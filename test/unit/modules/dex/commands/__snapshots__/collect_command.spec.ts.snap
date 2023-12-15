@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CollectCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/dex/command/collect",
+  "properties": {
+    "amount0Max": {
+      "dataType": "string",
+      "fieldNumber": 4,
+    },
+    "amount1Max": {
+      "dataType": "string",
+      "fieldNumber": 5,
+    },
+    "poolAddress": {
+      "dataType": "bytes",
+      "fieldNumber": 1,
+    },
+    "recipient": {
+      "dataType": "bytes",
+      "fieldNumber": 3,
+    },
+    "tokenId": {
+      "dataType": "string",
+      "fieldNumber": 2,
+    },
+  },
+  "type": "object",
+}
+`;

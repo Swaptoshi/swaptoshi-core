@@ -1,0 +1,124 @@
+{
+	"system": {
+		"dataPath": "~/.lisk/swaptoshi-core",
+		"keepEventsForHeights": -1,
+		"logLevel": "info"
+	},
+	"rpc": {
+		"modes": ["ipc", "ws", "http"],
+		"allowedMethods": ["*"],
+		"port": 7887,
+		"host": "0.0.0.0"
+	},
+	"network": {
+		"version": "1.0",
+		"seedPeers": [],
+		"port": 7667
+	},
+	"transactionPool": {
+		"maxTransactions": 1024,
+		"maxTransactionsPerAccount": 16,
+		"transactionExpiryTime": 10800000,
+		"minEntranceFeePriority": "0",
+		"minReplacementFeeDifference": "10"
+	},
+	"genesis": {
+		"block": {
+			"fromFile": "./config/genesis_block.blob"
+		},
+		"blockTime": 3,
+		"bftBatchSize": 103,
+		"maxTransactionsSize": 15360,
+		"minimumCertifyHeight": 1,
+		"chainID": "04535754"
+	},
+	"generator": {
+		"keys": {
+			"fromFile": "./config/dev-validators.json"
+		}
+	},
+	"modules": {
+		"dex": {
+			"feeAmountTickSpacing": [
+				["500", "10"],
+				["3000", "60"],
+				["10000", "200"]
+			],
+			"feeProtocol": 170,
+			"feeProtocolPool": "lskr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"feeConversionEnabled": true,
+			"supportAllTokens": true,
+			"minTransactionFee": {
+				"createPool": "0",
+				"mint": "0",
+				"burn": "0",
+				"collect": "0",
+				"increaseLiquidity": "0",
+				"decreaseLiquidity": "0",
+				"exactInput": "0",
+				"exactInputSingle": "0",
+				"exactOutput": "0",
+				"exactOutputSingle": "0",
+				"treasurify": "0"
+			}
+		},
+		"fee": {
+			"feePoolAddress": "lskr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb"
+		},
+		"pos": {
+			"failSafeInactiveWindow": 403200,
+			"punishmentWindowStaking": 806400,
+			"punishmentWindowSelfStaking": 2419200,
+			"lockingPeriodStaking": 86400,
+			"lockingPeriodSelfStaking": 806400
+		},
+		"reward": {
+			"offset": 0,
+			"distance": 42000000,
+			"brackets": [
+				"25000000",
+				"12500000",
+				"6250000",
+				"3125000",
+				"1562500",
+				"781250",
+				"390625",
+				"195313",
+				"97657",
+				"48829",
+				"24415",
+				"12208",
+				"6104",
+				"3052",
+				"1526",
+				"763",
+				"382",
+				"191",
+				"96",
+				"47",
+				"23",
+				"11",
+				"5",
+				"2",
+				"1",
+				"0"
+			]
+		},
+		"token": {
+			"userAccountInitializationFee": "0",
+			"escrowAccountInitializationFee": "0"
+		},
+		"tokenFactory": {
+			"createFee": "0"
+		}
+	},
+	"plugins": {
+		"chainConnector": {
+			"encryptedPrivateKey": "kdf=argon2id&cipher=aes-128-gcm&version=1&ciphertext=3c9e1fc705af2802749c9a485d50596b19cd5cf34e72af4deb3749e4d6eeb7eeea6b857ca6386374b6138a075345a47d314a0181111484ce1290e0c5b458b971a7727fcc19ae097cb8a117e9fe245e8d08e3710f905ee90d6e31c71a077adf1466c9124451b0e51334d1e10a170fb54f29dc6d0d0b227cf5c2cad6aa14cfe9fb&mac=626adf55e8dca92d875684c7d0dade897198d42f9e1aba714159e503dfd85989&salt=d7976ab6b3451c07&iv=e1440a6845156d5d3e7b66baec867694&tag=e37b6ee8bc7cc54c1628172caf8f264b&iterations=1&parallelism=4&memorySize=2097023",
+			"ccuFrequency": 5,
+			"ccuFee": "1000000",
+			"receivingChainIPCPath": "~/.lisk/lisk-core",
+			"receivingChainID": "04000000"
+		}
+	}
+}

@@ -1,0 +1,89 @@
+diff --git a/node_modules/lisk-framework/dist-node/application.d.ts b/node_modules/lisk-framework/dist-node/application.d.ts
+index ceb37cf..7891bf6 100644
+--- a/node_modules/lisk-framework/dist-node/application.d.ts
++++ b/node_modules/lisk-framework/dist-node/application.d.ts
+@@ -42,6 +42,7 @@ export declare class Application {
+     static defaultApplication(config?: PartialApplicationConfig, mainchain?: boolean): DefaultApplication;
+     registerPlugin(plugin: BasePlugin<any>, options?: PluginConfig): void;
+     registerModule(Module: BaseModule): void;
++    registerModulePriority(Module: BaseModule): void;
+     registerInteroperableModule(interoperableModule: BaseInteroperableModule): void;
+     getRegisteredModules(): BaseModule[];
+     getMetadata(): ModuleMetadataJSON[];
+diff --git a/node_modules/lisk-framework/dist-node/application.js b/node_modules/lisk-framework/dist-node/application.js
+index b9be7d4..d531273 100644
+--- a/node_modules/lisk-framework/dist-node/application.js
++++ b/node_modules/lisk-framework/dist-node/application.js
+@@ -133,6 +133,9 @@ class Application {
+     registerModule(Module) {
+         this._registerModule(Module);
+     }
++    registerModulePriority(Module) {
++        this._registerModulePriority(Module);
++    }
+     registerInteroperableModule(interoperableModule) {
+         const interoperabilityModule = this._registeredModules.find(module => module.name === interoperability_1.MODULE_NAME_INTEROPERABILITY);
+         if (interoperabilityModule === undefined) {
+@@ -237,6 +240,15 @@ class Application {
+         this._stateMachine.registerModule(mod);
+         this._controller.registerEndpoint(mod.name, (0, endpoint_1.getEndpointHandlers)(mod.endpoint));
+     }
++    _registerModulePriority(mod) {
++        assert(mod, 'Module implementation is required');
++        if (Object.keys(this._controller.getRegisteredPlugins()).includes(mod.name)) {
++            throw new Error(`A plugin with name "${mod.name}" is already registered.`);
++        }
++        this._registeredModules.unshift(mod);
++        this._stateMachine.registerModulePriority(mod);
++        this._controller.registerEndpoint(mod.name, (0, endpoint_1.getEndpointHandlers)(mod.endpoint));
++    }
+     _initLogger() {
+         var _a, _b;
+         return (0, logger_1.createLogger)({
+diff --git a/node_modules/lisk-framework/dist-node/modules/fee/module.js b/node_modules/lisk-framework/dist-node/modules/fee/module.js
+index 7ae3dab..1bdb7b4 100644
+--- a/node_modules/lisk-framework/dist-node/modules/fee/module.js
++++ b/node_modules/lisk-framework/dist-node/modules/fee/module.js
+@@ -69,10 +69,11 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+         if (transaction.fee < minFee) {
+             throw new Error(`Insufficient transaction fee. Minimum required fee is ${minFee}.`);
+         }
+-        const balance = await this._tokenMethod.getAvailableBalance(getMethodContext(), transaction.senderAddress, this._tokenID);
+-        if (transaction.fee > balance) {
+-            throw new Error(`Insufficient balance.`);
+-        }
++        // NOTE: this check needs to be disabled for dex 'feeConversion' hook
++        // const balance = await this._tokenMethod.getAvailableBalance(getMethodContext(), transaction.senderAddress, this._tokenID);
++        // if (transaction.fee > balance) {
++        //     throw new Error(`Insufficient balance.`);
++        // }
+         return { status: state_machine_1.VerifyStatus.OK };
+     }
+     async beforeCommandExecute(context) {
+diff --git a/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts b/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
+index 1ee0809..51c1c41 100644
+--- a/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
++++ b/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
+@@ -12,6 +12,7 @@ export declare class StateMachine {
+     private _logger;
+     private _initialized;
+     registerModule(mod: BaseModule): void;
++    registerModulePriority(mod: BaseModule): void;
+     init(logger: Logger, genesisConfig: GenesisConfig, moduleConfig?: Record<string, Record<string, unknown>>): Promise<void>;
+     executeGenesisBlock(ctx: GenesisBlockContext): Promise<void>;
+     insertAssets(ctx: GenerationContext): Promise<void>;
+diff --git a/node_modules/lisk-framework/dist-node/state_machine/state_machine.js b/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
+index 4b3dc79..81bfda2 100644
+--- a/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
++++ b/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
+@@ -16,6 +16,10 @@ class StateMachine {
+         this._validateExisting(mod);
+         this._modules.push(mod);
+     }
++    registerModulePriority(mod) {
++        this._validateExisting(mod);
++        this._modules.unshift(mod);
++    }
+     async init(logger, genesisConfig, moduleConfig = {}) {
+         var _a;
+         this._logger = logger;

@@ -1,0 +1,11 @@
+import { Uint64String, Uint256String } from '../../stores/library/int';
+
+export interface IncreaseLiquidityParams {
+	poolAddress: Buffer;
+	tokenId: Uint64String;
+	amount0Desired: Uint256String;
+	amount1Desired: Uint256String;
+	amount0Min: Uint256String;
+	amount1Min: Uint256String;
+	deadline: Uint256String;
+}

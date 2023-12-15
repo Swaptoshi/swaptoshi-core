@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/tokenFactory/command/create",
+  "properties": {
+    "amount": {
+      "dataType": "uint64",
+      "fieldNumber": 1,
+    },
+  },
+  "type": "object",
+}
+`;

@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExactOutputSingleCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/dex/command/exact_output_single",
+  "properties": {
+    "amountInMaximum": {
+      "dataType": "string",
+      "fieldNumber": 7,
+    },
+    "amountOut": {
+      "dataType": "string",
+      "fieldNumber": 6,
+    },
+    "deadline": {
+      "dataType": "string",
+      "fieldNumber": 5,
+    },
+    "fee": {
+      "dataType": "string",
+      "fieldNumber": 3,
+    },
+    "recipient": {
+      "dataType": "bytes",
+      "fieldNumber": 4,
+    },
+    "sqrtPriceLimitX96": {
+      "dataType": "string",
+      "fieldNumber": 8,
+    },
+    "tokenIn": {
+      "dataType": "bytes",
+      "fieldNumber": 1,
+    },
+    "tokenOut": {
+      "dataType": "bytes",
+      "fieldNumber": 2,
+    },
+  },
+  "type": "object",
+}
+`;
