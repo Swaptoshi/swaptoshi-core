@@ -105,6 +105,10 @@ import { TokenRegisteredEvent } from './events/token_registered';
 import { SupportedTokenStore } from './stores/supported_token';
 import { verifyValidTransfer } from './hooks/verifyValidTransfer';
 import { DexInteroperableMethod } from './cc_method';
+import {
+	getConfigEndpointRequestSchema,
+	getConfigEndpointResponseSchema,
+} from './schema/endpoint/get_config';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexModuleConfig | undefined;
@@ -192,6 +196,11 @@ export class DexModule extends BaseInteroperableModule {
 			...this.baseMetadata(),
 			endpoints: [
 				{
+					name: this.endpoint.getConfig.name,
+					request: getConfigEndpointRequestSchema,
+					response: getConfigEndpointResponseSchema,
+				},
+				{
 					name: this.endpoint.getPool.name,
 					request: getPoolEndpointRequestSchema,
 					response: getPoolEndpointResponseSchema,
@@ -261,6 +270,8 @@ export class DexModule extends BaseInteroperableModule {
 		poolStore.init(this._config);
 		positionManagerStore.init(Buffer.from(_args.genesisConfig.chainID, 'hex'));
 		supportedTokenStore.init(this._config);
+
+		this.endpoint.init(this._config);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
