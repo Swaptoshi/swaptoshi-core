@@ -6,6 +6,7 @@ export interface IncreaseLiquidityEventData {
 	liquidity: string;
 	amount0: string;
 	amount1: string;
+	ownerAddress: Buffer;
 }
 
 export class IncreaseLiquidityEvent extends BaseEvent<IncreaseLiquidityEventData> {

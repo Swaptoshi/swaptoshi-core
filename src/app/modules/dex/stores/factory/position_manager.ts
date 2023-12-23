@@ -273,6 +273,7 @@ export class NonfungiblePositionManager {
 			this.mutableContext!.context,
 			{
 				tokenId: PositionKey.getNFTId(this.chainId, this.collectionId, tokenId.toString()),
+				ownerAddress: params.recipient,
 				liquidity: liquidity.toString(),
 				amount0: amount0.toString(),
 				amount1: amount1.toString(),
@@ -353,11 +354,16 @@ export class NonfungiblePositionManager {
 
 		await this._savePosition(params.tokenId, position);
 
+		const nft = await this.nftMethod!.getNFT(
+			this.mutableContext!.context,
+			PositionKey.getNFTId(this.chainId, this.collectionId, params.tokenId),
+		);
 		const events = this.events!.get(IncreaseLiquidityEvent);
 		events.add(
 			this.mutableContext!.context,
 			{
 				tokenId: PositionKey.getNFTId(this.chainId, this.collectionId, params.tokenId),
+				ownerAddress: nft.owner,
 				liquidity: liquidity.toString(),
 				amount0: amount0.toString(),
 				amount1: amount1.toString(),

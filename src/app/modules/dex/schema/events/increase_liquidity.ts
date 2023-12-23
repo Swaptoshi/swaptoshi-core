@@ -19,5 +19,9 @@ export const increaseLiquidityEventSchema = {
 			dataType: 'string',
 			fieldNumber: 4,
 		},
+		ownerAddress: {
+			dataType: 'bytes',
+			fieldNumber: 5,
+		},
 	},
 };
