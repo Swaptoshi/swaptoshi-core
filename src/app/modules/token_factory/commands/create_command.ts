@@ -40,8 +40,8 @@ export class CreateCommand extends BaseCommand {
 		const factoryStore = this.stores.get(FactoryStore);
 		const nextId = await nextIdStore.getOrDefault(_context);
 
-		const tokenIdBuf = Buffer.allocUnsafe(8);
-		tokenIdBuf.writeBigInt64BE(nextId.nextTokenId);
+		const tokenIdBuf = Buffer.allocUnsafe(4);
+		tokenIdBuf.writeUIntBE(Number(nextId.nextTokenId), 0, 4);
 		const tokenId = Buffer.concat([_context.chainID, tokenIdBuf]);
 
 		this._feeMethod?.payFee(_context, BigInt(this._config!.createFee));
