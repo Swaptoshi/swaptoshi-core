@@ -12,6 +12,7 @@ import { PoolStore } from '../stores/pool';
 import { createPoolCommandSchema } from '../schema/commands/create_pool_command';
 import { CreatePoolParams } from '../types';
 import { verifyCreatePoolParam } from '../utils/verify';
+import { inversePriceSqrt } from '../utils';
 
 export class CreatePoolCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -52,7 +53,9 @@ export class CreatePoolCommand extends BaseCommand {
 			tokenBDecimal,
 			fee,
 		);
-		await pool.initialize(sqrtPriceX96);
+		await pool.initialize(
+			tokenA.compare(tokenB) >= 0 ? inversePriceSqrt(sqrtPriceX96) : sqrtPriceX96,
+		);
 	}
 
 	public schema = createPoolCommandSchema;

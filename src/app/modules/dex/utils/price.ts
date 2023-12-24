@@ -14,9 +14,9 @@ export function decodePriceSqrt(
 	decimalsToken0 = 8,
 	decimalsToken1 = 8,
 	inverse = false,
-): string {
-	const ratioNum = ((parseInt(sqrtRatioX96.toString(), 10) / 2 ** 96) ** 2).toPrecision(5);
-	let ratio = new Decimal(ratioNum.toString());
+	disableFiveSigPrevision = false,
+) {
+	let ratio = new Decimal(sqrtRatioX96).div(2 ** 96).pow(2);
 
 	if (decimalsToken1 < decimalsToken0) {
 		ratio = ratio.mul(TEN.pow(decimalsToken0 - decimalsToken1).toString());
@@ -28,7 +28,7 @@ export function decodePriceSqrt(
 		ratio = ratio.pow(-1);
 	}
 
-	if (ratio.lessThan(FIVE_SIG_FIGS_POW)) {
+	if (!disableFiveSigPrevision && ratio.lessThan(FIVE_SIG_FIGS_POW)) {
 		return ratio.toPrecision(5);
 	}
 
@@ -52,4 +52,9 @@ export function encodeFeeGrowth(feeGrowth: Uint256String, liquidity: Uint256Stri
 
 export function decodeFeeGrowth(feeGrowthX128: Uint256String, liquidity: Uint256String) {
 	return FullMath.mulDiv(feeGrowthX128, liquidity, FixedPoint128.Q128);
+}
+
+export function inversePriceSqrt(sqrtRatioX96: string, decimalsToken0 = 8, decimalsToken1 = 8) {
+	const invertedPrice = decodePriceSqrt(sqrtRatioX96, decimalsToken0, decimalsToken1, true, true);
+	return encodePriceSqrt(invertedPrice, 1).toString();
 }
