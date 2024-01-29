@@ -30,7 +30,7 @@
 		"bftBatchSize": 103,
 		"maxTransactionsSize": 15360,
 		"minimumCertifyHeight": 1,
-		"chainID": "04535754"
+		"chainID": "04555555"
 	},
 	"generator": {
 		"keys": {
