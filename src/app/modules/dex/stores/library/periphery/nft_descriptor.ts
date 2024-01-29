@@ -67,7 +67,7 @@ export function constructTokenURI(params: ConstructTokenURIParams): string {
 	const descriptionPartOne = generateDescriptionPartOne(
 		escapeQuotes(params.quoteTokenSymbol),
 		escapeQuotes(params.baseTokenSymbol),
-		addressToString(params.poolAddress),
+		cryptography.address.getLisk32AddressFromAddress(params.poolAddress),
 	);
 	const descriptionPartTwo = generateDescriptionPartTwo(
 		params.tokenId.toString(),
@@ -150,15 +150,15 @@ function generateDescriptionPartTwo(
 	feeTier: string,
 ): string {
 	return [
-		' Address: ',
+		' Token ID: ',
 		quoteTokenAddress,
 		'\\n',
 		baseTokenSymbol,
-		' Address: ',
+		' Token ID: ',
 		baseTokenAddress,
 		'\\nFee Tier: ',
 		feeTier,
-		'\\nToken ID: ',
+		'\\nNFT ID: ',
 		tokenId,
 		'\\n\\n',
 		'⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.',

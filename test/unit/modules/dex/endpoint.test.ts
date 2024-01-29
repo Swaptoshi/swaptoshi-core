@@ -512,7 +512,7 @@ describe('DexEndpoint', () => {
 			const res = await endpoint.getTokenURI(context);
 
 			expect(res).toStrictEqual({
-				tokenURI: 'ipfs://bafkreihvzu6qrsfxpzsetiwtovwnkpckzodquip26c3heaxqkp5jmxl4de',
+				tokenURI: 'ipfs://bafkreiabijd5jhj5n4gjrwjz5m7xasrkcjhfgq3siawy37r34paxzolfbq',
 			});
 		});
 

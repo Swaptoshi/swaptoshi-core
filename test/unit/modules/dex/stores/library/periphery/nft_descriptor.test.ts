@@ -3,7 +3,7 @@
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
-import { MethodContext } from 'lisk-sdk';
+import { MethodContext, cryptography } from 'lisk-sdk';
 import { Uint } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { methodContextFixture } from '../../shared/module';
 import { TEST_POOL_START_TIME, poolFixture } from '../../shared/pool';
@@ -985,12 +985,14 @@ describe('NFTDescriptor', () => {
 		return {
 			name: `Swaptoshi - ${feeTier} - ${_quoteTokenSymbol}/${_baseTokenSymbol} - ${prices}`,
 			description: `This NFT represents a liquidity position in a Swaptoshi ${_quoteTokenSymbol}-${_baseTokenSymbol} pool. The owner of this NFT can modify or redeem the position.\n\
-\nPool Address: ${poolAddress.toString('hex')}\n${_quoteTokenSymbol} Address: ${quoteTokenAddress
+\nPool Address: ${cryptography.address.getLisk32AddressFromAddress(
+				poolAddress,
+			)}\n${_quoteTokenSymbol} Token ID: ${quoteTokenAddress
 				.toString('hex')
-				.toLowerCase()}\n${_baseTokenSymbol} Address: ${baseTokenAddress
+				.toLowerCase()}\n${_baseTokenSymbol} Token ID: ${baseTokenAddress
 				.toString('hex')
 				.toLowerCase()}\n\
-Fee Tier: ${feeTier}\nToken ID: ${tokenId}\n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as \
+Fee Tier: ${feeTier}\nNFT ID: ${tokenId}\n\n⚠️ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as \
 token symbols may be imitated.`,
 		};
 	}
