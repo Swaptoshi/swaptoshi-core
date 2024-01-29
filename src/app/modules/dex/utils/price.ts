@@ -14,9 +14,10 @@ export function decodePriceSqrt(
 	decimalsToken0 = 8,
 	decimalsToken1 = 8,
 	inverse = false,
-	disableFiveSigPrevision = false,
+	disableFiveSigPrecision = false,
 ) {
-	let ratio = new Decimal(sqrtRatioX96).div(2 ** 96).pow(2);
+	const ratioNum = ((parseInt(sqrtRatioX96.toString(), 10) / 2 ** 96) ** 2).toPrecision(5);
+	let ratio = new Decimal(ratioNum.toString());
 
 	if (decimalsToken1 < decimalsToken0) {
 		ratio = ratio.mul(TEN.pow(decimalsToken0 - decimalsToken1).toString());
@@ -28,7 +29,7 @@ export function decodePriceSqrt(
 		ratio = ratio.pow(-1);
 	}
 
-	if (!disableFiveSigPrevision && ratio.lessThan(FIVE_SIG_FIGS_POW)) {
+	if (!disableFiveSigPrecision && ratio.lessThan(FIVE_SIG_FIGS_POW)) {
 		return ratio.toPrecision(5);
 	}
 
