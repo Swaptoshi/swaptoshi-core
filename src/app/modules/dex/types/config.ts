@@ -17,6 +17,19 @@ export interface DexModuleConfig {
 		exactOutputSingle: string;
 		treasurify: string;
 	};
+	baseFee: {
+		createPool: string;
+		mint: string;
+		burn: string;
+		collect: string;
+		increaseLiquidity: string;
+		decreaseLiquidity: string;
+		exactInput: string;
+		exactInputSingle: string;
+		exactOutput: string;
+		exactOutputSingle: string;
+		treasurify: string;
+	};
 	nftPositionMetadata: {
 		dex: {
 			name: string;

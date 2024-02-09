@@ -53,6 +53,19 @@ export const moduleConfig: DexModuleConfig = {
 		exactOutputSingle: '0',
 		treasurify: '0',
 	},
+	baseFee: {
+		createPool: '0',
+		mint: '0',
+		burn: '0',
+		collect: '0',
+		increaseLiquidity: '0',
+		decreaseLiquidity: '0',
+		exactInput: '0',
+		exactInputSingle: '0',
+		exactOutput: '0',
+		exactOutputSingle: '0',
+		treasurify: '0',
+	},
 	nftPositionMetadata: {
 		dex: {
 			name: 'Swaptoshi',

@@ -7,8 +7,7 @@ import {
 	SidechainInteroperabilityMethod,
 	TokenMethod,
 } from 'lisk-sdk';
-import { verifyValidCrossTransfer } from './hooks/verifyValidCrossTransfer';
-import { executeSwapByCrossTransfer } from './hooks/executeSwapByCrossTransfer';
+import { verifyValidCrossTransfer, executeSwapByCrossTransfer } from './hooks';
 
 type InteroperabilityMethod = SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 

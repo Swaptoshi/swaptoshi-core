@@ -84,14 +84,21 @@ import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
 import { DexModuleConfig } from './types';
-import { verifyMinimumFee, verifySwapByTransfer, executeSwapByTransfer } from './hooks';
+import {
+	verifyMinimumFee,
+	verifySwapByTransfer,
+	executeSwapByTransfer,
+	verifyValidTransfer,
+	verifyFeeConversion,
+	executeFeeConversion,
+	verifyBaseFee,
+	executeBaseFee,
+} from './hooks';
 import { defaultConfig } from './constants';
 import {
 	getMetadataEndpointRequestSchema,
 	getMetadataEndpointResponseSchema,
 } from './schema/endpoint/get_metadata';
-import { verifyFeeConversion } from './hooks/verifyFeeConversion';
-import { executeFeeConversion } from './hooks/executeFeeConversion';
 import { TreasurifyEvent } from './events/treasurify';
 import {
 	getPoolAddressFromCollectionIdEndpointRequestSchema,
@@ -103,7 +110,6 @@ import {
 } from './schema/endpoint/quote_price';
 import { TokenRegisteredEvent } from './events/token_registered';
 import { SupportedTokenStore } from './stores/supported_token';
-import { verifyValidTransfer } from './hooks/verifyValidTransfer';
 import { DexInteroperableMethod } from './cc_method';
 import {
 	getConfigEndpointRequestSchema,
@@ -280,6 +286,7 @@ export class DexModule extends BaseInteroperableModule {
 	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
 		try {
 			await verifyMinimumFee(_context, this._config!);
+			await verifyBaseFee.bind(this)(_context);
 			await verifyValidTransfer.bind(this)(_context);
 			await verifySwapByTransfer.bind(this)(_context);
 			await verifyFeeConversion.bind(this)(_context);
@@ -294,9 +301,11 @@ export class DexModule extends BaseInteroperableModule {
 
 	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
 		await verifyMinimumFee(_context, this._config!);
+		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
 		await verifySwapByTransfer.bind(this)(_context);
 		await executeFeeConversion.bind(this)(_context);
+		await executeBaseFee.bind(this)(_context);
 	}
 
 	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {

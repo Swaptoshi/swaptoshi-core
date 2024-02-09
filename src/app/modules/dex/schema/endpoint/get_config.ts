@@ -8,6 +8,7 @@ export const getConfigEndpointResponseSchema = {
 		'feeConversionEnabled',
 		'supportAllTokens',
 		'minTransactionFee',
+		'baseFee',
 		'nftPositionMetadata',
 	],
 	properties: {
@@ -100,9 +101,72 @@ export const getConfigEndpointResponseSchema = {
 				},
 			},
 		},
-		nftPositionMetadata: {
+		baseFee: {
 			type: 'object',
 			fieldNumber: 7,
+			required: [
+				'createPool',
+				'mint',
+				'burn',
+				'collect',
+				'increaseLiquidity',
+				'decreaseLiquidity',
+				'exactInput',
+				'exactInputSingle',
+				'exactOutput',
+				'exactOutputSingle',
+				'treasurify',
+			],
+			properties: {
+				createPool: {
+					dataType: 'string',
+					fieldNumber: 1,
+				},
+				mint: {
+					dataType: 'string',
+					fieldNumber: 2,
+				},
+				burn: {
+					dataType: 'string',
+					fieldNumber: 3,
+				},
+				collect: {
+					dataType: 'string',
+					fieldNumber: 4,
+				},
+				increaseLiquidity: {
+					dataType: 'string',
+					fieldNumber: 5,
+				},
+				decreaseLiquidity: {
+					dataType: 'string',
+					fieldNumber: 6,
+				},
+				exactInput: {
+					dataType: 'string',
+					fieldNumber: 7,
+				},
+				exactInputSingle: {
+					dataType: 'string',
+					fieldNumber: 8,
+				},
+				exactOutput: {
+					dataType: 'string',
+					fieldNumber: 9,
+				},
+				exactOutputSingle: {
+					dataType: 'string',
+					fieldNumber: 10,
+				},
+				treasurify: {
+					dataType: 'string',
+					fieldNumber: 11,
+				},
+			},
+		},
+		nftPositionMetadata: {
+			type: 'object',
+			fieldNumber: 8,
 			required: ['dex', 'mainchain'],
 			properties: {
 				dex: {
