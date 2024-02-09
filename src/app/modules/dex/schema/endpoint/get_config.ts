@@ -8,6 +8,7 @@ export const getConfigEndpointResponseSchema = {
 		'feeConversionEnabled',
 		'supportAllTokens',
 		'minTransactionFee',
+		'nftPositionMetadata',
 	],
 	properties: {
 		feeAmountTickSpacing: {
@@ -96,6 +97,47 @@ export const getConfigEndpointResponseSchema = {
 				treasurify: {
 					dataType: 'string',
 					fieldNumber: 11,
+				},
+			},
+		},
+		nftPositionMetadata: {
+			type: 'object',
+			fieldNumber: 7,
+			required: ['dex', 'mainchain'],
+			properties: {
+				dex: {
+					type: 'object',
+					fieldNumber: 1,
+					required: ['name', 'symbol', 'decimal'],
+					properties: {
+						name: {
+							fieldNumber: 1,
+							dataType: 'string',
+						},
+						symbol: {
+							fieldNumber: 2,
+							dataType: 'string',
+						},
+						decimal: {
+							fieldNumber: 3,
+							dataType: 'uint32',
+						},
+					},
+				},
+				mainchain: {
+					type: 'object',
+					fieldNumber: 1,
+					required: ['symbol', 'decimal'],
+					properties: {
+						symbol: {
+							fieldNumber: 1,
+							dataType: 'string',
+						},
+						decimal: {
+							fieldNumber: 2,
+							dataType: 'uint32',
+						},
+					},
 				},
 			},
 		},
