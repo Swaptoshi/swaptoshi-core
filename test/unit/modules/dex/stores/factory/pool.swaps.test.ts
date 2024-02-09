@@ -467,7 +467,7 @@ const TEST_POOLS: PoolTestCase[] = [
 	},
 ];
 
-describe('Swaptoshi Pool swap tests', () => {
+describe('DEX Pool swap tests', () => {
 	for (const poolCase of TEST_POOLS) {
 		let module: DexModule;
 		let createMethodContext: () => MethodContext;

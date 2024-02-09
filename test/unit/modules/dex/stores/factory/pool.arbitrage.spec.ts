@@ -50,7 +50,7 @@ function applySqrtRatioBipsHundredthsDelta(sqrtRatio: Uint, bipsHundredths: numb
 	);
 }
 
-describe('Swaptoshi Pool arbitrage tests', () => {
+describe('DEX Pool arbitrage tests', () => {
 	for (const feeProtocol of [0, 6]) {
 		describe(`protocol fee = ${feeProtocol};`, () => {
 			let module: DexModule;

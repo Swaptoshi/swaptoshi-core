@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9699",
   "arbBalanceDelta1": "-0.0099043",
@@ -16,7 +16,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.0099900",
@@ -25,7 +25,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9990",
   "arbBalanceDelta1": "-0.0099044",
@@ -61,7 +61,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9700",
   "arbBalanceDelta1": "-0.010055",
@@ -77,7 +77,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.0099900",
@@ -86,7 +86,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9991",
   "arbBalanceDelta1": "-0.010055",
@@ -122,7 +122,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9583",
   "arbBalanceDelta1": "-0.90001",
@@ -138,7 +138,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.90884",
@@ -147,7 +147,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9814",
   "arbBalanceDelta1": "-0.90054",
@@ -183,7 +183,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9735",
   "arbBalanceDelta1": "-0.91507",
@@ -199,7 +199,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.90884",
@@ -208,7 +208,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9965",
   "arbBalanceDelta1": "-0.91560",
@@ -244,7 +244,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.8533",
   "arbBalanceDelta1": "-4.8918",
@@ -260,7 +260,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-4.9925",
@@ -269,7 +269,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.8709",
   "arbBalanceDelta1": "-4.8940",
@@ -305,7 +305,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "10.005",
   "arbBalanceDelta1": "-5.0424",
@@ -321,7 +321,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-4.9925",
@@ -330,7 +330,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "10.022",
   "arbBalanceDelta1": "-5.0446",
@@ -366,7 +366,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "8.8029",
   "arbBalanceDelta1": "-7.9363",
@@ -382,7 +382,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-9.0661",
@@ -391,7 +391,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "8.8190",
   "arbBalanceDelta1": "-7.9680",
@@ -427,7 +427,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "10.317",
   "arbBalanceDelta1": "-9.4423",
@@ -443,7 +443,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-9.0661",
@@ -452,7 +452,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 0; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "10.333",
   "arbBalanceDelta1": "-9.4741",
@@ -488,7 +488,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 0; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9699",
   "arbBalanceDelta1": "-0.0099043",
@@ -504,7 +504,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.0099900",
@@ -513,7 +513,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9940",
   "arbBalanceDelta1": "-0.0099044",
@@ -549,7 +549,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9700",
   "arbBalanceDelta1": "-0.010055",
@@ -565,7 +565,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.0099900",
@@ -574,7 +574,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 0.010000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9941",
   "arbBalanceDelta1": "-0.010055",
@@ -610,7 +610,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 0
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9583",
   "arbBalanceDelta1": "-0.90001",
@@ -626,7 +626,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.90884",
@@ -635,7 +635,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9764",
   "arbBalanceDelta1": "-0.90054",
@@ -671,7 +671,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.9735",
   "arbBalanceDelta1": "-0.91507",
@@ -687,7 +687,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-0.90884",
@@ -696,7 +696,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 1.0000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.9915",
   "arbBalanceDelta1": "-0.91560",
@@ -732,7 +732,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "9.8533",
   "arbBalanceDelta1": "-4.8918",
@@ -748,7 +748,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-4.9925",
@@ -757,7 +757,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "9.8659",
   "arbBalanceDelta1": "-4.8940",
@@ -793,7 +793,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "10.005",
   "arbBalanceDelta1": "-5.0424",
@@ -809,7 +809,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-4.9925",
@@ -818,7 +818,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 10.000 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "10.017",
   "arbBalanceDelta1": "-5.0446",
@@ -854,7 +854,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "8.8029",
   "arbBalanceDelta1": "-7.9363",
@@ -870,7 +870,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-9.0661",
@@ -879,7 +879,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "8.8140",
   "arbBalanceDelta1": "-7.9680",
@@ -915,7 +915,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 backrun to true price after swap only 1`] = `
 {
   "arbBalanceDelta0": "10.317",
   "arbBalanceDelta1": "-9.4423",
@@ -931,7 +931,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 not sandwiched 1`] = `
 {
   "amount0Delta": "10.000",
   "amount1Delta": "-9.0661",
@@ -940,7 +940,7 @@ exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 1
 }
 `;
 
-exports[`Swaptoshi Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
+exports[`DEX Pool arbitrage tests protocol fee = 6; passive liquidity of 100.00 exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01 sandwiched with swap to execution price then mint max liquidity/target/burn max liquidity 1`] = `
 {
   "arbBalanceDelta0": "10.328",
   "arbBalanceDelta1": "-9.4741",

@@ -26,7 +26,7 @@ const sender = Buffer.from('0000000000000000000000000000000000000000', 'hex');
 
 type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
 
-describe('Swaptoshi Pool', () => {
+describe('DEX Pool', () => {
 	let module: DexModule;
 	let createMethodContext: () => MethodContext;
 
