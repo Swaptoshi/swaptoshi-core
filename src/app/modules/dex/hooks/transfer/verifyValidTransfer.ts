@@ -1,7 +1,7 @@
 import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'lisk-sdk';
-import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../constants';
-import { PoolStore } from '../stores/pool';
-import { nftTransferParamsSchema } from '../schema/dependencies/nft';
+import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
+import { PoolStore } from '../../stores/pool';
+import { nftTransferParamsSchema } from '../../schema/dependencies/nft';
 
 interface TransferTokenParams {
 	tokenID: Buffer;

@@ -14,7 +14,7 @@ import {
 	ExactInputSingleParams,
 	ExactOutputSingleParams,
 } from '../../types';
-import { isSwapByTransfer } from './isSwapByTransfer';
+import { isSwapByTransfer } from '../swapByTransfer/isSwapByTransfer';
 
 const FEE_CONVERSION_SUPPORTED_COMMANDS = [
 	'exactInput',

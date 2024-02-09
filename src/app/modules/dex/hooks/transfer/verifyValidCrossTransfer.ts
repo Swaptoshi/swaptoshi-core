@@ -1,10 +1,10 @@
 /* eslint-disable import/no-cycle */
 import { CrossChainMessageContext, codec } from 'lisk-sdk';
-import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../constants';
-import { PoolStore } from '../stores/pool';
-import { crossChainNFTTransferMessageParamsSchema } from '../schema/dependencies/nft';
-import { crossChainTokenTransferMessageParams } from '../schema/dependencies/token';
-import { DexInteroperableMethod } from '../cc_method';
+import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
+import { PoolStore } from '../../stores/pool';
+import { crossChainNFTTransferMessageParamsSchema } from '../../schema/dependencies/nft';
+import { crossChainTokenTransferMessageParams } from '../../schema/dependencies/token';
+import { DexInteroperableMethod } from '../../cc_method';
 
 interface CrossChainTransferTokenParams {
 	tokenID: Buffer;

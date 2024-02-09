@@ -1,8 +1,10 @@
-import { FeeMethod, NamedRegistry, TokenMethod, TransactionVerifyContext } from 'lisk-sdk';
-import { DexModuleConfig } from '../types';
-import { isFeeConversion } from './shared/isFeeConversion';
+import { FeeMethod, NamedRegistry, TokenMethod, TransactionExecuteContext } from 'lisk-sdk';
+import { DexModuleConfig } from '../../types';
+import { isFeeConversion } from './isFeeConversion';
+import { PoolStore } from '../../stores/pool';
+import { mutableHookSwapContext } from '../../stores/context';
 
-export async function verifyFeeConversion(
+export async function executeFeeConversion(
 	this: {
 		name: string;
 		stores: NamedRegistry;
@@ -11,7 +13,7 @@ export async function verifyFeeConversion(
 		_tokenMethod: TokenMethod | undefined;
 		_config: DexModuleConfig | undefined;
 	},
-	context: TransactionVerifyContext,
+	context: TransactionExecuteContext,
 ) {
 	if (!this._config || !this._tokenMethod || !this._feeMethod) return;
 	const check = await isFeeConversion.bind(this)(context);
@@ -37,6 +39,20 @@ export async function verifyFeeConversion(
 				).toString()}.`,
 			);
 		}
+
+		const ctx = mutableHookSwapContext(context);
+		const poolStore = this.stores.get(PoolStore);
+		const router = poolStore.getMutableRouter(ctx);
+		await router.exactOutputSingle({
+			tokenIn: check.payload.tokenIn,
+			tokenOut: check.payload.tokenOut,
+			fee: check.payload.fee,
+			amountInMaximum: check.payload.amountIn,
+			sqrtPriceLimitX96: '0',
+			amountOut: check.payload.amountOut,
+			recipient: context.transaction.senderAddress,
+			deadline: context.header.timestamp.toString(),
+		});
 	} else {
 		const balance = await this._tokenMethod.getAvailableBalance(
 			context,

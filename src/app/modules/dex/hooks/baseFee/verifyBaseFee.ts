@@ -1,5 +1,5 @@
 import { FeeMethod, TransactionVerifyContext } from 'lisk-sdk';
-import { DexModuleConfig } from '../types';
+import { DexModuleConfig } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyBaseFee(

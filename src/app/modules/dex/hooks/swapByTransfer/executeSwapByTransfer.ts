@@ -1,8 +1,8 @@
 import { NamedRegistry, TransactionExecuteContext } from 'lisk-sdk';
-import { PoolStore } from '../stores/pool';
-import { PoolAddress } from '../stores/library/periphery';
-import { mutableHookSwapContext } from '../stores/context';
-import { isSwapByTransfer } from './shared/isSwapByTransfer';
+import { PoolStore } from '../../stores/pool';
+import { PoolAddress } from '../../stores/library/periphery';
+import { mutableHookSwapContext } from '../../stores/context';
+import { isSwapByTransfer } from './isSwapByTransfer';
 
 export async function executeSwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },

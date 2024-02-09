@@ -1,6 +1,6 @@
 import { NamedRegistry, TransactionVerifyContext } from 'lisk-sdk';
-import { PoolAddress } from '../stores/library/periphery';
-import { isSwapByTransfer } from './shared/isSwapByTransfer';
+import { PoolAddress } from '../../stores/library/periphery';
+import { isSwapByTransfer } from './isSwapByTransfer';
 
 export async function verifySwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },

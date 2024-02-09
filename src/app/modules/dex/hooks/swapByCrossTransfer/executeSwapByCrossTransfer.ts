@@ -1,10 +1,10 @@
 /* eslint-disable import/no-cycle */
 import { CrossChainMessageContext } from 'lisk-sdk';
-import { PoolStore } from '../stores/pool';
-import { PoolAddress } from '../stores/library/periphery';
-import { crossChainMethodSwapContext } from '../stores/context';
-import { isSwapByCrossTransfer } from './shared/isSwapByCrossTransfer';
-import { DexInteroperableMethod } from '../cc_method';
+import { PoolStore } from '../../stores/pool';
+import { PoolAddress } from '../../stores/library/periphery';
+import { crossChainMethodSwapContext } from '../../stores/context';
+import { isSwapByCrossTransfer } from './isSwapByCrossTransfer';
+import { DexInteroperableMethod } from '../../cc_method';
 
 export async function executeSwapByCrossTransfer(
 	this: DexInteroperableMethod,
