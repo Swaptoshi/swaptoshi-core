@@ -116,6 +116,7 @@ export class DEXPool implements DEXPoolData {
 		stores: NamedRegistry,
 		events: NamedRegistry,
 		config: DexModuleConfig,
+		moduleName: string,
 		simulation = false,
 	) {
 		Object.assign(this, utils.objects.cloneDeep(pool));
@@ -138,10 +139,18 @@ export class DEXPool implements DEXPoolData {
 		this.tickBitmapStore = this.stores.get(TickBitmapStore);
 
 		this.simulation = simulation;
+		this.moduleName = moduleName;
 	}
 
 	public createEmulator(): DEXPool {
-		const emulatedPool = new DEXPool(this.toJSON(), this.stores!, this.events!, this.config!, true);
+		const emulatedPool = new DEXPool(
+			this.toJSON(),
+			this.stores!,
+			this.events!,
+			this.config!,
+			this.moduleName,
+			true,
+		);
 		if (this.mutableContext) {
 			emulatedPool.addMutableDependencies(this.mutableContext, this.tokenMethod!);
 		} else if (this.immutableContext) {
@@ -1358,6 +1367,7 @@ export class DEXPool implements DEXPoolData {
 	public feeGrowthGlobal1X128: Uint256String = '0';
 	public liquidity: Uint128String = '0';
 
+	private readonly moduleName: string;
 	private readonly poolStore: PoolStore | undefined;
 	private readonly tickInfoStore: TickInfoStore | undefined;
 	private readonly positionInfoStore: PositionInfoStore | undefined;

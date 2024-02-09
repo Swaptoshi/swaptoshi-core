@@ -30,7 +30,6 @@ import { PositionManagerStore } from '../../../../../src/app/modules/dex/stores/
 import { TokenSymbolStore } from '../../../../../src/app/modules/dex/stores/token_symbol';
 
 type CommandParam = CreatePoolParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'createPool';
 const commandSchema = createPoolCommandSchema;
 
@@ -259,16 +258,16 @@ describe('CreatePoolCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_lock).toHaveBeenCalledWith(poolAddress2, MODULE_NAME, token1, BigInt(10));
+			expect(mock_token_lock).toHaveBeenCalledWith(poolAddress2, module.name, token1, BigInt(10));
 
-			expect(mock_token_lock).toHaveBeenCalledWith(poolAddress2, MODULE_NAME, token2, BigInt(10));
+			expect(mock_token_lock).toHaveBeenCalledWith(poolAddress2, module.name, token2, BigInt(10));
 		});
 
 		it('should add command events', async () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			eventResultHaveMinimumLength(context.eventQueue, PoolCreatedEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, PoolCreatedEvent, module.name, 1);
 		});
 	});
 });

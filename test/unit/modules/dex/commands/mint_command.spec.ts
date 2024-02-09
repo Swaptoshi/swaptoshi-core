@@ -20,7 +20,6 @@ import { TokenRegistry } from '../stores/shared/token/token_registry';
 import { TokenURICreatedEvent } from '../../../../../src/app/modules/dex/events/tokenuri_created';
 
 type CommandParam = MintParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'mint';
 const commandSchema = mintCommandSchema;
 
@@ -195,7 +194,7 @@ describe('MintCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			eventResultHaveMinimumLength(context.eventQueue, TokenURICreatedEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, TokenURICreatedEvent, module.name, 1);
 		});
 	});
 });

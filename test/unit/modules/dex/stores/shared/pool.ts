@@ -177,7 +177,11 @@ export const completeFixture: Fixture<CompleteFixture> = async (
 	module: DexModule,
 ) => {
 	const fixture = await methodContextFixture();
-	const uninitializedRouter = new SwapRouter(fixture.module.stores, fixture.config);
+	const uninitializedRouter = new SwapRouter(
+		fixture.module.stores,
+		fixture.config,
+		fixture.module.name,
+	);
 	const pools = await poolFixture(context, module);
 
 	return {

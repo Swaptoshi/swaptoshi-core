@@ -21,7 +21,6 @@ import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
 
 type CommandParam = BurnParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'burn';
 const commandSchema = burnCommandSchema;
 
@@ -126,7 +125,7 @@ describe('BurnCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			eventResultHaveMinimumLength(context.eventQueue, TokenURIDestroyedEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, TokenURIDestroyedEvent, module.name, 1);
 		});
 	});
 });

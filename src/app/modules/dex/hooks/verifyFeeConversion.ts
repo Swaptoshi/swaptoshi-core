@@ -4,6 +4,7 @@ import { isFeeConversion } from './shared/isFeeConversion';
 
 export async function verifyFeeConversion(
 	this: {
+		name: string;
 		stores: NamedRegistry;
 		events: NamedRegistry;
 		_feeMethod: FeeMethod | undefined;

@@ -285,7 +285,7 @@ export class DexModule extends BaseInteroperableModule {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
 		try {
-			await verifyMinimumFee(_context, this._config!);
+			await verifyMinimumFee.bind(this)(_context);
 			await verifyBaseFee.bind(this)(_context);
 			await verifyValidTransfer.bind(this)(_context);
 			await verifySwapByTransfer.bind(this)(_context);
@@ -300,7 +300,7 @@ export class DexModule extends BaseInteroperableModule {
 	}
 
 	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
-		await verifyMinimumFee(_context, this._config!);
+		await verifyMinimumFee.bind(this)(_context);
 		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
 		await verifySwapByTransfer.bind(this)(_context);

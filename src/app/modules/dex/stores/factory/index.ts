@@ -18,8 +18,9 @@ export function createImmutablePoolInstance(
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	config: DexModuleConfig,
+	moduleName: string,
 ) {
-	const res = new DEXPool(pool, stores, events, config);
+	const res = new DEXPool(pool, stores, events, config, moduleName);
 	res.addImmutableDependencies(context, tokenMethod);
 	return res;
 }
@@ -31,8 +32,9 @@ export function createMutablePoolInstance(
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	config: DexModuleConfig,
+	moduleName: string,
 ) {
-	const res = new DEXPool(pool, stores, events, config);
+	const res = new DEXPool(pool, stores, events, config, moduleName);
 	res.addMutableDependencies(context, tokenMethod);
 	return res;
 }
@@ -42,8 +44,9 @@ export function createMutableRouterInstance(
 	stores: NamedRegistry,
 	tokenMethod: TokenMethod,
 	config: DexModuleConfig,
+	moduleName: string,
 ) {
-	const res = new SwapRouter(stores, config);
+	const res = new SwapRouter(stores, config, moduleName);
 	res.addDependencies(context, tokenMethod);
 	return res;
 }
@@ -57,6 +60,7 @@ export function createImmutablePositionManagerinstance(
 	nftMethod: NFTMethod,
 	genesisConfig: GenesisConfig,
 	dexConfig: DexModuleConfig,
+	moduleName: string,
 ) {
 	const res = new NonfungiblePositionManager(
 		positionManager,
@@ -64,6 +68,7 @@ export function createImmutablePositionManagerinstance(
 		events,
 		genesisConfig,
 		dexConfig,
+		moduleName,
 	);
 	res.addImmutableDependencies(context, tokenMethod, nftMethod);
 	return res;
@@ -78,6 +83,7 @@ export function createMutablePositionManagerinstance(
 	nftMethod: NFTMethod,
 	genesisConfig: GenesisConfig,
 	dexConfig: DexModuleConfig,
+	moduleName: string,
 ) {
 	const res = new NonfungiblePositionManager(
 		positionManager,
@@ -85,6 +91,7 @@ export function createMutablePositionManagerinstance(
 		events,
 		genesisConfig,
 		dexConfig,
+		moduleName,
 	);
 	res.addMutableDependencies(context, tokenMethod, nftMethod);
 	return res;

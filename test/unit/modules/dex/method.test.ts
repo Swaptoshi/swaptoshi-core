@@ -75,7 +75,7 @@ describe('DexMethod', () => {
 				8,
 				FeeAmount.MEDIUM,
 			);
-			eventResultHaveMinimumLength(context.eventQueue, PoolCreatedEvent, 'dex', 1);
+			eventResultHaveMinimumLength(context.eventQueue, PoolCreatedEvent, module.name, 1);
 		});
 	});
 

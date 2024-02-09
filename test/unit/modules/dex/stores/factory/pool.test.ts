@@ -199,7 +199,7 @@ describe('DEX Pool', () => {
 		it('emits a Initialized event with the input tick', async () => {
 			const sqrtPriceX96 = encodePriceSqrt(1, 2);
 			await pool.initialize(sqrtPriceX96.toString());
-			eventResultContain(context.eventQueue, PoolInitializedEvent, 'dex', {
+			eventResultContain(context.eventQueue, PoolInitializedEvent, module.name, {
 				sqrtPriceX96: sqrtPriceX96.toString(),
 				tick: '-6932',
 			});
@@ -213,7 +213,7 @@ describe('DEX Pool', () => {
 		it('emits an event including both old and new', async () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
 			await pool.increaseObservationCardinalityNext('2');
-			eventResultContain(context.eventQueue, IncreaseObservationCardinalityNextEvent, 'dex', {
+			eventResultContain(context.eventQueue, IncreaseObservationCardinalityNextEvent, module.name, {
 				observationCardinalityNextOld: '1',
 				observationCardinalityNextNew: '2',
 			});
@@ -222,7 +222,12 @@ describe('DEX Pool', () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
 			await pool.increaseObservationCardinalityNext('3');
 			await pool.increaseObservationCardinalityNext('2');
-			eventResultHaveLength(context.eventQueue, IncreaseObservationCardinalityNextEvent, 'dex', 1);
+			eventResultHaveLength(
+				context.eventQueue,
+				IncreaseObservationCardinalityNextEvent,
+				module.name,
+				1,
+			);
 		});
 		it('does not change cardinality next if less than current', async () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
@@ -699,13 +704,13 @@ describe('DEX Pool', () => {
 				await swapExact0For1(expandTo18Decimals(1).div(10), sender);
 				await swapExact1For0(expandTo18Decimals(1).div(100), sender);
 
-				eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+				eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 					senderAddress: sender,
 					recipientAddress: DEFAULT_TREASURY_ADDRESS,
 					amount0: '50000000000000',
 					amount1: '0',
 				});
-				eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+				eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 					senderAddress: sender,
 					recipientAddress: DEFAULT_TREASURY_ADDRESS,
 					amount0: '0',
@@ -723,7 +728,7 @@ describe('DEX Pool', () => {
 				await swapExact0For1(expandTo18Decimals(1).div(10), sender);
 				await swapExact1For0(expandTo18Decimals(1).div(100), sender);
 
-				eventResultHaveLength(context.eventQueue, CollectProtocolEvent, 'dex', 0);
+				eventResultHaveLength(context.eventQueue, CollectProtocolEvent, module.name, 0);
 			});
 
 			it('poke is not allowed on uninitialized position', async () => {
@@ -1197,7 +1202,7 @@ describe('DEX Pool', () => {
 			await swapExact1For0(expandTo18Decimals(2), other);
 			await pool.burn('0', '120', expandTo18Decimals(1).toString());
 
-			eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+			eventResultContain(context.eventQueue, BurnEvent, module.name, {
 				senderAddress: sender,
 				tickLower: '0',
 				tickUpper: '120',
@@ -1225,7 +1230,7 @@ describe('DEX Pool', () => {
 			// somebody takes the limit order
 			await swapExact0For1(expandTo18Decimals(2), other);
 			await pool.burn('-120', '0', expandTo18Decimals(1).toString());
-			eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+			eventResultContain(context.eventQueue, BurnEvent, module.name, {
 				senderAddress: sender,
 				tickLower: '-120',
 				tickUpper: '0',
@@ -1257,7 +1262,7 @@ describe('DEX Pool', () => {
 				// somebody takes the limit order
 				await swapExact1For0(expandTo18Decimals(2), other);
 				await pool.burn('0', '120', expandTo18Decimals(1).toString());
-				eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+				eventResultContain(context.eventQueue, BurnEvent, module.name, {
 					senderAddress: sender,
 					tickLower: '0',
 					tickUpper: '120',
@@ -1284,7 +1289,7 @@ describe('DEX Pool', () => {
 				// somebody takes the limit order
 				await swapExact0For1(expandTo18Decimals(2), other);
 				await pool.burn('-120', '0', expandTo18Decimals(1).toString());
-				eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+				eventResultContain(context.eventQueue, BurnEvent, module.name, {
 					senderAddress: sender,
 					tickLower: '-120',
 					tickUpper: '0',
@@ -1689,8 +1694,8 @@ describe('DEX Pool', () => {
 			expect(token0FeesNext).toBe('0');
 			expect(token1FeesNext).toBe('0');
 
-			eventResultHaveLength(context.eventQueue, CollectProtocolEvent, 'dex', 2);
-			eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+			eventResultHaveLength(context.eventQueue, CollectProtocolEvent, module.name, 2);
+			eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 				senderAddress: sender,
 				recipientAddress: DEFAULT_TREASURY_ADDRESS,
 				amount0: '83333333333333',
@@ -1712,8 +1717,8 @@ describe('DEX Pool', () => {
 				'416666666666666',
 			);
 
-			eventResultHaveLength(context.eventQueue, CollectProtocolEvent, 'dex', 2);
-			eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+			eventResultHaveLength(context.eventQueue, CollectProtocolEvent, module.name, 2);
+			eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 				senderAddress: sender,
 				recipientAddress: DEFAULT_TREASURY_ADDRESS,
 				amount0: '83333333333333',
@@ -1744,7 +1749,7 @@ describe('DEX Pool', () => {
 					await mint(sender.toString('hex'), 120000, 121200, liquidityAmount);
 					await swapExact1For0(expandTo18Decimals(1), sender);
 					await pool.burn('120000', '121200', liquidityAmount.toString());
-					eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+					eventResultContain(context.eventQueue, BurnEvent, module.name, {
 						senderAddress: sender,
 						tickLower: '120000',
 						tickUpper: '121200',
@@ -1760,7 +1765,7 @@ describe('DEX Pool', () => {
 					await mint(sender.toString('hex'), -121200, -120000, liquidityAmount);
 					await swapExact0For1(expandTo18Decimals(1), sender);
 					await pool.burn('-121200', '-120000', liquidityAmount.toString());
-					eventResultContain(context.eventQueue, BurnEvent, 'dex', {
+					eventResultContain(context.eventQueue, BurnEvent, module.name, {
 						senderAddress: sender,
 						tickLower: '-121200',
 						tickUpper: '-120000',
@@ -1853,7 +1858,7 @@ describe('DEX Pool', () => {
 			describe('fee off', () => {
 				it('emits an event', async () => {
 					await flash(1001, 2001, other);
-					eventResultContain(context.eventQueue, FlashEvent, 'dex', {
+					eventResultContain(context.eventQueue, FlashEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: other,
 						amount0: '1001',
@@ -1993,7 +1998,7 @@ describe('DEX Pool', () => {
 
 				it('emits an event', async () => {
 					await flash(1001, 2001, other);
-					eventResultContain(context.eventQueue, FlashEvent, 'dex', {
+					eventResultContain(context.eventQueue, FlashEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: other,
 						amount0: '1001',
@@ -2006,13 +2011,13 @@ describe('DEX Pool', () => {
 				it('increases the fee growth by the expected amount', async () => {
 					await flash(2002, 4004, other);
 
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '1',
 						amount1: '0',
 					});
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '0',
@@ -2034,7 +2039,7 @@ describe('DEX Pool', () => {
 						'567',
 					);
 
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '94',
@@ -2053,7 +2058,7 @@ describe('DEX Pool', () => {
 						'678',
 					);
 
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '0',
@@ -2078,13 +2083,13 @@ describe('DEX Pool', () => {
 						'1234',
 					);
 
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '131',
 						amount1: '0',
 					});
-					eventResultContain(context.eventQueue, CollectProtocolEvent, 'dex', {
+					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: DEFAULT_TREASURY_ADDRESS,
 						amount0: '0',

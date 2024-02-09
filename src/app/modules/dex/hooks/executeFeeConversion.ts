@@ -6,6 +6,7 @@ import { mutableHookSwapContext } from '../stores/context';
 
 export async function executeFeeConversion(
 	this: {
+		name: string;
 		stores: NamedRegistry;
 		events: NamedRegistry;
 		_feeMethod: FeeMethod | undefined;

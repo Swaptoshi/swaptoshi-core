@@ -25,6 +25,7 @@ const FEE_CONVERSION_SUPPORTED_COMMANDS = [
 
 export async function isFeeConversion(
 	this: {
+		name: string;
 		stores: NamedRegistry;
 		events: NamedRegistry;
 		_feeMethod: FeeMethod | undefined;
@@ -72,7 +73,7 @@ export async function isFeeConversion(
 
 	if (
 		this._config.feeConversionEnabled &&
-		context.transaction.module === 'dex' &&
+		context.transaction.module === this.name &&
 		FEE_CONVERSION_SUPPORTED_COMMANDS.includes(context.transaction.command)
 	) {
 		const tokenOut = this._feeMethod.getFeeTokenID();

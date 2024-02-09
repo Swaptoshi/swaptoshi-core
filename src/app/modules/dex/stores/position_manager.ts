@@ -30,6 +30,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 		super(moduleName, index);
 		this.stores = stores;
 		this.events = events;
+		this.moduleName = moduleName;
 	}
 
 	public addDependencies(tokenMethod: TokenMethod, nftMethod: NFTMethod) {
@@ -71,6 +72,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 			this.nftMethod!,
 			this.genesisConfig!,
 			this.dexConfig!,
+			this.moduleName,
 		);
 	}
 
@@ -95,6 +97,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 			this.nftMethod!,
 			this.genesisConfig!,
 			this.dexConfig!,
+			this.moduleName,
 		);
 	}
 
@@ -108,6 +111,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 
 	private readonly events: NamedRegistry;
 	private readonly stores: NamedRegistry;
+	private readonly moduleName: string;
 
 	private genesisConfig: GenesisConfig | undefined = undefined;
 	private dexConfig: DexModuleConfig | undefined = undefined;

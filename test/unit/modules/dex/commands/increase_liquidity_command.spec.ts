@@ -15,7 +15,6 @@ import { IncreaseLiquidityEvent } from '../../../../../src/app/modules/dex/event
 import { increaseLiquidityCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/increase_liquidity_command';
 
 type CommandParam = IncreaseLiquidityParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'increaseLiquidity';
 const commandSchema = increaseLiquidityCommandSchema;
 
@@ -148,7 +147,7 @@ describe('IncreaseLiquidityCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			eventResultHaveMinimumLength(context.eventQueue, IncreaseLiquidityEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, IncreaseLiquidityEvent, module.name, 1);
 		});
 	});
 });

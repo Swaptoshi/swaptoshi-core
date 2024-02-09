@@ -54,7 +54,7 @@ import { CollectPositionEvent } from '../../events/collect_position';
 import { DecreaseLiquidityEvent } from '../../events/decrease_liquidity';
 import { IncreaseLiquidityEvent } from '../../events/increase_liquidity';
 import { TokenURICreatedEvent } from '../../events/tokenuri_created';
-import { DEX_ATTRIBUTE, POSITION_MANAGER_ADDRESS, TOKENURI_ATTTRIBUTE } from '../../constants';
+import { POSITION_MANAGER_ADDRESS, TOKENURI_ATTTRIBUTE } from '../../constants';
 import { TokenURIDestroyedEvent } from '../../events/tokenuri_destroyed';
 
 interface AddLiquidityParams {
@@ -99,6 +99,7 @@ export class NonfungiblePositionManager {
 		events: NamedRegistry,
 		genesisConfig: GenesisConfig,
 		dexConfig: DexModuleConfig,
+		moduleName: string,
 	) {
 		Object.assign(this, utils.objects.cloneDeep(positionManager));
 		this.collectionId = PoolAddress.computePoolId(positionManager.poolAddress);
@@ -108,6 +109,7 @@ export class NonfungiblePositionManager {
 		this.poolStore = stores.get(PoolStore);
 		this.tokenSymbolStore = stores.get(TokenSymbolStore);
 		this.positionInfoStore = stores.get(PositionInfoStore);
+		this.moduleName = moduleName;
 	}
 
 	public toJSON(): PositionManager {
@@ -202,10 +204,10 @@ export class NonfungiblePositionManager {
 			this.immutableContext!.context as MethodContext,
 			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
 		);
-		const dexAttribute = nft.attributesArray.find(t => t.module === DEX_ATTRIBUTE);
+		const dexAttribute = nft.attributesArray.find(t => t.module === this.moduleName);
 		if (!dexAttribute)
 			throw new Error(
-				`attributes '${DEX_ATTRIBUTE}' doesnt exist on nft ${PositionKey.getNFTId(
+				`attributes '${this.moduleName}' doesnt exist on nft ${PositionKey.getNFTId(
 					this.chainId,
 					this.collectionId,
 					tokenId,
@@ -272,7 +274,7 @@ export class NonfungiblePositionManager {
 			this.collectionId,
 			[
 				{
-					module: DEX_ATTRIBUTE,
+					module: this.moduleName,
 					attributes: codec.encode(dexNFTAttributeSchema, position),
 				},
 			],
@@ -823,7 +825,7 @@ export class NonfungiblePositionManager {
 		const encodedPosition = codec.encode(dexNFTAttributeSchema, position);
 		await this.nftMethod!.setAttributes(
 			this.mutableContext!.context,
-			DEX_ATTRIBUTE,
+			this.moduleName,
 			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
 			encodedPosition,
 		);
@@ -962,6 +964,7 @@ export class NonfungiblePositionManager {
 	public symbol: string = '';
 	public address: Buffer = POSITION_MANAGER_ADDRESS;
 
+	private readonly moduleName: string;
 	private readonly chainId: Buffer = Buffer.alloc(0);
 	private readonly events: NamedRegistry | undefined;
 	private readonly poolStore: PoolStore | undefined;

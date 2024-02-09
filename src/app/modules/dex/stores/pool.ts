@@ -45,6 +45,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		super(moduleName, index);
 		this.stores = stores;
 		this.events = events;
+		this.moduleName = moduleName;
 	}
 
 	public addDependencies(tokenMethod: TokenMethod) {
@@ -64,7 +65,13 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 	public getMutableRouter(ctx: MutableSwapContext) {
 		this._checkDependencies();
-		return createMutableRouterInstance(ctx, this.stores, this.tokenMethod!, this.config!);
+		return createMutableRouterInstance(
+			ctx,
+			this.stores,
+			this.tokenMethod!,
+			this.config!,
+			this.moduleName,
+		);
 	}
 
 	public async getImmutablePool(
@@ -91,6 +98,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			this.events,
 			this.tokenMethod!,
 			this.config!,
+			this.moduleName,
 		);
 	}
 
@@ -118,6 +126,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			this.events,
 			this.tokenMethod!,
 			this.config!,
+			this.moduleName,
 		);
 	}
 
@@ -183,10 +192,10 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			}
 		} else {
 			if (tokenABalance > BigInt(0)) {
-				await this.tokenMethod!.lock(ctx.context, key, 'dex', tokenA, tokenABalance);
+				await this.tokenMethod!.lock(ctx.context, key, this.moduleName, tokenA, tokenABalance);
 			}
 			if (tokenBBalance > BigInt(0)) {
-				await this.tokenMethod!.lock(ctx.context, key, 'dex', tokenB, tokenBBalance);
+				await this.tokenMethod!.lock(ctx.context, key, this.moduleName, tokenB, tokenBBalance);
 			}
 		}
 
@@ -238,7 +247,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 				context,
 				params.address,
 				params.token,
-				'dex',
+				this.moduleName,
 			);
 			tokenToBeTransferred = await this.tokenMethod!.getAvailableBalance(
 				context,
@@ -258,7 +267,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 					await this.tokenMethod!.unlock(
 						context,
 						params.address,
-						'dex',
+						this.moduleName,
 						params.token,
 						tokenToBeUnlocked,
 					);
@@ -292,6 +301,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 	private readonly events: NamedRegistry;
 	private readonly stores: NamedRegistry;
+	private readonly moduleName: string;
 
 	private tokenMethod: TokenMethod | undefined;
 	private config: DexModuleConfig | undefined;

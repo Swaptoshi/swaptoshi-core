@@ -23,7 +23,6 @@ import { CollectPositionEvent } from '../../../../../src/app/modules/dex/events/
 import { collectCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/collect_command';
 
 type CommandParam = CollectParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'collect';
 const commandSchema = collectCommandSchema;
 
@@ -150,7 +149,7 @@ describe('CollectCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			eventResultHaveMinimumLength(context.eventQueue, CollectPositionEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, CollectPositionEvent, module.name, 1);
 		});
 	});
 });

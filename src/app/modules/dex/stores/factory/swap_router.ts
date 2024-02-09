@@ -35,7 +35,8 @@ interface SwapCallbackData {
 }
 
 export class SwapRouter {
-	public constructor(stores: NamedRegistry, config: DexModuleConfig) {
+	public constructor(stores: NamedRegistry, config: DexModuleConfig, moduleName: string) {
+		this.moduleName = moduleName;
 		this._amountInCached = this._DEFAULT_AMOUNT_IN_CACHED;
 		this.poolStore = stores.get(PoolStore);
 		this.setConfig(config);
@@ -373,7 +374,7 @@ export class SwapRouter {
 					await this.tokenMethod!.lock(
 						this.mutableContext!.context,
 						this.address,
-						'dex',
+						this.moduleName,
 						token,
 						balance,
 					);
@@ -409,6 +410,7 @@ export class SwapRouter {
 
 	private readonly _DEFAULT_AMOUNT_IN_CACHED = Uint256.MAX;
 	private readonly poolStore: PoolStore | undefined;
+	private readonly moduleName: string;
 
 	private feeProtocol: number = 0;
 	private feeProtocolPool: Buffer | undefined;

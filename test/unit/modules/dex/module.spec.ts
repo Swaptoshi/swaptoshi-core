@@ -56,7 +56,7 @@ import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_s
 import { fallbackTokenSymbol } from './utils/token';
 
 const baseTransaction = {
-	module: 'dex',
+	module: '',
 	command: '',
 	senderPublicKey,
 	nonce: BigInt(0),
@@ -144,7 +144,9 @@ describe('DexModule', () => {
 	});
 
 	const createPool = async (tokenA, tokenB) => {
-		executeContext = createTransactionExecuteContext(new Transaction(baseTransaction));
+		executeContext = createTransactionExecuteContext(
+			new Transaction({ ...baseTransaction, module: module.name }),
+		);
 		const context = mutableHookSwapContext(executeContext);
 
 		const pool = await poolStore.createPool(
@@ -166,7 +168,9 @@ describe('DexModule', () => {
 	};
 
 	const mintPosition = async (poolAddressToMint: Buffer, amountToMint: string) => {
-		executeContext = createTransactionExecuteContext(new Transaction(baseTransaction));
+		executeContext = createTransactionExecuteContext(
+			new Transaction({ ...baseTransaction, module: module.name }),
+		);
 		const context = mutableHookSwapContext(executeContext);
 		const nft = await positionManagerStore.getMutablePositionManager(context, poolAddressToMint);
 
@@ -203,7 +207,7 @@ describe('DexModule', () => {
 
 	describe('constructor', () => {
 		it('should have valid name', () => {
-			expect(module.name).toBe('dex');
+			expect(module.name).toBeTruthy();
 		});
 
 		it('should expose endpoint', () => {
@@ -307,7 +311,8 @@ describe('DexModule', () => {
 				'exactOutputSingle',
 				'treasurify',
 			])('%s', command => {
-				const transaction = {
+				// eslint-disable-next-line prefer-const
+				let transaction = {
 					...baseTransaction,
 					command,
 				};
@@ -315,6 +320,7 @@ describe('DexModule', () => {
 				beforeEach(async () => {
 					await mintNativeFee();
 					module._config = defaultConfig;
+					transaction.module = module.name;
 				});
 
 				it('should pass if fee is higher than config', async () => {
@@ -419,7 +425,9 @@ describe('DexModule', () => {
 				],
 			])('%s', (command, paramBuffer, swapAmount, totalAmount) => {
 				const tokenIn = token0;
-				const transaction = {
+
+				// eslint-disable-next-line prefer-const
+				let transaction = {
 					...baseTransaction,
 					command,
 					params: paramBuffer,
@@ -428,6 +436,7 @@ describe('DexModule', () => {
 
 				beforeEach(async () => {
 					module._config = defaultConfig;
+					transaction.module = module.name;
 					const pool = await createPool(token0, token1);
 					await mintPosition(pool.address, '10000');
 				});
@@ -508,13 +517,15 @@ describe('DexModule', () => {
 				'exactOutputSingle',
 				'treasurify',
 			])('%s', command => {
-				const transaction = {
+				// eslint-disable-next-line prefer-const
+				let transaction = {
 					...baseTransaction,
 					command,
 				};
 
 				beforeEach(async () => {
 					module._config = defaultConfig;
+					transaction.module = module.name;
 					await mintNativeFee();
 				});
 
@@ -614,7 +625,9 @@ describe('DexModule', () => {
 				],
 			])('%s', (command, paramBuffer, swapAmount, totalAmount) => {
 				const tokenIn = token0;
-				const transaction = {
+
+				// eslint-disable-next-line prefer-const
+				let transaction = {
 					...baseTransaction,
 					command,
 					params: paramBuffer,
@@ -623,6 +636,7 @@ describe('DexModule', () => {
 
 				beforeEach(async () => {
 					module._config = defaultConfig;
+					transaction.module = module.name;
 					const pool = await createPool(token0, token1);
 					await mintPosition(pool.address, '10000');
 				});
@@ -639,16 +653,16 @@ describe('DexModule', () => {
 
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await module.beforeCommandExecute(executeContext);
-						eventResultHaveLength(executeContext.eventQueue, SwapEvent, 'dex', 1);
+						eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 1);
 
 						expect(
-							getEvents(executeContext.eventQueue, SwapEvent, 'dex')[0][
+							getEvents(executeContext.eventQueue, SwapEvent, module.name)[0][
 								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 0 : 1}`
 							],
 						).toBe('-1000');
 
 						expect(
-							getEvents(executeContext.eventQueue, SwapEvent, 'dex')[0][
+							getEvents(executeContext.eventQueue, SwapEvent, module.name)[0][
 								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 1 : 0}`
 							],
 						).toBe('1116');
@@ -708,7 +722,7 @@ describe('DexModule', () => {
 					it('should not execute a swap operation', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await module.beforeCommandExecute(executeContext);
-						eventResultHaveLength(executeContext.eventQueue, SwapEvent, 'dex', 0);
+						eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 0);
 					});
 				});
 			});
@@ -735,8 +749,8 @@ describe('DexModule', () => {
 
 				executeContext = createTransactionExecuteContext(new Transaction(transaction));
 				await module.afterCommandExecute(executeContext);
-				eventResultHaveLength(executeContext.eventQueue, SwapEvent, 'dex', 1);
-				eventResultContain(executeContext.eventQueue, SwapEvent, 'dex', {
+				eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 1);
+				eventResultContain(executeContext.eventQueue, SwapEvent, module.name, {
 					senderAddress: pool.address,
 					recipientAddress: executeContext.transaction.senderAddress,
 					amount0: '10',
@@ -764,7 +778,7 @@ describe('DexModule', () => {
 			it('should not execute a swap operation if pool doesnt exist, indicating normal transfer', async () => {
 				executeContext = createTransactionExecuteContext(new Transaction(transaction));
 				await module.afterCommandExecute(executeContext);
-				eventResultHaveLength(executeContext.eventQueue, SwapEvent, 'dex', 0);
+				eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 0);
 			});
 
 			it('should fail if pool exist but token transferred is not compatible with pool', async () => {

@@ -619,7 +619,7 @@ describe('DEX Pool swap tests', () => {
 						);
 
 					// check that the swap event was emitted too
-					eventResultContain(context.eventQueue, SwapEvent, 'dex', {
+					eventResultContain(context.eventQueue, SwapEvent, module.name, {
 						senderAddress: sender,
 						recipientAddress: SWAP_RECIPIENT_ADDRESS,
 						amount0: poolBalance0Delta.toString(),

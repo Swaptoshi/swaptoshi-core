@@ -4,6 +4,7 @@ import { DexModuleConfig } from '../types';
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyBaseFee(
 	this: {
+		name: string;
 		_feeMethod: FeeMethod | undefined;
 		_config: DexModuleConfig | undefined;
 	},
@@ -11,7 +12,7 @@ export async function verifyBaseFee(
 ) {
 	if (!this._config || !this._feeMethod) return;
 
-	if (context.transaction.module === 'dex') {
+	if (context.transaction.module === this.name) {
 		if (
 			context.transaction.fee < BigInt(this._config.baseFee[context.transaction.command] as string)
 		) {

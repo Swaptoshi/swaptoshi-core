@@ -21,7 +21,6 @@ import { TreasurifyEvent } from '../../../../../src/app/modules/dex/events/treas
 import { PoolStore } from '../../../../../src/app/modules/dex/stores/pool';
 
 type CommandParam = TreasurifyParams;
-const MODULE_NAME = 'dex';
 const COMMAND_NAME = 'treasurify';
 const commandSchema = treasurifyCommandSchema;
 
@@ -105,7 +104,7 @@ describe('TreasurifyCommand', () => {
 		it('should do nothing if pool doesnt have any leftover balance', async () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
-			eventResultHaveLength(context.eventQueue, TreasurifyEvent, MODULE_NAME, 0);
+			eventResultHaveLength(context.eventQueue, TreasurifyEvent, module.name, 0);
 		});
 
 		it('should transfer leftover pool balance to treasury account', async () => {
@@ -142,11 +141,11 @@ describe('TreasurifyCommand', () => {
 		it('should transfer locked leftover pool balance to treasury account', async () => {
 			const context = createCommandExecuteContext(validParam);
 			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
-			await tokenMethod.lock(context, poolAddress, MODULE_NAME, token0, BigInt(10));
+			await tokenMethod.lock(context, poolAddress, module.name, token0, BigInt(10));
 
 			await command.execute(context);
 
-			expect(mock_token_unlock).toHaveBeenCalledWith(poolAddress, MODULE_NAME, token0, BigInt(10));
+			expect(mock_token_unlock).toHaveBeenCalledWith(poolAddress, module.name, token0, BigInt(10));
 
 			expect(mock_token_transfer).toHaveBeenCalledWith(
 				poolAddress,
@@ -162,13 +161,13 @@ describe('TreasurifyCommand', () => {
 				address: ROUTER_ADDRESS,
 			});
 			await tokenMethod.mint(context, ROUTER_ADDRESS, token0, BigInt(10));
-			await tokenMethod.lock(context, ROUTER_ADDRESS, MODULE_NAME, token0, BigInt(10));
+			await tokenMethod.lock(context, ROUTER_ADDRESS, module.name, token0, BigInt(10));
 
 			await command.execute(context);
 
 			expect(mock_token_unlock).toHaveBeenCalledWith(
 				ROUTER_ADDRESS,
-				MODULE_NAME,
+				module.name,
 				token0,
 				BigInt(10),
 			);
@@ -185,7 +184,7 @@ describe('TreasurifyCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
 			await command.execute(context);
-			eventResultHaveMinimumLength(context.eventQueue, TreasurifyEvent, MODULE_NAME, 1);
+			eventResultHaveMinimumLength(context.eventQueue, TreasurifyEvent, module.name, 1);
 		});
 	});
 });
