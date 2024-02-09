@@ -266,10 +266,12 @@ export class DexModule extends BaseInteroperableModule {
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportedTokenStore = this.stores.get(SupportedTokenStore);
+		const tokenSymbolStore = this.stores.get(TokenSymbolStore);
 
 		poolStore.init(this._config);
-		positionManagerStore.init(Buffer.from(_args.genesisConfig.chainID, 'hex'));
+		positionManagerStore.init(_args.genesisConfig, this._config);
 		supportedTokenStore.init(this._config);
+		tokenSymbolStore.init(_args.genesisConfig, this._config);
 
 		this.endpoint.init(this._config);
 	}

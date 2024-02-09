@@ -60,6 +60,17 @@
 				"exactOutput": "0",
 				"exactOutputSingle": "0",
 				"treasurify": "0"
+			},
+			"nftPositionMetadata": {
+				"dex": {
+					"name": "Swaptoshi",
+					"symbol": "SWT",
+					"decimal": 8
+				},
+				"mainchain": {
+					"symbol": "LSK",
+					"decimal": 8
+				}
 			}
 		},
 		"fee": {

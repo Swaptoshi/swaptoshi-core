@@ -15,3 +15,9 @@ NFT ID: 0
   "name": "Swaptoshi - 0.3% - TKNB/TKNC - MIN<>MAX",
 }
 `;
+
+exports[`DexEndpoint getTokenURI should get token uri 1`] = `
+{
+  "tokenURI": "ipfs://bafkreiabijd5jhj5n4gjrwjz5m7xasrkcjhfgq3siawy37r34paxzolfbq",
+}
+`;

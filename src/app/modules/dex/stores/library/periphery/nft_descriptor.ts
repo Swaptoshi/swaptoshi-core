@@ -20,8 +20,10 @@ import * as TickMath from '../core/tick_math';
 import * as FullMath from '../core/full_math';
 import * as HexStrings from './hex_strings';
 import * as NFTSVG from './nft_svg';
+import { DexModuleConfig } from '../../../types';
 
 interface ConstructTokenURIParams {
+	config: DexModuleConfig;
 	tokenId: Uint256String;
 	quoteTokenAddress: Buffer;
 	baseTokenAddress: Buffer;
@@ -65,6 +67,7 @@ const sqrt10X128 = Uint256.from('1076067327063303206878105757264492625226').toSt
 export function constructTokenURI(params: ConstructTokenURIParams): string {
 	const name = generateName(params, feeToPercentString(params.fee));
 	const descriptionPartOne = generateDescriptionPartOne(
+		params.config,
 		escapeQuotes(params.quoteTokenSymbol),
 		escapeQuotes(params.baseTokenSymbol),
 		cryptography.address.getLisk32AddressFromAddress(params.poolAddress),
@@ -124,12 +127,13 @@ function escapeQuotes(symbol: string): string {
 }
 
 function generateDescriptionPartOne(
+	config: DexModuleConfig,
 	quoteTokenSymbol: string,
 	baseTokenSymbol: string,
 	poolAddress: string,
 ): string {
 	return [
-		'This NFT represents a liquidity position in a Swaptoshi ',
+		`This NFT represents a liquidity position in a ${config.nftPositionMetadata.dex.name} `,
 		quoteTokenSymbol,
 		'-',
 		baseTokenSymbol,
@@ -167,7 +171,7 @@ function generateDescriptionPartTwo(
 
 function generateName(params: ConstructTokenURIParams, feeTier: string): string {
 	return [
-		'Swaptoshi - ',
+		`${params.config.nftPositionMetadata.dex.name} - `,
 		feeTier,
 		' - ',
 		escapeQuotes(params.quoteTokenSymbol),

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { NFTMethod, NamedRegistry, TokenMethod } from 'lisk-sdk';
+import { GenesisConfig, NFTMethod, NamedRegistry, TokenMethod } from 'lisk-sdk';
 import {
 	DEXPoolData,
 	DexModuleConfig,
@@ -55,9 +55,16 @@ export function createImmutablePositionManagerinstance(
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	nftMethod: NFTMethod,
-	chainId: Buffer,
+	genesisConfig: GenesisConfig,
+	dexConfig: DexModuleConfig,
 ) {
-	const res = new NonfungiblePositionManager(positionManager, stores, events, chainId);
+	const res = new NonfungiblePositionManager(
+		positionManager,
+		stores,
+		events,
+		genesisConfig,
+		dexConfig,
+	);
 	res.addImmutableDependencies(context, tokenMethod, nftMethod);
 	return res;
 }
@@ -69,9 +76,16 @@ export function createMutablePositionManagerinstance(
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	nftMethod: NFTMethod,
-	chainId: Buffer,
+	genesisConfig: GenesisConfig,
+	dexConfig: DexModuleConfig,
 ) {
-	const res = new NonfungiblePositionManager(positionManager, stores, events, chainId);
+	const res = new NonfungiblePositionManager(
+		positionManager,
+		stores,
+		events,
+		genesisConfig,
+		dexConfig,
+	);
 	res.addMutableDependencies(context, tokenMethod, nftMethod);
 	return res;
 }

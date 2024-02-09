@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { EventQueuer, codec } from 'lisk-sdk';
 
-export const eventResultContain = (
+export const getEvents = (
 	eventQueue: EventQueuer['eventQueue'],
 	EventClass: any,
 	moduleName: string,
-	expectedResult: any,
 ) => {
 	const eventName = new EventClass(moduleName).name;
 
@@ -20,7 +19,16 @@ export const eventResultContain = (
 			return eventData;
 		});
 
-	expect(eventDataList).toContainEqual(expectedResult);
+	return eventDataList;
+};
+
+export const eventResultContain = (
+	eventQueue: EventQueuer['eventQueue'],
+	EventClass: any,
+	moduleName: string,
+	expectedResult: any,
+) => {
+	expect(getEvents(eventQueue, EventClass, moduleName)).toContainEqual(expectedResult);
 
 	return true;
 };
@@ -31,11 +39,7 @@ export const eventResultHaveLength = (
 	moduleName: string,
 	length: number,
 ) => {
-	const eventName = new EventClass(moduleName).name;
-
-	const eventLength = eventQueue.getEvents().filter(t => t.toObject().name === eventName).length;
-
-	expect(eventLength).toBe(length);
+	expect(getEvents(eventQueue, EventClass, moduleName)).toHaveLength(length);
 
 	return true;
 };
@@ -46,11 +50,7 @@ export const eventResultHaveMinimumLength = (
 	moduleName: string,
 	length: number,
 ) => {
-	const eventName = new EventClass(moduleName).name;
-
-	const eventLength = eventQueue.getEvents().filter(t => t.toObject().name === eventName).length;
-
-	expect(eventLength).toBeGreaterThanOrEqual(length);
+	expect(getEvents(eventQueue, EventClass, moduleName).length).toBeGreaterThanOrEqual(length);
 
 	return true;
 };

@@ -5,7 +5,7 @@ import {
 	SwapRouter,
 } from '../../../../../../src/app/modules/dex/stores/factory';
 import { Quoter } from '../../../../../../src/app/modules/dex/stores/library/lens/quoter';
-import { methodContextFixture } from '../shared/module';
+import { methodContextFixture, moduleConfig } from '../shared/module';
 import { completeFixture } from '../shared/pool';
 import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
@@ -18,7 +18,6 @@ import {
 } from '../shared/quoter';
 import { encodePath } from '../shared/path';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
-import { LSK_TOKEN_SYMBOL } from '../../../../../../src/app/modules/dex/constants';
 
 const sender = Buffer.from('0000000000000000000000000000000000000005', 'hex');
 const trader = Buffer.from('0000000000000000000000000000000000000006', 'hex');
@@ -62,7 +61,7 @@ describe('QuoterV2', () => {
 		const _pool = await poolStore.createPool(
 			context,
 			Buffer.from('0000000000000000', 'hex'),
-			LSK_TOKEN_SYMBOL,
+			moduleConfig.nftPositionMetadata.mainchain.symbol.toUpperCase(),
 			parseInt(token0Decimal, 10),
 			Buffer.from('0010000000000000', 'hex'),
 			token1Symbol,

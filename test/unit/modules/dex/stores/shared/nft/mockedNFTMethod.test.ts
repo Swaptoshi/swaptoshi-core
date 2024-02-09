@@ -27,12 +27,13 @@ import {
 } from './index';
 import { NFTRegistry } from './nft_registry';
 import { NFT } from './nft';
+import { chainID } from '../module';
 
 const context = {} as any;
 const nftModule = 'module';
 const collectionId = Buffer.alloc(4);
 const receivingChainID = Buffer.from('00000001', 'hex');
-const nftId = Buffer.alloc(16);
+const nftId = Buffer.concat([chainID, collectionId, Buffer.alloc(8, 0)]);
 const sender = Buffer.alloc(20);
 const recipient = Buffer.from('0000000000000000000000000000000000000001', 'hex');
 const nft: NFT = {

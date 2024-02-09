@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
 import { TokenMethod } from 'lisk-sdk';
@@ -27,7 +28,7 @@ import { setTime } from '../shared/fixtures/PositionManagerUtilities';
 import { mock_token_transfer } from '../shared/token';
 import { encodePath } from '../shared/path';
 import { TokenRegistry } from '../shared/token/token_registry';
-import { LSK_TOKEN_ID, LSK_TOKEN_SYMBOL } from '../../../../../../src/app/modules/dex/constants';
+import { fallbackTokenSymbol } from '../../utils/token';
 
 type Fixture<T> = (sender: Buffer) => Promise<T>;
 
@@ -129,10 +130,10 @@ describe('NonfungiblePositionManager', () => {
 		const _pool = await poolStore.createPool(
 			context,
 			tokenA,
-			tokenA.subarray(1).compare(LSK_TOKEN_ID) === 0 ? LSK_TOKEN_SYMBOL : 'TKNA',
+			fallbackTokenSymbol(tokenA, 'TKNA'),
 			8,
 			tokenB,
-			tokenB.subarray(1).compare(LSK_TOKEN_ID) === 0 ? LSK_TOKEN_SYMBOL : 'TKNB',
+			fallbackTokenSymbol(tokenB, 'TKNB'),
 			8,
 			fee,
 		);

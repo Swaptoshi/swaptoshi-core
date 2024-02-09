@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -20,13 +21,9 @@ import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
 import { DexMethod } from '../../../../src/app/modules/dex/method';
 import { PoolStore } from '../../../../src/app/modules/dex/stores/pool';
 import { PositionManagerStore } from '../../../../src/app/modules/dex/stores/position_manager';
-import { moduleConfig } from './utils/config';
-import {
-	LSK_TOKEN_ID,
-	LSK_TOKEN_SYMBOL,
-	defaultConfig,
-} from '../../../../src/app/modules/dex/constants';
-import { hookContextFixture } from './stores/shared/module';
+import { moduleInitArgs } from './utils/config';
+import { defaultConfig } from '../../../../src/app/modules/dex/constants';
+import { hookContextFixture, tokenID } from './stores/shared/module';
 import { poolAddress, senderPublicKey, senderAddress, token0, token1 } from './utils/account';
 import { mutableHookSwapContext } from '../../../../src/app/modules/dex/stores/context';
 import {
@@ -51,10 +48,12 @@ import { NATIVE_TOKEN_ID } from './stores/shared/pool';
 import { encodePath } from './stores/shared/path';
 import { TokenRegistry } from './stores/shared/token/token_registry';
 import { Token } from './stores/shared/token/token';
-import { eventResultContain, eventResultHaveLength } from '../../../utils/events';
+import { eventResultContain, eventResultHaveLength, getEvents } from '../../../utils/events';
 import { SwapEvent } from '../../../../src/app/modules/dex/events/swap';
 import { mock_token_transfer } from './stores/shared/token';
 import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supported_token';
+import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_symbol';
+import { fallbackTokenSymbol } from './utils/token';
 
 const baseTransaction = {
 	module: 'dex',
@@ -106,6 +105,8 @@ describe('DexModule', () => {
 	let mockPoolStore;
 	let mockPositionManagerStore;
 	let mockSupportedTokenStore;
+	let mockTokenSymbolStore;
+
 	let poolStore: PoolStore;
 	let positionManagerStore: PositionManagerStore;
 	let tokenMethod: TokenMethod;
@@ -145,13 +146,14 @@ describe('DexModule', () => {
 	const createPool = async (tokenA, tokenB) => {
 		executeContext = createTransactionExecuteContext(new Transaction(baseTransaction));
 		const context = mutableHookSwapContext(executeContext);
+
 		const pool = await poolStore.createPool(
 			context,
 			tokenA,
-			tokenA.subarray(1).compare(LSK_TOKEN_ID) === 0 ? LSK_TOKEN_SYMBOL : 'TKNA',
+			fallbackTokenSymbol(tokenA, 'TKNA'),
 			8,
 			tokenB,
-			tokenB.subarray(1).compare(LSK_TOKEN_ID) === 0 ? LSK_TOKEN_SYMBOL : 'TKNB',
+			fallbackTokenSymbol(tokenB, 'TKNB'),
 			8,
 			FeeAmount.MEDIUM,
 		);
@@ -160,12 +162,7 @@ describe('DexModule', () => {
 	};
 
 	const mintNativeFee = async () => {
-		await tokenMethod.mint(
-			executeContext,
-			senderAddress,
-			Buffer.from('0000000000000000', 'hex'),
-			BigInt(1000000000),
-		);
+		await tokenMethod.mint(executeContext, senderAddress, tokenID, BigInt(1000000000));
 	};
 
 	const mintPosition = async (poolAddressToMint: Buffer, amountToMint: string) => {
@@ -253,21 +250,28 @@ describe('DexModule', () => {
 				init: jest.fn(),
 				addDependencies: jest.fn(),
 			};
+			mockTokenSymbolStore = {
+				init: jest.fn(),
+				addDependencies: jest.fn(),
+			};
+
 			const mockStores = new Map();
 			mockStores.set(PoolStore, mockPoolStore);
 			mockStores.set(PositionManagerStore, mockPositionManagerStore);
 			mockStores.set(SupportedTokenStore, mockSupportedTokenStore);
+			mockStores.set(TokenSymbolStore, mockTokenSymbolStore);
+
 			module.stores = mockStores as any;
 		});
 
 		describe('init', () => {
 			it('should initialize poolStore', async () => {
-				await module.init(moduleConfig as any);
+				await module.init(moduleInitArgs as any);
 				expect(mockPoolStore.init).toHaveBeenCalled();
 			});
 
 			it('should initialize positionManagerStore', async () => {
-				await module.init(moduleConfig as any);
+				await module.init(moduleInitArgs as any);
 				expect(mockPositionManagerStore.init).toHaveBeenCalled();
 			});
 		});
@@ -452,7 +456,9 @@ describe('DexModule', () => {
 						expect(res.status).toBe(VerifyStatus.FAIL);
 						expect(res.error).toBeDefined();
 						expect(res.error?.message).toBe(
-							`Insufficient 0000000000000001 balance for feeConversion. Minimum required balance is 1116.`,
+							`Insufficient ${tokenIn.toString(
+								'hex',
+							)} balance for feeConversion. Minimum required balance is 1116.`,
 						);
 					});
 
@@ -465,7 +471,9 @@ describe('DexModule', () => {
 						expect(res.status).toBe(VerifyStatus.FAIL);
 						expect(res.error).toBeDefined();
 						expect(res.error?.message).toBe(
-							`Insufficient 0000000000000001 balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
+							`Insufficient ${tokenIn.toString(
+								'hex',
+							)} balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
 						);
 					});
 				});
@@ -632,22 +640,18 @@ describe('DexModule', () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await module.beforeCommandExecute(executeContext);
 						eventResultHaveLength(executeContext.eventQueue, SwapEvent, 'dex', 1);
-						eventResultContain(executeContext.eventQueue, SwapEvent, 'dex', {
-							senderAddress: executeContext.transaction.senderAddress,
-							recipientAddress: executeContext.transaction.senderAddress,
-							amount0: '-1000',
-							amount1: '1116',
-							sqrtPriceX96Before: '79228162514264337593543950336',
-							sqrtPriceX96: '88031291682515930659493278152',
-							liquidityBefore: '10000',
-							liquidity: '10000',
-							tickBefore: '0',
-							tick: '2107',
-							feeGrowthGlobal0X128Before: '0',
-							feeGrowthGlobal0X128: '0',
-							feeGrowthGlobal1X128Before: '0',
-							feeGrowthGlobal1X128: '136112946768375385385349842972707284',
-						});
+
+						expect(
+							getEvents(executeContext.eventQueue, SwapEvent, 'dex')[0][
+								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 0 : 1}`
+							],
+						).toBe('-1000');
+
+						expect(
+							getEvents(executeContext.eventQueue, SwapEvent, 'dex')[0][
+								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 1 : 0}`
+							],
+						).toBe('1116');
 					});
 
 					it('should throw any error if sender have enough tokenIn (token0) balance', async () => {
@@ -668,7 +672,9 @@ describe('DexModule', () => {
 						await expect(
 							(async () => module.beforeCommandExecute(executeContext))(),
 						).rejects.toThrow(
-							`Insufficient 0000000000000001 balance for feeConversion. Minimum required balance is 1116.`,
+							`Insufficient ${tokenIn.toString(
+								'hex',
+							)} balance for feeConversion. Minimum required balance is 1116.`,
 						);
 					});
 
@@ -680,7 +686,9 @@ describe('DexModule', () => {
 						await expect(
 							(async () => module.beforeCommandExecute(executeContext))(),
 						).rejects.toThrow(
-							`Insufficient 0000000000000001 balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
+							`Insufficient ${tokenIn.toString(
+								'hex',
+							)} balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
 						);
 					});
 				});

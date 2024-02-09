@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-param-reassign */
@@ -24,7 +25,7 @@ import {
 	getMaxTick,
 } from '../shared/utilities';
 import { mock_token_transfer } from '../shared/token';
-import { LSK_TOKEN_ID, LSK_TOKEN_SYMBOL } from '../../../../../../src/app/modules/dex/constants';
+import { fallbackTokenSymbol } from '../../utils/token';
 
 // const TIMEOUT = 40000;
 const sender = Buffer.from('0000000000000000000000000000000000000001', 'hex');
@@ -175,10 +176,10 @@ describe('SwapRouter', () => {
 
 			await nft.createAndInitializePoolIfNecessary(
 				Buffer.from(tokenAddressA, 'hex'),
-				tokenAddressA.substring(2) === LSK_TOKEN_ID.toString('hex') ? LSK_TOKEN_SYMBOL : 'TKNA',
+				fallbackTokenSymbol(Buffer.from(tokenAddressA, 'hex'), 'TKNA'),
 				8,
 				Buffer.from(tokenAddressB, 'hex'),
-				tokenAddressA.substring(2) === LSK_TOKEN_ID.toString('hex') ? LSK_TOKEN_SYMBOL : 'TKNB',
+				fallbackTokenSymbol(Buffer.from(tokenAddressB, 'hex'), 'TKNB'),
 				8,
 				FeeAmount.MEDIUM,
 				encodePriceSqrt(1, 1).toString(),

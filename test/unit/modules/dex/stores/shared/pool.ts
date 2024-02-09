@@ -10,8 +10,18 @@ import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
 import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
 import { TestCallee } from './fixtures/TestCallee';
 import { TestRouter } from './fixtures/TestRouter';
-import { methodContextFixture } from './module';
+import { methodContextFixture, tokenID } from './module';
 import { defaultConfig } from '../../../../../../src/app/modules/dex/constants';
+import {
+	token0 as token0ID,
+	token1 as token1ID,
+	token2 as token2ID,
+	token3 as token3ID,
+	token0Symbol,
+	token1Symbol,
+	token2Symbol,
+	token3Symbol,
+} from '../../utils/account';
 
 type Fixture<T> = (context: MutableSwapContext, module: DexModule) => Promise<T>;
 
@@ -32,7 +42,7 @@ interface CompleteFixture extends PoolFixture {
 
 // Monday, October 5, 2020 9:00:00 AM GMT-05:00
 export const TEST_POOL_START_TIME = '1601906400';
-export const NATIVE_TOKEN_ID = Buffer.from('0000000000000000', 'hex');
+export const NATIVE_TOKEN_ID = tokenID;
 
 interface TokensFixture {
 	nativeTokenId: Buffer;
@@ -54,34 +64,30 @@ async function tokensFixture(sender: Buffer): Promise<TokensFixture> {
 	const tokenMethod = new MockedTokenMethod();
 
 	const nativeToken = new Token();
-	const nativeTokenId = Buffer.from('0000000000000000', 'hex');
+	const nativeTokenId = tokenID;
 	TokenRegistry.createToken(nativeTokenId, nativeToken);
 	await tokenMethod.mint(undefined as any, sender, nativeTokenId, Uint.from(2).pow(255).toBigInt());
 
 	const tokenA = new Token();
-	const tokenAID = Buffer.from('0000000000000001', 'hex');
-	const token0Symbol = 'TKNA';
+	const tokenAID = token0ID;
 	const token0Decimal = '8';
 	TokenRegistry.createToken(tokenAID, tokenA);
 	await tokenMethod.mint(undefined as any, sender, tokenAID, Uint.from(2).pow(255).toBigInt());
 
 	const tokenB = new Token();
-	const tokenBID = Buffer.from('0000000000000002', 'hex');
-	const token1Symbol = 'TKNB';
+	const tokenBID = token1ID;
 	const token1Decimal = '8';
 	TokenRegistry.createToken(tokenBID, tokenB);
 	await tokenMethod.mint(undefined as any, sender, tokenBID, Uint.from(2).pow(255).toBigInt());
 
 	const tokenC = new Token();
-	const tokenCID = Buffer.from('0000000000000003', 'hex');
-	const token2Symbol = 'TKNC';
+	const tokenCID = token2ID;
 	const token2Decimal = '8';
 	TokenRegistry.createToken(tokenCID, tokenC);
 	await tokenMethod.mint(undefined as any, sender, tokenCID, Uint.from(2).pow(255).toBigInt());
 
 	const tokenD = new Token();
-	const tokenDID = Buffer.from('0000000000000004', 'hex');
-	const token3Symbol = 'TKND';
+	const tokenDID = token3ID;
 	const token3Decimal = '8';
 	TokenRegistry.createToken(tokenDID, tokenD);
 	await tokenMethod.mint(undefined as any, sender, tokenDID, Uint.from(2).pow(255).toBigInt());
@@ -117,13 +123,9 @@ export const poolFixture: Fixture<PoolFixture> = async (
 		token1,
 		token2,
 		token3,
-		token0Symbol,
 		token0Decimal,
-		token1Symbol,
 		token1Decimal,
-		token2Symbol,
 		token2Decimal,
-		token3Symbol,
 		token3Decimal,
 	} = await tokensFixture(context.senderAddress);
 

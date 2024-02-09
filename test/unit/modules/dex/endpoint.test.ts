@@ -452,8 +452,8 @@ describe('DexEndpoint', () => {
 			const res = await endpoint.getPosition(context);
 
 			expect(res).toStrictEqual({
-				token0: '0000000000000003',
-				token1: '0000000000000002',
+				token0: tokens[2].address.toString('hex'),
+				token1: tokens[1].address.toString('hex'),
 				fee: '3000',
 				tickLower: '-887220',
 				tickUpper: '887220',
@@ -511,7 +511,7 @@ describe('DexEndpoint', () => {
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
 			const res = await endpoint.getTokenURI(context);
 
-			expect(res).toStrictEqual({
+			expect(res).toMatchSnapshot({
 				tokenURI: 'ipfs://bafkreiabijd5jhj5n4gjrwjz5m7xasrkcjhfgq3siawy37r34paxzolfbq',
 			});
 		});

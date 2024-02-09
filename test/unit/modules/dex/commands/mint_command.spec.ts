@@ -8,7 +8,12 @@ import { invalidAddress, invalidNumberString, invalidTokenAddress } from '../uti
 import { commandFixture } from '../utils/fixtures';
 import { NonfungiblePositionManager } from '../../../../../src/app/modules/dex/stores/factory';
 import { FeeAmount, TICK_SPACINGS, getMaxTick, getMinTick } from '../stores/shared/utilities';
-import { senderAddress, senderPublicKey } from '../utils/account';
+import {
+	senderAddress,
+	senderPublicKey,
+	token0 as token0ID,
+	token1 as token1ID,
+} from '../utils/account';
 import { eventResultHaveMinimumLength } from '../../../../utils/events';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
@@ -20,8 +25,8 @@ const COMMAND_NAME = 'mint';
 const commandSchema = mintCommandSchema;
 
 const validParam: CommandParam = {
-	token0: Buffer.from('0000000000000001', 'hex'),
-	token1: Buffer.from('0000000000000002', 'hex'),
+	token0: token0ID,
+	token1: token1ID,
 	fee: FeeAmount.MEDIUM,
 	tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]).toString(),
 	tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]).toString(),

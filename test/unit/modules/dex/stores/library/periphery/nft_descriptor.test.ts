@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
 import { MethodContext, cryptography } from 'lisk-sdk';
 import { Uint } from '../../../../../../../src/app/modules/dex/stores/library/int';
-import { methodContextFixture } from '../../shared/module';
+import { methodContextFixture, moduleConfig } from '../../shared/module';
 import { TEST_POOL_START_TIME, poolFixture } from '../../shared/pool';
 import { methodSwapContext } from '../../../../../../../src/app/modules/dex/stores/context';
 import { DexModule } from '../../../../../../../src/app/modules/dex/module';
@@ -155,6 +155,7 @@ describe('NFTDescriptor', () => {
 		it('returns the valid JSON string with min and max ticks', async () => {
 			const json = extractJSONFromURI(
 				nftDescriptor.constructTokenURI({
+					config: moduleConfig,
 					tokenId,
 					baseTokenAddress,
 					quoteTokenAddress,
@@ -199,6 +200,7 @@ describe('NFTDescriptor', () => {
 
 			const json = extractJSONFromURI(
 				nftDescriptor.constructTokenURI({
+					config: moduleConfig,
 					tokenId,
 					baseTokenAddress,
 					quoteTokenAddress,
@@ -239,6 +241,7 @@ describe('NFTDescriptor', () => {
 			quoteTokenSymbol = '"TES"T1"';
 			const json = extractJSONFromURI(
 				nftDescriptor.constructTokenURI({
+					config: moduleConfig,
 					tokenId,
 					baseTokenAddress,
 					quoteTokenAddress,
@@ -283,6 +286,7 @@ describe('NFTDescriptor', () => {
 
 				const json = extractJSONFromURI(
 					nftDescriptor.constructTokenURI({
+						config: moduleConfig,
 						tokenId,
 						baseTokenAddress,
 						quoteTokenAddress,
@@ -324,6 +328,7 @@ describe('NFTDescriptor', () => {
 
 				const json = extractJSONFromURI(
 					nftDescriptor.constructTokenURI({
+						config: moduleConfig,
 						tokenId,
 						baseTokenAddress,
 						quoteTokenAddress,
@@ -377,6 +382,7 @@ describe('NFTDescriptor', () => {
 			baseTokenSymbol = 'WETH';
 			expect(
 				nftDescriptor.constructTokenURI({
+					config: moduleConfig,
 					tokenId,
 					quoteTokenAddress,
 					baseTokenAddress,
@@ -799,13 +805,21 @@ describe('NFTDescriptor', () => {
 
 	describe('#tokenToColorHex', () => {
 		it('returns the correct hash for the first 3 bytes of the token address', async () => {
-			expect(nftDescriptor.tokenToColorHex(tokens[0].address, '136')).toBe('c0cac3');
-			expect(nftDescriptor.tokenToColorHex(tokens[1].address, '136')).toBe('371f1f');
+			expect(nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'), '136')).toBe(
+				'c0cac3',
+			);
+			expect(nftDescriptor.tokenToColorHex(Buffer.from('0000000000000002', 'hex'), '136')).toBe(
+				'371f1f',
+			);
 		});
 
 		it('returns the correct hash for the last 3 bytes of the address', async () => {
-			expect(nftDescriptor.tokenToColorHex(tokens[0].address, '0')).toBe('d00a50');
-			expect(nftDescriptor.tokenToColorHex(tokens[1].address, '0')).toBe('e77f70');
+			expect(nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'), '0')).toBe(
+				'd00a50',
+			);
+			expect(nftDescriptor.tokenToColorHex(Buffer.from('0000000000000002', 'hex'), '0')).toBe(
+				'e77f70',
+			);
 		});
 	});
 
@@ -912,6 +926,7 @@ describe('NFTDescriptor', () => {
 
 		it('matches the current snapshot', async () => {
 			const svg = nftDescriptor.generateSVGImage({
+				config: moduleConfig,
 				tokenId,
 				baseTokenAddress,
 				quoteTokenAddress,
@@ -937,6 +952,7 @@ describe('NFTDescriptor', () => {
 
 		it('returns a valid SVG', async () => {
 			const svg = nftDescriptor.generateSVGImage({
+				config: moduleConfig,
 				tokenId,
 				baseTokenAddress,
 				quoteTokenAddress,

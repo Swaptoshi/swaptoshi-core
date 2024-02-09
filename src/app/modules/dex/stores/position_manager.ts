@@ -1,7 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable import/no-cycle */
-import { BaseStore, NFTMethod, NamedRegistry, TokenMethod, cryptography } from 'lisk-sdk';
-import { ImmutableSwapContext, MutableSwapContext, PositionManager } from '../types';
+import {
+	BaseStore,
+	GenesisConfig,
+	NFTMethod,
+	NamedRegistry,
+	TokenMethod,
+	cryptography,
+} from 'lisk-sdk';
+import {
+	DexModuleConfig,
+	ImmutableSwapContext,
+	MutableSwapContext,
+	PositionManager,
+} from '../types';
 import { positionManagerStoreSchema } from '../schema/stores/position_manager';
 import {
 	createImmutablePositionManagerinstance,
@@ -23,11 +35,13 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 	public addDependencies(tokenMethod: TokenMethod, nftMethod: NFTMethod) {
 		this.tokenMethod = tokenMethod;
 		this.nftMethod = nftMethod;
-		if (this.chainId !== undefined) this.dependencyReady = true;
+		if (this.genesisConfig !== undefined && this.dexConfig !== undefined)
+			this.dependencyReady = true;
 	}
 
-	public init(chainId: Buffer) {
-		this.chainId = chainId;
+	public init(genesisConfig: GenesisConfig, dexConfig: DexModuleConfig) {
+		this.genesisConfig = genesisConfig;
+		this.dexConfig = dexConfig;
 		if (this.tokenMethod !== undefined && this.nftMethod !== undefined) this.dependencyReady = true;
 	}
 
@@ -55,7 +69,8 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 			this.events,
 			this.tokenMethod!,
 			this.nftMethod!,
-			this.chainId,
+			this.genesisConfig!,
+			this.dexConfig!,
 		);
 	}
 
@@ -78,7 +93,8 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 			this.events,
 			this.tokenMethod!,
 			this.nftMethod!,
-			this.chainId,
+			this.genesisConfig!,
+			this.dexConfig!,
 		);
 	}
 
@@ -93,7 +109,8 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 	private readonly events: NamedRegistry;
 	private readonly stores: NamedRegistry;
 
-	private chainId: Buffer = Buffer.alloc(0);
+	private genesisConfig: GenesisConfig | undefined = undefined;
+	private dexConfig: DexModuleConfig | undefined = undefined;
 	private tokenMethod: TokenMethod | undefined;
 	private nftMethod: NFTMethod | undefined;
 

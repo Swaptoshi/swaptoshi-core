@@ -2,7 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { MethodContext, NFTMethod, NamedRegistry, TokenMethod, codec, utils } from 'lisk-sdk';
+import {
+	GenesisConfig,
+	MethodContext,
+	NFTMethod,
+	NamedRegistry,
+	TokenMethod,
+	codec,
+	utils,
+} from 'lisk-sdk';
 import * as IPFSHash from 'ipfs-only-hash';
 import {
 	Uint24String,
@@ -27,6 +35,7 @@ import {
 	DecreaseLiquidityParams,
 	IncreaseLiquidityParams,
 	MintParams,
+	DexModuleConfig,
 } from '../../types';
 import { PoolStore } from '../pool';
 import { DEXPool } from './pool';
@@ -88,12 +97,14 @@ export class NonfungiblePositionManager {
 		positionManager: PositionManager,
 		stores: NamedRegistry,
 		events: NamedRegistry,
-		chainId: Buffer,
+		genesisConfig: GenesisConfig,
+		dexConfig: DexModuleConfig,
 	) {
 		Object.assign(this, utils.objects.cloneDeep(positionManager));
 		this.collectionId = PoolAddress.computePoolId(positionManager.poolAddress);
 		this.events = events;
-		this.chainId = chainId;
+		this.chainId = Buffer.from(genesisConfig.chainID, 'hex');
+		this.dexConfig = dexConfig;
 		this.poolStore = stores.get(PoolStore);
 		this.tokenSymbolStore = stores.get(TokenSymbolStore);
 		this.positionInfoStore = stores.get(PositionInfoStore);
@@ -622,6 +633,7 @@ export class NonfungiblePositionManager {
 		);
 
 		const uri = NFTDescriptor.constructTokenURI({
+			config: this.dexConfig,
 			tokenId,
 			quoteTokenAddress,
 			baseTokenAddress,
@@ -955,6 +967,7 @@ export class NonfungiblePositionManager {
 	private readonly poolStore: PoolStore | undefined;
 	private readonly tokenSymbolStore: TokenSymbolStore | undefined;
 	private readonly positionInfoStore: PositionInfoStore | undefined;
+	private readonly dexConfig: DexModuleConfig;
 
 	private mutableContext: MutableSwapContext | undefined;
 	private immutableContext: ImmutableSwapContext | undefined;

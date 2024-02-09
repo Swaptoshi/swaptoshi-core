@@ -12,6 +12,12 @@ export const senderAddress = cryptography.address.getAddressFromPublicKey(sender
 export const token0 = Buffer.from('0000000000000001', 'hex');
 export const token1 = Buffer.from('0000000000000002', 'hex');
 export const token2 = Buffer.from('0000000000000003', 'hex');
+export const token3 = Buffer.from('0000000000000004', 'hex');
+
+export const token0Symbol = 'TKNA';
+export const token1Symbol = 'TKNB';
+export const token2Symbol = 'TKNC';
+export const token3Symbol = 'TKND';
 
 export const poolAddress = PoolAddress.computeAddress(
 	PoolAddress.getPoolKey(token0, token1, FeeAmount.MEDIUM),

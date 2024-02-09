@@ -1,15 +1,9 @@
-import { BaseStore, NamedRegistry } from 'lisk-sdk';
-import { MutableContext, TokenSymbol } from '../types';
-import {
-	LSK_TOKEN_DECIMAL,
-	LSK_TOKEN_ID,
-	LSK_TOKEN_SYMBOL,
-	SWT_TOKEN_DECIMAL,
-	SWT_TOKEN_ID,
-	SWT_TOKEN_SYMBOL,
-} from '../constants';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { BaseStore, GenesisConfig, NamedRegistry } from 'lisk-sdk';
+import { DexModuleConfig, MutableContext, TokenSymbol } from '../types';
 import { tokenSymbolStoreSchema } from '../schema/stores/token_symbol';
 import { TokenRegisteredEvent } from '../events/token_registered';
+import { getDEXToken, getMainchainToken } from '../utils';
 
 export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 	public constructor(moduleName: string, index: number, events: NamedRegistry) {
@@ -17,8 +11,14 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		this.events = events;
 	}
 
+	public init(genesisConfig: GenesisConfig, dexConfig: DexModuleConfig) {
+		this.genesisConfig = genesisConfig;
+		this.dexConfig = dexConfig;
+		this.dependencyReady = true;
+	}
+
 	public getKey(tokenId: Buffer) {
-		return tokenId.subarray(1);
+		return tokenId;
 	}
 
 	public async registerSymbol(
@@ -27,25 +27,27 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		symbol: string,
 		decimal: number,
 	) {
+		this._checkDependencies();
 		if (await this.has(ctx, this.getKey(tokenId))) return;
 
 		let _symbol = symbol;
 		let _decimal = decimal;
 
-		if (
-			this._isInvalidLSKToken(tokenId, symbol, decimal) ||
-			this._isInvalidSWTToken(tokenId, symbol, decimal)
-		) {
-			// throw new Error('invalid parameter');
-			throw new Error(`${tokenId.toString('hex')} ${symbol} ${decimal}`);
-		}
+		if (this._isInvalidMainchainToken(tokenId, symbol, decimal))
+			throw new Error('invalid mainchain token parameter');
 
-		if (this.getKey(tokenId).compare(LSK_TOKEN_ID) === 0) {
-			_symbol = LSK_TOKEN_SYMBOL;
-			_decimal = LSK_TOKEN_DECIMAL;
-		} else if (this.getKey(tokenId).compare(SWT_TOKEN_ID) === 0) {
-			_symbol = SWT_TOKEN_SYMBOL;
-			_decimal = SWT_TOKEN_DECIMAL;
+		if (this._isInvalidDEXToken(tokenId, symbol, decimal))
+			throw new Error('invalid dex token parameter');
+
+		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
+		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
+
+		if (this.getKey(tokenId).compare(mainchain.tokenId) === 0) {
+			_symbol = mainchain.symbol;
+			_decimal = mainchain.decimal;
+		} else if (this.getKey(tokenId).compare(dex.tokenId) === 0) {
+			_symbol = mainchain.symbol;
+			_decimal = mainchain.decimal;
 		}
 
 		await this.set(ctx, this.getKey(tokenId), { symbol: _symbol, decimal: _decimal });
@@ -58,24 +60,38 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		});
 	}
 
-	private _isInvalidLSKToken(tokenId: Buffer, symbol: string, decimal: number) {
+	private _isInvalidMainchainToken(tokenId: Buffer, symbol: string, decimal: number) {
+		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
+		const isMainchainToken = this.getKey(tokenId).compare(mainchain.tokenId) === 0;
+
 		return (
-			(this.getKey(tokenId).compare(LSK_TOKEN_ID) === 0 &&
-				(symbol !== LSK_TOKEN_SYMBOL || decimal !== LSK_TOKEN_DECIMAL)) ||
-			(symbol === LSK_TOKEN_SYMBOL &&
-				(this.getKey(tokenId).compare(LSK_TOKEN_ID) !== 0 || decimal !== LSK_TOKEN_DECIMAL))
+			(isMainchainToken && (symbol !== mainchain.symbol || decimal !== mainchain.decimal)) ||
+			(symbol === mainchain.symbol && (!isMainchainToken || decimal !== mainchain.decimal))
 		);
 	}
 
-	private _isInvalidSWTToken(tokenId: Buffer, symbol: string, decimal: number) {
+	private _isInvalidDEXToken(tokenId: Buffer, symbol: string, decimal: number) {
+		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
+		const isDEXToken = this.getKey(tokenId).compare(dex.tokenId) === 0;
+
 		return (
-			(this.getKey(tokenId).compare(SWT_TOKEN_ID) === 0 &&
-				(symbol !== SWT_TOKEN_SYMBOL || decimal !== SWT_TOKEN_DECIMAL)) ||
-			(symbol === SWT_TOKEN_SYMBOL &&
-				(this.getKey(tokenId).compare(SWT_TOKEN_ID) !== 0 || decimal !== SWT_TOKEN_DECIMAL))
+			(isDEXToken && (symbol !== dex.symbol || decimal !== dex.decimal)) ||
+			(symbol === dex.symbol && (!isDEXToken || decimal !== dex.decimal))
 		);
+	}
+
+	private _checkDependencies() {
+		if (!this.dependencyReady) {
+			throw new Error('dependencies not configured');
+		}
 	}
 
 	public schema = tokenSymbolStoreSchema;
+
 	private readonly events: NamedRegistry;
+
+	private dexConfig: DexModuleConfig | undefined = undefined;
+	private genesisConfig: GenesisConfig | undefined = undefined;
+
+	private dependencyReady = false;
 }

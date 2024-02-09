@@ -17,4 +17,15 @@ export interface DexModuleConfig {
 		exactOutputSingle: string;
 		treasurify: string;
 	};
+	nftPositionMetadata: {
+		dex: {
+			name: string;
+			symbol: string;
+			decimal: number;
+		};
+		mainchain: {
+			symbol: string;
+			decimal: number;
+		};
+	};
 }

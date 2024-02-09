@@ -204,8 +204,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		)}`;
 		await positionManagerStore.set(ctx.context, positionManagerStore.getKey(key), {
 			poolAddress: key,
-			name: `Swaptoshi Positions NFT - ${positionNameAndSymbol}`,
-			symbol: `SWTPOS-${positionNameAndSymbol}`,
+			name: `${this.config!.nftPositionMetadata.dex.name} Positions NFT - ${positionNameAndSymbol}`,
+			symbol: `${this.config!.nftPositionMetadata.dex.symbol.toUpperCase()}POS-${positionNameAndSymbol}`,
 		});
 
 		const events = this.events.get(PoolCreatedEvent);

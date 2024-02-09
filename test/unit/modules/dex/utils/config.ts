@@ -1,7 +1,10 @@
-import { chainID } from '../stores/shared/module';
+import { GenesisConfig } from 'lisk-sdk';
+import { chainID, moduleConfig } from '../stores/shared/module';
+import { DexModuleConfig } from '../../../../../src/app/modules/dex/types';
 
-export const moduleConfig = {
+export const moduleInitArgs: { genesisConfig: GenesisConfig; moduleConfig: DexModuleConfig } = {
 	genesisConfig: {
-		chainID,
-	},
+		chainID: chainID.toString('hex'),
+	} as GenesisConfig,
+	moduleConfig,
 };

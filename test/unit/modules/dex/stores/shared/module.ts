@@ -28,8 +28,8 @@ import { DEFAULT_TREASURY_ADDRESS } from '../../../../../../src/app/modules/dex/
 import { MockedFeeMethod } from './fee';
 import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/stores/supported_token';
 
-export const chainID = Buffer.from('00000000', 'hex');
-export const tokenID = Buffer.from('0000000000000000', 'hex');
+export const chainID = Buffer.from('00000001', 'hex');
+export const tokenID = Buffer.concat([chainID, Buffer.alloc(4, 0)]);
 export const moduleConfig: DexModuleConfig = {
 	feeAmountTickSpacing: [
 		['500', '10'],
@@ -52,6 +52,17 @@ export const moduleConfig: DexModuleConfig = {
 		exactOutput: '0',
 		exactOutputSingle: '0',
 		treasurify: '0',
+	},
+	nftPositionMetadata: {
+		dex: {
+			name: 'Swaptoshi',
+			symbol: 'SWT',
+			decimal: 8,
+		},
+		mainchain: {
+			symbol: 'LSK',
+			decimal: 8,
+		},
 	},
 };
 
