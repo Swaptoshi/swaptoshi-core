@@ -21,7 +21,7 @@ import { TEST_POOL_START_TIME, poolFixture } from '../shared/pool';
 import { Uint, Uint128, Uint256 } from '../../../../../../src/app/modules/dex/stores/library/int';
 
 import * as tickMath from '../../../../../../src/app/modules/dex/stores/library/core/tick_math';
-import { SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { SwapTest } from '../shared/fixtures/SwapTest';
 import { methodContextFixture } from '../shared/module';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
@@ -143,7 +143,7 @@ describe('Swaptoshi Pool arbitrage tests', () => {
 					let swapToHigherPrice: SwapFunction;
 					let swapToLowerPrice: SwapFunction;
 					let swapExact1For0: SwapFunction;
-					let pool: SwaptoshiPool;
+					let pool: DEXPool;
 					let mint: MintFunction;
 					let tester: SwapTest;
 

@@ -4,7 +4,7 @@ import { TokenMethod } from 'lisk-sdk';
 import {
 	NonfungiblePositionManager,
 	SwapRouter,
-	SwaptoshiPool,
+	DEXPool,
 } from '../../../../../../src/app/modules/dex/stores/factory';
 import * as PoolAddress from '../../../../../../src/app/modules/dex/stores/library/periphery/pool_address';
 import { completeFixture } from '../shared/pool';
@@ -44,7 +44,7 @@ describe('NonfungiblePositionManager', () => {
 	const nftFixture: Fixture<{
 		nft: NonfungiblePositionManager;
 		tokens: [Tokens, Tokens, Tokens];
-		pool: SwaptoshiPool;
+		pool: DEXPool;
 		router: SwapRouter;
 	}> = async (_sender: Buffer) => {
 		const {
@@ -114,7 +114,7 @@ describe('NonfungiblePositionManager', () => {
 	};
 
 	let tokenMethod: TokenMethod;
-	let pool: SwaptoshiPool;
+	let pool: DEXPool;
 	let context: MutableSwapContext;
 	let poolStore: PoolStore;
 	let router: SwapRouter;
@@ -195,7 +195,7 @@ describe('NonfungiblePositionManager', () => {
 				[tokens[0].address, tokens[1].address],
 				FeeAmount.MEDIUM,
 			);
-			let _pool: SwaptoshiPool;
+			let _pool: DEXPool;
 			try {
 				_pool = await createPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM);
 				await _pool.initialize(encodePriceSqrt(3, 1).toString());

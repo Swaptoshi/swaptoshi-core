@@ -25,14 +25,14 @@ import {
 	ImmutableSwapContext,
 	QuoteExactInputSingleParams,
 	QuoteExactOutputSingleParams,
-	SwaptoshiPoolData,
+	DEXPoolData,
 } from '../../../types';
 import { PoolStore } from '../../pool';
 
 import * as Path from '../periphery/path';
 import * as PoolTicksCounter from '../periphery/pool_ticks_counter';
 import * as TickMath from '../core/tick_math';
-import { SwaptoshiPool } from '../../factory';
+import { DEXPool } from '../../factory';
 import { TickBitmapStore } from '../../tick_bitmap';
 import { decodePriceSqrt } from '../../../utils';
 import { TokenSymbolStore } from '../../token_symbol';
@@ -324,7 +324,7 @@ export class Quoter {
 		amount0Delta: Int256String,
 		amount1Delta: Int256String,
 		_data: string,
-		pool?: SwaptoshiPoolData,
+		pool?: DEXPoolData,
 	) {
 		if (pool === undefined) throw new Error('no pool supplied');
 
@@ -397,7 +397,7 @@ export class Quoter {
 
 	private async _handleRevert(
 		reason: string,
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 	): Promise<{ amount: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
 		const [amount, sqrtPriceX96After, _tickAfter, _tickBefore] = this._parseRevertReason(reason);
 

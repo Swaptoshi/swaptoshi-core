@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DexModule } from '../../../../../../../src/app/modules/dex/module';
-import { SwaptoshiPool } from '../../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import {
 	Uint160String,
 	Int256String,
@@ -18,7 +18,7 @@ export class TestSwapPay {
 	}
 
 	public async swap(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		recipient: Buffer,
 		zeroForOne: boolean,
 		sqrtPriceX96: Uint160String,

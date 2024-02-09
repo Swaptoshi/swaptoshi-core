@@ -29,7 +29,7 @@ import {
 	MintParams,
 } from '../../types';
 import { PoolStore } from '../pool';
-import { SwaptoshiPool } from './pool';
+import { DEXPool } from './pool';
 import { dexNFTAttributeSchema } from '../../schema/nft_attribute/dex_nft_attribute';
 import { tokenUriNFTAttributeSchema } from '../../schema/nft_attribute/tokenuri_nft_attribute';
 
@@ -156,10 +156,10 @@ export class NonfungiblePositionManager {
 		token1Decimal: number,
 		fee: Uint24String,
 		sqrtPriceX96: Uint160String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		this._checkMutableDependency();
 		if (token0.compare(token1) >= 0) throw new Error('invalid token order');
-		let pool: SwaptoshiPool | undefined;
+		let pool: DEXPool | undefined;
 
 		try {
 			pool = await this.poolStore!.getMutablePool(this.mutableContext!, token0, token1, fee);
@@ -737,7 +737,7 @@ export class NonfungiblePositionManager {
 	}
 
 	private async _getFeeGrowthInside(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		tickLower: Int24String,
 		tickUpper: Int24String,
 	): Promise<[feeGrowthInside0X128: string, feeGrowthInside1X128: string]> {
@@ -880,7 +880,7 @@ export class NonfungiblePositionManager {
 	private async _addLiquidity(
 		params: AddLiquidityParams,
 	): Promise<
-		[liquidity: Uint128String, amount0: Uint256String, amount1: Uint256String, pool: SwaptoshiPool]
+		[liquidity: Uint128String, amount0: Uint256String, amount1: Uint256String, pool: DEXPool]
 	> {
 		const poolKey: PoolAddress.PoolKey = {
 			token0: params.token0,

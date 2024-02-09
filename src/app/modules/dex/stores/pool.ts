@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, NamedRegistry, TokenMethod, cryptography } from 'lisk-sdk';
 import {
-	SwaptoshiPoolData,
+	DEXPoolData,
 	DexModuleConfig,
 	Slot0,
 	ImmutableSwapContext,
@@ -16,7 +16,7 @@ import { Tick } from './library/core';
 import { PoolCreatedEvent } from '../events/pool_created';
 import { poolStoreSchema } from '../schema/stores/pool';
 import {
-	SwaptoshiPool,
+	DEXPool,
 	createImmutablePoolInstance,
 	createMutablePoolInstance,
 	createMutableRouterInstance,
@@ -35,7 +35,7 @@ export const defaultSlot0: Slot0 = Object.freeze({
 	observationCardinalityNext: '0',
 });
 
-export class PoolStore extends BaseStore<SwaptoshiPoolData> {
+export class PoolStore extends BaseStore<DEXPoolData> {
 	public constructor(
 		moduleName: string,
 		index: number,
@@ -72,7 +72,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		tokenA: Buffer,
 		tokenB: Buffer,
 		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		this._checkDependencies();
 
 		if (!this.schema) {
@@ -80,7 +80,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		}
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
-		const pool = await subStore.getWithSchema<SwaptoshiPoolData>(
+		const pool = await subStore.getWithSchema<DEXPoolData>(
 			this.getKey(tokenA, tokenB, fee),
 			this.schema,
 		);
@@ -99,7 +99,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		tokenA: Buffer,
 		tokenB: Buffer,
 		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		this._checkDependencies();
 
 		if (!this.schema) {
@@ -107,7 +107,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		}
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
-		const pool = await subStore.getWithSchema<SwaptoshiPoolData>(
+		const pool = await subStore.getWithSchema<DEXPoolData>(
 			this.getKey(tokenA, tokenB, fee),
 			this.schema,
 		);
@@ -130,7 +130,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		tokenBSymbol: string,
 		tokenBDecimal: number,
 		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		this._checkDependencies();
 
 		if (tokenA.subarray(0, 1).compare(tokenB.subarray(0, 1)) !== 0)
@@ -143,7 +143,7 @@ export class PoolStore extends BaseStore<SwaptoshiPoolData> {
 		const orderedTokenKey = PoolAddress.getPoolKey(tokenA, tokenB, fee);
 		if (await this.has(ctx.context, key)) throw new Error('pool already exists');
 
-		const pool: SwaptoshiPoolData = {
+		const pool: DEXPoolData = {
 			...orderedTokenKey,
 			tickSpacing,
 			maxLiquidityPerTick: Tick.tickSpacingToMaxLiquidityPerTick(tickSpacing),

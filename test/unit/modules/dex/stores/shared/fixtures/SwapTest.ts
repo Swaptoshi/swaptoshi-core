@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MutableSwapContext } from '../../../../../../../src/app/modules/dex/types';
 import { DexModule } from '../../../../../../../src/app/modules/dex/module';
-import { SwaptoshiPool } from '../../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import {
 	Int256String,
 	Uint160String,
@@ -20,7 +20,7 @@ export class SwapTest {
 	}
 
 	public async getSwapResult(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		zeroForOne: boolean,
 		amountSpecified: Int256String,
 		sqrtPriceLimitX96: Uint160String,

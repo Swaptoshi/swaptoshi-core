@@ -16,7 +16,7 @@ import {
 import { Tokens, endpointFixture } from './utils/fixtures';
 import { encodePath } from './stores/shared/path';
 import { FeeAmount } from './stores/shared/utilities';
-import { SwaptoshiPool } from '../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../src/app/modules/dex/stores/factory';
 import { serializer } from '../../../../src/app/modules/dex/utils';
 
 describe('DexEndpoint', () => {
@@ -25,7 +25,7 @@ describe('DexEndpoint', () => {
 	let endpoint: DexEndpoint;
 	let stateStore: PrefixedStateReadWriter;
 	let tokens: Tokens;
-	let pool: SwaptoshiPool;
+	let pool: DEXPool;
 
 	beforeEach(async () => {
 		({ module, stateStore, tokens, pool } = await endpointFixture());

@@ -12,7 +12,7 @@ import {
 	expandTo18Decimals,
 } from '../shared/utilities';
 import { TEST_POOL_START_TIME, poolFixture } from '../shared/pool';
-import { SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { TestCallee } from '../shared/fixtures/TestCallee';
 import { TestRouter } from '../shared/fixtures/TestRouter';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
@@ -33,8 +33,8 @@ describe('Swaptoshi Pool', () => {
 	let token0: Buffer;
 	let token1: Buffer;
 	let token2: Buffer;
-	let pool0: SwaptoshiPool;
-	let pool1: SwaptoshiPool;
+	let pool0: DEXPool;
+	let pool1: DEXPool;
 
 	let pool0Functions: PoolFunctions;
 	let pool1Functions: PoolFunctions;
@@ -64,7 +64,7 @@ describe('Swaptoshi Pool', () => {
 			spacing: number,
 			firstToken: Buffer,
 			secondToken: Buffer,
-		): Promise<[SwaptoshiPool, any]> => {
+		): Promise<[DEXPool, any]> => {
 			const pool = await createPool(amount.toString(), spacing.toString(), firstToken, secondToken);
 			const poolFunctions = createPoolFunctions({
 				swapTarget: swapTargetCallee,

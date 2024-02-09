@@ -4,7 +4,7 @@ import { methodSwapContext } from './stores/context';
 import { Uint24String } from './stores/library/int';
 import { PositionManagerStore } from './stores/position_manager';
 import { Quoter } from './stores/library/lens';
-import { NonfungiblePositionManager, SwapRouter, SwaptoshiPool } from './stores/factory';
+import { NonfungiblePositionManager, SwapRouter, DEXPool } from './stores/factory';
 
 export class DexMethod extends BaseMethod {
 	public async createPool(
@@ -18,7 +18,7 @@ export class DexMethod extends BaseMethod {
 		tokenBSymbol: string,
 		tokenBDecimal: number,
 		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		const poolStore = this.stores.get(PoolStore);
 		const _context = methodSwapContext(context, senderAddress, timestamp);
 		return poolStore.createPool(
@@ -40,7 +40,7 @@ export class DexMethod extends BaseMethod {
 		tokenA: Buffer,
 		tokenB: Buffer,
 		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	): Promise<DEXPool> {
 		const poolStore = this.stores.get(PoolStore);
 		const _context = methodSwapContext(context, senderAddress, timestamp);
 		return poolStore.getMutablePool(_context, tokenA, tokenB, fee);

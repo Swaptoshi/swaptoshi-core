@@ -3,7 +3,7 @@ import { BigIntAble, Uint } from '../../../../../../src/app/modules/dex/stores/l
 import {
 	NonfungiblePositionManager,
 	SwapRouter,
-	SwaptoshiPool,
+	DEXPool,
 } from '../../../../../../src/app/modules/dex/stores/factory';
 import { completeFixture } from '../shared/pool';
 import { methodContextFixture } from '../shared/module';
@@ -35,7 +35,7 @@ interface Tokens {
 
 describe('PositionValue', () => {
 	const positionValueCompleteFixture: Fixture<{
-		pool: SwaptoshiPool;
+		pool: DEXPool;
 		context: MutableSwapContext;
 		tokens: [Tokens, Tokens, Tokens, Tokens];
 		nft: NonfungiblePositionManager;
@@ -110,7 +110,7 @@ describe('PositionValue', () => {
 
 	let poolStore: PoolStore;
 	let context: MutableSwapContext;
-	let pool: SwaptoshiPool;
+	let pool: DEXPool;
 	let tokens: [Tokens, Tokens, Tokens, Tokens];
 	let nft: NonfungiblePositionManager;
 	let router: SwapRouter;

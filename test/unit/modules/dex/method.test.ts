@@ -5,7 +5,7 @@ import { methodFixture } from './utils/fixtures';
 import {
 	NonfungiblePositionManager,
 	SwapRouter,
-	SwaptoshiPool,
+	DEXPool,
 } from '../../../../src/app/modules/dex/stores/factory';
 import { DexMethod } from '../../../../src/app/modules/dex/method';
 import { poolAddress2, senderAddress } from './utils/account';
@@ -89,7 +89,7 @@ describe('DexMethod', () => {
 				token2,
 				FeeAmount.MEDIUM,
 			);
-			expect(pool).toBeInstanceOf(SwaptoshiPool);
+			expect(pool).toBeInstanceOf(DEXPool);
 		});
 	});
 

@@ -15,7 +15,7 @@ export interface Slot0 {
 	observationCardinalityNext: Uint16String;
 }
 
-export interface SwaptoshiPoolData {
+export interface DEXPoolData {
 	token0: Buffer;
 	token1: Buffer;
 	fee: Uint24String;

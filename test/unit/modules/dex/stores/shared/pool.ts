@@ -4,7 +4,7 @@ import { TokenRegistry } from './token/token_registry';
 import { Token } from './token/token';
 import { MockedTokenMethod } from './token';
 import { Uint } from '../../../../../../src/app/modules/dex/stores/library/int';
-import { SwapRouter, SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { SwapRouter, DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
 import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
@@ -23,7 +23,7 @@ interface PoolFixture extends TokensFixture {
 		tickSpacing: string,
 		firstToken?: Buffer,
 		secondToken?: Buffer,
-	): Promise<SwaptoshiPool>;
+	): Promise<DEXPool>;
 }
 
 interface CompleteFixture extends PoolFixture {

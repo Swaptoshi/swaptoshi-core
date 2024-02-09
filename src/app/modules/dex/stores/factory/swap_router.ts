@@ -23,7 +23,7 @@ import {
 	ExactOutputSingleParams,
 	DexModuleConfig,
 } from '../../types';
-import { SwaptoshiPool } from './pool';
+import { DEXPool } from './pool';
 import { ROUTER_ADDRESS } from '../../constants';
 
 import * as TickMath from '../library/core/tick_math';
@@ -226,11 +226,7 @@ export class SwapRouter {
 		};
 	}
 
-	private async _getPool(
-		tokenA: Buffer,
-		tokenB: Buffer,
-		fee: Uint24String,
-	): Promise<SwaptoshiPool> {
+	private async _getPool(tokenA: Buffer, tokenB: Buffer, fee: Uint24String): Promise<DEXPool> {
 		return this.poolStore!.getMutablePool(this.mutableContext!, tokenA, tokenB, fee);
 	}
 

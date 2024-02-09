@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { SwaptoshiPool } from '../../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import {
 	Uint256String,
 	Uint160String,
@@ -25,7 +25,7 @@ export class TestCallee {
 	}
 
 	public async swapExact0For1(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		amount0In: Uint256String,
 		recipient: Buffer,
 		sqrtPriceLimitX96: Uint160String,
@@ -41,7 +41,7 @@ export class TestCallee {
 	}
 
 	public async swap0ForExact1(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		amount1Out: Uint256String,
 		recipient: Buffer,
 		sqrtPriceLimitX96: Uint160String,
@@ -57,7 +57,7 @@ export class TestCallee {
 	}
 
 	public async swapExact1For0(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		amount1In: Uint256String,
 		recipient: Buffer,
 		sqrtPriceLimitX96: Uint160String,
@@ -73,7 +73,7 @@ export class TestCallee {
 	}
 
 	public async swap1ForExact0(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		amount0Out: Uint256String,
 		recipient: Buffer,
 		sqrtPriceLimitX96: Uint160String,
@@ -88,11 +88,7 @@ export class TestCallee {
 		);
 	}
 
-	public async swapToLowerSqrtPrice(
-		pool: SwaptoshiPool,
-		sqrtPriceX96: Uint160String,
-		recipient: Buffer,
-	) {
+	public async swapToLowerSqrtPrice(pool: DEXPool, sqrtPriceX96: Uint160String, recipient: Buffer) {
 		await pool.swap(
 			recipient,
 			true,
@@ -104,7 +100,7 @@ export class TestCallee {
 	}
 
 	public async swapToHigherSqrtPrice(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		sqrtPriceX96: Uint160String,
 		recipient: Buffer,
 	) {
@@ -119,7 +115,7 @@ export class TestCallee {
 	}
 
 	public async mint(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		recipient: Buffer,
 		tickLower: Int24String,
 		tickUpper: Int24String,
@@ -136,7 +132,7 @@ export class TestCallee {
 	}
 
 	public async flash(
-		pool: SwaptoshiPool,
+		pool: DEXPool,
 		recipient: Buffer,
 		amount0: Uint256String,
 		amount1: Uint256String,

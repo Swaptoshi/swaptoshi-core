@@ -5,7 +5,7 @@ import { NamedRegistry, TokenMethod, cryptography, utils } from 'lisk-sdk';
 import {
 	PositionInfo,
 	Slot0,
-	SwaptoshiPoolData,
+	DEXPoolData,
 	DexModuleConfig,
 	ImmutableSwapContext,
 	MutableSwapContext,
@@ -110,9 +110,9 @@ const defaultStepComputations: StepComputations = Object.freeze({
 	feeAmount: '0',
 });
 
-export class SwaptoshiPool implements SwaptoshiPoolData {
+export class DEXPool implements DEXPoolData {
 	public constructor(
-		pool: SwaptoshiPoolData,
+		pool: DEXPoolData,
 		stores: NamedRegistry,
 		events: NamedRegistry,
 		config: DexModuleConfig,
@@ -140,14 +140,8 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 		this.simulation = simulation;
 	}
 
-	public createEmulator(): SwaptoshiPool {
-		const emulatedPool = new SwaptoshiPool(
-			this.toJSON(),
-			this.stores!,
-			this.events!,
-			this.config!,
-			true,
-		);
+	public createEmulator(): DEXPool {
+		const emulatedPool = new DEXPool(this.toJSON(), this.stores!, this.events!, this.config!, true);
 		if (this.mutableContext) {
 			emulatedPool.addMutableDependencies(this.mutableContext, this.tokenMethod!);
 		} else if (this.immutableContext) {
@@ -359,12 +353,7 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 		tickUpper: Int24String,
 		amount: Uint128String,
 		data: string,
-		callback: (
-			amount0: string,
-			amount1: string,
-			data: string,
-			pool?: SwaptoshiPoolData,
-		) => Promise<void>,
+		callback: (amount0: string, amount1: string, data: string, pool?: DEXPoolData) => Promise<void>,
 	): Promise<[amount0: string, amount1: string]> {
 		this._checkMutableDependencies();
 		if (Uint128.from(amount).lte(0)) throw new Error('amount must be positive');
@@ -580,12 +569,7 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 		amountSpecified: Int256String,
 		sqrtPriceLimitX96: Uint160String,
 		data: string,
-		callback: (
-			amount0: string,
-			amount1: string,
-			data: string,
-			pool?: SwaptoshiPoolData,
-		) => Promise<void>,
+		callback: (amount0: string, amount1: string, data: string, pool?: DEXPoolData) => Promise<void>,
 	): Promise<[amount0: string, amount1: string]> {
 		let context: MutableContext | ImmutableContext;
 		let timestamp: string;
@@ -916,7 +900,7 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 		amount0: Uint256String,
 		amount1: Uint256String,
 		data: string,
-		callback: (fee0: string, fee1: string, data: string, pool?: SwaptoshiPoolData) => Promise<void>,
+		callback: (fee0: string, fee1: string, data: string, pool?: DEXPoolData) => Promise<void>,
 	) {
 		this._checkMutableDependencies();
 
@@ -1056,7 +1040,7 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 		).bitmap;
 	}
 
-	public toJSON(): SwaptoshiPoolData {
+	public toJSON(): DEXPoolData {
 		return utils.objects.cloneDeep({
 			token0: this.token0,
 			token1: this.token1,
@@ -1067,7 +1051,7 @@ export class SwaptoshiPool implements SwaptoshiPoolData {
 			feeGrowthGlobal1X128: this.feeGrowthGlobal1X128,
 			liquidity: this.liquidity,
 			slot0: this.slot0,
-		}) as SwaptoshiPoolData;
+		}) as DEXPoolData;
 	}
 
 	private async _getBalance0() {

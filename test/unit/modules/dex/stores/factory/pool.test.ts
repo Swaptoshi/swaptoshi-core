@@ -33,7 +33,7 @@ import {
 	Uint160,
 	Uint256,
 } from '../../../../../../src/app/modules/dex/stores/library/int';
-import { SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { TestCallee, mockedFlashCallback } from '../shared/fixtures/TestCallee';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { methodContextFixture } from '../shared/module';
@@ -78,7 +78,7 @@ describe('Swaptoshi Pool', () => {
 	let token0: Buffer;
 	let token1: Buffer;
 
-	let pool: SwaptoshiPool;
+	let pool: DEXPool;
 
 	let swapTarget: TestCallee;
 
@@ -885,7 +885,7 @@ describe('Swaptoshi Pool', () => {
 
 	// the combined amount of liquidity that the pool is initialized with (including the 1 minimum liquidity that is burned)
 	const initializeLiquidityAmount = expandTo18Decimals(2);
-	async function initializeAtZeroTick(_pool: SwaptoshiPool): Promise<void> {
+	async function initializeAtZeroTick(_pool: DEXPool): Promise<void> {
 		await _pool.initialize(encodePriceSqrt(1, 1).toString());
 		const { tickSpacing: _tickSpacing } = _pool;
 		const [min, max] = [getMinTick(_tickSpacing), getMaxTick(_tickSpacing)];

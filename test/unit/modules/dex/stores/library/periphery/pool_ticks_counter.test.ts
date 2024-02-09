@@ -1,6 +1,6 @@
 import { MethodContext } from 'lisk-sdk';
 import { methodSwapContext } from '../../../../../../../src/app/modules/dex/stores/context';
-import { SwaptoshiPool } from '../../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import * as PoolTicksCounter from '../../../../../../../src/app/modules/dex/stores/library/periphery/pool_ticks_counter';
 import { TickBitmapStore } from '../../../../../../../src/app/modules/dex/stores/tick_bitmap';
 import { methodContextFixture } from '../../shared/module';
@@ -16,7 +16,7 @@ describe('PoolTicksCounter', () => {
 	const TICK_SPACINGS = ['200', '60', '10'];
 
 	TICK_SPACINGS.forEach(TICK_SPACING => {
-		let pool: SwaptoshiPool;
+		let pool: DEXPool;
 
 		// Bit index to tick
 		const bitIdxToTick = (idx: number, page = 0) => {

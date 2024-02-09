@@ -2,7 +2,7 @@
 import * as TickMath from '../../../../../../../src/app/modules/dex/stores/library/core/tick_math';
 import { MutableSwapContext } from '../../../../../../../src/app/modules/dex/types';
 import { DexModule } from '../../../../../../../src/app/modules/dex/module';
-import { SwaptoshiPool } from '../../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import {
 	Uint256String,
 	Int256,
@@ -23,8 +23,8 @@ export class TestRouter {
 
 	public async swapForExact0Multi(
 		recipient: Buffer,
-		poolInput: SwaptoshiPool,
-		poolOutput: SwaptoshiPool,
+		poolInput: DEXPool,
+		poolOutput: DEXPool,
 		amount0Out: Uint256String,
 	) {
 		const data = JSON.stringify({
@@ -43,8 +43,8 @@ export class TestRouter {
 
 	public async swapForExact1Multi(
 		recipient: Buffer,
-		poolInput: SwaptoshiPool,
-		poolOutput: SwaptoshiPool,
+		poolInput: DEXPool,
+		poolOutput: DEXPool,
 		amount1Out: Uint256String,
 	) {
 		const data = JSON.stringify({

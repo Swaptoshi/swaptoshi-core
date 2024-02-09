@@ -1,38 +1,38 @@
 /* eslint-disable import/no-cycle */
 import { NFTMethod, NamedRegistry, TokenMethod } from 'lisk-sdk';
 import {
-	SwaptoshiPoolData,
+	DEXPoolData,
 	DexModuleConfig,
 	PositionManager,
 	ImmutableSwapContext,
 	MutableSwapContext,
 } from '../../types';
-import { SwaptoshiPool } from './pool';
+import { DEXPool } from './pool';
 import { SwapRouter } from './swap_router';
 import { NonfungiblePositionManager } from './position_manager';
 
 export function createImmutablePoolInstance(
 	context: ImmutableSwapContext,
-	pool: SwaptoshiPoolData,
+	pool: DEXPoolData,
 	stores: NamedRegistry,
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	config: DexModuleConfig,
 ) {
-	const res = new SwaptoshiPool(pool, stores, events, config);
+	const res = new DEXPool(pool, stores, events, config);
 	res.addImmutableDependencies(context, tokenMethod);
 	return res;
 }
 
 export function createMutablePoolInstance(
 	context: MutableSwapContext,
-	pool: SwaptoshiPoolData,
+	pool: DEXPoolData,
 	stores: NamedRegistry,
 	events: NamedRegistry,
 	tokenMethod: TokenMethod,
 	config: DexModuleConfig,
 ) {
-	const res = new SwaptoshiPool(pool, stores, events, config);
+	const res = new DEXPool(pool, stores, events, config);
 	res.addMutableDependencies(context, tokenMethod);
 	return res;
 }
@@ -76,6 +76,6 @@ export function createMutablePositionManagerinstance(
 	return res;
 }
 
-export { SwaptoshiPool } from './pool';
+export { DEXPool } from './pool';
 export { NonfungiblePositionManager } from './position_manager';
 export { SwapRouter } from './swap_router';

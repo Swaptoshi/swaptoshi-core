@@ -21,7 +21,7 @@ import {
 	Uint,
 	Uint128,
 } from '../../../../../../src/app/modules/dex/stores/library/int';
-import { SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { mock_token_transfer } from '../shared/token';
 import { eventResultContain } from '../../../../../utils/events';
 import { SwapEvent } from '../../../../../../src/app/modules/dex/events/swap';
@@ -111,7 +111,7 @@ const POSITION_PROCEEDS_OUTPUT_ADDRESS = Buffer.from(
 );
 
 async function executeSwap(
-	_pool: SwaptoshiPool,
+	_pool: DEXPool,
 	testCase: SwapTestCase,
 	poolFunctions: PoolFunctions,
 ): Promise<void> {
@@ -519,7 +519,7 @@ describe('Swaptoshi Pool swap tests', () => {
 			let poolBalance0: string;
 			let poolBalance1: string;
 
-			let pool: SwaptoshiPool;
+			let pool: DEXPool;
 			let poolFunctions: PoolFunctions;
 
 			beforeEach(async () => {

@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { TestCallee } from './fixtures/TestCallee';
 
 import { BigIntAble, Uint } from '../../../../../../src/app/modules/dex/stores/library/int';
-import { SwaptoshiPool } from '../../../../../../src/app/modules/dex/stores/factory';
+import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { TestRouter } from './fixtures/TestRouter';
 import { encodePriceSqrt as encodePriceSqrtFun } from '../../../../../../src/app/modules/dex/utils';
 
@@ -96,7 +96,7 @@ export function createPoolFunctions({
 	swapTarget: TestCallee;
 	token0: Buffer;
 	token1: Buffer;
-	pool: SwaptoshiPool;
+	pool: DEXPool;
 }): PoolFunctions {
 	async function swapToSqrtPrice(
 		inputToken: Buffer,
@@ -229,8 +229,8 @@ export function createMultiPoolFunctions({
 }: {
 	inputToken: Buffer;
 	swapTarget: TestRouter;
-	poolInput: SwaptoshiPool;
-	poolOutput: SwaptoshiPool;
+	poolInput: DEXPool;
+	poolOutput: DEXPool;
 }): MultiPoolFunctions {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async function swapForExact0Multi(amountOut: BigIntAble, to: Buffer): Promise<void> {

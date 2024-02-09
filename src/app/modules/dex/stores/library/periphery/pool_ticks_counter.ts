@@ -11,12 +11,12 @@ import {
 	Uint16String,
 	Uint16,
 } from '../int';
-import { ImmutableContext, SwaptoshiPoolData } from '../../../types';
+import { ImmutableContext, DEXPoolData } from '../../../types';
 
 export async function countInitializedTicksCrossed(
 	tickBitmapStore: TickBitmapStore,
 	context: ImmutableContext,
-	self: SwaptoshiPoolData & { address: Buffer },
+	self: DEXPoolData & { address: Buffer },
 	tickBefore: Int24String,
 	tickAfter: Int24String,
 ): Promise<string> {
