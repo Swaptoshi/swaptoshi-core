@@ -27,18 +27,26 @@ interface LiskMethod {
 }
 
 export const registerModules = (app: Application, method: LiskMethod): void => {
-	const dexModule = new DexModule();
 	const nftModule = new NFTModule();
 	const tokenFactoryModule = new TokenFactoryModule();
+	const dexModule = new DexModule();
 
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
 	dexModule.addDependencies(method.token, nftModule.method, method.fee, method.interoperability);
-	tokenFactoryModule.addDependencies(method.token, method.fee);
+	tokenFactoryModule.addDependencies(
+		method.token,
+		method.fee,
+		nftModule.method,
+		dexModule.method,
+		method.interoperability,
+	);
 
+	// NOTE: registerModulePriority order matters here! Module with highest priority should be registered last
 	app.registerModule(nftModule);
+	app.registerModulePriority(tokenFactoryModule);
 	app.registerModulePriority(dexModule);
-	app.registerModule(tokenFactoryModule);
 
 	app.registerInteroperableModule(nftModule);
+	app.registerInteroperableModule(tokenFactoryModule);
 	app.registerInteroperableModule(dexModule);
 };

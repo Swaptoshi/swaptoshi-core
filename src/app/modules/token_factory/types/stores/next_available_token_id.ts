@@ -1,3 +1,3 @@
-export interface NextAvailableTokenId {
+export interface NextAvailableTokenIdStoreData {
 	nextTokenId: bigint;
 }

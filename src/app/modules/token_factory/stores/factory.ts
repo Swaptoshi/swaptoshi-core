@@ -1,40 +1,118 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'lisk-sdk';
-import { FactoryStoreData } from '../types';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable import/no-cycle */
+import {
+	FactoryStoreData,
+	ImmutableFactoryContext,
+	MutableFactoryContext,
+	StoreInstance,
+} from '../types';
 import { factoryStoreSchema } from '../schema/stores/factory';
+import { TOKEN_ID_LENGTH } from '../constants';
+import { Factory } from './instances/factory';
+import { BaseStoreWithInstance } from './base';
 
-export class FactoryStore extends BaseStore<FactoryStoreData> {
-	public async getOrDefault(context: ImmutableStoreGetter, key: Buffer): Promise<FactoryStoreData> {
-		try {
-			const factory = await this.get(context, key);
-			return factory;
-		} catch (error) {
-			if (!(error instanceof db.NotFoundError)) {
-				throw error;
-			}
-			return { owner: Buffer.alloc(0) };
-		}
+export class FactoryStore extends BaseStoreWithInstance<FactoryStoreData> {
+	// eslint-disable-next-line @typescript-eslint/require-await
+	public async getMutableEmptyFactory(ctx: MutableFactoryContext) {
+		this._checkDependencies();
+		const factory = new Factory(
+			this.stores,
+			this.events,
+			this.genesisConfig!,
+			this.factoryConfig!,
+			this.moduleName,
+			this.default,
+			Buffer.alloc(0),
+		);
+		factory.addMutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+		return factory;
 	}
 
-	public async getOrUndefined(
-		context: ImmutableStoreGetter,
-		key: Buffer,
-	): Promise<FactoryStoreData | undefined> {
-		try {
-			const factory = await this.get(context, key);
-			return factory;
-		} catch (error) {
-			if (!(error instanceof db.NotFoundError)) {
-				throw error;
-			}
-			return undefined;
-		}
+	// eslint-disable-next-line @typescript-eslint/require-await
+	public async getImmutableEmptyFactory(ctx: ImmutableFactoryContext) {
+		this._checkDependencies();
+		const factory = new Factory(
+			this.stores,
+			this.events,
+			this.genesisConfig!,
+			this.factoryConfig!,
+			this.moduleName,
+			this.default,
+			Buffer.alloc(0),
+		);
+		factory.addImmutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+		return factory;
 	}
 
-	public async register(context: StoreGetter, tokenId: Buffer, owner: Buffer): Promise<void> {
-		if (await this.has(context, tokenId))
-			throw new Error(`factory for ${tokenId.toString('hex')} already registered`);
-		await this.set(context, tokenId, { owner });
+	public async getMutableFactory(
+		ctx: MutableFactoryContext,
+		tokenId: Buffer,
+	): Promise<StoreInstance<Factory>> {
+		this._checkDependencies();
+
+		const factoryData = await this.get(ctx.context, this._getKey(tokenId));
+
+		const factory = new Factory(
+			this.stores,
+			this.events,
+			this.genesisConfig!,
+			this.factoryConfig!,
+			this.moduleName,
+			factoryData,
+			tokenId,
+		);
+
+		factory.addMutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+
+		return factory;
+	}
+
+	public async getImmutableFactory(
+		ctx: ImmutableFactoryContext,
+		tokenId: Buffer,
+	): Promise<StoreInstance<Factory>> {
+		this._checkDependencies();
+
+		const factoryData = await this.get(ctx.context, this._getKey(tokenId));
+
+		const factory = new Factory(
+			this.stores,
+			this.events,
+			this.genesisConfig!,
+			this.factoryConfig!,
+			this.moduleName,
+			factoryData,
+			tokenId,
+		);
+
+		factory.addImmutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+
+		return factory;
+	}
+
+	private _getKey(key: Buffer) {
+		if (key.length !== TOKEN_ID_LENGTH) {
+			throw new Error('invalid token id');
+		}
+		return key;
 	}
 
 	public schema = factoryStoreSchema;
+	protected readonly default = { owner: Buffer.alloc(0) };
 }

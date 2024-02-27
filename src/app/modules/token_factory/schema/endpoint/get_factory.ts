@@ -1,5 +1,5 @@
 export const getFactoryEndpointResponseSchema = {
-	$id: '/tokenFactory/endpoint/response/get_factory',
+	$id: '/tokenFactory/endpoint/response/getFactory',
 	type: 'object',
 	required: ['owner'],
 	properties: {
@@ -11,7 +11,7 @@ export const getFactoryEndpointResponseSchema = {
 };
 
 export const getFactoryEndpointRequestSchema = {
-	$id: '/tokenFactory/endpoint/request/get_factory',
+	$id: '/tokenFactory/endpoint/request/getFactory',
 	type: 'object',
 	required: ['tokenId'],
 	properties: {

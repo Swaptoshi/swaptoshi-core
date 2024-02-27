@@ -1,13 +1,13 @@
 import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'lisk-sdk';
-import { NextAvailableTokenId } from '../types';
-import { nextTokenIdStoreSchema } from '../schema/stores/next_available_token_id';
+import { NextAvailableTokenIdStoreData } from '../types';
+import { nextAvailableTokenIdStoreSchema } from '../schema';
 
-export const defaultNextId: NextAvailableTokenId = Object.freeze({
+export const defaultNextId = Object.freeze<NextAvailableTokenIdStoreData>({
 	nextTokenId: BigInt(1),
 });
 
-export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenId> {
-	public async getOrDefault(context: ImmutableStoreGetter): Promise<NextAvailableTokenId> {
+export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenIdStoreData> {
+	public async getOrDefault(context: ImmutableStoreGetter): Promise<NextAvailableTokenIdStoreData> {
 		try {
 			const nextAvailableId = await this.get(context, Buffer.alloc(0));
 			return nextAvailableId;
@@ -25,5 +25,5 @@ export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenId> {
 		await this.set(context, Buffer.alloc(0), state);
 	}
 
-	public schema = nextTokenIdStoreSchema;
+	public schema = nextAvailableTokenIdStoreSchema;
 }

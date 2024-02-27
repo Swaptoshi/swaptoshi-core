@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IcoCreateCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/tokenFactory/command/icoCreate",
+  "properties": {
+    "amount": {
+      "dataType": "uint64",
+      "fieldNumber": 4,
+    },
+    "price": {
+      "dataType": "string",
+      "fieldNumber": 3,
+    },
+    "providerAddress": {
+      "dataType": "bytes",
+      "fieldNumber": 5,
+    },
+    "tokenIn": {
+      "dataType": "bytes",
+      "fieldNumber": 1,
+    },
+    "tokenOut": {
+      "dataType": "bytes",
+      "fieldNumber": 2,
+    },
+  },
+  "type": "object",
+}
+`;

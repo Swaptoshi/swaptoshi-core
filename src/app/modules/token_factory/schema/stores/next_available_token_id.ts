@@ -1,5 +1,5 @@
-export const nextTokenIdStoreSchema = {
-	$id: '/tokenFactory/store/nextTokenId',
+export const nextAvailableTokenIdStoreSchema = {
+	$id: '/tokenFactory/store/nextAvailableTokenId',
 	type: 'object',
 	required: ['nextTokenId'],
 	properties: {
