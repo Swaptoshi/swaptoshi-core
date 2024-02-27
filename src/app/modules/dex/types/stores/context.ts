@@ -2,7 +2,9 @@ import {
 	CommandExecuteContext,
 	ImmutableMethodContext,
 	MethodContext,
+	ModuleEndpointContext,
 	TransactionExecuteContext,
+	TransactionVerifyContext,
 } from 'lisk-sdk';
 
 export interface ImmutableSwapContext<T = unknown> {
@@ -17,6 +19,9 @@ export interface MutableSwapContext<T = unknown> {
 	timestamp: string;
 }
 
-export type ImmutableContext = ImmutableMethodContext;
+export type ImmutableContext =
+	| ImmutableMethodContext
+	| TransactionVerifyContext
+	| ModuleEndpointContext;
 
 export type MutableContext = TransactionExecuteContext | CommandExecuteContext | MethodContext;
