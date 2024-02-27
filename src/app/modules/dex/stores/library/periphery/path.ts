@@ -25,6 +25,10 @@ export function getFirstPool(path: Buffer): Buffer {
 	return path.subarray(0, POP_OFFSET);
 }
 
+export function getLastPool(path: Buffer): Buffer {
+	return path.subarray(path.length - POP_OFFSET, path.length);
+}
+
 export function skipToken(path: Buffer): Buffer {
 	return slice(path, NEXT_OFFSET, path.length - NEXT_OFFSET);
 }
