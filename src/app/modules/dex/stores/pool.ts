@@ -240,6 +240,14 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 				throw new Error('pool doesnt exists, and address is not a router');
 			}
 
+			const poolKey = PoolAddress.decodePoolAddress(params.address);
+			if (
+				(await this.has(context, params.address)) &&
+				(params.token.compare(poolKey.token0) === 0 || params.token.compare(poolKey.token1) === 0)
+			) {
+				throw new Error(`invalid attempt to treasurify pool's token0 or token1`);
+			}
+
 			let tokenToBeTransferred = BigInt(0);
 			let tokenToBeUnlocked = BigInt(0);
 
