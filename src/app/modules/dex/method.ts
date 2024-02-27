@@ -1,12 +1,24 @@
-import { BaseMethod, MethodContext } from 'lisk-sdk';
+import { BaseMethod, ImmutableMethodContext, MethodContext } from 'lisk-sdk';
 import { PoolStore } from './stores/pool';
-import { methodSwapContext } from './stores/context';
+import { immutableMethodSwapContext, methodSwapContext } from './stores/context';
 import { Uint24String } from './stores/library/int';
 import { PositionManagerStore } from './stores/position_manager';
 import { Quoter } from './stores/library/lens';
 import { NonfungiblePositionManager, SwapRouter, DEXPool } from './stores/factory';
+import { DexModuleConfig } from './types';
+import { PoolAddress } from './stores/library/periphery';
 
 export class DexMethod extends BaseMethod {
+	public init(config: DexModuleConfig) {
+		this._config = config;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/require-await
+	public async getConfig() {
+		if (!this._config) throw new Error('config not initialized');
+		return this._config;
+	}
+
 	public async createPool(
 		context: MethodContext,
 		senderAddress: Buffer,
@@ -46,6 +58,17 @@ export class DexMethod extends BaseMethod {
 		return poolStore.getMutablePool(_context, tokenA, tokenB, fee);
 	}
 
+	public async poolExists(
+		context: ImmutableMethodContext,
+		tokenA: Buffer,
+		tokenB: Buffer,
+		fee: Uint24String,
+	): Promise<boolean> {
+		const poolStore = this.stores.get(PoolStore);
+		const poolAddress = PoolAddress.computeAddress(PoolAddress.getPoolKey(tokenA, tokenB, fee));
+		return poolStore.has(context, poolAddress);
+	}
+
 	public async getPositionManager(
 		context: MethodContext,
 		senderAddress: Buffer,
@@ -70,11 +93,13 @@ export class DexMethod extends BaseMethod {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async getQuoter(
-		context: MethodContext,
+		context: ImmutableMethodContext,
 		senderAddress: Buffer,
 		timestamp: number,
 	): Promise<Quoter> {
-		const _context = methodSwapContext(context, senderAddress, timestamp);
+		const _context = immutableMethodSwapContext(context, senderAddress, timestamp);
 		return new Quoter(_context, this.stores);
 	}
+
+	public _config: DexModuleConfig | undefined;
 }
