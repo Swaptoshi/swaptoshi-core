@@ -19,7 +19,7 @@ export const quoteExactInputSingleEndpointResponseSchema = {
 };
 
 export const quoteExactInputSingleEndpointRequestSchema = {
-	$id: '/dex/endpoint/requeste/quote_exact_input_single',
+	$id: '/dex/endpoint/request/quote_exact_input_single',
 	type: 'object',
 	required: ['tokenIn', 'tokenOut', 'amountIn', 'fee', 'sqrtPriceLimitX96'],
 	properties: {
