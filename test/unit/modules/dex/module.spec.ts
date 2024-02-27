@@ -83,7 +83,7 @@ const exactInputSingleParam: ExactInputSingleParams = {
 	sqrtPriceLimitX96: '0',
 };
 const exactOutputParam: ExactOutputParams = {
-	path: encodePath([token0, token1], [FeeAmount.MEDIUM]),
+	path: encodePath([token1, token0], [FeeAmount.MEDIUM]),
 	deadline: Date.now().toString(),
 	recipient: senderAddress,
 	amountOut: '1000',
@@ -409,23 +409,35 @@ describe('DexModule', () => {
 
 		describe('verifyFeeConversion', () => {
 			describe.each([
-				['exactInput', codec.encode(exactInputCommandSchema, exactInputParam), '1000', '2116'],
-				['exactOutput', codec.encode(exactOutputCommandSchema, exactOutputParam), '1116', '2232'],
+				[
+					'exactInput',
+					token0,
+					codec.encode(exactInputCommandSchema, exactInputParam),
+					'1000',
+					'2116',
+				],
+				[
+					'exactOutput',
+					token0,
+					codec.encode(exactOutputCommandSchema, exactOutputParam),
+					'1116',
+					'2232',
+				],
 				[
 					'exactInputSingle',
+					token0,
 					codec.encode(exactInputSingleCommandSchema, exactInputSingleParam),
 					'1000',
 					'2116',
 				],
 				[
 					'exactOutputSingle',
+					token0,
 					codec.encode(exactOutputSingleCommandSchema, exactOutputSingleParam),
 					'1116',
 					'2232',
 				],
-			])('%s', (command, paramBuffer, swapAmount, totalAmount) => {
-				const tokenIn = token0;
-
+			])('%s', (command, tokenIn, paramBuffer, swapAmount, totalAmount) => {
 				// eslint-disable-next-line prefer-const
 				let transaction = {
 					...baseTransaction,
@@ -443,11 +455,11 @@ describe('DexModule', () => {
 
 				describe('pool exist', () => {
 					beforeEach(async () => {
-						const pool = await createPool(NATIVE_TOKEN_ID, token0);
+						const pool = await createPool(NATIVE_TOKEN_ID, tokenIn);
 						await mintPosition(pool.address, '10000');
 					});
 
-					it('should pass if sender have enough tokenIn (token0) balance', async () => {
+					it('should pass if sender have enough tokenIn balance', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
 
@@ -456,7 +468,7 @@ describe('DexModule', () => {
 						expect(res.status).toBe(VerifyStatus.OK);
 					});
 
-					it('should fail if sender dont have enough tokenIn (token0) balance', async () => {
+					it('should fail if sender dont have enough tokenIn balance', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(50));
 
@@ -471,7 +483,7 @@ describe('DexModule', () => {
 						);
 					});
 
-					it('should fail if sender only have enough tokenIn (token0) balance for feeConversion, but not enough for swap', async () => {
+					it('should fail if sender only have enough tokenIn balance for feeConversion, but not enough for swap', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(1116));
 
@@ -609,23 +621,35 @@ describe('DexModule', () => {
 
 		describe('executeFeeConversion', () => {
 			describe.each([
-				['exactInput', codec.encode(exactInputCommandSchema, exactInputParam), '1000', '2116'],
-				['exactOutput', codec.encode(exactOutputCommandSchema, exactOutputParam), '1116', '2232'],
+				[
+					'exactInput',
+					token0,
+					codec.encode(exactInputCommandSchema, exactInputParam),
+					'1000',
+					'2116',
+				],
+				[
+					'exactOutput',
+					token0,
+					codec.encode(exactOutputCommandSchema, exactOutputParam),
+					'1116',
+					'2232',
+				],
 				[
 					'exactInputSingle',
+					token0,
 					codec.encode(exactInputSingleCommandSchema, exactInputSingleParam),
 					'1000',
 					'2116',
 				],
 				[
 					'exactOutputSingle',
+					token0,
 					codec.encode(exactOutputSingleCommandSchema, exactOutputSingleParam),
 					'1116',
 					'2232',
 				],
-			])('%s', (command, paramBuffer, swapAmount, totalAmount) => {
-				const tokenIn = token0;
-
+			])('%s', (command, tokenIn, paramBuffer, swapAmount, totalAmount) => {
 				// eslint-disable-next-line prefer-const
 				let transaction = {
 					...baseTransaction,
@@ -643,11 +667,11 @@ describe('DexModule', () => {
 
 				describe('pool exist', () => {
 					beforeEach(async () => {
-						const pool = await createPool(NATIVE_TOKEN_ID, token0);
+						const pool = await createPool(NATIVE_TOKEN_ID, tokenIn);
 						await mintPosition(pool.address, '10000');
 					});
 
-					it('should execute a swap operation if sender have enough tokenIn (token0) balance as feeConversion', async () => {
+					it('should execute a swap operation if sender have enough tokenIn balance as feeConversion', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
 
@@ -668,7 +692,7 @@ describe('DexModule', () => {
 						).toBe('1116');
 					});
 
-					it('should throw any error if sender have enough tokenIn (token0) balance', async () => {
+					it('should throw any error if sender have enough tokenIn balance', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
 
@@ -678,7 +702,7 @@ describe('DexModule', () => {
 						).resolves.not.toThrow();
 					});
 
-					it('should fail if sender dont have enough tokenIn (token0) balance', async () => {
+					it('should fail if sender dont have enough tokenIn balance', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(50));
 
@@ -692,7 +716,7 @@ describe('DexModule', () => {
 						);
 					});
 
-					it('should fail if sender only have enough tokenIn (token0) balance for feeConversion, but not enough for swap', async () => {
+					it('should fail if sender only have enough tokenIn balance for feeConversion, but not enough for swap', async () => {
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(1116));
 

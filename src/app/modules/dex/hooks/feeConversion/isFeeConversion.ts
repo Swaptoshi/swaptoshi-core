@@ -107,7 +107,7 @@ export async function isFeeConversion(
 						exactOutputCommandSchema,
 						context.transaction.params,
 					);
-					[tokenIn] = Path.decodeFirstPool(Path.getFirstPool(params.path));
+					[, tokenIn] = Path.decodeFirstPool(Path.getLastPool(params.path));
 					({ amountIn: swapAmount } = await quoter.quoteExactOutput(params.path, params.amountOut));
 					break;
 				case 'exactInputSingle':
