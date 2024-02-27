@@ -2,6 +2,7 @@
 import {
 	CommandExecuteContext,
 	CrossChainMessageContext,
+	ImmutableMethodContext,
 	MethodContext,
 	ModuleEndpointContext,
 	TransactionExecuteContext,
@@ -44,6 +45,18 @@ export function methodSwapContext(
 	senderAddress: Buffer,
 	timestamp: number,
 ): MutableSwapContext<typeof context> {
+	return {
+		context,
+		senderAddress,
+		timestamp: timestamp.toString(),
+	};
+}
+
+export function immutableMethodSwapContext(
+	context: ImmutableMethodContext,
+	senderAddress: Buffer,
+	timestamp: number,
+): ImmutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress,
