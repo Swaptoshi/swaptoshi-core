@@ -7,7 +7,7 @@ import { treasurifyCommandSchema } from '../../../../../src/app/modules/dex/sche
 import { TreasurifyParams } from '../../../../../src/app/modules/dex/types';
 import { invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
-import { poolAddress, senderPublicKey, token0 } from '../utils/account';
+import { poolAddress, senderPublicKey, token2 } from '../utils/account';
 import { eventResultHaveLength, eventResultHaveMinimumLength } from '../../../../utils/events';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
@@ -26,7 +26,7 @@ const commandSchema = treasurifyCommandSchema;
 
 const validParam: CommandParam = {
 	address: poolAddress,
-	token: token0,
+	token: token2,
 };
 
 describe('TreasurifyCommand', () => {
@@ -89,14 +89,14 @@ describe('TreasurifyCommand', () => {
 			});
 
 			const context = createCommandExecuteContext(validParam);
-			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
+			await tokenMethod.mint(context, poolAddress, token2, BigInt(10));
 
 			await command.execute(context);
 
 			expect(mock_token_transfer).not.toHaveBeenCalledWith(
 				poolAddress,
 				DEFAULT_TREASURY_ADDRESS,
-				token0,
+				token2,
 				BigInt(10),
 			);
 		});
@@ -109,14 +109,14 @@ describe('TreasurifyCommand', () => {
 
 		it('should transfer leftover pool balance to treasury account', async () => {
 			const context = createCommandExecuteContext(validParam);
-			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
+			await tokenMethod.mint(context, poolAddress, token2, BigInt(10));
 
 			await command.execute(context);
 
 			expect(mock_token_transfer).toHaveBeenCalledWith(
 				poolAddress,
 				DEFAULT_TREASURY_ADDRESS,
-				token0,
+				token2,
 				BigInt(10),
 			);
 		});
@@ -126,31 +126,31 @@ describe('TreasurifyCommand', () => {
 				...validParam,
 				address: ROUTER_ADDRESS,
 			});
-			await tokenMethod.mint(context, ROUTER_ADDRESS, token0, BigInt(10));
+			await tokenMethod.mint(context, ROUTER_ADDRESS, token2, BigInt(10));
 
 			await command.execute(context);
 
 			expect(mock_token_transfer).toHaveBeenCalledWith(
 				ROUTER_ADDRESS,
 				DEFAULT_TREASURY_ADDRESS,
-				token0,
+				token2,
 				BigInt(10),
 			);
 		});
 
 		it('should transfer locked leftover pool balance to treasury account', async () => {
 			const context = createCommandExecuteContext(validParam);
-			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
-			await tokenMethod.lock(context, poolAddress, module.name, token0, BigInt(10));
+			await tokenMethod.mint(context, poolAddress, token2, BigInt(10));
+			await tokenMethod.lock(context, poolAddress, module.name, token2, BigInt(10));
 
 			await command.execute(context);
 
-			expect(mock_token_unlock).toHaveBeenCalledWith(poolAddress, module.name, token0, BigInt(10));
+			expect(mock_token_unlock).toHaveBeenCalledWith(poolAddress, module.name, token2, BigInt(10));
 
 			expect(mock_token_transfer).toHaveBeenCalledWith(
 				poolAddress,
 				DEFAULT_TREASURY_ADDRESS,
-				token0,
+				token2,
 				BigInt(10),
 			);
 		});
@@ -160,29 +160,29 @@ describe('TreasurifyCommand', () => {
 				...validParam,
 				address: ROUTER_ADDRESS,
 			});
-			await tokenMethod.mint(context, ROUTER_ADDRESS, token0, BigInt(10));
-			await tokenMethod.lock(context, ROUTER_ADDRESS, module.name, token0, BigInt(10));
+			await tokenMethod.mint(context, ROUTER_ADDRESS, token2, BigInt(10));
+			await tokenMethod.lock(context, ROUTER_ADDRESS, module.name, token2, BigInt(10));
 
 			await command.execute(context);
 
 			expect(mock_token_unlock).toHaveBeenCalledWith(
 				ROUTER_ADDRESS,
 				module.name,
-				token0,
+				token2,
 				BigInt(10),
 			);
 
 			expect(mock_token_transfer).toHaveBeenCalledWith(
 				ROUTER_ADDRESS,
 				DEFAULT_TREASURY_ADDRESS,
-				token0,
+				token2,
 				BigInt(10),
 			);
 		});
 
 		it('should add command events', async () => {
 			const context = createCommandExecuteContext(validParam);
-			await tokenMethod.mint(context, poolAddress, token0, BigInt(10));
+			await tokenMethod.mint(context, poolAddress, token2, BigInt(10));
 			await command.execute(context);
 			eventResultHaveMinimumLength(context.eventQueue, TreasurifyEvent, module.name, 1);
 		});
