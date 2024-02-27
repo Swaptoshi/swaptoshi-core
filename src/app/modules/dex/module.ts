@@ -279,6 +279,7 @@ export class DexModule extends BaseInteroperableModule {
 		supportedTokenStore.init(this._config);
 		tokenSymbolStore.init(_args.genesisConfig, this._config);
 
+		this.method.init(this._config);
 		this.endpoint.init(this._config);
 	}
 
