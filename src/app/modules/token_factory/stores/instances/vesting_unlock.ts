@@ -157,7 +157,7 @@ export class VestingUnlock
 	}
 
 	private async _setUnlockScheduleAtHeight(height: number, vestingUnlock: VestingUnlockStoreData) {
-		return this.instanceStore.set(
+		await this.instanceStore.set(
 			this.mutableContext!.context,
 			numberToBytes(height),
 			vestingUnlock,

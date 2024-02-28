@@ -6,6 +6,7 @@ import {
 	NamedRegistry,
 	TokenMethod,
 	db,
+	utils,
 } from 'lisk-sdk';
 import { TokenFactoryModuleConfig } from '../types';
 import { DexMethod } from '../../dex/method';
@@ -30,7 +31,8 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 	}
 
 	public getDefault() {
-		return this.default ? Object.freeze<T>(this.default) : undefined;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		return this.default ? (utils.objects.cloneDeep(this.default) as T) : undefined;
 	}
 
 	public async getOrDefault(context: ImmutableStoreGetter, key: Buffer): Promise<T> {
