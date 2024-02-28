@@ -116,8 +116,8 @@ export class Factory
 		await this._checkIsFactoryOwner();
 
 		const senderBalance = await this.tokenMethod!.getAvailableBalance(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
+			this.immutableContext!.context,
+			this.immutableContext!.senderAddress,
 			params.tokenId,
 		);
 		if (senderBalance < params.amount) {
