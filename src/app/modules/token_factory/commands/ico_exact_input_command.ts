@@ -13,7 +13,6 @@ import { ICOStore } from '../stores/ico';
 import { icoExactInputCommandSchema } from '../schema';
 
 export class IcoExactInputCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICOExactInputParams>,
 	): Promise<VerificationResult> {

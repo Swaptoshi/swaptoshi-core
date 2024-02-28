@@ -14,7 +14,6 @@ import { decodeICOPoolAddress } from '../stores/library';
 import { icoDepositCommandSchema } from '../schema';
 
 export class IcoDepositCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICODepositParams>,
 	): Promise<VerificationResult> {

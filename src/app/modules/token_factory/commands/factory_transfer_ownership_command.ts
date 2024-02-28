@@ -13,7 +13,6 @@ import { commandFactoryContext, immutableTransactionHookFactoryContext } from '.
 import { FactoryStore } from '../stores/factory';
 
 export class FactoryTransferOwnershipCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<FactoryTransferOwnershipParams>,
 	): Promise<VerificationResult> {

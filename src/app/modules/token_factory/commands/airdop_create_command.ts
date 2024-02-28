@@ -13,7 +13,6 @@ import { AirdropStore } from '../stores/airdrop';
 import { commandFactoryContext, immutableTransactionHookFactoryContext } from '../stores/context';
 
 export class AirdopCreateCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<AirdropCreateParams>,
 	): Promise<VerificationResult> {

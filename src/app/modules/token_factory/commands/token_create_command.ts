@@ -13,7 +13,6 @@ import { commandFactoryContext, immutableTransactionHookFactoryContext } from '.
 import { FactoryStore } from '../stores/factory';
 
 export class TokenCreateCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<TokenCreateParams>,
 	): Promise<VerificationResult> {
@@ -32,7 +31,7 @@ export class TokenCreateCommand extends BaseCommand {
 
 	public async execute(_context: CommandExecuteContext<TokenCreateParams>): Promise<void> {
 		const context = commandFactoryContext(_context);
-		const factory = await this.stores.get(FactoryStore).getImmutableEmptyFactory(context);
+		const factory = await this.stores.get(FactoryStore).getMutableEmptyFactory(context);
 		await factory.create(_context.params, false);
 	}
 

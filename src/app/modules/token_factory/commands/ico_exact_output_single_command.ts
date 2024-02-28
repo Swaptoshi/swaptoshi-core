@@ -13,7 +13,6 @@ import { commandFactoryContext, immutableTransactionHookFactoryContext } from '.
 import { ICOStore } from '../stores/ico';
 
 export class IcoExactOutputSingleCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICOExactOutputSingleParams>,
 	): Promise<VerificationResult> {

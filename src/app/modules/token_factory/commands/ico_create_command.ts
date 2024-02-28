@@ -13,7 +13,6 @@ import { ICOStore } from '../stores/ico';
 import { icoCreateCommandSchema } from '../schema';
 
 export class IcoCreateCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICOCreateParams>,
 	): Promise<VerificationResult> {

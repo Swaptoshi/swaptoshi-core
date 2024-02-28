@@ -14,7 +14,6 @@ import { ICOStore } from '../stores/ico';
 import { decodeICOPoolAddress } from '../stores/library';
 
 export class IcoChangePriceCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICOChangePriceParams>,
 	): Promise<VerificationResult> {

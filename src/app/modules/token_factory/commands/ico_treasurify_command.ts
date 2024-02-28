@@ -14,7 +14,6 @@ import { decodeICOPoolAddress } from '../stores/library';
 import { ICOStore } from '../stores/ico';
 
 export class IcoTreasurifyCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<ICOTreasurifyParams>,
 	): Promise<VerificationResult> {

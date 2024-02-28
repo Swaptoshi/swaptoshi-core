@@ -13,7 +13,6 @@ import { FactoryStore } from '../stores/factory';
 import { tokenMintCommandSchema } from '../schema';
 
 export class TokenMintCommand extends BaseCommand {
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async verify(
 		_context: CommandVerifyContext<TokenMintParams>,
 	): Promise<VerificationResult> {
