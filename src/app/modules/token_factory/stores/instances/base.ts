@@ -97,10 +97,14 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 		this._checkMutableDependencies();
 	}
 
+	protected _setKey(key: Buffer) {
+		this.key = key;
+	}
+
 	protected async _saveStore() {
 		this._checkMutableDependencies();
 
-		if (this.key.compare(Buffer.alloc(0))) {
+		if (this.key.compare(Buffer.alloc(0)) === 0) {
 			throw new Error("instance _saveStore() can't store data with empty buffer as key");
 		}
 

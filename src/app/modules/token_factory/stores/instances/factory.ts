@@ -199,7 +199,7 @@ export class Factory
 		if (await this._isFactoryExists(tokenId))
 			throw new Error(`factory for ${tokenId.toString('hex')} already registered`);
 		this.owner = this.mutableContext!.senderAddress;
-		this.key = tokenId;
+		this._setKey(tokenId);
 		await this._saveStore();
 	}
 

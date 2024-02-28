@@ -354,7 +354,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		);
 
 		Object.assign(this, utils.objects.cloneDeep(icoData));
-		this.key = poolAddress;
+		this._setKey(poolAddress);
 	}
 
 	private async _checkICONotCreatedYet(tokenIn: Buffer, tokenOut: Buffer) {

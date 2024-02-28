@@ -185,7 +185,7 @@ export class Airdrop
 				)} with provider ${params.providerAddress.toString('hex')} already registered`,
 			);
 
-		this.key = Buffer.concat([params.tokenId, params.providerAddress]);
+		this._setKey(Buffer.concat([params.tokenId, params.providerAddress]));
 		this.recipients = params.recipients.map(t => ({
 			address: t.address,
 			amount: t.amountDelta,
