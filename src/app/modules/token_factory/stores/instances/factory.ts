@@ -234,7 +234,7 @@ export class Factory
 	}
 
 	private async _isFactoryExists(tokenId: Buffer) {
-		return this.instanceStore.has(this.mutableContext!.context, tokenId);
+		return this.instanceStore.has(this.immutableContext!.context, tokenId);
 	}
 
 	private async _checkFactoryExists(tokenId: Buffer) {
