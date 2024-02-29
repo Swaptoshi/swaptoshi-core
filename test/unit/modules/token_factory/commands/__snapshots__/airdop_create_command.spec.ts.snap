@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AirdopCreateCommand constructor should have valid schema 1`] = `
+exports[`AirdropCreateCommand constructor should have valid schema 1`] = `
 {
   "$id": "/tokenFactory/command/airdropCreate",
   "properties": {

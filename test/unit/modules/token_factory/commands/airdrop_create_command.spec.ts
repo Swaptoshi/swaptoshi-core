@@ -1,18 +1,18 @@
-import { AirdopEditRecipientsCommand } from '../../../../../src/app/modules/token_factory/commands/airdop_edit_recipients_command';
+import { AirdropCreateCommand } from '../../../../../src/app/modules/token_factory/commands/airdrop_create_command';
 import { TokenFactoryModule } from '../../../../../src/app/modules/token_factory/module';
 
-describe('AirdopEditRecipientsCommand', () => {
+describe('AirdropCreateCommand', () => {
 	let module: TokenFactoryModule;
-	let command: AirdopEditRecipientsCommand;
+	let command: AirdropCreateCommand;
 
 	beforeEach(() => {
 		module = new TokenFactoryModule();
-		command = new AirdopEditRecipientsCommand(module.stores, module.events);
+		command = new AirdropCreateCommand(module.stores, module.events);
 	});
 
 	describe('constructor', () => {
 		it('should have valid name', () => {
-			expect(command.name).toBe('airdopEditRecipients');
+			expect(command.name).toBe('AirdropCreate');
 		});
 
 		it('should have valid schema', () => {

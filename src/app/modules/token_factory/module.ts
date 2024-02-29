@@ -16,9 +16,9 @@ import {
 	VerificationResult,
 	VerifyStatus,
 } from 'lisk-sdk';
-import { AirdopCreateCommand } from './commands/airdop_create_command';
-import { AirdopDistributeCommand } from './commands/airdop_distribute_command';
-import { AirdopEditRecipientsCommand } from './commands/airdop_edit_recipients_command';
+import { AirdropCreateCommand } from './commands/airdrop_create_command';
+import { AirdropDistributeCommand } from './commands/airdrop_distribute_command';
+import { AirdropEditRecipientsCommand } from './commands/airdrop_edit_recipients_command';
 import { FactoryTransferOwnershipCommand } from './commands/factory_transfer_ownership_command';
 import { IcoChangePriceCommand } from './commands/ico_change_price_command';
 import { IcoCreateCommand } from './commands/ico_create_command';
@@ -120,9 +120,9 @@ export class TokenFactoryModule extends BaseModule {
 		new IcoExactInputSingleCommand(this.stores, this.events),
 		new IcoExactOutputCommand(this.stores, this.events),
 		new IcoExactOutputSingleCommand(this.stores, this.events),
-		new AirdopCreateCommand(this.stores, this.events),
-		new AirdopEditRecipientsCommand(this.stores, this.events),
-		new AirdopDistributeCommand(this.stores, this.events),
+		new AirdropCreateCommand(this.stores, this.events),
+		new AirdropEditRecipientsCommand(this.stores, this.events),
+		new AirdropDistributeCommand(this.stores, this.events),
 	];
 
 	public constructor() {

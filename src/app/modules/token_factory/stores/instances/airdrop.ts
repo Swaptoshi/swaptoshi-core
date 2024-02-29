@@ -178,7 +178,7 @@ export class Airdrop
 	}
 
 	private async _registerAirdrop(params: AirdropCreateParams): Promise<void> {
-		if (await this._isAirdopExists(params.tokenId, params.providerAddress))
+		if (await this._isAirdropExists(params.tokenId, params.providerAddress))
 			throw new Error(
 				`airdrop for ${params.tokenId.toString(
 					'hex',
@@ -195,7 +195,7 @@ export class Airdrop
 	}
 
 	private async _checkAirdropExists(tokenId: Buffer, address: Buffer) {
-		if (!(await this._isAirdopExists(tokenId, address)))
+		if (!(await this._isAirdropExists(tokenId, address)))
 			throw new Error(
 				`airdrop for ${tokenId.toString('hex')} with provider ${address.toString(
 					'hex',
@@ -231,7 +231,7 @@ export class Airdrop
 		if (!(await factory.isFactoryOwner())) throw new Error('sender is not factory owner');
 	}
 
-	private async _isAirdopExists(tokenId: Buffer, providerAddress: Buffer) {
+	private async _isAirdropExists(tokenId: Buffer, providerAddress: Buffer) {
 		return this.instanceStore.has(
 			this.mutableContext!.context,
 			Buffer.concat([tokenId, providerAddress]),

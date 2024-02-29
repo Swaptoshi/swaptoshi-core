@@ -1,18 +1,18 @@
-import { AirdopDistributeCommand } from '../../../../../src/app/modules/token_factory/commands/airdop_distribute_command';
+import { AirdropDistributeCommand } from '../../../../../src/app/modules/token_factory/commands/airdrop_distribute_command';
 import { TokenFactoryModule } from '../../../../../src/app/modules/token_factory/module';
 
-describe('AirdopDistributeCommand', () => {
+describe('AirdropDistributeCommand', () => {
 	let module: TokenFactoryModule;
-	let command: AirdopDistributeCommand;
+	let command: AirdropDistributeCommand;
 
 	beforeEach(() => {
 		module = new TokenFactoryModule();
-		command = new AirdopDistributeCommand(module.stores, module.events);
+		command = new AirdropDistributeCommand(module.stores, module.events);
 	});
 
 	describe('constructor', () => {
 		it('should have valid name', () => {
-			expect(command.name).toBe('airdopDistribute');
+			expect(command.name).toBe('AirdropDistribute');
 		});
 
 		it('should have valid schema', () => {

@@ -12,7 +12,7 @@ import { AirdropCreateParams } from '../types';
 import { AirdropStore } from '../stores/airdrop';
 import { commandFactoryContext, immutableTransactionHookFactoryContext } from '../stores/context';
 
-export class AirdopCreateCommand extends BaseCommand {
+export class AirdropCreateCommand extends BaseCommand {
 	public async verify(
 		_context: CommandVerifyContext<AirdropCreateParams>,
 	): Promise<VerificationResult> {
