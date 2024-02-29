@@ -213,22 +213,24 @@ export class Factory
 			verifyAddress('distribution.recipientAddress', distributionItem.recipientAddress);
 			verifyPositiveNumber('distribution.amount', distributionItem.amount);
 
-			let totalAmount = BigInt(0);
-			for (const vestingItem of distributionItem.vesting) {
-				verifyPositiveNumber('distribution.vesting.height', vestingItem.height);
+			if (distributionItem.vesting.length > 0) {
+				let totalAmount = BigInt(0);
+				for (const vestingItem of distributionItem.vesting) {
+					verifyPositiveNumber('distribution.vesting.height', vestingItem.height);
 
-				if (vestingItem.amount <= BigInt(0)) {
-					throw new Error('vested token amount must be positive non zero integer');
+					if (vestingItem.amount <= BigInt(0)) {
+						throw new Error('vested token amount must be positive non zero integer');
+					}
+					totalAmount += vestingItem.amount;
 				}
-				totalAmount += vestingItem.amount;
-			}
 
-			if (totalAmount !== distributionItem.amount) {
-				throw new Error(
-					`total vested token for address ${distributionItem.recipientAddress.toString(
-						'hex',
-					)} doesn't match with total minted token`,
-				);
+				if (totalAmount !== distributionItem.amount) {
+					throw new Error(
+						`total vested token for address ${distributionItem.recipientAddress.toString(
+							'hex',
+						)} doesn't match with total minted token`,
+					);
+				}
 			}
 		}
 	}
