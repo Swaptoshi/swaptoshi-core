@@ -53,7 +53,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 
 		const ico = await this.instanceStore.get(this.immutableContext!.context, poolAddress);
 
-		return BigInt(new Decimal(Number(params.amountIn)).mul(ico.price).toFixed(0));
+		return BigInt(new Decimal(Number(params.amountIn)).div(ico.price).toFixed(0));
 	}
 
 	public async quoteExactOutputSingle(params: QuoteExactOutputSingleParams) {
@@ -64,7 +64,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 
 		const ico = await this.instanceStore.get(this.immutableContext!.context, poolAddress);
 
-		return BigInt(new Decimal(Number(params.amountOut)).div(ico.price).toFixed(0));
+		return BigInt(new Decimal(Number(params.amountOut)).mul(ico.price).toFixed(0));
 	}
 
 	public async quoteExactInput(params: QuoteExactInputParams) {
