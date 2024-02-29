@@ -64,7 +64,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		verifyPositiveNumber('amount', params.amount);
 		verifyPositiveNumber('price', params.price);
 
-		await this._checkFactoryOwner();
+		await this._checkFactoryOwner(params.tokenOut);
 		await this._checkICONotCreatedYet(params.tokenIn, params.tokenOut);
 	}
 
@@ -152,7 +152,10 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 			}
 		}
 
-		await this._updateInstance(params.tokenIn, params.tokenOut);
+		this.price = params.price;
+		this.providerAddress = params.providerAddress;
+		this._setKey(poolAddress);
+
 		await this._saveStore();
 
 		const events = this.events.get(ICOCreatedEvent);
@@ -166,6 +169,10 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 			},
 			[params.providerAddress],
 		);
+
+		if (params.amount > BigInt(0)) {
+			await this.deposit({ poolAddress, amount: params.amount }, false);
+		}
 	}
 
 	public async verifyChangePrice(params: ICOChangePriceParams) {
@@ -345,18 +352,6 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		}
 	}
 
-	private async _updateInstance(tokenIn: Buffer, tokenOut: Buffer) {
-		const poolAddress = computeICOPoolAddress({ tokenIn, tokenOut });
-
-		const icoData = await this.instanceStore.getOrDefault(
-			this.mutableContext!.context,
-			poolAddress,
-		);
-
-		Object.assign(this, utils.objects.cloneDeep(icoData));
-		this._setKey(poolAddress);
-	}
-
 	private async _checkICONotCreatedYet(tokenIn: Buffer, tokenOut: Buffer) {
 		if (
 			await this.instanceStore.has(
@@ -374,12 +369,11 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		}
 	}
 
-	private async _checkFactoryOwner() {
+	private async _checkFactoryOwner(factoryToken: Buffer) {
 		this._checkImmutableDependencies();
-		const poolKey = decodeICOPoolAddress(this.key);
 		const factory = await this.factoryStore.getImmutableFactory(
 			this.immutableContext!,
-			poolKey.tokenOut,
+			factoryToken,
 		);
 		if (!(await factory.isFactoryOwner())) throw new Error('sender is not factory owner');
 	}
