@@ -152,7 +152,7 @@ export class Factory
 
 		if (verify) await this.verifyTransferOwnership(params);
 
-		this.owner = this.mutableContext!.senderAddress;
+		this.owner = params.ownerAddress;
 		await this._saveStore();
 	}
 
