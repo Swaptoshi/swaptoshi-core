@@ -33,7 +33,7 @@ export class Airdrop
 		providerAddress: Buffer,
 	) {
 		super(
-			FactoryStore,
+			AirdropStore,
 			stores,
 			events,
 			genesisConfig,
