@@ -47,12 +47,12 @@ import { AirdropDistributedEvent } from './events/airdrop_distributed';
 import { AirdropRecipientsChangedEvent } from './events/airdrop_recipients_changed';
 import { FactoryCreatedEvent } from './events/factory_created';
 import { FactoryOwnerChangedEvent } from './events/factory_owner_changed';
-import { ICOCreatedEvent } from './events/ico_created';
-import { ICODepositEvent } from './events/ico_deposit';
-import { ICOPriceChangedEvent } from './events/ico_price_changed';
-import { ICOSwapEvent } from './events/ico_swap';
-import { ICOTreasurifyEvent } from './events/ico_treasurify';
-import { ICOWithdrawEvent } from './events/ico_withdraw';
+import { IcoCreatedEvent } from './events/ico_created';
+import { IcoDepositEvent } from './events/ico_deposit';
+import { IcoPriceChangedEvent } from './events/ico_price_changed';
+import { IcoSwapEvent } from './events/ico_swap';
+import { IcoTreasurifyEvent } from './events/ico_treasurify';
+import { IcoWithdrawEvent } from './events/ico_withdraw';
 import { VestedTokenLockedEvent } from './events/vested_token_locked';
 import { VestedTokenUnlockedEvent } from './events/vested_token_unlocked';
 import {
@@ -145,12 +145,12 @@ export class TokenFactoryModule extends BaseModule {
 		);
 		this.events.register(FactoryCreatedEvent, new FactoryCreatedEvent(this.name));
 		this.events.register(FactoryOwnerChangedEvent, new FactoryOwnerChangedEvent(this.name));
-		this.events.register(ICOCreatedEvent, new ICOCreatedEvent(this.name));
-		this.events.register(ICODepositEvent, new ICODepositEvent(this.name));
-		this.events.register(ICOPriceChangedEvent, new ICOPriceChangedEvent(this.name));
-		this.events.register(ICOSwapEvent, new ICOSwapEvent(this.name));
-		this.events.register(ICOTreasurifyEvent, new ICOTreasurifyEvent(this.name));
-		this.events.register(ICOWithdrawEvent, new ICOWithdrawEvent(this.name));
+		this.events.register(IcoCreatedEvent, new IcoCreatedEvent(this.name));
+		this.events.register(IcoDepositEvent, new IcoDepositEvent(this.name));
+		this.events.register(IcoPriceChangedEvent, new IcoPriceChangedEvent(this.name));
+		this.events.register(IcoSwapEvent, new IcoSwapEvent(this.name));
+		this.events.register(IcoTreasurifyEvent, new IcoTreasurifyEvent(this.name));
+		this.events.register(IcoWithdrawEvent, new IcoWithdrawEvent(this.name));
 		this.events.register(VestedTokenLockedEvent, new VestedTokenLockedEvent(this.name));
 		this.events.register(VestedTokenUnlockedEvent, new VestedTokenUnlockedEvent(this.name));
 	}

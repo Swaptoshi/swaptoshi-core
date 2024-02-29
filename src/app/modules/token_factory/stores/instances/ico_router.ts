@@ -17,7 +17,7 @@ import { AddDependenciesParam, BaseInstance } from './base';
 import { ICOStore } from '../ico';
 import { serializer, verifyPositiveNumber, verifyToken } from '../../utils';
 import { computeICOPoolAddress } from '../library';
-import { ICOSwapEvent } from '../../events/ico_swap';
+import { IcoSwapEvent } from '../../events/ico_swap';
 import { TOKEN_ID_LENGTH } from '../../constants';
 import { ICOQuoter } from './ico_quoter';
 
@@ -231,7 +231,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			amountOut,
 		);
 
-		const events = this.events.get(ICOSwapEvent);
+		const events = this.events.get(IcoSwapEvent);
 		events.add(
 			this.mutableContext!.context,
 			{

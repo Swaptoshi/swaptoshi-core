@@ -14,14 +14,14 @@ import {
 } from '../../types';
 import { BaseInstance } from './base';
 import { ICOStore } from '../ico';
-import { ICOCreatedEvent } from '../../events/ico_created';
+import { IcoCreatedEvent } from '../../events/ico_created';
 import { serializer, verifyAddress, verifyPositiveNumber, verifyToken } from '../../utils';
 import { FactoryStore } from '../factory';
 import { computeICOPoolAddress, decodeICOPoolAddress } from '../library';
-import { ICOTreasurifyEvent } from '../../events/ico_treasurify';
-import { ICOPriceChangedEvent } from '../../events/ico_price_changed';
-import { ICODepositEvent } from '../../events/ico_deposit';
-import { ICOWithdrawEvent } from '../../events/ico_withdraw';
+import { IcoTreasurifyEvent } from '../../events/ico_treasurify';
+import { IcoPriceChangedEvent } from '../../events/ico_price_changed';
+import { IcoDepositEvent } from '../../events/ico_deposit';
+import { IcoWithdrawEvent } from '../../events/ico_withdraw';
 import { ICO_MODULE_SUFFIX } from '../../constants';
 
 export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
@@ -158,7 +158,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 
 		await this._saveStore();
 
-		const events = this.events.get(ICOCreatedEvent);
+		const events = this.events.get(IcoCreatedEvent);
 		events.add(
 			this.mutableContext!.context,
 			{
@@ -193,7 +193,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 
 		await this._saveStore();
 
-		const events = this.events.get(ICOPriceChangedEvent);
+		const events = this.events.get(IcoPriceChangedEvent);
 		events.add(
 			this.mutableContext!.context,
 			{
@@ -227,7 +227,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 			params.amount,
 		);
 
-		const events = this.events.get(ICODepositEvent);
+		const events = this.events.get(IcoDepositEvent);
 		events.add(
 			this.mutableContext!.context,
 			{
@@ -261,7 +261,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 			params.amount,
 		);
 
-		const events = this.events.get(ICOWithdrawEvent);
+		const events = this.events.get(IcoWithdrawEvent);
 		events.add(
 			this.mutableContext!.context,
 			{
@@ -337,7 +337,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 					amount,
 				);
 
-				const events = this.events.get(ICOTreasurifyEvent);
+				const events = this.events.get(IcoTreasurifyEvent);
 				events.add(
 					this.mutableContext!.context,
 					{

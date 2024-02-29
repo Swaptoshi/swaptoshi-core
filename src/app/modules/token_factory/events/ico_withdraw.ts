@@ -2,6 +2,6 @@ import { BaseEvent } from 'lisk-sdk';
 import { icoWithdrawEventSchema } from '../schema';
 import { ICOWithdrawEventData } from '../types';
 
-export class ICOWithdrawEvent extends BaseEvent<ICOWithdrawEventData> {
+export class IcoWithdrawEvent extends BaseEvent<ICOWithdrawEventData> {
 	public schema = icoWithdrawEventSchema;
 }
