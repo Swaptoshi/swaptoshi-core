@@ -108,7 +108,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		verifyToken('tokenOut', params.tokenOut);
 		verifyPositiveNumber('amountIn', params.amountIn);
 
-		await this._checkICOExists();
+		await this._checkICOExists(computeICOPoolAddress(params));
 	}
 
 	public async exactInputSingle(params: ICOExactInputSingleParams, verify = true) {
@@ -173,7 +173,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		verifyToken('tokenOut', params.tokenOut);
 		verifyPositiveNumber('amountOut', params.amountOut);
 
-		await this._checkICOExists();
+		await this._checkICOExists(computeICOPoolAddress(params));
 	}
 
 	public async exactOutputSingle(params: ICOExactOutputSingleParams, verify = true) {
@@ -192,10 +192,12 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 	}
 
 	private async _updateInstance(tokenIn: Buffer, tokenOut: Buffer) {
+		const poolAddress = computeICOPoolAddress({ tokenIn, tokenOut });
 		const icoData = await this.instanceStore.getOrDefault(
 			this.mutableContext!.context,
-			computeICOPoolAddress({ tokenIn, tokenOut }),
+			poolAddress,
 		);
+		this._setKey(poolAddress);
 		Object.assign(this, utils.objects.cloneDeep(icoData));
 	}
 
@@ -241,8 +243,8 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		);
 	}
 
-	private async _checkICOExists() {
-		if (!(await this.instanceStore.has(this.immutableContext!.context, this.key))) {
+	private async _checkICOExists(poolAddress: Buffer) {
+		if (!(await this.instanceStore.has(this.immutableContext!.context, poolAddress))) {
 			throw new Error('ICO pool doesnt exists');
 		}
 	}
