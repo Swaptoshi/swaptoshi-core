@@ -3,7 +3,7 @@ export const airdropDistributedEventSchema = {
 	type: 'object',
 	required: ['tokenId', 'senderAddress', 'recipientAddress', 'amount'],
 	properties: {
-		poolAddress: {
+		tokenId: {
 			dataType: 'bytes',
 			fieldNumber: 1,
 		},

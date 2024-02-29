@@ -233,7 +233,7 @@ export class Airdrop
 
 	private async _isAirdropExists(tokenId: Buffer, providerAddress: Buffer) {
 		return this.instanceStore.has(
-			this.mutableContext!.context,
+			this.immutableContext!.context,
 			Buffer.concat([tokenId, providerAddress]),
 		);
 	}
