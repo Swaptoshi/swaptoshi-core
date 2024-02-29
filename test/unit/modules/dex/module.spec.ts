@@ -54,6 +54,7 @@ import { mock_token_transfer } from './stores/shared/token';
 import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supported_token';
 import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_symbol';
 import { fallbackTokenSymbol } from './utils/token';
+import { TokenFactoryMethod } from '../../../../src/app/modules/token_factory/method';
 
 const baseTransaction = {
 	module: '',
@@ -112,6 +113,7 @@ describe('DexModule', () => {
 	let tokenMethod: TokenMethod;
 	let nftMethod: NFTMethod;
 	let feeMethod: FeeMethod;
+	let tokenFactoryMethod: TokenFactoryMethod;
 	let interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	let verifyContext: TransactionVerifyContext;
 	let executeContext: TransactionExecuteContext;
@@ -135,6 +137,7 @@ describe('DexModule', () => {
 			tokenMethod,
 			nftMethod,
 			feeMethod,
+			tokenFactoryMethod,
 		} = await hookContextFixture());
 	});
 
@@ -282,12 +285,24 @@ describe('DexModule', () => {
 
 		describe('addDependencies', () => {
 			it('should add poolStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod);
+				module.addDependencies(
+					tokenMethod,
+					nftMethod,
+					feeMethod,
+					tokenFactoryMethod,
+					interoperabilityMethod,
+				);
 				expect(mockPoolStore.addDependencies).toHaveBeenCalledWith(tokenMethod);
 			});
 
 			it('should add positionManagerStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod);
+				module.addDependencies(
+					tokenMethod,
+					nftMethod,
+					feeMethod,
+					tokenFactoryMethod,
+					interoperabilityMethod,
+				);
 				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(
 					tokenMethod,
 					nftMethod,

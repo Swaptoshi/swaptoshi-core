@@ -10,7 +10,7 @@ exports[`IcoChangePriceCommand constructor should have valid schema 1`] = `
     },
     "price": {
       "dataType": "string",
-      "fieldNumber": 3,
+      "fieldNumber": 2,
     },
   },
   "type": "object",

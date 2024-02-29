@@ -12,7 +12,7 @@ describe('AirdropDistributeCommand', () => {
 
 	describe('constructor', () => {
 		it('should have valid name', () => {
-			expect(command.name).toBe('AirdropDistribute');
+			expect(command.name).toBe('airdropDistribute');
 		});
 
 		it('should have valid schema', () => {

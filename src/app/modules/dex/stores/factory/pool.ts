@@ -777,47 +777,67 @@ export class DEXPool implements DEXPoolData {
 
 		if (zeroForOne) {
 			this.feeGrowthGlobal0X128 = state.feeGrowthGlobalX128;
-			if (!this.simulation && Uint128.from(state.protocolFee).gt(0) && this._checkFeeProtocol()) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					this.feeProtocolPool!,
-					this.token0,
-					BigInt(state.protocolFee),
-				);
-				const events = this.events!.get(CollectProtocolEvent);
-				events.add(
-					this.mutableContext!.context,
-					{
-						senderAddress: this.mutableContext!.senderAddress,
-						recipientAddress: this.feeProtocolPool!,
-						amount0: state.protocolFee,
-						amount1: '0',
-					},
-					[this.address, this.feeProtocolPool!],
-				);
+			if (!this.simulation && Uint128.from(state.protocolFee).gt(0)) {
+				if (this._checkFeeProtocol()) {
+					await this.tokenMethod!.transfer(
+						this.mutableContext!.context,
+						this.address,
+						this.feeProtocolPool!,
+						this.token0,
+						BigInt(state.protocolFee),
+					);
+					const events = this.events!.get(CollectProtocolEvent);
+					events.add(
+						this.mutableContext!.context,
+						{
+							senderAddress: this.mutableContext!.senderAddress,
+							recipientAddress: this.feeProtocolPool!,
+							amount0: state.protocolFee,
+							amount1: '0',
+						},
+						[this.address, this.feeProtocolPool!],
+					);
+				} else {
+					await this.tokenMethod!.lock(
+						this.mutableContext!.context,
+						this.address,
+						this.moduleName,
+						this.token0,
+						BigInt(state.protocolFee),
+					);
+				}
 			}
 		} else {
 			this.feeGrowthGlobal1X128 = state.feeGrowthGlobalX128;
-			if (!this.simulation && Uint128.from(state.protocolFee).gt(0) && this._checkFeeProtocol()) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					this.feeProtocolPool!,
-					this.token1,
-					BigInt(state.protocolFee),
-				);
-				const events = this.events!.get(CollectProtocolEvent);
-				events.add(
-					this.mutableContext!.context,
-					{
-						senderAddress: this.mutableContext!.senderAddress,
-						recipientAddress: this.feeProtocolPool!,
-						amount0: '0',
-						amount1: state.protocolFee,
-					},
-					[this.address, this.feeProtocolPool!],
-				);
+			if (!this.simulation && Uint128.from(state.protocolFee).gt(0)) {
+				if (this._checkFeeProtocol()) {
+					await this.tokenMethod!.transfer(
+						this.mutableContext!.context,
+						this.address,
+						this.feeProtocolPool!,
+						this.token1,
+						BigInt(state.protocolFee),
+					);
+					const events = this.events!.get(CollectProtocolEvent);
+					events.add(
+						this.mutableContext!.context,
+						{
+							senderAddress: this.mutableContext!.senderAddress,
+							recipientAddress: this.feeProtocolPool!,
+							amount0: '0',
+							amount1: state.protocolFee,
+						},
+						[this.address, this.feeProtocolPool!],
+					);
+				} else {
+					await this.tokenMethod!.lock(
+						this.mutableContext!.context,
+						this.address,
+						this.moduleName,
+						this.token1,
+						BigInt(state.protocolFee),
+					);
+				}
 			}
 		}
 
@@ -956,15 +976,28 @@ export class DEXPool implements DEXPoolData {
 		if (paid0.gt(0)) {
 			const feeProtocol0 = Uint8.from(this.feeProtocol).mod(16);
 			const fees0 = Uint256.from(feeProtocol0.eq(0) ? 0 : paid0.div(feeProtocol0));
-			if (Uint128.from(fees0).gt(0) && this._checkFeeProtocol()) {
-				if (!this.simulation) {
-					await this.tokenMethod!.transfer(
-						this.mutableContext!.context,
-						this.address,
-						this.feeProtocolPool!,
-						this.token0,
-						fees0.toBigInt(),
-					);
+			if (Uint128.from(fees0).gt(0)) {
+				if (this._checkFeeProtocol()) {
+					if (!this.simulation) {
+						await this.tokenMethod!.transfer(
+							this.mutableContext!.context,
+							this.address,
+							this.feeProtocolPool!,
+							this.token0,
+							fees0.toBigInt(),
+						);
+					}
+				} else {
+					// eslint-disable-next-line no-lonely-if
+					if (!this.simulation) {
+						await this.tokenMethod!.lock(
+							this.mutableContext!.context,
+							this.address,
+							this.moduleName,
+							this.token0,
+							fees0.toBigInt(),
+						);
+					}
 				}
 				const events = this.events!.get(CollectProtocolEvent);
 				events.add(
@@ -985,15 +1018,28 @@ export class DEXPool implements DEXPoolData {
 		if (paid1.gt(0)) {
 			const feeProtocol1 = Uint8.from(this.feeProtocol).shr(4);
 			const fees1 = Uint256.from(feeProtocol1.eq(0) ? 0 : paid1.div(feeProtocol1));
-			if (Uint128.from(fees1).gt(0) && this._checkFeeProtocol()) {
-				if (!this.simulation) {
-					await this.tokenMethod!.transfer(
-						this.mutableContext!.context,
-						this.address,
-						this.feeProtocolPool!,
-						this.token1,
-						fees1.toBigInt(),
-					);
+			if (Uint128.from(fees1).gt(0)) {
+				if (this._checkFeeProtocol()) {
+					if (!this.simulation) {
+						await this.tokenMethod!.transfer(
+							this.mutableContext!.context,
+							this.address,
+							this.feeProtocolPool!,
+							this.token1,
+							fees1.toBigInt(),
+						);
+					}
+				} else {
+					// eslint-disable-next-line no-lonely-if
+					if (!this.simulation) {
+						await this.tokenMethod!.lock(
+							this.mutableContext!.context,
+							this.address,
+							this.moduleName,
+							this.token1,
+							fees1.toBigInt(),
+						);
+					}
 				}
 				const events = this.events!.get(CollectProtocolEvent);
 				events.add(

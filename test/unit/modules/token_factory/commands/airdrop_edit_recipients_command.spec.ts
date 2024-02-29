@@ -12,7 +12,7 @@ describe('AirdropEditRecipientsCommand', () => {
 
 	describe('constructor', () => {
 		it('should have valid name', () => {
-			expect(command.name).toBe('AirdropEditRecipients');
+			expect(command.name).toBe('airdropEditRecipients');
 		});
 
 		it('should have valid schema', () => {
