@@ -80,7 +80,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 
 		const quoteResult = await quoter.quoteExactInput(params.path, params.amountIn.toString());
 
-		const icoAmountOut = this.quoteExactInputSingle({
+		const icoAmountOut = await this.quoteExactInputSingle({
 			amountIn: BigInt(quoteResult.amountOut),
 			tokenIn: params.path.subarray(params.path.length - TOKEN_ID_LENGTH, params.path.length),
 			tokenOut: params.tokenOut,
@@ -100,7 +100,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 			Number(this.immutableContext!.timestamp),
 		);
 
-		const swapAmountOut = this.quoteExactOutputSingle({
+		const swapAmountOut = await this.quoteExactOutputSingle({
 			amountOut: BigInt(params.amountOut),
 			tokenIn: params.path.subarray(params.path.length - TOKEN_ID_LENGTH, params.path.length),
 			tokenOut: params.tokenOut,
