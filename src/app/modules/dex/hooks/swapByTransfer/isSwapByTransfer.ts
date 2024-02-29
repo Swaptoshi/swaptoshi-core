@@ -1,4 +1,4 @@
-import { NamedRegistry, TransactionVerifyContext, codec } from 'lisk-sdk';
+import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'lisk-sdk';
 import { PoolStore } from '../../stores/pool';
 import { tokenTransferParamsSchema } from '../../schema/dependencies/token';
 
@@ -11,13 +11,11 @@ interface TransferTokenParams {
 
 export async function isSwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },
-	context: TransactionVerifyContext,
+	context: ImmutableMethodContext,
+	transaction: Transaction,
 ) {
-	if (context.transaction.module === 'token' && context.transaction.command === 'transfer') {
-		const params = codec.decode<TransferTokenParams>(
-			tokenTransferParamsSchema,
-			context.transaction.params,
-		);
+	if (transaction.module === 'token' && transaction.command === 'transfer') {
+		const params = codec.decode<TransferTokenParams>(tokenTransferParamsSchema, transaction.params);
 
 		const poolStore = this.stores.get(PoolStore);
 		if (await poolStore.has(context, params.recipientAddress)) {

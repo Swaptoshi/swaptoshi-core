@@ -8,7 +8,7 @@ export async function executeSwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },
 	ctx: TransactionExecuteContext,
 ) {
-	const check = await isSwapByTransfer.bind(this)(ctx);
+	const check = await isSwapByTransfer.bind(this)(ctx, ctx.transaction);
 	if (check.status && check.payload) {
 		const poolStore = this.stores.get(PoolStore);
 		if (await poolStore.has(ctx, check.payload.recipientAddress)) {

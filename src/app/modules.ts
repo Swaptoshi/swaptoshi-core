@@ -32,7 +32,13 @@ export const registerModules = (app: Application, method: LiskMethod): void => {
 	const dexModule = new DexModule();
 
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
-	dexModule.addDependencies(method.token, nftModule.method, method.fee, method.interoperability);
+	dexModule.addDependencies(
+		method.token,
+		nftModule.method,
+		method.fee,
+		tokenFactoryModule.method,
+		method.interoperability,
+	);
 	tokenFactoryModule.addDependencies(
 		method.token,
 		method.fee,

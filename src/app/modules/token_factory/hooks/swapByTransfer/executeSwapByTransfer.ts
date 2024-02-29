@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { NamedRegistry, TransactionExecuteContext } from 'lisk-sdk';
 import { ICOStore } from '../../stores/ico';
 import { mutableTransactionHookFactoryContext } from '../../stores/context';
@@ -8,7 +9,7 @@ export async function executeSwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },
 	ctx: TransactionExecuteContext,
 ) {
-	const check = await isSwapByTransfer.bind(this)(ctx);
+	const check = await isSwapByTransfer.bind(this)(ctx, ctx.transaction);
 	if (check.status && check.payload) {
 		const icoStore = this.stores.get(ICOStore);
 		if (await icoStore.has(ctx, check.payload.recipientAddress)) {

@@ -105,7 +105,7 @@ export class TokenFactoryModule extends BaseModule {
 	public crossChainMethod = this._tokenFactoryInteroperableMethod;
 
 	public endpoint = new TokenFactoryEndpoint(this.stores, this.offchainStores);
-	public method = new TokenFactoryMethod(this.stores, this.events);
+	public method = new TokenFactoryMethod(this.stores, this.events, this.name);
 	public commands = [
 		new TokenCreateCommand(this.stores, this.events),
 		new TokenMintCommand(this.stores, this.events),
@@ -184,6 +184,8 @@ export class TokenFactoryModule extends BaseModule {
 			tokenMethod,
 			nftMethod,
 		);
+
+		this.method.addDependencies(tokenMethod, feeMethod, dexMethod);
 	}
 
 	public metadata(): ModuleMetadata {
@@ -259,6 +261,7 @@ export class TokenFactoryModule extends BaseModule {
 		vestingUnlockStore.init(_args.genesisConfig, this._config);
 
 		this.endpoint.init(this._config);
+		this.method.init(this._config);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await

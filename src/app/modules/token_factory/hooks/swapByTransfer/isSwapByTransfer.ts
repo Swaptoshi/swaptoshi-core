@@ -1,4 +1,5 @@
-import { NamedRegistry, TransactionVerifyContext, codec } from 'lisk-sdk';
+/* eslint-disable import/no-cycle */
+import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'lisk-sdk';
 import { ICOStore } from '../../stores/ico';
 import { tokenTransferParamsSchema } from '../../schema';
 
@@ -11,13 +12,11 @@ interface TransferTokenParams {
 
 export async function isSwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },
-	context: TransactionVerifyContext,
+	context: ImmutableMethodContext,
+	transaction: Transaction,
 ) {
-	if (context.transaction.module === 'token' && context.transaction.command === 'transfer') {
-		const params = codec.decode<TransferTokenParams>(
-			tokenTransferParamsSchema,
-			context.transaction.params,
-		);
+	if (transaction.module === 'token' && transaction.command === 'transfer') {
+		const params = codec.decode<TransferTokenParams>(tokenTransferParamsSchema, transaction.params);
 
 		const icoStore = this.stores.get(ICOStore);
 		if (await icoStore.has(context, params.recipientAddress)) {

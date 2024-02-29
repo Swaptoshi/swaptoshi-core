@@ -6,7 +6,7 @@ export async function verifySwapByTransfer(
 	this: { stores: NamedRegistry; events: NamedRegistry },
 	context: TransactionVerifyContext,
 ) {
-	const check = await isSwapByTransfer.bind(this)(context);
+	const check = await isSwapByTransfer.bind(this)(context, context.transaction);
 	if (check.status && check.payload) {
 		const key = PoolAddress.decodePoolAddress(check.payload.recipientAddress);
 		if (

@@ -115,18 +115,20 @@ import {
 	getConfigEndpointRequestSchema,
 	getConfigEndpointResponseSchema,
 } from './schema/endpoint/get_config';
+import { TokenFactoryMethod } from '../token_factory/method';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexModuleConfig | undefined;
 	public _feeMethod: FeeMethod | undefined;
 	public _tokenMethod: TokenMethod | undefined;
+	public _tokenFactoryMethod: TokenFactoryMethod | undefined;
 	public _dexInteroperableMethod = new DexInteroperableMethod(this.stores, this.events);
 
 	public crossChainCommand = [];
 	public crossChainMethod = this._dexInteroperableMethod;
 
 	public endpoint = new DexEndpoint(this.stores, this.offchainStores);
-	public method = new DexMethod(this.stores, this.events);
+	public method = new DexMethod(this.stores, this.events, this.name);
 	public commands = [
 		new CreatePoolCommand(this.stores, this.events),
 		new MintCommand(this.stores, this.events),
@@ -182,6 +184,7 @@ export class DexModule extends BaseInteroperableModule {
 		tokenMethod: TokenMethod,
 		nftMethod: NFTMethod,
 		feeMethod: FeeMethod,
+		tokenFactoryMethod: TokenFactoryMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
 	) {
 		const poolStore = this.stores.get(PoolStore);
@@ -194,7 +197,10 @@ export class DexModule extends BaseInteroperableModule {
 
 		this._feeMethod = feeMethod;
 		this._tokenMethod = tokenMethod;
+		this._tokenFactoryMethod = tokenFactoryMethod;
 		this._dexInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
+
+		this.method.addDependencies(tokenMethod, feeMethod);
 	}
 
 	public metadata(): ModuleMetadata {

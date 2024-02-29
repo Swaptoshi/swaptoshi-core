@@ -1,13 +1,15 @@
+/* eslint-disable import/no-cycle */
 import { FeeMethod, NamedRegistry, TokenMethod, TransactionVerifyContext } from 'lisk-sdk';
 import { TokenFactoryModuleConfig } from '../../types';
-import { isFeeConversion } from './isFeeConversion';
 import { DexMethod } from '../../../dex/method';
+import { TokenFactoryMethod } from '../../method';
 
 export async function verifyFeeConversion(
 	this: {
 		name: string;
 		stores: NamedRegistry;
 		events: NamedRegistry;
+		method: TokenFactoryMethod;
 		_feeMethod: FeeMethod | undefined;
 		_tokenMethod: TokenMethod | undefined;
 		_dexMethod: DexMethod | undefined;
@@ -15,8 +17,21 @@ export async function verifyFeeConversion(
 	},
 	context: TransactionVerifyContext,
 ) {
-	if (!this._config || !this._tokenMethod || !this._feeMethod) return;
-	const check = await isFeeConversion.bind(this)(context);
+	if (!this._config || !this._tokenMethod || !this._feeMethod || !this._dexMethod) return;
+
+	const check = await this.method.isFeeConversion(
+		context,
+		context.transaction,
+		context.header.timestamp,
+		context.header.height,
+	);
+
+	const dexCheck = await this._dexMethod.isFeeConversion(
+		context,
+		context.transaction,
+		context.header.timestamp,
+	);
+
 	if (check.status && check.payload) {
 		const senderTokenInBalance = await this._tokenMethod.getAvailableBalance(
 			context,
@@ -39,6 +54,8 @@ export async function verifyFeeConversion(
 				).toString()}.`,
 			);
 		}
+	} else if (dexCheck.status && dexCheck.payload) {
+		/* do nothing */
 	} else {
 		const balance = await this._tokenMethod.getAvailableBalance(
 			context,
