@@ -8,7 +8,7 @@ export const icoChangePriceCommandSchema = {
 		},
 		price: {
 			dataType: 'string',
-			fieldNumber: 3,
+			fieldNumber: 2,
 		},
 	},
 };
