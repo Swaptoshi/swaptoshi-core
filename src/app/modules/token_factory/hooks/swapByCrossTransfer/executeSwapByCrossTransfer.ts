@@ -25,6 +25,7 @@ export async function executeSwapByCrossTransfer(
 					tokenIn: check.payload.tokenID,
 					tokenOut: key.tokenOut,
 					amountIn: check.payload.amount,
+					recipient: check.payload.senderAddress,
 				});
 			} catch {
 				await this._tokenMethod?.transfer(

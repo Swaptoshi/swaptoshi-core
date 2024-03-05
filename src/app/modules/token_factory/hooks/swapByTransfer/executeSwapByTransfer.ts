@@ -27,6 +27,7 @@ export async function executeSwapByTransfer(
 				tokenIn: check.payload.tokenID,
 				tokenOut: key.tokenOut,
 				amountIn: check.payload.amount,
+				recipient: _ctx.context.transaction.senderAddress,
 			});
 		}
 	}

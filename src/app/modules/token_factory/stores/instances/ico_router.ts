@@ -99,7 +99,13 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenOut: params.tokenOut,
 		});
 
-		await this._icoSwapInternal(BigInt(icoAmountIn), icoAmountOut, tokenIn, params.tokenOut);
+		await this._icoSwapInternal(
+			params.recipient,
+			BigInt(icoAmountIn),
+			icoAmountOut,
+			tokenIn,
+			params.tokenOut,
+		);
 	}
 
 	public async verifyExactInputSingle(params: ICOExactInputSingleParams) {
@@ -123,7 +129,13 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenIn: params.tokenIn,
 			tokenOut: params.tokenOut,
 		});
-		await this._icoSwapInternal(params.amountIn, amountOut, params.tokenIn, params.tokenOut);
+		await this._icoSwapInternal(
+			params.recipient,
+			params.amountIn,
+			amountOut,
+			params.tokenIn,
+			params.tokenOut,
+		);
 	}
 
 	public async verifyExactOutput(params: ICOExactOutputParams) {
@@ -164,7 +176,13 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			});
 		}
 
-		await this._icoSwapInternal(swapAmountOut, params.amountOut, tokenIn, params.tokenOut);
+		await this._icoSwapInternal(
+			params.recipient,
+			swapAmountOut,
+			params.amountOut,
+			tokenIn,
+			params.tokenOut,
+		);
 	}
 
 	public async verifyExactOuputSingle(params: ICOExactOutputSingleParams) {
@@ -188,7 +206,13 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenIn: params.tokenIn,
 			tokenOut: params.tokenOut,
 		});
-		await this._icoSwapInternal(amountIn, params.amountOut, params.tokenIn, params.tokenOut);
+		await this._icoSwapInternal(
+			params.recipient,
+			amountIn,
+			params.amountOut,
+			params.tokenIn,
+			params.tokenOut,
+		);
 	}
 
 	private async _updateInstance(tokenIn: Buffer, tokenOut: Buffer) {
@@ -202,6 +226,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 	}
 
 	private async _icoSwapInternal(
+		recipient: Buffer,
 		amountIn: bigint,
 		amountOut: bigint,
 		tokenIn: Buffer,
@@ -226,7 +251,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		await this.tokenMethod!.transfer(
 			this.mutableContext!.context,
 			this.key,
-			this.mutableContext!.senderAddress,
+			recipient,
 			tokenOut,
 			amountOut,
 		);
@@ -239,7 +264,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 				amountOut,
 				poolAddress: this.key,
 			},
-			[this.key, this.providerAddress, this.mutableContext!.senderAddress],
+			[this.key, this.providerAddress, recipient],
 		);
 	}
 

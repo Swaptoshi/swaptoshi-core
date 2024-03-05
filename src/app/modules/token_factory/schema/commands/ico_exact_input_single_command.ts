@@ -14,5 +14,9 @@ export const icoExactInputSingleCommandSchema = {
 			dataType: 'uint64',
 			fieldNumber: 3,
 		},
+		recipient: {
+			dataType: 'bytes',
+			fieldNumber: 4,
+		},
 	},
 };

@@ -14,13 +14,17 @@ export const icoExactOutputCommandSchema = {
 			dataType: 'uint64',
 			fieldNumber: 3,
 		},
+		recipient: {
+			dataType: 'bytes',
+			fieldNumber: 4,
+		},
 		deadline: {
 			dataType: 'uint32',
-			fieldNumber: 4,
+			fieldNumber: 5,
 		},
 		amountInMaximum: {
 			dataType: 'uint64',
-			fieldNumber: 5,
+			fieldNumber: 6,
 		},
 	},
 };
