@@ -83,7 +83,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		if (params.path.length > TOKEN_ID_LENGTH) {
 			icoAmountIn = await swapRouter.exactInput({
 				amountIn: params.amountIn.toString(),
-				amountOutMinimum: params.amountOutMinimum.toString(),
+				amountOutMinimum: params.pathAmountOutMinimum.toString(),
 				deadline: params.deadline.toString(),
 				path: params.path,
 				recipient: this.mutableContext!.senderAddress,
@@ -169,7 +169,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 		if (params.path.length > TOKEN_ID_LENGTH) {
 			await swapRouter.exactOutput({
 				amountOut: swapAmountOut.toString(),
-				amountInMaximum: params.amountInMaximum.toString(),
+				amountInMaximum: params.pathAmountInMaximum.toString(),
 				deadline: params.deadline.toString(),
 				path: params.path,
 				recipient: this.mutableContext!.senderAddress,

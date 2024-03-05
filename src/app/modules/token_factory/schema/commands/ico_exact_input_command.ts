@@ -22,7 +22,7 @@ export const icoExactInputCommandSchema = {
 			dataType: 'uint32',
 			fieldNumber: 5,
 		},
-		amountOutMinimum: {
+		pathAmountOutMinimum: {
 			dataType: 'uint64',
 			fieldNumber: 6,
 		},

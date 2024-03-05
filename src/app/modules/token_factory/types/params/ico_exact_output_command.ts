@@ -4,5 +4,5 @@ export interface ICOExactOutputParams {
 	amountOut: bigint;
 	recipient: Buffer;
 	deadline: number;
-	amountInMaximum: bigint;
+	pathAmountInMaximum: bigint;
 }

@@ -22,7 +22,7 @@ export const icoExactOutputCommandSchema = {
 			dataType: 'uint32',
 			fieldNumber: 5,
 		},
-		amountInMaximum: {
+		pathAmountInMaximum: {
 			dataType: 'uint64',
 			fieldNumber: 6,
 		},
