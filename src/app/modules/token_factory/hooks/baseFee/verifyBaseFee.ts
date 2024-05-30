@@ -1,4 +1,4 @@
-import { FeeMethod, TransactionVerifyContext } from 'lisk-sdk';
+import { FeeMethod, TransactionVerifyContext } from 'klayr-sdk';
 import { TokenFactoryModuleConfig } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/require-await

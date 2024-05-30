@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
 import { BurnCommand } from '../../../../../src/app/modules/dex/commands/burn_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { burnCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/burn_command';

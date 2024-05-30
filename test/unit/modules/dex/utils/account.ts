@@ -1,4 +1,4 @@
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { PoolAddress } from '../../../../../src/app/modules/dex/stores/library/periphery';
 import { FeeAmount } from '../stores/shared/utilities';
 

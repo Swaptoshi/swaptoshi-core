@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { MethodContext } from 'lisk-sdk';
+import { MethodContext } from 'klayr-sdk';
 import {
 	FeeAmount,
 	TICK_SPACINGS,

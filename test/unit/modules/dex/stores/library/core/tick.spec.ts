@@ -1,5 +1,5 @@
 /* eslint-disable no-return-assign */
-import { MethodContext } from 'lisk-sdk';
+import { MethodContext } from 'klayr-sdk';
 import * as tickTest from '../../../../../../../src/app/modules/dex/stores/library/core/tick';
 import { TickInfoStore } from '../../../../../../../src/app/modules/dex/stores/tick_info';
 import { TickInfo } from '../../../../../../../src/app/modules/dex/types';

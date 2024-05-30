@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { TokenRegistry } from './token/token_registry';
 import { Token } from './token/token';
 import { MockedTokenMethod } from './token';

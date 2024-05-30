@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { verifyTreasurifyParam } from '../utils/verify/params/treasurify';
 import { TreasurifyParams } from '../types';
 import { treasurifyCommandSchema } from '../schema/commands/treasurify_command';

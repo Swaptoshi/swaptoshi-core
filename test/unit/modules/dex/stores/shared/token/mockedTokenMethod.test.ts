@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { TokenMethod } from 'lisk-sdk';
+import { TokenMethod } from 'klayr-sdk';
 import {
 	MockedTokenMethod,
 	mock_token_addDependencies,
@@ -9,7 +9,7 @@ import {
 	mock_token_getAvailableBalance,
 	mock_token_getEscrowedAmount,
 	mock_token_getLockedAmount,
-	mock_token_getTokenIDLSK,
+	mock_token_getTokenIDKLY,
 	mock_token_getTotalSupply,
 	mock_token_init,
 	mock_token_initializeEscrowAccount,
@@ -47,7 +47,7 @@ describe('MockedTokenMethod', () => {
 	let tokenMethod: TokenMethod;
 
 	beforeEach(() => {
-		tokenMethod = new MockedTokenMethod() as TokenMethod;
+		tokenMethod = new MockedTokenMethod() as unknown as TokenMethod;
 		const token = new Token();
 		TokenRegistry.createToken(tokenId, token);
 	});
@@ -78,10 +78,10 @@ describe('MockedTokenMethod', () => {
 		});
 	});
 
-	describe('getTokenIDLSK', () => {
+	describe('getTokenIDKLY', () => {
 		it('should call mock method', () => {
-			tokenMethod.getTokenIDLSK();
-			expect(mock_token_getTokenIDLSK).toHaveBeenCalled();
+			tokenMethod.getTokenIDKLY();
+			expect(mock_token_getTokenIDKLY).toHaveBeenCalled();
 		});
 	});
 

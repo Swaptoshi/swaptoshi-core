@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { flashEventSchema } from '../schema/events/flash';
 
 export interface FlashEventData {

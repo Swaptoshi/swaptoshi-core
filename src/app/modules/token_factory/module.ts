@@ -8,14 +8,13 @@ import {
 	MainchainInteroperabilityMethod,
 	ModuleInitArgs,
 	ModuleMetadata,
-	NFTMethod,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { AirdropCreateCommand } from './commands/airdrop_create_command';
 import { AirdropDistributeCommand } from './commands/airdrop_distribute_command';
 import { AirdropEditRecipientsCommand } from './commands/airdrop_edit_recipients_command';
@@ -89,6 +88,7 @@ import {
 	verifySwapByTransfer,
 	verifyValidTransfer,
 } from './hooks';
+import { NFTMethod } from '../nft';
 
 export class TokenFactoryModule extends BaseModule {
 	public _config: TokenFactoryModuleConfig | undefined;

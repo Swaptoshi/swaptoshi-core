@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { invalidAddress, invalidNumberString } from '../utils/invalid';
 import { Tokens, commandFixture } from '../utils/fixtures';

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { EventQueuer, codec } from 'lisk-sdk';
+import { EventQueuer, codec } from 'klayr-sdk';
 
 export const getEvents = (
 	eventQueue: EventQueuer['eventQueue'],

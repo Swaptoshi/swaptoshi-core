@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, NamedRegistry } from 'lisk-sdk';
+import { GenesisConfig, NamedRegistry } from 'klayr-sdk';
 import Decimal from 'decimal.js';
 import { ICOStoreData, TokenFactoryModuleConfig } from '../../types';
 import { BaseInstance } from './base';

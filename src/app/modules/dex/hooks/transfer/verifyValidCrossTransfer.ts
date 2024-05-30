@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'lisk-sdk';
+import { CrossChainMessageContext, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';
 import { crossChainNFTTransferMessageParamsSchema } from '../../schema/dependencies/nft';

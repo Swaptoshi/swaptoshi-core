@@ -1,4 +1,4 @@
-import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'lisk-sdk';
+import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';
 import { nftTransferParamsSchema } from '../../schema/dependencies/nft';

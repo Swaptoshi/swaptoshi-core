@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-loop-func */
 import Decimal from 'decimal.js';
-import { MethodContext, TokenMethod } from 'lisk-sdk';
+import { MethodContext, TokenMethod } from 'klayr-sdk';
 import {
 	FeeAmount,
 	MAX_SQRT_RATIO,

@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable camelcase */
 import { Decimal } from 'decimal.js';
-import { MethodContext, TokenMethod } from 'lisk-sdk';
+import { MethodContext, TokenMethod } from 'klayr-sdk';
 import { formatPrice, formatTokenAmount } from '../shared/format';
 import {
 	createPoolFunctions,

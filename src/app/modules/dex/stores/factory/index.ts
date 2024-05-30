@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { GenesisConfig, NFTMethod, NamedRegistry, TokenMethod } from 'lisk-sdk';
+import { GenesisConfig, NamedRegistry, TokenMethod } from 'klayr-sdk';
 import {
 	DEXPoolData,
 	DexModuleConfig,
@@ -10,6 +10,7 @@ import {
 import { DEXPool } from './pool';
 import { SwapRouter } from './swap_router';
 import { NonfungiblePositionManager } from './position_manager';
+import { NFTMethod } from '../../../nft';
 
 export function createImmutablePoolInstance(
 	context: ImmutableSwapContext,

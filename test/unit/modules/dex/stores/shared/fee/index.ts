@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable camelcase */
 /* eslint-disable import/no-extraneous-dependencies */
-import { ModuleConfig } from 'lisk-framework/dist-node/modules/fee/types';
-import { FeeMethod, MethodContext } from 'lisk-sdk';
+import { ModuleConfig } from 'klayr-framework/dist-node/modules/fee/types';
+import { FeeMethod, MethodContext } from 'klayr-sdk';
 import { tokenID } from '../module';
 
 export const mock_fee_init = jest.fn();

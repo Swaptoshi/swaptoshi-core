@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { ICOExactOutputParams } from '../types';
 import { commandFactoryContext, immutableTransactionHookFactoryContext } from '../stores/context';
 import { ICOStore } from '../stores/ico';

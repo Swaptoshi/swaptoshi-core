@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { tokenRegisteredEventSchema } from '../schema/events/token_registered';
 
 export interface TokenRegisteredData {

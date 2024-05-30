@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionVerifyContext } from 'lisk-sdk';
+import { NamedRegistry, TransactionVerifyContext } from 'klayr-sdk';
 import { isSwapByTransfer } from './isSwapByTransfer';
 import { decodeICOPoolAddress } from '../../stores/library';
 

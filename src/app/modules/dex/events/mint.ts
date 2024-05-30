@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { mintEventSchema } from '../schema/events/mint';
 
 export interface MintEventData {

@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { collectPositionEventSchema } from '../schema/events/collect_position';
 
 export interface CollectPositionEventData {

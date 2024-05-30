@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, NamedRegistry, TokenMethod, cryptography } from 'lisk-sdk';
+import { BaseStore, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
 import {
 	DEXPoolData,
 	DexModuleConfig,
@@ -177,7 +177,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		const tokenBBalance = await this.tokenMethod!.getAvailableBalance(ctx.context, key, tokenB);
 
 		if (this.config!.feeProtocolPool) {
-			const treasury = cryptography.address.getAddressFromLisk32Address(
+			const treasury = cryptography.address.getAddressFromKlayr32Address(
 				this.config!.feeProtocolPool,
 				this.config!.feeProtocolPool.substring(0, 3),
 			);
@@ -264,7 +264,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			);
 
 			if (tokenToBeTransferred > BigInt(0) || tokenToBeUnlocked > BigInt(0)) {
-				const treasury = cryptography.address.getAddressFromLisk32Address(
+				const treasury = cryptography.address.getAddressFromKlayr32Address(
 					this.config!.feeProtocolPool,
 					this.config!.feeProtocolPool.substring(0, 3),
 				);

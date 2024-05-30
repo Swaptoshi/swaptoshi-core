@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db } from 'lisk-sdk';
+import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { TickBitmap } from '../types';
 import { Int16String } from './library/int';
 import { tickBitmapStoreSchema } from '../schema/stores/tick_bitmap';

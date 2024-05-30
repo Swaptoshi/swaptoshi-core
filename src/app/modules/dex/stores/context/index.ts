@@ -7,7 +7,7 @@ import {
 	ModuleEndpointContext,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { ImmutableSwapContext, MutableSwapContext } from '../../types';
 
 export function commandSwapContext(

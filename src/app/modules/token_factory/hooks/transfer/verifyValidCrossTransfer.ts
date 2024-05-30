@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'lisk-sdk';
+import { CrossChainMessageContext, codec } from 'klayr-sdk';
 import { crossChainNFTTransferMessageParamsSchema } from '../../schema/dependencies/nft';
 import { TokenFactoryInteroperableMethod } from '../../cc_method';
 import { ICOStore } from '../../stores/ico';

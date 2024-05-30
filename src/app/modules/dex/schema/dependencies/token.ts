@@ -32,7 +32,7 @@ export const tokenTransferParamsSchema = {
 		recipientAddress: {
 			dataType: 'bytes',
 			fieldNumber: 3,
-			format: 'lisk32',
+			format: 'klayr32',
 		},
 		/** Optional field for data / messages.
 		 *
@@ -74,13 +74,13 @@ export const crossChainTokenTransferMessageParams = {
 		senderAddress: {
 			dataType: 'bytes',
 			fieldNumber: 3,
-			format: 'lisk32',
+			format: 'klayr32',
 		},
 		/** Address of the recipient. */
 		recipientAddress: {
 			dataType: 'bytes',
 			fieldNumber: 4,
-			format: 'lisk32',
+			format: 'klayr32',
 		},
 		/** Optional field for data / messages.
 		 *

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { Uint24String } from '../int';
 
 export interface PoolKey {

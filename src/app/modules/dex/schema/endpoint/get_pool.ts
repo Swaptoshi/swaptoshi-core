@@ -14,7 +14,7 @@ export const getPoolEndpointResponseSchema = {
 		'liquidity',
 		'slot0',
 		'address',
-		'lisk32',
+		'klayr32',
 		'collectionId',
 	],
 	properties: {
@@ -95,7 +95,7 @@ export const getPoolEndpointResponseSchema = {
 			dataType: 'string',
 			fieldNumber: 12,
 		},
-		lisk32: {
+		klayr32: {
 			dataType: 'string',
 			fieldNumber: 13,
 		},

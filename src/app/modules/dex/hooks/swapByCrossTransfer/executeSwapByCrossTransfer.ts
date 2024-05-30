@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext } from 'lisk-sdk';
+import { CrossChainMessageContext } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { PoolAddress } from '../../stores/library/periphery';
 import { crossChainMethodSwapContext } from '../../stores/context';

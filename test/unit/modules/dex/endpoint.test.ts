@@ -1,7 +1,7 @@
-import { BaseEndpoint, ModuleEndpointContext, testing } from 'lisk-sdk';
+import { BaseEndpoint, ModuleEndpointContext, testing } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
-import { PrefixedStateReadWriter } from '../../../../node_modules/lisk-framework/dist-node/state_machine/prefixed_state_read_writer';
+import { PrefixedStateReadWriter } from '../../../../node_modules/klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
 import {
 	GetMetadataParams,
 	GetPoolParams,
@@ -388,7 +388,7 @@ describe('DexEndpoint', () => {
 					...pool.toJSON(),
 					address: pool.address,
 					collectionId: pool.collectionId,
-					lisk32: pool.lisk32,
+					klayr32: pool.klayr32,
 				}),
 			);
 		});
@@ -512,7 +512,7 @@ describe('DexEndpoint', () => {
 			const res = await endpoint.getTokenURI(context);
 
 			expect(res).toMatchSnapshot({
-				tokenURI: 'ipfs://bafkreiabijd5jhj5n4gjrwjz5m7xasrkcjhfgq3siawy37r34paxzolfbq',
+				tokenURI: 'ipfs://bafkreife6klefkcmghsoxqnzmayi3fq5mia5cv3kb7pcawo3xds5kmijxu',
 			});
 		});
 

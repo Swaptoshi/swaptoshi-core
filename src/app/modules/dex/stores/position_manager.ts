@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable import/no-cycle */
-import {
-	BaseStore,
-	GenesisConfig,
-	NFTMethod,
-	NamedRegistry,
-	TokenMethod,
-	cryptography,
-} from 'lisk-sdk';
+import { BaseStore, GenesisConfig, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
 import {
 	DexModuleConfig,
 	ImmutableSwapContext,
@@ -19,6 +12,7 @@ import {
 	createImmutablePositionManagerinstance,
 	createMutablePositionManagerinstance,
 } from './factory';
+import { NFTMethod } from '../../nft';
 
 export class PositionManagerStore extends BaseStore<PositionManager> {
 	public constructor(

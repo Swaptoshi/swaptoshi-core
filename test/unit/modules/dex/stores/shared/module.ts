@@ -3,7 +3,6 @@
 import {
 	FeeMethod,
 	MainchainInteroperabilityMethod,
-	NFTMethod,
 	Schema,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
@@ -11,8 +10,8 @@ import {
 	codec,
 	cryptography,
 	testing,
-} from 'lisk-sdk';
-import { PrefixedStateReadWriter } from 'lisk-framework/dist-node/state_machine/prefixed_state_read_writer';
+} from 'klayr-sdk';
+import { PrefixedStateReadWriter } from 'klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { ObservationStore } from '../../../../../../src/app/modules/dex/stores/observation';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
@@ -28,6 +27,7 @@ import { DEFAULT_TREASURY_ADDRESS } from '../../../../../../src/app/modules/dex/
 import { MockedFeeMethod } from './fee';
 import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/stores/supported_token';
 import { TokenFactoryMethod } from '../../../../../../src/app/modules/token_factory/method';
+import { NFTMethod } from '../../../../../../src/app/modules/nft';
 
 export const chainID = Buffer.from('00000001', 'hex');
 export const tokenID = Buffer.concat([chainID, Buffer.alloc(4, 0)]);
@@ -38,7 +38,7 @@ export const moduleConfig: DexModuleConfig = {
 		['10000', '200'],
 	],
 	feeProtocol: 0,
-	feeProtocolPool: cryptography.address.getLisk32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),
+	feeProtocolPool: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),
 	feeConversionEnabled: true,
 	supportAllTokens: true,
 	minTransactionFee: {
@@ -70,11 +70,11 @@ export const moduleConfig: DexModuleConfig = {
 	nftPositionMetadata: {
 		dex: {
 			name: 'Swaptoshi',
-			symbol: 'SWT',
+			symbol: 'XSW',
 			decimal: 8,
 		},
 		mainchain: {
-			symbol: 'LSK',
+			symbol: 'KLY',
 			decimal: 8,
 		},
 	},

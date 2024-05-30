@@ -3,11 +3,11 @@ import {
 	BaseCCMethod,
 	CrossChainMessageContext,
 	MainchainInteroperabilityMethod,
-	NFTMethod,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { verifyValidCrossTransfer, executeSwapByCrossTransfer } from './hooks';
+import { NFTMethod } from '../nft';
 
 type InteroperabilityMethod = SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 

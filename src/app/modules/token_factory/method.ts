@@ -8,7 +8,7 @@ import {
 	TokenMethod,
 	Transaction,
 	codec,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { ICOPool } from './stores/instances/ico_pool';
 import { Airdrop } from './stores/instances/airdrop';
 import { Factory } from './stores/instances/factory';

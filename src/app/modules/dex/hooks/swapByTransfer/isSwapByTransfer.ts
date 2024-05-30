@@ -1,4 +1,4 @@
-import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'lisk-sdk';
+import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { tokenTransferParamsSchema } from '../../schema/dependencies/token';
 

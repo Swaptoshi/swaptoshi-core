@@ -3,7 +3,7 @@
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
-import { MethodContext, cryptography } from 'lisk-sdk';
+import { MethodContext, cryptography } from 'klayr-sdk';
 import { Uint } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { methodContextFixture, moduleConfig } from '../../shared/module';
 import { TEST_POOL_START_TIME, poolFixture } from '../../shared/pool';
@@ -1001,7 +1001,7 @@ describe('NFTDescriptor', () => {
 		return {
 			name: `Swaptoshi - ${feeTier} - ${_quoteTokenSymbol}/${_baseTokenSymbol} - ${prices}`,
 			description: `This NFT represents a liquidity position in a Swaptoshi ${_quoteTokenSymbol}-${_baseTokenSymbol} pool. The owner of this NFT can modify or redeem the position.\n\
-\nPool Address: ${cryptography.address.getLisk32AddressFromAddress(
+\nPool Address: ${cryptography.address.getKlayr32AddressFromAddress(
 				poolAddress,
 			)}\n${_quoteTokenSymbol} Token ID: ${quoteTokenAddress
 				.toString('hex')

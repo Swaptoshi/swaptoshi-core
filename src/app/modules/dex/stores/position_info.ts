@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db } from 'lisk-sdk';
+import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { PositionInfo } from '../types';
 import { positionInfoStoreSchema } from '../schema/stores/position_info';
 

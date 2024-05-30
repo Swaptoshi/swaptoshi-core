@@ -16,7 +16,7 @@ export const nftTransferParamsSchema = {
 		},
 		recipientAddress: {
 			dataType: 'bytes',
-			format: 'lisk32',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		data: {
@@ -41,12 +41,12 @@ export const crossChainNFTTransferMessageParamsSchema = {
 		},
 		senderAddress: {
 			dataType: 'bytes',
-			format: 'lisk32',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		recipientAddress: {
 			dataType: 'bytes',
-			format: 'lisk32',
+			format: 'klayr32',
 			fieldNumber: 3,
 		},
 		attributesArray: {

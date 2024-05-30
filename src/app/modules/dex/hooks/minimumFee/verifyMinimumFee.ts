@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TransactionVerifyContext } from 'lisk-sdk';
+import { TransactionVerifyContext } from 'klayr-sdk';
 import { DexModuleConfig } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/require-await

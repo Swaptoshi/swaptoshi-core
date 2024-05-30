@@ -1,4 +1,4 @@
-import { MethodContext } from 'lisk-sdk';
+import { MethodContext } from 'klayr-sdk';
 import * as tickBitmap from '../../../../../../../src/app/modules/dex/stores/library/core/tick_bitmap';
 import { TickBitmapStore } from '../../../../../../../src/app/modules/dex/stores/tick_bitmap';
 import { Int24String } from '../../../../../../../src/app/modules/dex/stores/library/int';

@@ -1,4 +1,4 @@
-import { Schema } from 'lisk-sdk';
+import { Schema } from 'klayr-sdk';
 import {
 	commandSwapContext,
 	methodSwapContext,

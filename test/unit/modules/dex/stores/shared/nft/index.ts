@@ -4,12 +4,13 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { InternalMethod } from 'lisk-framework/dist-node/modules/nft/internal_method';
-import { NFTAttributes } from 'lisk-framework/dist-node/modules/nft/stores/nft';
-import { ModuleConfig, FeeMethod, NFT } from 'lisk-framework/dist-node/modules/nft/types';
-import { ImmutableMethodContext, MethodContext, NFTMethod } from 'lisk-sdk';
+import { ImmutableMethodContext, MethodContext } from 'klayr-sdk';
+import { InternalMethod } from '../../../../../../../src/app/modules/nft/internal_method';
+import { NFTAttributes } from '../../../../../../../src/app/modules/nft/stores/nft';
+import { ModuleConfig, FeeMethod, NFT } from '../../../../../../../src/app/modules/nft/types';
 import { NFTRegistry } from './nft_registry';
 import { chainID } from '../module';
+import { NFTMethod } from '../../../../../../../src/app/modules/nft';
 
 export const mock_nft_init = jest.fn();
 export const mock_nft_addDependencies = jest.fn();

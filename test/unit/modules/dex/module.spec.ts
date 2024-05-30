@@ -6,7 +6,6 @@ import {
 	BaseModule,
 	FeeMethod,
 	MainchainInteroperabilityMethod,
-	NFTMethod,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
 	Transaction,
@@ -15,7 +14,7 @@ import {
 	TransferCommand,
 	VerifyStatus,
 	codec,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
 import { DexMethod } from '../../../../src/app/modules/dex/method';
@@ -55,6 +54,7 @@ import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supp
 import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_symbol';
 import { fallbackTokenSymbol } from './utils/token';
 import { TokenFactoryMethod } from '../../../../src/app/modules/token_factory/method';
+import { NFTMethod } from '../../../../src/app/modules/nft';
 
 const baseTransaction = {
 	module: '',

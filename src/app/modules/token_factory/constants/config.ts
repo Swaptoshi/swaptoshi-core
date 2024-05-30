@@ -1,9 +1,9 @@
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { TokenFactoryModuleConfig } from '../types';
 import { DEFAULT_LEFTOVER_ADDRESS } from './address';
 
 export const defaultConfig: TokenFactoryModuleConfig = {
-	icoLeftOverAddress: cryptography.address.getLisk32AddressFromAddress(DEFAULT_LEFTOVER_ADDRESS),
+	icoLeftOverAddress: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_LEFTOVER_ADDRESS),
 	icoFeeConversionEnabled: true,
 	minTransactionFee: {
 		airdropCreate: '0',

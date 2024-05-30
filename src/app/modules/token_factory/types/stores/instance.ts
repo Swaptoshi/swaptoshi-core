@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Schema } from 'lisk-sdk';
+import { Schema } from 'klayr-sdk';
 
 interface Named {
 	name: string;

@@ -1,4 +1,4 @@
-import { NamedRegistry, TransactionVerifyContext, codec } from 'lisk-sdk';
+import { NamedRegistry, TransactionVerifyContext, codec } from 'klayr-sdk';
 import { nftTransferParamsSchema } from '../../schema/dependencies/nft';
 import { ICOStore } from '../../stores/ico';
 

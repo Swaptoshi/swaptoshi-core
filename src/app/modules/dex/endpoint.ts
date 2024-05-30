@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext } from 'lisk-sdk';
+import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
 import { endpointSwapContext } from './stores/context';
 import { Quoter } from './stores/library/lens';
 import {
@@ -117,7 +117,7 @@ export class DexEndpoint extends BaseEndpoint {
 		);
 		return serializer({
 			...pool.toJSON(),
-			lisk32: pool.lisk32,
+			klayr32: pool.klayr32,
 			address: pool.address,
 			collectionId: pool.collectionId,
 		} as unknown as Record<string, unknown>);

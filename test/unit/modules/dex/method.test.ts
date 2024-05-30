@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { BaseMethod, MethodContext } from 'lisk-sdk';
+import { BaseMethod, MethodContext } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { methodFixture } from './utils/fixtures';
 import {

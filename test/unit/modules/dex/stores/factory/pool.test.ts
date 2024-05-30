@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { MethodContext, TokenMethod } from 'lisk-sdk';
+import { MethodContext, TokenMethod } from 'klayr-sdk';
 import {
 	expandTo18Decimals,
 	FeeAmount,

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-param-reassign */
 /* eslint-disable jest/no-standalone-expect */
-import { TokenMethod } from 'lisk-sdk';
+import { TokenMethod } from 'klayr-sdk';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import {
 	NonfungiblePositionManager,

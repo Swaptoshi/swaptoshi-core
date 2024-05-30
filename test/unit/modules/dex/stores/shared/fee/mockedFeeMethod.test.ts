@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { FeeMethod } from 'lisk-sdk';
+import { FeeMethod } from 'klayr-sdk';
 import { MockedFeeMethod, mock_fee_getFeeTokenID, mock_fee_init, mock_fee_payFee } from '.';
 
 describe('MockedFeeMethod', () => {

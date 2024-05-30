@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'lisk-sdk';
+import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'klayr-sdk';
 import { NextAvailableTokenIdStoreData } from '../types';
 import { nextAvailableTokenIdStoreSchema } from '../schema';
 

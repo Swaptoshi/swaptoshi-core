@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { collectProtocolEventSchema } from '../schema/events/collect_protocol';
 
 export interface CollectProtocolEventData {

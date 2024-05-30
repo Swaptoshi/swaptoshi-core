@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { TokenBurnParams } from '../types';
 import { tokenBurnCommandSchema } from '../schema';
 import { commandFactoryContext, immutableTransactionHookFactoryContext } from '../stores/context';

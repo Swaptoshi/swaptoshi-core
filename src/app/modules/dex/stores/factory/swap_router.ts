@@ -3,7 +3,7 @@
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { NamedRegistry, TokenMethod, cryptography, utils } from 'lisk-sdk';
+import { NamedRegistry, TokenMethod, cryptography, utils } from 'klayr-sdk';
 import {
 	Uint24String,
 	Uint256String,
@@ -61,7 +61,7 @@ export class SwapRouter {
 		this.feeProtocol = config.feeProtocol ?? 0;
 
 		this.feeProtocolPool = config.feeProtocolPool
-			? cryptography.address.getAddressFromLisk32Address(
+			? cryptography.address.getAddressFromKlayr32Address(
 					config.feeProtocolPool,
 					config.feeProtocolPool.substring(0, 3),
 			  )

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'lisk-sdk';
+import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
 import {
 	AirdropCreateParams,
 	AirdropDistributeParams,

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, GenesisConfig, NamedRegistry } from 'lisk-sdk';
+import { BaseStore, GenesisConfig, NamedRegistry } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, TokenSymbol } from '../types';
 import { tokenSymbolStoreSchema } from '../schema/stores/token_symbol';
 import { TokenRegisteredEvent } from '../events/token_registered';
@@ -53,11 +53,15 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		await this.set(ctx, this.getKey(tokenId), { symbol: _symbol, decimal: _decimal });
 
 		const events = this.events.get(TokenRegisteredEvent);
-		events.add(ctx, {
-			tokenId,
-			symbol: _symbol,
-			decimal: _decimal,
-		});
+		events.add(
+			ctx,
+			{
+				tokenId,
+				symbol: _symbol,
+				decimal: _decimal,
+			},
+			[tokenId],
+		);
 	}
 
 	private _isInvalidMainchainToken(tokenId: Buffer, symbol: string, decimal: number) {

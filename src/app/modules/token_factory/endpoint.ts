@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext, cryptography } from 'lisk-sdk';
+import { BaseEndpoint, ModuleEndpointContext, cryptography } from 'klayr-sdk';
 import {
 	GetAirdropParams,
 	GetFactoryParams,
@@ -59,7 +59,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer({
 			...icoPool.toJSON(),
 			poolAddress,
-			lisk32: cryptography.address.getLisk32AddressFromAddress(poolAddress),
+			klayr32: cryptography.address.getKlayr32AddressFromAddress(poolAddress),
 		});
 	}
 

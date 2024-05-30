@@ -1,6 +1,6 @@
 {
 	"system": {
-		"dataPath": "~/.lisk/swaptoshi-core",
+		"dataPath": "~/.klayr/swaptoshi-core",
 		"keepEventsForHeights": -1,
 		"logLevel": "info"
 	},
@@ -45,7 +45,7 @@
 				["10000", "200"]
 			],
 			"feeProtocol": 170,
-			"feeProtocolPool": "lskr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"feeProtocolPool": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"feeConversionEnabled": true,
 			"supportAllTokens": true,
 			"minTransactionFee": {
@@ -77,17 +77,17 @@
 			"nftPositionMetadata": {
 				"dex": {
 					"name": "Swaptoshi",
-					"symbol": "SWT",
+					"symbol": "XSW",
 					"decimal": 8
 				},
 				"mainchain": {
-					"symbol": "LSK",
+					"symbol": "KLY",
 					"decimal": 8
 				}
 			}
 		},
 		"tokenFactory": {
-			"icoLeftOverAddress": "lskr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"icoLeftOverAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"icoFeeConversionEnabled": true,
 			"minTransactionFee": {
 				"airdropCreate": "0",
@@ -127,7 +127,7 @@
 			}
 		},
 		"fee": {
-			"feePoolAddress": "lskr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb"
+			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb"
 		},
 		"pos": {
 			"failSafeInactiveWindow": 403200,
@@ -178,7 +178,7 @@
 			"encryptedPrivateKey": "kdf=argon2id&cipher=aes-128-gcm&version=1&ciphertext=3c9e1fc705af2802749c9a485d50596b19cd5cf34e72af4deb3749e4d6eeb7eeea6b857ca6386374b6138a075345a47d314a0181111484ce1290e0c5b458b971a7727fcc19ae097cb8a117e9fe245e8d08e3710f905ee90d6e31c71a077adf1466c9124451b0e51334d1e10a170fb54f29dc6d0d0b227cf5c2cad6aa14cfe9fb&mac=626adf55e8dca92d875684c7d0dade897198d42f9e1aba714159e503dfd85989&salt=d7976ab6b3451c07&iv=e1440a6845156d5d3e7b66baec867694&tag=e37b6ee8bc7cc54c1628172caf8f264b&iterations=1&parallelism=4&memorySize=2097023",
 			"ccuFrequency": 5,
 			"ccuFee": "1000000",
-			"receivingChainIPCPath": "~/.lisk/lisk-core",
+			"receivingChainIPCPath": "~/.klayr/klayr-core",
 			"receivingChainID": "04000000"
 		},
 		"faucet": {

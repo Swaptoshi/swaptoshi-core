@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionExecuteContext } from 'lisk-sdk';
+import { NamedRegistry, TransactionExecuteContext } from 'klayr-sdk';
 import { ICOStore } from '../../stores/ico';
 import { mutableTransactionHookFactoryContext } from '../../stores/context';
 import { isSwapByTransfer } from './isSwapByTransfer';

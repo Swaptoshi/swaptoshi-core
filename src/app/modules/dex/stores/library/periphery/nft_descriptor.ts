@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/prefer-for-of */
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import {
 	Uint256String,
 	Uint8String,
@@ -70,7 +70,7 @@ export function constructTokenURI(params: ConstructTokenURIParams): string {
 		params.config,
 		escapeQuotes(params.quoteTokenSymbol),
 		escapeQuotes(params.baseTokenSymbol),
-		cryptography.address.getLisk32AddressFromAddress(params.poolAddress),
+		cryptography.address.getKlayr32AddressFromAddress(params.poolAddress),
 	);
 	const descriptionPartTwo = generateDescriptionPartTwo(
 		params.tokenId.toString(),

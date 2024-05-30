@@ -1,4 +1,4 @@
-import { NamedRegistry, TransactionExecuteContext } from 'lisk-sdk';
+import { NamedRegistry, TransactionExecuteContext } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { PoolAddress } from '../../stores/library/periphery';
 import { mutableHookSwapContext } from '../../stores/context';

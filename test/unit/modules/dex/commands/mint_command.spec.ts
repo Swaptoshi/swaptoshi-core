@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
 import { MintCommand } from '../../../../../src/app/modules/dex/commands/mint_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { mintCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/mint_command';

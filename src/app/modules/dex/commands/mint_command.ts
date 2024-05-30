@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { mintCommandSchema } from '../schema/commands/mint_command';
 import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';

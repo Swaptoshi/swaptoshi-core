@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { swapEventSchema } from '../schema/events/swap';
 
 export interface SwapEventData {

@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { NFTMethod } from 'lisk-sdk';
 import {
 	MockedNFTMethod,
 	mock_nft_addDependencies,
@@ -28,6 +27,7 @@ import {
 import { NFTRegistry } from './nft_registry';
 import { NFT } from './nft';
 import { chainID } from '../module';
+import { NFTMethod } from '../../../../../../../src/app/modules/nft';
 
 const context = {} as any;
 const nftModule = 'module';

@@ -1,4 +1,4 @@
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { DexModuleConfig } from '../types';
 import { DEFAULT_TREASURY_ADDRESS } from './address';
 import {
@@ -16,7 +16,7 @@ export const defaultConfig: DexModuleConfig = {
 		['10000', '200'],
 	],
 	feeProtocol: 0,
-	feeProtocolPool: cryptography.address.getLisk32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),
+	feeProtocolPool: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),
 	feeConversionEnabled: true,
 	supportAllTokens: true,
 	minTransactionFee: {

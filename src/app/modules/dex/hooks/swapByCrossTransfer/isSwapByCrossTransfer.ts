@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'lisk-sdk';
+import { CrossChainMessageContext, codec } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { crossChainTokenTransferMessageParams } from '../../schema/dependencies/token';
 import { DexInteroperableMethod } from '../../cc_method';

@@ -8,7 +8,7 @@ import {
 	TokenMethod,
 	Transaction,
 	codec,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { PoolStore } from './stores/pool';
 import { immutableMethodSwapContext, methodSwapContext } from './stores/context';
 import { Uint24String } from './stores/library/int';

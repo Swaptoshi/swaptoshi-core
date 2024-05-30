@@ -1,4 +1,4 @@
-import { TokenMethod } from 'lisk-sdk';
+import { TokenMethod } from 'klayr-sdk';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import {
 	NonfungiblePositionManager,

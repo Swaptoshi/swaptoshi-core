@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { ExactInputParams } from '../../../../../src/app/modules/dex/types';
 import { invalidAddress, invalidNumberString } from '../utils/invalid';

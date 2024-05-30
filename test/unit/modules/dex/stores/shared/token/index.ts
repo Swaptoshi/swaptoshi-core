@@ -2,16 +2,16 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable import/no-extraneous-dependencies */
-import { InternalMethod } from 'lisk-framework/dist-node/modules/token/internal_method';
-import { SupplyStoreData } from 'lisk-framework/dist-node/modules/token/stores/supply';
-import { InteroperabilityMethod } from 'lisk-framework/dist-node/modules/token/types';
-import { ImmutableMethodContext, MethodContext, TokenMethod } from 'lisk-sdk';
+import { InternalMethod } from 'klayr-framework/dist-node/modules/token/internal_method';
+import { SupplyStoreData } from 'klayr-framework/dist-node/modules/token/stores/supply';
+import { InteroperabilityMethod } from 'klayr-framework/dist-node/modules/token/types';
+import { ImmutableMethodContext, MethodContext, TokenMethod } from 'klayr-sdk';
 import { TokenRegistry } from './token_registry';
 
 export const mock_token_init = jest.fn();
 export const mock_token_addDependencies = jest.fn();
 export const mock_token_isNativeToken = jest.fn();
-export const mock_token_getTokenIDLSK = jest.fn();
+export const mock_token_getTokenIDKLY = jest.fn();
 export const mock_token_userSubstoreExists = jest.fn();
 export const mock_token_getLockedAmount = jest.fn();
 export const mock_token_getEscrowedAmount = jest.fn();
@@ -51,8 +51,8 @@ export class MockedTokenMethod implements Omit<TokenMethod, ''> {
 		mock_token_isNativeToken(_tokenID);
 		return true;
 	}
-	public getTokenIDLSK(): Buffer {
-		mock_token_getTokenIDLSK();
+	public getTokenIDKLY(): Buffer {
+		mock_token_getTokenIDKLY();
 		return Buffer.from('0000000000000000', 'hex');
 	}
 	public async userSubstoreExists(

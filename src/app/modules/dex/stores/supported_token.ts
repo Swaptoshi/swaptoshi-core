@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, MethodContext, StoreGetter, TokenMethod } from 'lisk-sdk';
+import { BaseStore, MethodContext, StoreGetter, TokenMethod } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, SupportedTokenManager } from '../types';
 import { supportedTokenStoreSchema } from '../schema/stores/supported_token';
 

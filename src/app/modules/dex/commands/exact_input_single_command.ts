@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { PoolStore } from '../stores/pool';
 import { commandSwapContext } from '../stores/context';
 import { exactInputSingleCommandSchema } from '../schema/commands/exact_input_single_command';

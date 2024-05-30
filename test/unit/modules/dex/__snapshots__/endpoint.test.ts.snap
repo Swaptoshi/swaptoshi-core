@@ -4,7 +4,7 @@ exports[`DexEndpoint getMetadata should get token metadata 1`] = `
 {
   "description": "This NFT represents a liquidity position in a Swaptoshi TKNB-TKNC pool. The owner of this NFT can modify or redeem the position.
 
-Pool Address: lskzzzzzzzzzzzzpzzzzzzzzzzzzozzzvh2553k7h
+Pool Address: klyzzzzzzzzzzzzpzzzzzzzzzzzzozzzvh2553k7h
 TKNB Token ID: 0000000000000002
 TKNC Token ID: 0000000000000003
 Fee Tier: 0.3%
@@ -18,6 +18,6 @@ NFT ID: 0
 
 exports[`DexEndpoint getTokenURI should get token uri 1`] = `
 {
-  "tokenURI": "ipfs://bafkreiabijd5jhj5n4gjrwjz5m7xasrkcjhfgq3siawy37r34paxzolfbq",
+  "tokenURI": "ipfs://bafkreife6klefkcmghsoxqnzmayi3fq5mia5cv3kb7pcawo3xds5kmijxu",
 }
 `;

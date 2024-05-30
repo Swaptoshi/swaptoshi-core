@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
 import { CreatePoolCommand } from '../../../../../src/app/modules/dex/commands/create_pool_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { createPoolCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/create_pool_command';

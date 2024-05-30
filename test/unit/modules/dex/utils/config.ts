@@ -1,4 +1,4 @@
-import { GenesisConfig } from 'lisk-sdk';
+import { GenesisConfig } from 'klayr-sdk';
 import { chainID, moduleConfig } from '../stores/shared/module';
 import { DexModuleConfig } from '../../../../../src/app/modules/dex/types';
 

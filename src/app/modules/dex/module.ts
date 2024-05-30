@@ -9,14 +9,13 @@ import {
 	MainchainInteroperabilityMethod,
 	ModuleInitArgs,
 	ModuleMetadata,
-	NFTMethod,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { BurnCommand } from './commands/burn_command';
 import { CollectCommand } from './commands/collect_command';
 import { CreatePoolCommand } from './commands/create_pool_command';
@@ -116,6 +115,7 @@ import {
 	getConfigEndpointResponseSchema,
 } from './schema/endpoint/get_config';
 import { TokenFactoryMethod } from '../token_factory/method';
+import { NFTMethod } from '../nft';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexModuleConfig | undefined;

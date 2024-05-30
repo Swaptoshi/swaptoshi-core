@@ -1,4 +1,4 @@
-import { BlockExecuteContext, NamedRegistry } from 'lisk-sdk';
+import { BlockExecuteContext, NamedRegistry } from 'klayr-sdk';
 import { mutableBlockHookFactoryContext } from '../../stores/context';
 import { VestingUnlockStore } from '../../stores/vesting_unlock';
 

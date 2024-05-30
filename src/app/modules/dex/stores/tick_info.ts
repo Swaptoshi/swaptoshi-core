@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db } from 'lisk-sdk';
+import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { TickInfo } from '../types';
 import { Int24String } from './library/int';
 import { tickInfoStoreSchema } from '../schema/stores/tick_info';

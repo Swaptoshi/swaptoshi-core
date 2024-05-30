@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { Uint256String } from '../stores/library/int';
 import { treasurifyEventSchema } from '../schema/events/treasurify';
 

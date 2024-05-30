@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'lisk-sdk';
+import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'klayr-sdk';
 import {
 	ICOChangePriceParams,
 	ICOCreateParams,
@@ -98,7 +98,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		);
 
 		if (this.config.icoLeftOverAddress) {
-			const leftOverAddress = cryptography.address.getAddressFromLisk32Address(
+			const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(
 				this.config.icoLeftOverAddress,
 				this.config.icoLeftOverAddress.substring(0, 3),
 			);
@@ -311,7 +311,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 			);
 
 			if (tokenToBeTransferred > BigInt(0) || tokenToBeUnlocked > BigInt(0)) {
-				const leftOverAddress = cryptography.address.getAddressFromLisk32Address(
+				const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(
 					this.config.icoLeftOverAddress,
 					this.config.icoLeftOverAddress.substring(0, 3),
 				);

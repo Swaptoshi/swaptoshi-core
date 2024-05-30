@@ -2,15 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-	GenesisConfig,
-	MethodContext,
-	NFTMethod,
-	NamedRegistry,
-	TokenMethod,
-	codec,
-	utils,
-} from 'lisk-sdk';
+import { GenesisConfig, MethodContext, NamedRegistry, TokenMethod, codec, utils } from 'klayr-sdk';
 import * as IPFSHash from 'ipfs-only-hash';
 import {
 	Uint24String,
@@ -56,6 +48,7 @@ import { IncreaseLiquidityEvent } from '../../events/increase_liquidity';
 import { TokenURICreatedEvent } from '../../events/tokenuri_created';
 import { POSITION_MANAGER_ADDRESS, TOKENURI_ATTTRIBUTE } from '../../constants';
 import { TokenURIDestroyedEvent } from '../../events/tokenuri_destroyed';
+import { NFTMethod } from '../../../nft';
 
 interface AddLiquidityParams {
 	token0: Buffer;

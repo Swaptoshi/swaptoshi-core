@@ -5,17 +5,17 @@ import {
 	DynamicRewardMethod,
 	FeeMethod,
 	MainchainInteroperabilityMethod,
-	NFTModule,
 	PoSMethod,
 	RandomMethod,
 	SidechainInteroperabilityMethod,
 	TokenMethod,
 	ValidatorsMethod,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
+import { NFTModule } from './modules/nft/module';
 import { DexModule } from './modules/dex/module';
 import { TokenFactoryModule } from './modules/token_factory/module';
 
-interface LiskMethod {
+interface KlayrMethod {
 	validator: ValidatorsMethod;
 	auth: AuthMethod;
 	token: TokenMethod;
@@ -26,7 +26,7 @@ interface LiskMethod {
 	interoperability: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 }
 
-export const registerModules = (app: Application, method: LiskMethod): void => {
+export const registerModules = (app: Application, method: KlayrMethod): void => {
 	const nftModule = new NFTModule();
 	const tokenFactoryModule = new TokenFactoryModule();
 	const dexModule = new DexModule();

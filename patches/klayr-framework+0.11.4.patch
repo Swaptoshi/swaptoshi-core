@@ -1,7 +1,7 @@
-diff --git a/node_modules/lisk-framework/dist-node/application.d.ts b/node_modules/lisk-framework/dist-node/application.d.ts
-index ceb37cf..7891bf6 100644
---- a/node_modules/lisk-framework/dist-node/application.d.ts
-+++ b/node_modules/lisk-framework/dist-node/application.d.ts
+diff --git a/node_modules/klayr-framework/dist-node/application.d.ts b/node_modules/klayr-framework/dist-node/application.d.ts
+index 2a3ee8a..207625f 100644
+--- a/node_modules/klayr-framework/dist-node/application.d.ts
++++ b/node_modules/klayr-framework/dist-node/application.d.ts
 @@ -42,6 +42,7 @@ export declare class Application {
      static defaultApplication(config?: PartialApplicationConfig, mainchain?: boolean): DefaultApplication;
      registerPlugin(plugin: BasePlugin<any>, options?: PluginConfig): void;
@@ -10,10 +10,10 @@ index ceb37cf..7891bf6 100644
      registerInteroperableModule(interoperableModule: BaseInteroperableModule): void;
      getRegisteredModules(): BaseModule[];
      getMetadata(): ModuleMetadataJSON[];
-diff --git a/node_modules/lisk-framework/dist-node/application.js b/node_modules/lisk-framework/dist-node/application.js
-index b9be7d4..d531273 100644
---- a/node_modules/lisk-framework/dist-node/application.js
-+++ b/node_modules/lisk-framework/dist-node/application.js
+diff --git a/node_modules/klayr-framework/dist-node/application.js b/node_modules/klayr-framework/dist-node/application.js
+index 4aece0e..516380a 100644
+--- a/node_modules/klayr-framework/dist-node/application.js
++++ b/node_modules/klayr-framework/dist-node/application.js
 @@ -133,6 +133,9 @@ class Application {
      registerModule(Module) {
          this._registerModule(Module);
@@ -40,10 +40,10 @@ index b9be7d4..d531273 100644
      _initLogger() {
          var _a, _b;
          return (0, logger_1.createLogger)({
-diff --git a/node_modules/lisk-framework/dist-node/modules/fee/module.js b/node_modules/lisk-framework/dist-node/modules/fee/module.js
-index 7ae3dab..1bdb7b4 100644
---- a/node_modules/lisk-framework/dist-node/modules/fee/module.js
-+++ b/node_modules/lisk-framework/dist-node/modules/fee/module.js
+diff --git a/node_modules/klayr-framework/dist-node/modules/fee/module.js b/node_modules/klayr-framework/dist-node/modules/fee/module.js
+index da24f74..1f1ca62 100644
+--- a/node_modules/klayr-framework/dist-node/modules/fee/module.js
++++ b/node_modules/klayr-framework/dist-node/modules/fee/module.js
 @@ -69,10 +69,11 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
          if (transaction.fee < minFee) {
              throw new Error(`Insufficient transaction fee. Minimum required fee is ${minFee}.`);
@@ -60,10 +60,10 @@ index 7ae3dab..1bdb7b4 100644
          return { status: state_machine_1.VerifyStatus.OK };
      }
      async beforeCommandExecute(context) {
-diff --git a/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts b/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
+diff --git a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts b/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts
 index 1ee0809..51c1c41 100644
---- a/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
-+++ b/node_modules/lisk-framework/dist-node/state_machine/state_machine.d.ts
+--- a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts
++++ b/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts
 @@ -12,6 +12,7 @@ export declare class StateMachine {
      private _logger;
      private _initialized;
@@ -72,10 +72,10 @@ index 1ee0809..51c1c41 100644
      init(logger: Logger, genesisConfig: GenesisConfig, moduleConfig?: Record<string, Record<string, unknown>>): Promise<void>;
      executeGenesisBlock(ctx: GenesisBlockContext): Promise<void>;
      insertAssets(ctx: GenerationContext): Promise<void>;
-diff --git a/node_modules/lisk-framework/dist-node/state_machine/state_machine.js b/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
-index 4b3dc79..81bfda2 100644
---- a/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
-+++ b/node_modules/lisk-framework/dist-node/state_machine/state_machine.js
+diff --git a/node_modules/klayr-framework/dist-node/state_machine/state_machine.js b/node_modules/klayr-framework/dist-node/state_machine/state_machine.js
+index dc24f4d..eb419c3 100644
+--- a/node_modules/klayr-framework/dist-node/state_machine/state_machine.js
++++ b/node_modules/klayr-framework/dist-node/state_machine/state_machine.js
 @@ -16,6 +16,10 @@ class StateMachine {
          this._validateExisting(mod);
          this._modules.push(mod);

@@ -1,4 +1,4 @@
-import { MethodContext } from 'lisk-sdk';
+import { MethodContext } from 'klayr-sdk';
 import { methodSwapContext } from '../../../../../../../src/app/modules/dex/stores/context';
 import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
 import * as PoolTicksCounter from '../../../../../../../src/app/modules/dex/stores/library/periphery/pool_ticks_counter';

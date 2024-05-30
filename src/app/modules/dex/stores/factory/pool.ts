@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { NamedRegistry, TokenMethod, cryptography, utils } from 'lisk-sdk';
+import { NamedRegistry, TokenMethod, cryptography, utils } from 'klayr-sdk';
 import {
 	PositionInfo,
 	Slot0,
@@ -123,7 +123,7 @@ export class DEXPool implements DEXPoolData {
 		this.address = PoolAddress.computeAddress(
 			PoolAddress.getPoolKey(pool.token0, pool.token1, pool.fee),
 		);
-		this.lisk32 = cryptography.address.getLisk32AddressFromAddress(this.address);
+		this.klayr32 = cryptography.address.getKlayr32AddressFromAddress(this.address);
 		this.collectionId = PoolAddress.computePoolId(this.address);
 
 		this.stores = stores;
@@ -171,7 +171,7 @@ export class DEXPool implements DEXPoolData {
 		this.feeProtocol = config.feeProtocol ?? 0;
 
 		this.feeProtocolPool = config.feeProtocolPool
-			? cryptography.address.getAddressFromLisk32Address(
+			? cryptography.address.getAddressFromKlayr32Address(
 					config.feeProtocolPool,
 					config.feeProtocolPool.substring(0, 3),
 			  )
@@ -1400,7 +1400,7 @@ export class DEXPool implements DEXPoolData {
 	}
 
 	public readonly address: Buffer = Buffer.alloc(0);
-	public readonly lisk32: string = '';
+	public readonly klayr32: string = '';
 	public readonly collectionId: Buffer = Buffer.alloc(0);
 
 	public token0: Buffer = Buffer.alloc(0);

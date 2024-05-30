@@ -1,4 +1,4 @@
-import { GenesisConfig, getMainchainID } from 'lisk-sdk';
+import { GenesisConfig, getMainchainID } from 'klayr-sdk';
 import { DexModuleConfig } from '../types';
 
 export const getMainchainTokenId = (chainId: Buffer) =>

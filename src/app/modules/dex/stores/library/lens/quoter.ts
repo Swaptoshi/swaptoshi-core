@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { NamedRegistry } from 'lisk-sdk';
+import { NamedRegistry } from 'klayr-sdk';
 import {
 	Uint256String,
 	Uint24String,

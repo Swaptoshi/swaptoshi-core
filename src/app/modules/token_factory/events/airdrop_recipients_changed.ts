@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { airdropRecipientsChangedEventSchema } from '../schema';
 import { AirdropRecipientsChangedEventData } from '../types';
 

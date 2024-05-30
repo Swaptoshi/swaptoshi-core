@@ -6,7 +6,7 @@ import {
 	CommandExecuteContext,
 	VerificationResult,
 	VerifyStatus,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { airdropEditRecipientsCommandSchema } from '../schema';
 import { AirdropEditRecipientsParams } from '../types';
 import { commandFactoryContext, immutableTransactionHookFactoryContext } from '../stores/context';

@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { poolInitializedEventSchema } from '../schema/events/pool_initialized';
 
 export interface PoolInitializedEventData {

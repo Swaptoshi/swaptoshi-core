@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db } from 'lisk-sdk';
+import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { Observation } from '../types';
 import { Int16String } from './library/int';
 import { observationStoreSchema } from '../schema/stores/observation';

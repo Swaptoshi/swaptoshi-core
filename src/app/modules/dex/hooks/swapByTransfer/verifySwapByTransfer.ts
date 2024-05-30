@@ -1,4 +1,4 @@
-import { NamedRegistry, TransactionVerifyContext } from 'lisk-sdk';
+import { NamedRegistry, TransactionVerifyContext } from 'klayr-sdk';
 import { PoolAddress } from '../../stores/library/periphery';
 import { isSwapByTransfer } from './isSwapByTransfer';
 

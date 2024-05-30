@@ -6,7 +6,7 @@ import {
 	JSONObject,
 	NamedRegistry,
 	TokenMethod,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import {
 	Constructor,
 	ImmutableFactoryContext,

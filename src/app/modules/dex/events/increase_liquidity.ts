@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { increaseLiquidityEventSchema } from '../schema/events/increase_liquidity';
 
 export interface IncreaseLiquidityEventData {

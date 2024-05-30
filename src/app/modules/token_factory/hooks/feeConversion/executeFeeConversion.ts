@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { FeeMethod, NamedRegistry, TokenMethod, TransactionExecuteContext } from 'lisk-sdk';
+import { FeeMethod, NamedRegistry, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
 import { TokenFactoryModuleConfig } from '../../types';
 import { DexMethod } from '../../../dex/method';
 import { TokenFactoryMethod } from '../../method';

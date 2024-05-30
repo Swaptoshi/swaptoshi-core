@@ -1,0 +1,6 @@
+{
+	"commander": {
+		"version": "6.0.5"
+	},
+	"template": "klayr-ts"
+}

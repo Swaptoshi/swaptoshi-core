@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'lisk-sdk';
+import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
 import { TreasurifyCommand } from '../../../../../src/app/modules/dex/commands/treasurify_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { treasurifyCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/treasurify_command';

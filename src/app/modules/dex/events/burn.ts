@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { burnEventSchema } from '../schema/events/burn';
 
 export interface BurnEventData {

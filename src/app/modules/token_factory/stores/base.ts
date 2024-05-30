@@ -7,7 +7,7 @@ import {
 	TokenMethod,
 	db,
 	utils,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { TokenFactoryModuleConfig } from '../types';
 import { DexMethod } from '../../dex/method';
 

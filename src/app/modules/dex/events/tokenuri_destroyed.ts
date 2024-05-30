@@ -1,4 +1,4 @@
-import { BaseEvent } from 'lisk-sdk';
+import { BaseEvent } from 'klayr-sdk';
 import { tokenUriDestroyedEventSchema } from '../schema/events/tokenuri_destroyed';
 
 export interface TokenURIDestroyedEventData {

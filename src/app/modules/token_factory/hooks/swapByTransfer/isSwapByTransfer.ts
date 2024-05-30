@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'lisk-sdk';
+import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'klayr-sdk';
 import { ICOStore } from '../../stores/ico';
 import { tokenTransferParamsSchema } from '../../schema';
 

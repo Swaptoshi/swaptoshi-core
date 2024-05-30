@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext } from 'lisk-sdk';
+import { CrossChainMessageContext } from 'klayr-sdk';
 import { crossChainMethodFactoryContext } from '../../stores/context';
 import { isSwapByCrossTransfer } from './isSwapByCrossTransfer';
 import { TokenFactoryInteroperableMethod } from '../../cc_method';

@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
-import { TokenMethod } from 'lisk-sdk';
+import { TokenMethod } from 'klayr-sdk';
 import {
 	NonfungiblePositionManager,
 	SwapRouter,

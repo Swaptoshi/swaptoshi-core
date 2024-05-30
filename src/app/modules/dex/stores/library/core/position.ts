@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { cryptography } from 'lisk-sdk';
+import { cryptography } from 'klayr-sdk';
 import { Uint256String, Int24String, Int128String, Uint128, Int128, Uint256 } from '../int';
 import { PositionInfoStore } from '../../position_info';
 import { ImmutableContext, MutableContext, PositionInfo } from '../../../types';

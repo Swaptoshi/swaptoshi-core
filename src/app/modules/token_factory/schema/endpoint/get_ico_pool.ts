@@ -1,7 +1,7 @@
 export const getICOPoolEndpointResponseSchema = {
 	$id: '/tokenFactory/endpoint/response/getICOPool',
 	type: 'object',
-	required: ['providerAddress', 'price', 'poolAddress', 'lisk32'],
+	required: ['providerAddress', 'price', 'poolAddress', 'klayr32'],
 	properties: {
 		providerAddress: {
 			dataType: 'string',
@@ -15,7 +15,7 @@ export const getICOPoolEndpointResponseSchema = {
 			dataType: 'string',
 			fieldNumber: 3,
 		},
-		lisk32: {
+		klayr32: {
 			dataType: 'string',
 			fieldNumber: 4,
 		},

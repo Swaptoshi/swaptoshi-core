@@ -8,7 +8,7 @@ import {
 	ModuleEndpointContext,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
-} from 'lisk-sdk';
+} from 'klayr-sdk';
 import { ImmutableFactoryContext, MutableFactoryContext } from '../../types';
 
 export function commandFactoryContext(
