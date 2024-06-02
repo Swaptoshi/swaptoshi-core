@@ -107,7 +107,7 @@
 		}
 	},
 	"dependencies": {
-		"@klayr/chain-connector-plugin": "0.1.2",
+		"@klayr/chain-connector-plugin": "^0.1.4",
 		"@klayr/dashboard-plugin": "0.3.2",
 		"@klayr/faucet-plugin": "0.3.2",
 		"@klayr/generator-plugin": "0.4.2",
@@ -124,7 +124,7 @@
 		"inquirer": "8.2.5",
 		"ipfs-only-hash": "^4.0.0",
 		"klayr-commander": "6.0.2",
-		"klayr-sdk": "6.0.2",
+		"klayr-sdk": "^6.0.4",
 		"patch-package": "^8.0.0",
 		"tar": "6.1.11",
 		"tslib": "2.4.1"

@@ -2,7 +2,12 @@
 	"system": {
 		"dataPath": "~/.klayr/swaptoshi-core",
 		"keepEventsForHeights": -1,
-		"logLevel": "info"
+		"logLevel": "info",
+		"enableMetrics": true,
+		"keepInclusionProofsForHeights": -1,
+		"inclusionProofKeys": [
+			"83ed0d2500005735b05e48e476be8b87c6fcfcccdb3012808926eaa933b756379214586d380c"
+		]
 	},
 	"rpc": {
 		"modes": ["ipc", "ws", "http"],
@@ -27,7 +32,6 @@
 			"fromFile": "./config/genesis_block.blob"
 		},
 		"blockTime": 3,
-		"bftBatchSize": 103,
 		"maxTransactionsSize": 15360,
 		"minimumCertifyHeight": 1,
 		"chainID": "04555555"
@@ -175,9 +179,8 @@
 	},
 	"plugins": {
 		"chainConnector": {
-			"encryptedPrivateKey": "kdf=argon2id&cipher=aes-128-gcm&version=1&ciphertext=3c9e1fc705af2802749c9a485d50596b19cd5cf34e72af4deb3749e4d6eeb7eeea6b857ca6386374b6138a075345a47d314a0181111484ce1290e0c5b458b971a7727fcc19ae097cb8a117e9fe245e8d08e3710f905ee90d6e31c71a077adf1466c9124451b0e51334d1e10a170fb54f29dc6d0d0b227cf5c2cad6aa14cfe9fb&mac=626adf55e8dca92d875684c7d0dade897198d42f9e1aba714159e503dfd85989&salt=d7976ab6b3451c07&iv=e1440a6845156d5d3e7b66baec867694&tag=e37b6ee8bc7cc54c1628172caf8f264b&iterations=1&parallelism=4&memorySize=2097023",
+			"encryptedPrivateKey": "kdf=argon2id&cipher=aes-128-gcm&version=1&ciphertext=2a96e2ffa614e838389bf52a40b89a85570fd01a11462df7903f8073bd5302945cd32edbcfc8ee72fac61edc10e02b068f19ce3f0bf5af773d4657bad707c6b1f1d70e0b0bd1657530bf9b4eb24fea6ee49c645ae22d3cd92ca88342f334e02348ba19f1499f5dd99ccc7870a589e04660fe37f54d3ceba90b378dac5500910d&mac=436027a2906b585601fafa9be654207eee2ed4f9d1c8a1ccd0f0e737096bfc7f&salt=701158d498117e8a&iv=3e6f8c010cccce9c5135b24fd2a58c6e&tag=c3c8419ef3a7113d33790e3976f36870&iterations=1&parallelism=4&memorySize=2097023",
 			"ccuFrequency": 5,
-			"ccuFee": "1000000",
 			"receivingChainIPCPath": "~/.klayr/klayr-core",
 			"receivingChainID": "04000000"
 		},
