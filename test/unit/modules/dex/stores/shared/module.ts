@@ -70,7 +70,7 @@ export const moduleConfig: DexModuleConfig = {
 	nftPositionMetadata: {
 		dex: {
 			name: 'Swaptoshi',
-			symbol: 'XSW',
+			symbol: 'SWX',
 			decimal: 8,
 		},
 		mainchain: {
