@@ -11,8 +11,9 @@ import {
 	TokenMethod,
 	ValidatorsMethod,
 } from 'klayr-sdk';
-import { NFTModule } from './modules/nft/module';
+import { FeeConversionModule } from './modules/fee_conversion';
 import { DexModule } from './modules/dex/module';
+import { NFTModule } from './modules/nft/module';
 import { TokenFactoryModule } from './modules/token_factory/module';
 
 interface KlayrMethod {
@@ -30,27 +31,18 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 	const nftModule = new NFTModule();
 	const tokenFactoryModule = new TokenFactoryModule();
 	const dexModule = new DexModule();
+	const feeConversionModule = new FeeConversionModule();
 
+	feeConversionModule.addDependencies(method.token, method.fee, dexModule.method);
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
-	dexModule.addDependencies(
-		method.token,
-		nftModule.method,
-		method.fee,
-		tokenFactoryModule.method,
-		method.interoperability,
-	);
-	tokenFactoryModule.addDependencies(
-		method.token,
-		method.fee,
-		nftModule.method,
-		dexModule.method,
-		method.interoperability,
-	);
+	dexModule.addDependencies(method.token, nftModule.method, method.fee, feeConversionModule.method, tokenFactoryModule.method, method.interoperability);
+	tokenFactoryModule.addDependencies(method.token, method.fee, feeConversionModule.method, nftModule.method, dexModule.method, method.interoperability);
 
-	// NOTE: registerModulePriority order matters here! Module with highest priority should be registered last
+	app.registerModulePriority(feeConversionModule);
+
 	app.registerModule(nftModule);
-	app.registerModulePriority(tokenFactoryModule);
-	app.registerModulePriority(dexModule);
+	app.registerModule(tokenFactoryModule);
+	app.registerModule(dexModule);
 
 	app.registerInteroperableModule(nftModule);
 	app.registerInteroperableModule(tokenFactoryModule);

@@ -77,35 +77,25 @@ import {
 	quoteICOExactOutputSingleEndpointResponseSchema,
 } from './schema';
 import { defaultConfig } from './constants';
-import {
-	executeBaseFee,
-	executeFeeConversion,
-	executeSwapByTransfer,
-	executeVestingUnlock,
-	verifyBaseFee,
-	verifyFeeConversion,
-	verifyMinimumFee,
-	verifySwapByTransfer,
-	verifyValidTransfer,
-} from './hooks';
+import { executeBaseFee, executeSwapByTransfer, executeVestingUnlock, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
 import { NFTMethod } from '../nft';
+import { FeeConversionMethod } from '../fee_conversion';
+import { TokenFactoryICOPurchaseFeeConversionMethod, TokenFactoryTransferFeeConversionMethod } from './fc_method';
 
 export class TokenFactoryModule extends BaseModule {
 	public _config: TokenFactoryModuleConfig | undefined;
 	public _feeMethod: FeeMethod | undefined;
+	public _feeConversionMethod: FeeConversionMethod | undefined;
 	public _tokenMethod: TokenMethod | undefined;
 	public _nftMethod: NFTMethod | undefined;
 	public _dexMethod: DexMethod | undefined;
-	public _tokenFactoryInteroperableMethod = new TokenFactoryInteroperableMethod(
-		this.stores,
-		this.events,
-	);
+	public _tokenFactoryInteroperableMethod = new TokenFactoryInteroperableMethod(this.stores, this.events);
 
 	public crossChainCommand = [];
 	public crossChainMethod = this._tokenFactoryInteroperableMethod;
 
 	public endpoint = new TokenFactoryEndpoint(this.stores, this.offchainStores);
-	public method = new TokenFactoryMethod(this.stores, this.events, this.name);
+	public method = new TokenFactoryMethod(this.stores, this.events);
 	public commands = [
 		new TokenCreateCommand(this.stores, this.events),
 		new TokenMintCommand(this.stores, this.events),
@@ -132,17 +122,11 @@ export class TokenFactoryModule extends BaseModule {
 		this.stores.register(FactoryStore, new FactoryStore(this.name, 1, this.stores, this.events));
 		this.stores.register(ICOStore, new ICOStore(this.name, 2, this.stores, this.events));
 		this.stores.register(NextAvailableTokenIdStore, new NextAvailableTokenIdStore(this.name, 3));
-		this.stores.register(
-			VestingUnlockStore,
-			new VestingUnlockStore(this.name, 4, this.stores, this.events),
-		);
+		this.stores.register(VestingUnlockStore, new VestingUnlockStore(this.name, 4, this.stores, this.events));
 
 		this.events.register(AirdropCreatedEvent, new AirdropCreatedEvent(this.name));
 		this.events.register(AirdropDistributedEvent, new AirdropDistributedEvent(this.name));
-		this.events.register(
-			AirdropRecipientsChangedEvent,
-			new AirdropRecipientsChangedEvent(this.name),
-		);
+		this.events.register(AirdropRecipientsChangedEvent, new AirdropRecipientsChangedEvent(this.name));
 		this.events.register(FactoryCreatedEvent, new FactoryCreatedEvent(this.name));
 		this.events.register(FactoryOwnerChangedEvent, new FactoryOwnerChangedEvent(this.name));
 		this.events.register(IcoCreatedEvent, new IcoCreatedEvent(this.name));
@@ -158,6 +142,7 @@ export class TokenFactoryModule extends BaseModule {
 	public addDependencies(
 		tokenMethod: TokenMethod,
 		feeMethod: FeeMethod,
+		feeConversionMethod: FeeConversionMethod,
 		nftMethod: NFTMethod,
 		dexMethod: DexMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
@@ -175,17 +160,13 @@ export class TokenFactoryModule extends BaseModule {
 		vestingUnlockStore.addDependencies(dependencies);
 
 		this._feeMethod = feeMethod;
+		this._feeConversionMethod = feeConversionMethod;
 		this._tokenMethod = tokenMethod;
 		this._nftMethod = nftMethod;
 		this._dexMethod = dexMethod;
 
-		this._tokenFactoryInteroperableMethod.addDependencies(
-			interoperabilityMethod,
-			tokenMethod,
-			nftMethod,
-		);
-
-		this.method.addDependencies(tokenMethod, feeMethod, dexMethod);
+		this._tokenFactoryInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
+		this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
 	}
 
 	public metadata(): ModuleMetadata {
@@ -261,7 +242,15 @@ export class TokenFactoryModule extends BaseModule {
 		vestingUnlockStore.init(_args.genesisConfig, this._config);
 
 		this.endpoint.init(this._config);
-		this.method.init(this._config);
+
+		if (this._config.icoFeeConversionEnabled) {
+			this._feeConversionMethod?.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
+			this._feeConversionMethod?.register(
+				this.name,
+				['icoExactInput', 'icoExactInputSingle', 'icoExactOutput', 'icoExactOutputSingle'],
+				new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.events),
+			);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -271,7 +260,6 @@ export class TokenFactoryModule extends BaseModule {
 			await verifyBaseFee.bind(this)(_context);
 			await verifyValidTransfer.bind(this)(_context);
 			await verifySwapByTransfer.bind(this)(_context);
-			await verifyFeeConversion.bind(this)(_context);
 		} catch (error: unknown) {
 			return {
 				status: VerifyStatus.FAIL,
@@ -286,7 +274,6 @@ export class TokenFactoryModule extends BaseModule {
 		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
 		await verifySwapByTransfer.bind(this)(_context);
-		await executeFeeConversion.bind(this)(_context);
 		await executeBaseFee.bind(this)(_context);
 	}
 

@@ -1,16 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable import/no-extraneous-dependencies */
-import {
-	FeeMethod,
-	MainchainInteroperabilityMethod,
-	Schema,
-	SidechainInteroperabilityMethod,
-	TokenMethod,
-	Transaction,
-	codec,
-	cryptography,
-	testing,
-} from 'klayr-sdk';
+import { FeeMethod, MainchainInteroperabilityMethod, Schema, SidechainInteroperabilityMethod, TokenMethod, Transaction, codec, cryptography, testing } from 'klayr-sdk';
 import { PrefixedStateReadWriter } from 'klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { ObservationStore } from '../../../../../../src/app/modules/dex/stores/observation';
@@ -28,6 +18,8 @@ import { MockedFeeMethod } from './fee';
 import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/stores/supported_token';
 import { TokenFactoryMethod } from '../../../../../../src/app/modules/token_factory/method';
 import { NFTMethod } from '../../../../../../src/app/modules/nft';
+import { MockedFeeConversionMethod } from './fee_conversion';
+import { FeeConversionMethod } from '../../../../../../src/app/modules/fee_conversion';
 
 export const chainID = Buffer.from('00000001', 'hex');
 export const tokenID = Buffer.concat([chainID, Buffer.alloc(4, 0)]);
@@ -85,22 +77,15 @@ export async function storeFixture() {
 	const tokenMethod = new MockedTokenMethod() as TokenMethod;
 	const nftMethod = new MockedNFTMethod() as NFTMethod;
 	const feeMethod = new MockedFeeMethod() as FeeMethod;
+	const feeConversionMethod = new MockedFeeConversionMethod() as FeeConversionMethod;
 	const tokenFactoryMethod = {
 		isFeeConversion: () => ({ status: false, payload: undefined }),
 	} as unknown as TokenFactoryMethod;
-	const interoperabilityMethod = {} as
-		| SidechainInteroperabilityMethod
-		| MainchainInteroperabilityMethod;
+	const interoperabilityMethod = {} as SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 
 	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
-	module.addDependencies(
-		tokenMethod,
-		nftMethod,
-		feeMethod,
-		tokenFactoryMethod,
-		interoperabilityMethod,
-	);
+	module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
 
 	const observationStore = module.stores.get(ObservationStore);
 	const positionInfoStore = module.stores.get(PositionInfoStore);
@@ -124,6 +109,7 @@ export async function storeFixture() {
 		tokenMethod,
 		nftMethod,
 		feeMethod,
+		feeConversionMethod,
 		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
@@ -137,11 +123,7 @@ export async function storeFixture() {
 	};
 }
 
-export async function commandContextFixture<T extends object>(
-	command: string,
-	commandSchema: Schema,
-	senderPublicKey: Buffer,
-) {
+export async function commandContextFixture<T extends object>(command: string, commandSchema: Schema, senderPublicKey: Buffer) {
 	const {
 		config,
 		module,
@@ -211,6 +193,7 @@ export async function hookContextFixture() {
 		tokenMethod,
 		nftMethod,
 		feeMethod,
+		feeConversionMethod,
 		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
@@ -243,6 +226,7 @@ export async function hookContextFixture() {
 		tokenMethod,
 		nftMethod,
 		feeMethod,
+		feeConversionMethod,
 		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,

@@ -1,18 +1,7 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-	BaseStore,
-	FeeMethod,
-	GenesisConfig,
-	JSONObject,
-	NamedRegistry,
-	TokenMethod,
-} from 'klayr-sdk';
-import {
-	Constructor,
-	ImmutableFactoryContext,
-	MutableFactoryContext,
-	TokenFactoryModuleConfig,
-} from '../../types';
+import { BaseStore, FeeMethod, GenesisConfig, JSONObject, NamedRegistry, TokenMethod } from 'klayr-sdk';
+import { Constructor, ImmutableFactoryContext, MutableFactoryContext, TokenFactoryModuleConfig } from '../../types';
 import { DexMethod } from '../../../dex/method';
 
 export interface AddDependenciesParam<T extends ImmutableFactoryContext | MutableFactoryContext> {
@@ -23,15 +12,7 @@ export interface AddDependenciesParam<T extends ImmutableFactoryContext | Mutabl
 }
 
 export class BaseInstance<T, K extends BaseStore<T>> {
-	public constructor(
-		storeKey: Constructor,
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		genesisConfig: GenesisConfig,
-		config: TokenFactoryModuleConfig,
-		moduleName: string,
-		key?: Buffer,
-	) {
+	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, key?: Buffer) {
 		this.stores = stores;
 		this.events = events;
 		this.moduleName = moduleName;

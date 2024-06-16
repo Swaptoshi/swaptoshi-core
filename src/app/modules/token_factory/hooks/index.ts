@@ -1,6 +1,5 @@
 /* eslint-disable import/no-cycle */
 export * from './baseFee';
-export * from './feeConversion';
 export * from './minimumFee';
 export * from './swapByCrossTransfer';
 export * from './swapByTransfer';

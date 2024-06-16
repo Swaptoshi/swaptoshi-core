@@ -25,29 +25,12 @@ import { defaultConfig } from '../../../../src/app/modules/dex/constants';
 import { hookContextFixture, tokenID } from './stores/shared/module';
 import { poolAddress, senderPublicKey, senderAddress, token0, token1 } from './utils/account';
 import { mutableHookSwapContext } from '../../../../src/app/modules/dex/stores/context';
-import {
-	FeeAmount,
-	TICK_SPACINGS,
-	encodePriceSqrt,
-	getMaxTick,
-	getMinTick,
-} from './stores/shared/utilities';
-import {
-	ExactInputParams,
-	ExactInputSingleParams,
-	ExactOutputParams,
-	ExactOutputSingleParams,
-} from '../../../../src/app/modules/dex/types';
-import { exactInputCommandSchema } from '../../../../src/app/modules/dex/schema/commands/exact_input_command';
-import { exactInputSingleCommandSchema } from '../../../../src/app/modules/dex/schema/commands/exact_input_single_command';
-import { exactOutputCommandSchema } from '../../../../src/app/modules/dex/schema/commands/exact_output_command';
-import { exactOutputSingleCommandSchema } from '../../../../src/app/modules/dex/schema/commands/exact_output_single_command';
+import { FeeAmount, TICK_SPACINGS, encodePriceSqrt, getMaxTick, getMinTick } from './stores/shared/utilities';
 import { PoolAddress } from '../../../../src/app/modules/dex/stores/library/periphery';
 import { NATIVE_TOKEN_ID } from './stores/shared/pool';
-import { encodePath } from './stores/shared/path';
 import { TokenRegistry } from './stores/shared/token/token_registry';
 import { Token } from './stores/shared/token/token';
-import { eventResultContain, eventResultHaveLength, getEvents } from '../../../utils/events';
+import { eventResultContain, eventResultHaveLength } from '../../../utils/events';
 import { SwapEvent } from '../../../../src/app/modules/dex/events/swap';
 import { mock_token_transfer } from './stores/shared/token';
 import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supported_token';
@@ -55,6 +38,7 @@ import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_s
 import { fallbackTokenSymbol } from './utils/token';
 import { TokenFactoryMethod } from '../../../../src/app/modules/token_factory/method';
 import { NFTMethod } from '../../../../src/app/modules/nft';
+import { FeeConversionMethod } from '../../../../src/app/modules/fee_conversion';
 
 const baseTransaction = {
 	module: '',
@@ -64,41 +48,6 @@ const baseTransaction = {
 	fee: BigInt(1000000000),
 	signatures: [senderPublicKey],
 	params: Buffer.alloc(0),
-};
-
-const exactInputParam: ExactInputParams = {
-	path: encodePath([token0, token1], [FeeAmount.MEDIUM]),
-	deadline: Date.now().toString(),
-	recipient: senderAddress,
-	amountIn: '1000',
-	amountOutMinimum: '0',
-};
-const exactInputSingleParam: ExactInputSingleParams = {
-	tokenIn: token0,
-	tokenOut: token1,
-	fee: FeeAmount.MEDIUM,
-	deadline: Date.now().toString(),
-	recipient: senderAddress,
-	amountIn: '1000',
-	amountOutMinimum: '0',
-	sqrtPriceLimitX96: '0',
-};
-const exactOutputParam: ExactOutputParams = {
-	path: encodePath([token1, token0], [FeeAmount.MEDIUM]),
-	deadline: Date.now().toString(),
-	recipient: senderAddress,
-	amountOut: '1000',
-	amountInMaximum: '0',
-};
-const exactOutputSingleParam: ExactOutputSingleParams = {
-	tokenIn: token0,
-	tokenOut: token1,
-	fee: FeeAmount.MEDIUM,
-	deadline: Date.now().toString(),
-	recipient: senderAddress,
-	amountOut: '1000',
-	amountInMaximum: '0',
-	sqrtPriceLimitX96: '0',
 };
 
 describe('DexModule', () => {
@@ -113,6 +62,7 @@ describe('DexModule', () => {
 	let tokenMethod: TokenMethod;
 	let nftMethod: NFTMethod;
 	let feeMethod: FeeMethod;
+	let feeConversionMethod: FeeConversionMethod;
 	let tokenFactoryMethod: TokenFactoryMethod;
 	let interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	let verifyContext: TransactionVerifyContext;
@@ -128,17 +78,8 @@ describe('DexModule', () => {
 		const nativeTokenIns = new Token();
 		TokenRegistry.createToken(NATIVE_TOKEN_ID, nativeTokenIns);
 
-		({
-			module,
-			createTransactionVerifyContext,
-			createTransactionExecuteContext,
-			poolStore,
-			positionManagerStore,
-			tokenMethod,
-			nftMethod,
-			feeMethod,
-			tokenFactoryMethod,
-		} = await hookContextFixture());
+		({ module, createTransactionVerifyContext, createTransactionExecuteContext, poolStore, positionManagerStore, tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod } =
+			await hookContextFixture());
 	});
 
 	afterEach(() => {
@@ -147,21 +88,10 @@ describe('DexModule', () => {
 	});
 
 	const createPool = async (tokenA, tokenB) => {
-		executeContext = createTransactionExecuteContext(
-			new Transaction({ ...baseTransaction, module: module.name }),
-		);
+		executeContext = createTransactionExecuteContext(new Transaction({ ...baseTransaction, module: module.name }));
 		const context = mutableHookSwapContext(executeContext);
 
-		const pool = await poolStore.createPool(
-			context,
-			tokenA,
-			fallbackTokenSymbol(tokenA, 'TKNA'),
-			8,
-			tokenB,
-			fallbackTokenSymbol(tokenB, 'TKNB'),
-			8,
-			FeeAmount.MEDIUM,
-		);
+		const pool = await poolStore.createPool(context, tokenA, fallbackTokenSymbol(tokenA, 'TKNA'), 8, tokenB, fallbackTokenSymbol(tokenB, 'TKNB'), 8, FeeAmount.MEDIUM);
 		await pool.initialize(encodePriceSqrt(1, 1).toString());
 		return pool;
 	};
@@ -171,17 +101,11 @@ describe('DexModule', () => {
 	};
 
 	const mintPosition = async (poolAddressToMint: Buffer, amountToMint: string) => {
-		executeContext = createTransactionExecuteContext(
-			new Transaction({ ...baseTransaction, module: module.name }),
-		);
+		executeContext = createTransactionExecuteContext(new Transaction({ ...baseTransaction, module: module.name }));
 		const context = mutableHookSwapContext(executeContext);
 		const nft = await positionManagerStore.getMutablePositionManager(context, poolAddressToMint);
 
-		const {
-			token0: tokenA,
-			token1: tokenB,
-			fee: feePool,
-		} = PoolAddress.decodePoolAddress(poolAddressToMint);
+		const { token0: tokenA, token1: tokenB, fee: feePool } = PoolAddress.decodePoolAddress(poolAddressToMint);
 
 		await tokenMethod.mint(executeContext, senderAddress, tokenA, BigInt(amountToMint));
 		await tokenMethod.mint(executeContext, senderAddress, tokenB, BigInt(amountToMint));
@@ -228,13 +152,7 @@ describe('DexModule', () => {
 		it('should return module metadata', () => {
 			const moduleMetadata = module.metadata();
 			expect(typeof moduleMetadata).toBe('object');
-			expect(Object.keys(moduleMetadata)).toEqual([
-				'commands',
-				'events',
-				'stores',
-				'endpoints',
-				'assets',
-			]);
+			expect(Object.keys(moduleMetadata)).toEqual(['commands', 'events', 'stores', 'endpoints', 'assets']);
 			expect(moduleMetadata.commands).toHaveLength(11);
 			expect(moduleMetadata.endpoints).toHaveLength(12);
 			expect(moduleMetadata.events).toHaveLength(16);
@@ -285,86 +203,58 @@ describe('DexModule', () => {
 
 		describe('addDependencies', () => {
 			it('should add poolStore dependencies', () => {
-				module.addDependencies(
-					tokenMethod,
-					nftMethod,
-					feeMethod,
-					tokenFactoryMethod,
-					interoperabilityMethod,
-				);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
 				expect(mockPoolStore.addDependencies).toHaveBeenCalledWith(tokenMethod);
 			});
 
 			it('should add positionManagerStore dependencies', () => {
-				module.addDependencies(
-					tokenMethod,
-					nftMethod,
-					feeMethod,
-					tokenFactoryMethod,
-					interoperabilityMethod,
-				);
-				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(
-					tokenMethod,
-					nftMethod,
-				);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
+				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(tokenMethod, nftMethod);
 			});
 		});
 	});
 
 	describe('verifyTransaction', () => {
 		describe('verifyMinimumFee', () => {
-			describe.each([
-				'createPool',
-				'mint',
-				'burn',
-				'collect',
-				'increaseLiquidity',
-				'decreaseLiquidity',
-				'exactInput',
-				'exactInputSingle',
-				'exactOutput',
-				'exactOutputSingle',
-				'treasurify',
-			])('%s', command => {
-				// eslint-disable-next-line prefer-const
-				let transaction = {
-					...baseTransaction,
-					command,
-				};
-
-				beforeEach(async () => {
-					await mintNativeFee();
-					module._config = defaultConfig;
-					transaction.module = module.name;
-				});
-
-				it('should pass if fee is higher than config', async () => {
-					module._config = { ...defaultConfig, feeConversionEnabled: false };
-					verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-					await expect(
-						(async () => module.verifyTransaction(verifyContext))(),
-					).resolves.toHaveProperty('status', VerifyStatus.OK);
-				});
-
-				it('should fail if fee is lower than config', async () => {
-					module._config = {
-						...defaultConfig,
-						feeConversionEnabled: false,
-						minTransactionFee: {
-							...defaultConfig.minTransactionFee,
-							[command]: '1000000001',
-						},
+			describe.each(['createPool', 'mint', 'burn', 'collect', 'increaseLiquidity', 'decreaseLiquidity', 'exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle', 'treasurify'])(
+				'%s',
+				command => {
+					// eslint-disable-next-line prefer-const
+					let transaction = {
+						...baseTransaction,
+						command,
 					};
-					verifyContext = createTransactionVerifyContext(new Transaction(transaction));
 
-					const res = await module.verifyTransaction(verifyContext);
-					expect(res.status).toBe(VerifyStatus.FAIL);
-					expect(res.error).toBeDefined();
-					expect(res.error?.message).toBe(
-						'Insufficient transaction fee. Minimum required fee is 1000000001.',
-					);
-				});
-			});
+					beforeEach(async () => {
+						await mintNativeFee();
+						module._config = defaultConfig;
+						transaction.module = module.name;
+					});
+
+					it('should pass if fee is higher than config', async () => {
+						module._config = { ...defaultConfig, feeConversionEnabled: false };
+						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
+						await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
+					});
+
+					it('should fail if fee is lower than config', async () => {
+						module._config = {
+							...defaultConfig,
+							feeConversionEnabled: false,
+							minTransactionFee: {
+								...defaultConfig.minTransactionFee,
+								[command]: '1000000001',
+							},
+						};
+						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
+
+						const res = await module.verifyTransaction(verifyContext);
+						expect(res.status).toBe(VerifyStatus.FAIL);
+						expect(res.error).toBeDefined();
+						expect(res.error?.message).toBe('Insufficient transaction fee. Minimum required fee is 1000000001.');
+					});
+				},
+			);
 		});
 
 		describe('verifySwapByTransfer', () => {
@@ -388,16 +278,12 @@ describe('DexModule', () => {
 				await createPool(token0, token1);
 
 				verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-				await expect(
-					(async () => module.verifyTransaction(verifyContext))(),
-				).resolves.toHaveProperty('status', VerifyStatus.OK);
+				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
 			});
 
 			it('should pass if pool doesnt exist, indicating normal transfer', async () => {
 				verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-				await expect(
-					(async () => module.verifyTransaction(verifyContext))(),
-				).resolves.toHaveProperty('status', VerifyStatus.OK);
+				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
 			});
 
 			it('should fail if pool exist but token transferred is not compatible with pool', async () => {
@@ -421,164 +307,45 @@ describe('DexModule', () => {
 				expect(res.error?.message).toBe('transfering incompatible token to pool address');
 			});
 		});
-
-		describe('verifyFeeConversion', () => {
-			describe.each([
-				[
-					'exactInput',
-					token0,
-					codec.encode(exactInputCommandSchema, exactInputParam),
-					'1000',
-					'2116',
-				],
-				[
-					'exactOutput',
-					token0,
-					codec.encode(exactOutputCommandSchema, exactOutputParam),
-					'1116',
-					'2232',
-				],
-				[
-					'exactInputSingle',
-					token0,
-					codec.encode(exactInputSingleCommandSchema, exactInputSingleParam),
-					'1000',
-					'2116',
-				],
-				[
-					'exactOutputSingle',
-					token0,
-					codec.encode(exactOutputSingleCommandSchema, exactOutputSingleParam),
-					'1116',
-					'2232',
-				],
-			])('%s', (command, tokenIn, paramBuffer, swapAmount, totalAmount) => {
-				// eslint-disable-next-line prefer-const
-				let transaction = {
-					...baseTransaction,
-					command,
-					params: paramBuffer,
-					fee: BigInt(1000),
-				};
-
-				beforeEach(async () => {
-					module._config = defaultConfig;
-					transaction.module = module.name;
-					const pool = await createPool(token0, token1);
-					await mintPosition(pool.address, '10000');
-				});
-
-				describe('pool exist', () => {
-					beforeEach(async () => {
-						const pool = await createPool(NATIVE_TOKEN_ID, tokenIn);
-						await mintPosition(pool.address, '10000');
-					});
-
-					it('should pass if sender have enough tokenIn balance', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
-
-						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-						const res = await module.verifyTransaction(verifyContext);
-						expect(res.status).toBe(VerifyStatus.OK);
-					});
-
-					it('should fail if sender dont have enough tokenIn balance', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(50));
-
-						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-						const res = await module.verifyTransaction(verifyContext);
-						expect(res.status).toBe(VerifyStatus.FAIL);
-						expect(res.error).toBeDefined();
-						expect(res.error?.message).toBe(
-							`Insufficient ${tokenIn.toString(
-								'hex',
-							)} balance for feeConversion. Minimum required balance is 1116.`,
-						);
-					});
-
-					it('should fail if sender only have enough tokenIn balance for feeConversion, but not enough for swap', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(1116));
-
-						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-						const res = await module.verifyTransaction(verifyContext);
-						expect(res.status).toBe(VerifyStatus.FAIL);
-						expect(res.error).toBeDefined();
-						expect(res.error?.message).toBe(
-							`Insufficient ${tokenIn.toString(
-								'hex',
-							)} balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
-						);
-					});
-				});
-
-				describe('pool doesnt exist', () => {
-					beforeEach(async () => {
-						await mintNativeFee();
-					});
-
-					it('should pass indicating normal transaction execution', async () => {
-						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-						const res = await module.verifyTransaction(verifyContext);
-						expect(res.status).toBe(VerifyStatus.OK);
-					});
-				});
-			});
-		});
 	});
 
 	describe('beforeCommandExecute', () => {
 		describe('verifyMinimumFee', () => {
-			describe.each([
-				'createPool',
-				'mint',
-				'burn',
-				'collect',
-				'increaseLiquidity',
-				'decreaseLiquidity',
-				'exactInput',
-				'exactInputSingle',
-				'exactOutput',
-				'exactOutputSingle',
-				'treasurify',
-			])('%s', command => {
-				// eslint-disable-next-line prefer-const
-				let transaction = {
-					...baseTransaction,
-					command,
-				};
-
-				beforeEach(async () => {
-					module._config = defaultConfig;
-					transaction.module = module.name;
-					await mintNativeFee();
-				});
-
-				it('should pass if fee is higher than config', async () => {
-					module._config = { ...defaultConfig, feeConversionEnabled: false };
-					executeContext = createTransactionExecuteContext(new Transaction(transaction));
-					await expect(
-						(async () => module.beforeCommandExecute(executeContext))(),
-					).resolves.not.toThrow();
-				});
-
-				it('should fail if fee is lower than config', async () => {
-					module._config = {
-						...defaultConfig,
-						feeConversionEnabled: false,
-						minTransactionFee: {
-							...defaultConfig.minTransactionFee,
-							[command]: '1000000001',
-						},
+			describe.each(['createPool', 'mint', 'burn', 'collect', 'increaseLiquidity', 'decreaseLiquidity', 'exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle', 'treasurify'])(
+				'%s',
+				command => {
+					// eslint-disable-next-line prefer-const
+					let transaction = {
+						...baseTransaction,
+						command,
 					};
-					executeContext = createTransactionExecuteContext(new Transaction(transaction));
-					await expect((async () => module.beforeCommandExecute(executeContext))()).rejects.toThrow(
-						'Insufficient transaction fee. Minimum required fee is 1000000001.',
-					);
-				});
-			});
+
+					beforeEach(async () => {
+						module._config = defaultConfig;
+						transaction.module = module.name;
+						await mintNativeFee();
+					});
+
+					it('should pass if fee is higher than config', async () => {
+						module._config = { ...defaultConfig, feeConversionEnabled: false };
+						executeContext = createTransactionExecuteContext(new Transaction(transaction));
+						await expect((async () => module.beforeCommandExecute(executeContext))()).resolves.not.toThrow();
+					});
+
+					it('should fail if fee is lower than config', async () => {
+						module._config = {
+							...defaultConfig,
+							feeConversionEnabled: false,
+							minTransactionFee: {
+								...defaultConfig.minTransactionFee,
+								[command]: '1000000001',
+							},
+						};
+						executeContext = createTransactionExecuteContext(new Transaction(transaction));
+						await expect((async () => module.beforeCommandExecute(executeContext))()).rejects.toThrow('Insufficient transaction fee. Minimum required fee is 1000000001.');
+					});
+				},
+			);
 		});
 
 		describe('verifySwapByTransfer', () => {
@@ -602,16 +369,12 @@ describe('DexModule', () => {
 				await createPool(token0, token1);
 
 				executeContext = createTransactionExecuteContext(new Transaction(transaction));
-				await expect(
-					(async () => module.beforeCommandExecute(executeContext))(),
-				).resolves.not.toThrow();
+				await expect((async () => module.beforeCommandExecute(executeContext))()).resolves.not.toThrow();
 			});
 
 			it('should pass if pool doesnt exist, indicating normal transfer', async () => {
 				executeContext = createTransactionExecuteContext(new Transaction(transaction));
-				await expect(
-					(async () => module.beforeCommandExecute(executeContext))(),
-				).resolves.not.toThrow();
+				await expect((async () => module.beforeCommandExecute(executeContext))()).resolves.not.toThrow();
 			});
 
 			it('should fail if pool exist but token transferred is not compatible with pool', async () => {
@@ -628,142 +391,7 @@ describe('DexModule', () => {
 						}),
 					}),
 				);
-				await expect((async () => module.beforeCommandExecute(executeContext))()).rejects.toThrow(
-					'transfering incompatible token to pool address',
-				);
-			});
-		});
-
-		describe('executeFeeConversion', () => {
-			describe.each([
-				[
-					'exactInput',
-					token0,
-					codec.encode(exactInputCommandSchema, exactInputParam),
-					'1000',
-					'2116',
-				],
-				[
-					'exactOutput',
-					token0,
-					codec.encode(exactOutputCommandSchema, exactOutputParam),
-					'1116',
-					'2232',
-				],
-				[
-					'exactInputSingle',
-					token0,
-					codec.encode(exactInputSingleCommandSchema, exactInputSingleParam),
-					'1000',
-					'2116',
-				],
-				[
-					'exactOutputSingle',
-					token0,
-					codec.encode(exactOutputSingleCommandSchema, exactOutputSingleParam),
-					'1116',
-					'2232',
-				],
-			])('%s', (command, tokenIn, paramBuffer, swapAmount, totalAmount) => {
-				// eslint-disable-next-line prefer-const
-				let transaction = {
-					...baseTransaction,
-					command,
-					params: paramBuffer,
-					fee: BigInt(1000),
-				};
-
-				beforeEach(async () => {
-					module._config = defaultConfig;
-					transaction.module = module.name;
-					const pool = await createPool(token0, token1);
-					await mintPosition(pool.address, '10000');
-				});
-
-				describe('pool exist', () => {
-					beforeEach(async () => {
-						const pool = await createPool(NATIVE_TOKEN_ID, tokenIn);
-						await mintPosition(pool.address, '10000');
-					});
-
-					it('should execute a swap operation if sender have enough tokenIn balance as feeConversion', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
-
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await module.beforeCommandExecute(executeContext);
-						eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 1);
-
-						expect(
-							getEvents(executeContext.eventQueue, SwapEvent, module.name)[0][
-								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 0 : 1}`
-							],
-						).toBe('-1000');
-
-						expect(
-							getEvents(executeContext.eventQueue, SwapEvent, module.name)[0][
-								`amount${NATIVE_TOKEN_ID.compare(tokenIn) < 0 ? 1 : 0}`
-							],
-						).toBe('1116');
-					});
-
-					it('should throw any error if sender have enough tokenIn balance', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(2232));
-
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await expect(
-							(async () => module.beforeCommandExecute(executeContext))(),
-						).resolves.not.toThrow();
-					});
-
-					it('should fail if sender dont have enough tokenIn balance', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(50));
-
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await expect(
-							(async () => module.beforeCommandExecute(executeContext))(),
-						).rejects.toThrow(
-							`Insufficient ${tokenIn.toString(
-								'hex',
-							)} balance for feeConversion. Minimum required balance is 1116.`,
-						);
-					});
-
-					it('should fail if sender only have enough tokenIn balance for feeConversion, but not enough for swap', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await tokenMethod.mint(executeContext, senderAddress, tokenIn, BigInt(1116));
-
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await expect(
-							(async () => module.beforeCommandExecute(executeContext))(),
-						).rejects.toThrow(
-							`Insufficient ${tokenIn.toString(
-								'hex',
-							)} balance to swap ${swapAmount} of tokens with feeConversion. Total minimum required balance is ${totalAmount}.`,
-						);
-					});
-				});
-
-				describe('pool doesnt exist', () => {
-					beforeEach(async () => {
-						await mintNativeFee();
-					});
-
-					it('should pass indicating normal transaction execution', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await expect(
-							(async () => module.beforeCommandExecute(executeContext))(),
-						).resolves.not.toThrow();
-					});
-
-					it('should not execute a swap operation', async () => {
-						executeContext = createTransactionExecuteContext(new Transaction(transaction));
-						await module.beforeCommandExecute(executeContext);
-						eventResultHaveLength(executeContext.eventQueue, SwapEvent, module.name, 0);
-					});
-				});
+				await expect((async () => module.beforeCommandExecute(executeContext))()).rejects.toThrow('transfering incompatible token to pool address');
 			});
 		});
 	});
@@ -806,12 +434,7 @@ describe('DexModule', () => {
 					feeGrowthGlobal1X128: '0',
 				});
 
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address,
-					executeContext.transaction.senderAddress,
-					token1,
-					BigInt(8),
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address, executeContext.transaction.senderAddress, token1, BigInt(8));
 			});
 
 			it('should not execute a swap operation if pool doesnt exist, indicating normal transfer', async () => {
@@ -836,9 +459,7 @@ describe('DexModule', () => {
 					}),
 				);
 
-				await expect((async () => module.afterCommandExecute(executeContext))()).rejects.toThrow(
-					'transfering incompatible token to pool address',
-				);
+				await expect((async () => module.afterCommandExecute(executeContext))()).rejects.toThrow('transfering incompatible token to pool address');
 			});
 		});
 	});

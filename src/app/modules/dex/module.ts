@@ -43,38 +43,14 @@ import { SwapEvent } from './events/swap';
 import { TokenURICreatedEvent } from './events/tokenuri_created';
 import { TokenURIDestroyedEvent } from './events/tokenuri_destroyed';
 import { DexMethod } from './method';
-import {
-	getPoolEndpointRequestSchema,
-	getPoolEndpointResponseSchema,
-} from './schema/endpoint/get_pool';
-import {
-	getPositionEndpointRequestSchema,
-	getPositionEndpointResponseSchema,
-} from './schema/endpoint/get_position';
-import {
-	getTokenURIEndpointRequestSchema,
-	getTokenURIEndpointResponseSchema,
-} from './schema/endpoint/get_token_uri';
-import {
-	observeEndpointRequestSchema,
-	observeEndpointResponseSchema,
-} from './schema/endpoint/observe';
-import {
-	quoteExactInputEndpointRequestSchema,
-	quoteExactInputEndpointResponseSchema,
-} from './schema/endpoint/quote_exact_input';
-import {
-	quoteExactInputSingleEndpointRequestSchema,
-	quoteExactInputSingleEndpointResponseSchema,
-} from './schema/endpoint/quote_exact_input_single';
-import {
-	quoteExactOutputEndpointRequestSchema,
-	quoteExactOutputEndpointResponseSchema,
-} from './schema/endpoint/quote_exact_output';
-import {
-	quoteExactOutputSingleEndpointRequestSchema,
-	quoteExactOutputSingleEndpointResponseSchema,
-} from './schema/endpoint/quote_exact_output_single';
+import { getPoolEndpointRequestSchema, getPoolEndpointResponseSchema } from './schema/endpoint/get_pool';
+import { getPositionEndpointRequestSchema, getPositionEndpointResponseSchema } from './schema/endpoint/get_position';
+import { getTokenURIEndpointRequestSchema, getTokenURIEndpointResponseSchema } from './schema/endpoint/get_token_uri';
+import { observeEndpointRequestSchema, observeEndpointResponseSchema } from './schema/endpoint/observe';
+import { quoteExactInputEndpointRequestSchema, quoteExactInputEndpointResponseSchema } from './schema/endpoint/quote_exact_input';
+import { quoteExactInputSingleEndpointRequestSchema, quoteExactInputSingleEndpointResponseSchema } from './schema/endpoint/quote_exact_input_single';
+import { quoteExactOutputEndpointRequestSchema, quoteExactOutputEndpointResponseSchema } from './schema/endpoint/quote_exact_output';
+import { quoteExactOutputSingleEndpointRequestSchema, quoteExactOutputSingleEndpointResponseSchema } from './schema/endpoint/quote_exact_output_single';
 import { ObservationStore } from './stores/observation';
 import { PoolStore } from './stores/pool';
 import { PositionInfoStore } from './stores/position_info';
@@ -83,43 +59,25 @@ import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
 import { DexModuleConfig } from './types';
-import {
-	verifyMinimumFee,
-	verifySwapByTransfer,
-	executeSwapByTransfer,
-	verifyValidTransfer,
-	verifyFeeConversion,
-	executeFeeConversion,
-	verifyBaseFee,
-	executeBaseFee,
-} from './hooks';
+import { verifyMinimumFee, verifySwapByTransfer, executeSwapByTransfer, verifyValidTransfer, verifyBaseFee, executeBaseFee } from './hooks';
 import { defaultConfig } from './constants';
-import {
-	getMetadataEndpointRequestSchema,
-	getMetadataEndpointResponseSchema,
-} from './schema/endpoint/get_metadata';
+import { getMetadataEndpointRequestSchema, getMetadataEndpointResponseSchema } from './schema/endpoint/get_metadata';
 import { TreasurifyEvent } from './events/treasurify';
-import {
-	getPoolAddressFromCollectionIdEndpointRequestSchema,
-	getPoolAddressFromCollectionIdEndpointResponseSchema,
-} from './schema/endpoint/get_pool_address_from_collection_id';
-import {
-	quotePriceEndpointRequestSchema,
-	quotePriceEndpointResponseSchema,
-} from './schema/endpoint/quote_price';
+import { getPoolAddressFromCollectionIdEndpointRequestSchema, getPoolAddressFromCollectionIdEndpointResponseSchema } from './schema/endpoint/get_pool_address_from_collection_id';
+import { quotePriceEndpointRequestSchema, quotePriceEndpointResponseSchema } from './schema/endpoint/quote_price';
 import { TokenRegisteredEvent } from './events/token_registered';
 import { SupportedTokenStore } from './stores/supported_token';
 import { DexInteroperableMethod } from './cc_method';
-import {
-	getConfigEndpointRequestSchema,
-	getConfigEndpointResponseSchema,
-} from './schema/endpoint/get_config';
+import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema } from './schema/endpoint/get_config';
 import { TokenFactoryMethod } from '../token_factory/method';
 import { NFTMethod } from '../nft';
+import { FeeConversionMethod } from '../fee_conversion';
+import { DexSwapFeeConversionMethod, DexTransferFeeConversionMethod } from './fc_method';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexModuleConfig | undefined;
 	public _feeMethod: FeeMethod | undefined;
+	public _feeConversionMethod: FeeConversionMethod | undefined;
 	public _tokenMethod: TokenMethod | undefined;
 	public _tokenFactoryMethod: TokenFactoryMethod | undefined;
 	public _dexInteroperableMethod = new DexInteroperableMethod(this.stores, this.events);
@@ -128,7 +86,7 @@ export class DexModule extends BaseInteroperableModule {
 	public crossChainMethod = this._dexInteroperableMethod;
 
 	public endpoint = new DexEndpoint(this.stores, this.offchainStores);
-	public method = new DexMethod(this.stores, this.events, this.name);
+	public method = new DexMethod(this.stores, this.events);
 	public commands = [
 		new CreatePoolCommand(this.stores, this.events),
 		new MintCommand(this.stores, this.events),
@@ -147,10 +105,7 @@ export class DexModule extends BaseInteroperableModule {
 		super();
 		// registeration of stores and events
 		this.stores.register(PoolStore, new PoolStore(this.name, 0, this.stores, this.events));
-		this.stores.register(
-			PositionManagerStore,
-			new PositionManagerStore(this.name, 1, this.stores, this.events),
-		);
+		this.stores.register(PositionManagerStore, new PositionManagerStore(this.name, 1, this.stores, this.events));
 
 		this.stores.register(ObservationStore, new ObservationStore(this.name, 2));
 		this.stores.register(PositionInfoStore, new PositionInfoStore(this.name, 3));
@@ -166,10 +121,7 @@ export class DexModule extends BaseInteroperableModule {
 		this.events.register(DecreaseLiquidityEvent, new DecreaseLiquidityEvent(this.name));
 		this.events.register(FlashEvent, new FlashEvent(this.name));
 		this.events.register(IncreaseLiquidityEvent, new IncreaseLiquidityEvent(this.name));
-		this.events.register(
-			IncreaseObservationCardinalityNextEvent,
-			new IncreaseObservationCardinalityNextEvent(this.name),
-		);
+		this.events.register(IncreaseObservationCardinalityNextEvent, new IncreaseObservationCardinalityNextEvent(this.name));
 		this.events.register(MintEvent, new MintEvent(this.name));
 		this.events.register(PoolCreatedEvent, new PoolCreatedEvent(this.name));
 		this.events.register(PoolInitializedEvent, new PoolInitializedEvent(this.name));
@@ -184,6 +136,7 @@ export class DexModule extends BaseInteroperableModule {
 		tokenMethod: TokenMethod,
 		nftMethod: NFTMethod,
 		feeMethod: FeeMethod,
+		feeConversionMethod: FeeConversionMethod,
 		tokenFactoryMethod: TokenFactoryMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
 	) {
@@ -196,11 +149,12 @@ export class DexModule extends BaseInteroperableModule {
 		supportManagerStore.addDependencies(tokenMethod);
 
 		this._feeMethod = feeMethod;
+		this._feeConversionMethod = feeConversionMethod;
 		this._tokenMethod = tokenMethod;
 		this._tokenFactoryMethod = tokenFactoryMethod;
 		this._dexInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
 
-		this.method.addDependencies(tokenMethod, feeMethod);
+		this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
 	}
 
 	public metadata(): ModuleMetadata {
@@ -287,6 +241,11 @@ export class DexModule extends BaseInteroperableModule {
 
 		this.method.init(this._config);
 		this.endpoint.init(this._config);
+
+		if (this._config?.feeConversionEnabled) {
+			this._feeConversionMethod?.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
+			this._feeConversionMethod?.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -296,7 +255,6 @@ export class DexModule extends BaseInteroperableModule {
 			await verifyBaseFee.bind(this)(_context);
 			await verifyValidTransfer.bind(this)(_context);
 			await verifySwapByTransfer.bind(this)(_context);
-			await verifyFeeConversion.bind(this)(_context);
 		} catch (error: unknown) {
 			return {
 				status: VerifyStatus.FAIL,
@@ -311,7 +269,6 @@ export class DexModule extends BaseInteroperableModule {
 		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
 		await verifySwapByTransfer.bind(this)(_context);
-		await executeFeeConversion.bind(this)(_context);
 		await executeBaseFee.bind(this)(_context);
 	}
 
