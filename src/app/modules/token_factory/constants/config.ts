@@ -3,6 +3,7 @@ import { TokenFactoryModuleConfig } from '../types';
 import { DEFAULT_LEFTOVER_ADDRESS } from './address';
 
 export const defaultConfig: TokenFactoryModuleConfig = {
+	skippedTokenID: [],
 	icoLeftOverAddress: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_LEFTOVER_ADDRESS),
 	icoFeeConversionEnabled: true,
 	minTransactionFee: {

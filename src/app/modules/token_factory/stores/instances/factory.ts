@@ -3,14 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import {
-	FactoryStoreData,
-	FactoryTransferOwnershipParams,
-	TokenBurnParams,
-	TokenCreateParams,
-	TokenFactoryModuleConfig,
-	TokenMintParams,
-} from '../../types';
+import { FactoryStoreData, FactoryTransferOwnershipParams, TokenBurnParams, TokenCreateParams, TokenFactoryModuleConfig, TokenMintParams } from '../../types';
 import { FactoryStore } from '../factory';
 import { NextAvailableTokenIdStore } from '../next_available_token_id';
 import { FactoryCreatedEvent } from '../../events/factory_created';
@@ -18,24 +11,14 @@ import { BaseInstance } from './base';
 import { VestingUnlockStore } from '../vesting_unlock';
 import { serializer, verifyAddress, verifyPositiveNumber, verifyToken } from '../../utils';
 
-export class Factory
-	extends BaseInstance<FactoryStoreData, FactoryStore>
-	implements FactoryStoreData
-{
-	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		genesisConfig: GenesisConfig,
-		config: TokenFactoryModuleConfig,
-		moduleName: string,
-		factory: FactoryStoreData,
-		tokenId: Buffer,
-	) {
+export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
 		super(FactoryStore, stores, events, genesisConfig, config, moduleName, tokenId);
 
 		Object.assign(this, utils.objects.cloneDeep(factory));
 
 		this.nextAvailableIdStore = stores.get(NextAvailableTokenIdStore);
+		this._parseSkippedTokenID();
 	}
 
 	public toJSON() {
@@ -66,6 +49,8 @@ export class Factory
 		const nextId = await this.getNextAvailableTokenId();
 		const tokenIdBuf = Buffer.allocUnsafe(4);
 		tokenIdBuf.writeUIntBE(Number(nextId.nextTokenId), 0, 4);
+		nextId.nextTokenId += BigInt(1);
+
 		const tokenId = Buffer.concat([Buffer.from(this.genesisConfig.chainID, 'hex'), tokenIdBuf]);
 
 		await this.tokenMethod!.initializeToken(this.mutableContext!.context, tokenId);
@@ -76,7 +61,7 @@ export class Factory
 		});
 
 		await this._registerFactory(tokenId);
-		await this._incrementAvailableId();
+		await this.nextAvailableIdStore.set(this.mutableContext!.context, Buffer.alloc(0), nextId);
 
 		const events = this.events.get(FactoryCreatedEvent);
 		events.add(
@@ -115,11 +100,7 @@ export class Factory
 		await this._checkFactoryExists(params.tokenId);
 		await this._checkIsFactoryOwner();
 
-		const senderBalance = await this.tokenMethod!.getAvailableBalance(
-			this.immutableContext!.context,
-			this.immutableContext!.senderAddress,
-			params.tokenId,
-		);
+		const senderBalance = await this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.immutableContext!.senderAddress, params.tokenId);
 		if (senderBalance < params.amount) {
 			throw new Error('sender balance is not sufficient to be burned');
 		}
@@ -130,12 +111,7 @@ export class Factory
 
 		if (verify) await this.verifyBurn(params);
 
-		await this.tokenMethod!.burn(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
-			params.tokenId,
-			params.amount,
-		);
+		await this.tokenMethod!.burn(this.mutableContext!.context, this.mutableContext!.senderAddress, params.tokenId, params.amount);
 	}
 
 	public async verifyTransferOwnership(params: FactoryTransferOwnershipParams) {
@@ -158,7 +134,13 @@ export class Factory
 
 	public async getNextAvailableTokenId() {
 		this._checkImmutableDependencies();
-		return this.nextAvailableIdStore.getOrDefault(this.immutableContext!.context);
+		const nextAvailableId = await this.nextAvailableIdStore.getOrDefault(this.immutableContext!.context);
+
+		if (this._skippedTokenID.has(nextAvailableId.nextTokenId)) {
+			nextAvailableId.nextTokenId += BigInt(1);
+		}
+
+		return nextAvailableId;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -179,32 +161,20 @@ export class Factory
 		for (const distribution of params.distribution) {
 			totalAmountMinted += distribution.amount;
 
-			await this.tokenMethod!.mint(
-				this.mutableContext!.context,
-				distribution.recipientAddress,
-				params.tokenId,
-				distribution.amount,
-			);
+			await this.tokenMethod!.mint(this.mutableContext!.context, distribution.recipientAddress, params.tokenId, distribution.amount);
 		}
 
-		const vestingInstance = await this.stores
-			.get(VestingUnlockStore)
-			.getInstance(this.mutableContext!);
+		const vestingInstance = await this.stores.get(VestingUnlockStore).getInstance(this.mutableContext!);
 		await vestingInstance.lock(params);
 
 		return totalAmountMinted;
 	}
 
 	private async _registerFactory(tokenId: Buffer): Promise<void> {
-		if (await this._isFactoryExists(tokenId))
-			throw new Error(`factory for ${tokenId.toString('hex')} already registered`);
+		if (await this._isFactoryExists(tokenId)) throw new Error(`factory for ${tokenId.toString('hex')} already registered`);
 		this.owner = this.mutableContext!.senderAddress;
 		this._setKey(tokenId);
 		await this._saveStore();
-	}
-
-	private async _incrementAvailableId() {
-		await this.nextAvailableIdStore.increment(this.mutableContext!.context);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -225,11 +195,7 @@ export class Factory
 				}
 
 				if (totalAmount !== distributionItem.amount) {
-					throw new Error(
-						`total vested token for address ${distributionItem.recipientAddress.toString(
-							'hex',
-						)} doesn't match with total minted token`,
-					);
+					throw new Error(`total vested token for address ${distributionItem.recipientAddress.toString('hex')} doesn't match with total minted token`);
 				}
 			}
 		}
@@ -252,7 +218,36 @@ export class Factory
 		}
 	}
 
+	private _parseSkippedTokenID() {
+		for (const skippedTokenId of this.config.skippedTokenID) {
+			const id = this._tokenStringOrNumberToBigint(skippedTokenId);
+			this._skippedTokenID.add(id);
+		}
+	}
+
+	private _tokenStringOrNumberToBigint(stringOrNumber: string | number) {
+		const { chainID } = this.genesisConfig;
+
+		if (typeof stringOrNumber === 'number') {
+			return BigInt(stringOrNumber);
+		}
+
+		if (typeof stringOrNumber === 'string') {
+			if (stringOrNumber.length === 16) {
+				if (!stringOrNumber.startsWith(chainID)) throw new Error('invalid tokenFactory skippedTokenID config chainID');
+				return BigInt(`0x${stringOrNumber.substring(8, 16)}`);
+			}
+			if (stringOrNumber.length === 8) {
+				return BigInt(`0x${stringOrNumber.substring(0, 8)}`);
+			}
+			throw new Error('invalid tokenFactory skippedTokenID config string length');
+		}
+
+		throw new Error('invalid tokenFactory skippedTokenID config type');
+	}
+
 	public owner: Buffer = Buffer.alloc(0);
 
 	private readonly nextAvailableIdStore: NextAvailableTokenIdStore;
+	private readonly _skippedTokenID: Set<bigint> = new Set();
 }

@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { NextAvailableTokenIdStoreData } from '../types';
 import { nextAvailableTokenIdStoreSchema } from '../schema';
 
@@ -17,12 +17,6 @@ export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenIdSto
 			}
 			return { ...defaultNextId };
 		}
-	}
-
-	public async increment(context: StoreGetter): Promise<void> {
-		const state = await this.getOrDefault(context);
-		state.nextTokenId += BigInt(1);
-		await this.set(context, Buffer.alloc(0), state);
 	}
 
 	public schema = nextAvailableTokenIdStoreSchema;

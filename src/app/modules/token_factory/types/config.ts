@@ -1,4 +1,5 @@
 export interface TokenFactoryModuleConfig {
+	skippedTokenID: (string | number)[];
 	icoLeftOverAddress: string;
 	icoFeeConversionEnabled: boolean;
 	minTransactionFee: {

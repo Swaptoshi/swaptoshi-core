@@ -89,6 +89,7 @@
 			}
 		},
 		"tokenFactory": {
+			"skippedTokenID": [1],
 			"icoLeftOverAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"icoFeeConversionEnabled": true,
 			"minTransactionFee": {
