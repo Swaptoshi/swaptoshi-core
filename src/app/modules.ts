@@ -11,8 +11,9 @@ import {
 	TokenMethod,
 	ValidatorsMethod,
 } from 'klayr-sdk';
-import { FeeConversionModule } from './modules/fee_conversion';
 import { DexModule } from './modules/dex/module';
+import { FeeConversionModule } from './modules/fee_conversion';
+import { LiquidPosModule } from './modules/liquid_pos/module';
 import { NFTModule } from './modules/nft/module';
 import { TokenFactoryModule } from './modules/token_factory/module';
 
@@ -32,7 +33,9 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 	const tokenFactoryModule = new TokenFactoryModule();
 	const dexModule = new DexModule();
 	const feeConversionModule = new FeeConversionModule();
+	const liquidPosModule = new LiquidPosModule();
 
+	liquidPosModule.addDependencies(method.token);
 	feeConversionModule.addDependencies(method.token, method.fee, dexModule.method);
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
 	dexModule.addDependencies(method.token, nftModule.method, method.fee, tokenFactoryModule.method, method.interoperability, feeConversionModule.method);
@@ -43,6 +46,7 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 	app.registerModule(nftModule);
 	app.registerModule(tokenFactoryModule);
 	app.registerModule(dexModule);
+	app.registerModule(liquidPosModule);
 
 	app.registerInteroperableModule(nftModule);
 	app.registerInteroperableModule(tokenFactoryModule);
