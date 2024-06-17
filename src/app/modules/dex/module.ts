@@ -136,9 +136,9 @@ export class DexModule extends BaseInteroperableModule {
 		tokenMethod: TokenMethod,
 		nftMethod: NFTMethod,
 		feeMethod: FeeMethod,
-		feeConversionMethod: FeeConversionMethod,
 		tokenFactoryMethod: TokenFactoryMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
+		feeConversionMethod?: FeeConversionMethod,
 	) {
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
@@ -149,12 +149,14 @@ export class DexModule extends BaseInteroperableModule {
 		supportManagerStore.addDependencies(tokenMethod);
 
 		this._feeMethod = feeMethod;
-		this._feeConversionMethod = feeConversionMethod;
 		this._tokenMethod = tokenMethod;
 		this._tokenFactoryMethod = tokenFactoryMethod;
 		this._dexInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
 
-		this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+		if (feeConversionMethod) {
+			this._feeConversionMethod = feeConversionMethod;
+			this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+		}
 	}
 
 	public metadata(): ModuleMetadata {
@@ -242,9 +244,13 @@ export class DexModule extends BaseInteroperableModule {
 		this.method.init(this._config);
 		this.endpoint.init(this._config);
 
-		if (this._config?.feeConversionEnabled) {
-			this._feeConversionMethod?.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
-			this._feeConversionMethod?.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
+		if (this._config.feeConversionEnabled && !this._feeConversionMethod) {
+			throw new Error('feeConversionMethod dependencies is not configured');
+		}
+
+		if (this._feeConversionMethod && this._config.feeConversionEnabled) {
+			this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
+			this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
 		}
 	}
 

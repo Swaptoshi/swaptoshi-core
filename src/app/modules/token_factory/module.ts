@@ -142,10 +142,10 @@ export class TokenFactoryModule extends BaseModule {
 	public addDependencies(
 		tokenMethod: TokenMethod,
 		feeMethod: FeeMethod,
-		feeConversionMethod: FeeConversionMethod,
 		nftMethod: NFTMethod,
 		dexMethod: DexMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
+		feeConversionMethod?: FeeConversionMethod,
 	) {
 		const dependencies = { tokenMethod, feeMethod, dexMethod };
 
@@ -160,13 +160,16 @@ export class TokenFactoryModule extends BaseModule {
 		vestingUnlockStore.addDependencies(dependencies);
 
 		this._feeMethod = feeMethod;
-		this._feeConversionMethod = feeConversionMethod;
 		this._tokenMethod = tokenMethod;
 		this._nftMethod = nftMethod;
 		this._dexMethod = dexMethod;
 
 		this._tokenFactoryInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
-		this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+
+		if (feeConversionMethod) {
+			this._feeConversionMethod = feeConversionMethod;
+			this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+		}
 	}
 
 	public metadata(): ModuleMetadata {
@@ -243,9 +246,13 @@ export class TokenFactoryModule extends BaseModule {
 
 		this.endpoint.init(this._config);
 
-		if (this._config.icoFeeConversionEnabled) {
-			this._feeConversionMethod?.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
-			this._feeConversionMethod?.register(
+		if (this._config.icoFeeConversionEnabled && !this._feeConversionMethod) {
+			throw new Error('feeConversionMethod dependencies is not configured');
+		}
+
+		if (this._feeConversionMethod && this._config.icoFeeConversionEnabled) {
+			this._feeConversionMethod.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
+			this._feeConversionMethod.register(
 				this.name,
 				['icoExactInput', 'icoExactInputSingle', 'icoExactOutput', 'icoExactOutputSingle'],
 				new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.events),
