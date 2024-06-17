@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
+import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
 import { LiquidPosEndpoint } from './endpoint';
 import { LiquidPosMethod } from './method';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
@@ -55,5 +55,9 @@ export class LiquidPosModule extends BaseModule {
 
 	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {
 		await this._internalMethod.handleAfterCommandExecute(_context);
+	}
+
+	public async initGenesisState(context: GenesisBlockExecuteContext): Promise<void> {
+		await this._internalMethod.handleInitGenesisState(context);
 	}
 }

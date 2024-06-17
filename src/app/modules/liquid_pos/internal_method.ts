@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, GenesisConfig, MethodContext, TokenMethod, TransactionExecuteContext, codec } from 'klayr-sdk';
+import { BaseMethod, GenesisBlockExecuteContext, GenesisConfig, MethodContext, TokenMethod, TransactionExecuteContext, codec } from 'klayr-sdk';
 import { LiquidPosModuleConfig, StakeTransactionParams } from './types';
 import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { stakeCommandParamsSchema } from './schema';
@@ -27,6 +27,13 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		return this._lstTokenID;
 	}
 
+	public async handleInitGenesisState(context: GenesisBlockExecuteContext) {
+		await this._checkDependencies();
+
+		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
+		if (!isTokenIDAvailable) throw new Error('specified tokenID on liquid_pos config is not available');
+	}
+
 	public async handleAfterCommandExecute(context: TransactionExecuteContext) {
 		await this._checkDependencies();
 
@@ -47,6 +54,9 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		await this._checkDependencies();
 		if (amount < BigInt(0)) throw new Error("amount minted can't be negative");
 
+		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
+		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
+
 		await this._tokenMethod!.mint(context, address, this._lstTokenID!, amount);
 		const events = this.events.get(LiquidStakingTokenMintEvent);
 		events.add(context, { address, tokenID: this._lstTokenID!, amount }, [address]);
@@ -55,6 +65,9 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	public async burn(context: MethodContext, address: Buffer, amount: bigint) {
 		await this._checkDependencies();
 		if (amount < BigInt(0)) throw new Error("amount burned can't be negative");
+
+		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
+		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
 		await this._tokenMethod!.burn(context, address, this._lstTokenID!, amount);
 		const events = this.events.get(LiquidStakingTokenBurnEvent);
