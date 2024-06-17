@@ -40,6 +40,9 @@
 		}
 	},
 	"modules": {
+		"liquidPos": {
+			"tokenID": 1
+		},
 		"dex": {
 			"feeAmountTickSpacing": [
 				["500", "10"],
