@@ -41,22 +41,46 @@ index 4aece0e..516380a 100644
          var _a, _b;
          return (0, logger_1.createLogger)({
 diff --git a/node_modules/klayr-framework/dist-node/modules/fee/module.js b/node_modules/klayr-framework/dist-node/modules/fee/module.js
-index da24f74..1f1ca62 100644
+index da24f74..53b884c 100644
 --- a/node_modules/klayr-framework/dist-node/modules/fee/module.js
 +++ b/node_modules/klayr-framework/dist-node/modules/fee/module.js
-@@ -69,10 +69,11 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+@@ -45,8 +45,11 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+         };
+     }
+     async init(args) {
++        // NOTE: dangerouslySkipBalanceVerification config is default to false
++        const dangerouslySkipBalanceVerification = false;
++        
+         const defaultFeeTokenID = `${args.genesisConfig.chainID}${Buffer.alloc(4).toString('hex')}`;
+-        const config = utils_1.objects.mergeDeep({}, { ...constants_1.defaultConfig, feeTokenID: defaultFeeTokenID }, args.moduleConfig);
++        const config = utils_1.objects.mergeDeep({}, { ...constants_1.defaultConfig, feeTokenID: defaultFeeTokenID, dangerouslySkipBalanceVerification }, args.moduleConfig);
+         validator_1.validator.validate(schemas_1.configSchema, config);
+         const moduleConfig = {
+             ...config,
+@@ -62,6 +65,7 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+         this._minFeePerByte = moduleConfig.minFeePerByte;
+         this._maxBlockHeightZeroFeePerByte = moduleConfig.maxBlockHeightZeroFeePerByte;
+         this._feePoolAddress = moduleConfig.feePoolAddress;
++        this._skipBalanceVerification = moduleConfig.dangerouslySkipBalanceVerification;
+     }
+     async verifyTransaction(context) {
+         const { getMethodContext, transaction, header } = context;
+@@ -69,10 +73,17 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
          if (transaction.fee < minFee) {
              throw new Error(`Insufficient transaction fee. Minimum required fee is ${minFee}.`);
          }
--        const balance = await this._tokenMethod.getAvailableBalance(getMethodContext(), transaction.senderAddress, this._tokenID);
++
++        /* NOTE: 
++         * dangerouslySkipBalanceVerification is needed if other module is handling balance verification instead, for example fee_conversion module
++         * since the default is false, it will not interfere with other module implementations if it is not specified
++         */
++        
+         const balance = await this._tokenMethod.getAvailableBalance(getMethodContext(), transaction.senderAddress, this._tokenID);
 -        if (transaction.fee > balance) {
--            throw new Error(`Insufficient balance.`);
--        }
-+        // NOTE: this check needs to be disabled for dex 'feeConversion' hook
-+        // const balance = await this._tokenMethod.getAvailableBalance(getMethodContext(), transaction.senderAddress, this._tokenID);
-+        // if (transaction.fee > balance) {
-+        //     throw new Error(`Insufficient balance.`);
-+        // }
++        if (!this._skipBalanceVerification && transaction.fee > balance) {
+             throw new Error(`Insufficient balance.`);
+         }
++
          return { status: state_machine_1.VerifyStatus.OK };
      }
      async beforeCommandExecute(context) {

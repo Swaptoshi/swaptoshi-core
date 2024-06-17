@@ -5,9 +5,7 @@
 		"logLevel": "info",
 		"enableMetrics": true,
 		"keepInclusionProofsForHeights": -1,
-		"inclusionProofKeys": [
-			"83ed0d2500005735b05e48e476be8b87c6fcfcccdb3012808926eaa933b756379214586d380c"
-		]
+		"inclusionProofKeys": ["83ed0d2500005735b05e48e476be8b87c6fcfcccdb3012808926eaa933b756379214586d380c"]
 	},
 	"rpc": {
 		"modes": ["ipc", "ws", "http"],
@@ -131,7 +129,8 @@
 			}
 		},
 		"fee": {
-			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb"
+			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"dangerouslySkipBalanceVerification": true
 		},
 		"pos": {
 			"failSafeInactiveWindow": 403200,
