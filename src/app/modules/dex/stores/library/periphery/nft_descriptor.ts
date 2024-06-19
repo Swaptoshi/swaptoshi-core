@@ -1,20 +1,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/prefer-for-of */
 import { cryptography } from 'klayr-sdk';
-import {
-	Uint256String,
-	Uint8String,
-	Int24String,
-	Uint24String,
-	Uint256,
-	Uint8,
-	Int24,
-	Uint160String,
-	Int256,
-	Uint160,
-	Uint24,
-	Int8String,
-} from '../int';
+import { crc32 } from 'crc';
+import { Uint256String, Uint8String, Int24String, Uint24String, Uint256, Uint8, Int24, Uint160String, Int256, Uint160, Uint24, Int8String } from '../int';
 
 import * as TickMath from '../core/tick_math';
 import * as FullMath from '../core/full_math';
@@ -83,19 +71,7 @@ export function constructTokenURI(params: ConstructTokenURIParams): string {
 
 	return [
 		'data:application/json;base64,',
-		Buffer.from(
-			[
-				'{"name":"',
-				name,
-				'", "description":"',
-				descriptionPartOne,
-				descriptionPartTwo,
-				'", "image": "',
-				'data:image/svg+xml;base64,',
-				image,
-				'"}',
-			].join(''),
-		).toString('base64'),
+		Buffer.from(['{"name":"', name, '", "description":"', descriptionPartOne, descriptionPartTwo, '", "image": "', 'data:image/svg+xml;base64,', image, '"}'].join('')).toString('base64'),
 	].join('');
 }
 
@@ -126,12 +102,7 @@ function escapeQuotes(symbol: string): string {
 	return symbol;
 }
 
-function generateDescriptionPartOne(
-	config: DexModuleConfig,
-	quoteTokenSymbol: string,
-	baseTokenSymbol: string,
-	poolAddress: string,
-): string {
+function generateDescriptionPartOne(config: DexModuleConfig, quoteTokenSymbol: string, baseTokenSymbol: string, poolAddress: string): string {
 	return [
 		`This NFT represents a liquidity position in a ${config.nftPositionMetadata.dex.name} `,
 		quoteTokenSymbol,
@@ -146,13 +117,7 @@ function generateDescriptionPartOne(
 	].join('');
 }
 
-function generateDescriptionPartTwo(
-	tokenId: string,
-	baseTokenSymbol: string,
-	quoteTokenAddress: string,
-	baseTokenAddress: string,
-	feeTier: string,
-): string {
+function generateDescriptionPartTwo(tokenId: string, baseTokenSymbol: string, quoteTokenAddress: string, baseTokenAddress: string, feeTier: string): string {
 	return [
 		' Token ID: ',
 		quoteTokenAddress,
@@ -178,21 +143,9 @@ function generateName(params: ConstructTokenURIParams, feeTier: string): string 
 		'/',
 		escapeQuotes(params.baseTokenSymbol),
 		' - ',
-		tickToDecimalString(
-			!params.flipRatio ? params.tickLower : params.tickUpper,
-			params.tickSpacing,
-			params.baseTokenDecimals,
-			params.quoteTokenDecimals,
-			params.flipRatio,
-		),
+		tickToDecimalString(!params.flipRatio ? params.tickLower : params.tickUpper, params.tickSpacing, params.baseTokenDecimals, params.quoteTokenDecimals, params.flipRatio),
 		'<>',
-		tickToDecimalString(
-			!params.flipRatio ? params.tickUpper : params.tickLower,
-			params.tickSpacing,
-			params.baseTokenDecimals,
-			params.quoteTokenDecimals,
-			params.flipRatio,
-		),
+		tickToDecimalString(!params.flipRatio ? params.tickUpper : params.tickLower, params.tickSpacing, params.baseTokenDecimals, params.quoteTokenDecimals, params.flipRatio),
 	].join('');
 }
 
@@ -209,11 +162,7 @@ function generateDecimalString(params: DecimalStringParams): string {
 	}
 
 	// Add leading/trailing 0's
-	for (
-		let zerosCursor = parseInt(params.zerosStartIndex, 10);
-		zerosCursor <= parseInt(params.zerosEndIndex, 10);
-		zerosCursor += 1
-	) {
+	for (let zerosCursor = parseInt(params.zerosStartIndex, 10); zerosCursor <= parseInt(params.zerosEndIndex, 10); zerosCursor += 1) {
 		buffer[zerosCursor] = '0';
 	}
 
@@ -226,9 +175,7 @@ function generateDecimalString(params: DecimalStringParams): string {
 			sigfigIndex = Uint8.from(sigfigIndex).sub(1).toString();
 		}
 
-		buffer[Uint8.from(sigfigIndex).toNumber()] = String.fromCharCode(
-			48 + Uint256.from(params.sigfigs).mod(10).toNumber(),
-		);
+		buffer[Uint8.from(sigfigIndex).toNumber()] = String.fromCharCode(48 + Uint256.from(params.sigfigs).mod(10).toNumber());
 		sigfigIndex = Uint8.from(sigfigIndex).sub(1).toString();
 		params.sigfigs = Uint256.from(params.sigfigs).div(10).toString();
 	}
@@ -236,13 +183,7 @@ function generateDecimalString(params: DecimalStringParams): string {
 	return buffer.join('');
 }
 
-export function tickToDecimalString(
-	tick: Int24String,
-	tickSpacing: Int24String,
-	baseTokenDecimals: Uint8String,
-	quoteTokenDecimals: Uint8String,
-	flipRatio: boolean,
-): string {
+export function tickToDecimalString(tick: Int24String, tickSpacing: Int24String, baseTokenDecimals: Uint8String, quoteTokenDecimals: Uint8String, flipRatio: boolean): string {
 	if (Int24.from(tick).eq(Int24.from(TickMath.MIN_TICK).div(tickSpacing).mul(tickSpacing))) {
 		return !flipRatio ? 'MIN' : 'MAX';
 	}
@@ -276,11 +217,7 @@ function sigfigsRounded(value: Uint256String, digits: Uint8String): [Uint256Stri
 	return [_value, extraDigit];
 }
 
-function adjustForDecimalPrecision(
-	sqrtRatioX96: Uint160String,
-	baseTokenDecimals: Uint8String,
-	quoteTokenDecimals: Uint8String,
-): Uint256String {
+function adjustForDecimalPrecision(sqrtRatioX96: Uint160String, baseTokenDecimals: Uint8String, quoteTokenDecimals: Uint8String): Uint256String {
 	let adjustedSqrtRatioX96: Uint256String;
 
 	const difference = Int256.from(baseTokenDecimals).sub(quoteTokenDecimals).abs();
@@ -290,22 +227,14 @@ function adjustForDecimalPrecision(
 				.mul(Uint256.from(10).pow(difference.div(2)))
 				.toString();
 			if (difference.mod(2).toNumber() === 1) {
-				adjustedSqrtRatioX96 = FullMath.mulDiv(
-					adjustedSqrtRatioX96,
-					sqrt10X128,
-					Uint256.from(1).shl(128).toString(),
-				);
+				adjustedSqrtRatioX96 = FullMath.mulDiv(adjustedSqrtRatioX96, sqrt10X128, Uint256.from(1).shl(128).toString());
 			}
 		} else {
 			adjustedSqrtRatioX96 = Uint160.from(sqrtRatioX96)
 				.div(Uint256.from(10).pow(difference.div(2)))
 				.toString();
 			if (difference.mod(2).toNumber() === 1) {
-				adjustedSqrtRatioX96 = FullMath.mulDiv(
-					adjustedSqrtRatioX96,
-					Uint256.from(1).shl(128).toString(),
-					sqrt10X128,
-				);
+				adjustedSqrtRatioX96 = FullMath.mulDiv(adjustedSqrtRatioX96, Uint256.from(1).shl(128).toString(), sqrt10X128);
 			}
 		}
 	} else {
@@ -314,35 +243,15 @@ function adjustForDecimalPrecision(
 	return adjustedSqrtRatioX96;
 }
 
-export function fixedPointToDecimalString(
-	sqrtRatioX96: Uint160String,
-	baseTokenDecimals: Uint8String,
-	quoteTokenDecimals: Uint8String,
-): string {
-	const adjustedSqrtRatioX96 = adjustForDecimalPrecision(
-		sqrtRatioX96,
-		baseTokenDecimals,
-		quoteTokenDecimals,
-	);
-	let value = FullMath.mulDiv(
-		adjustedSqrtRatioX96,
-		adjustedSqrtRatioX96,
-		Uint256.from(1).shl(64).toString(),
-	);
+export function fixedPointToDecimalString(sqrtRatioX96: Uint160String, baseTokenDecimals: Uint8String, quoteTokenDecimals: Uint8String): string {
+	const adjustedSqrtRatioX96 = adjustForDecimalPrecision(sqrtRatioX96, baseTokenDecimals, quoteTokenDecimals);
+	let value = FullMath.mulDiv(adjustedSqrtRatioX96, adjustedSqrtRatioX96, Uint256.from(1).shl(64).toString());
 
 	const priceBelow1 = Uint256.from(adjustedSqrtRatioX96).lt(Uint256.from(2).pow(96));
 	if (priceBelow1) {
-		value = FullMath.mulDiv(
-			value,
-			Uint256.from(10).pow(44).toString(),
-			Uint256.from(1).shl(128).toString(),
-		);
+		value = FullMath.mulDiv(value, Uint256.from(10).pow(44).toString(), Uint256.from(1).shl(128).toString());
 	} else {
-		value = FullMath.mulDiv(
-			value,
-			Uint256.from(10).pow(5).toString(),
-			Uint256.from(1).shl(128).toString(),
-		);
+		value = FullMath.mulDiv(value, Uint256.from(10).pow(5).toString(), Uint256.from(1).shl(128).toString());
 	}
 
 	let temp = Uint256.from(value);
@@ -398,16 +307,10 @@ export function feeToPercentString(fee: Uint24String): string {
 
 	if (digits.gte(5)) {
 		const decimalPlace = digits.sub(numSigfigs).gte(4) ? 0 : 1;
-		nZeros = digits.sub(5).lt(numSigfigs.sub(1))
-			? Uint256.from(0)
-			: digits.sub(5).sub(numSigfigs.sub(1));
+		nZeros = digits.sub(5).lt(numSigfigs.sub(1)) ? Uint256.from(0) : digits.sub(5).sub(numSigfigs.sub(1));
 		params.zerosStartIndex = numSigfigs.toString();
 		params.zerosEndIndex = Uint8.from(0).add(params.zerosStartIndex).add(nZeros).sub(1).toString();
-		params.sigfigIndex = Uint8.from(0)
-			.add(params.zerosStartIndex)
-			.sub(1)
-			.add(decimalPlace)
-			.toString();
+		params.sigfigIndex = Uint8.from(0).add(params.zerosStartIndex).sub(1).add(decimalPlace).toString();
 		params.bufferLength = Uint8.from(0)
 			.add(nZeros.add(numSigfigs.add(1)).add(decimalPlace))
 			.toString();
@@ -445,86 +348,22 @@ export function generateSVGImage(params: ConstructTokenURIParams): string {
 		tickSpacing: params.tickSpacing,
 		overRange: overRange(params.tickLower, params.tickUpper, params.tickCurrent),
 		tokenId: params.tokenId,
-		color0: tokenToColorHex(params.quoteTokenAddress, '136'),
-		color1: tokenToColorHex(params.baseTokenAddress, '136'),
-		color2: tokenToColorHex(params.quoteTokenAddress, '0'),
-		color3: tokenToColorHex(params.baseTokenAddress, '0'),
-		x1: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.quoteTokenAddress),
-				'16',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'16',
-			'274',
-		),
-		y1: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.baseTokenAddress),
-				'16',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'100',
-			'484',
-		),
-		x2: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.quoteTokenAddress),
-				'32',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'16',
-			'274',
-		),
-		y2: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.baseTokenAddress),
-				'32',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'100',
-			'484',
-		),
-		x3: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.quoteTokenAddress),
-				'48',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'16',
-			'274',
-		),
-		y3: scale(
-			getCircleCoord(
-				HexStrings.bufferToUint256String(params.baseTokenAddress),
-				'48',
-				params.tokenId,
-			),
-			'0',
-			'255',
-			'100',
-			'484',
-		),
+		color0: tokenToColorHex(params.quoteTokenAddress),
+		color1: tokenToColorHex(params.baseTokenAddress),
+		color2: tokenToColorHex(params.quoteTokenAddress),
+		color3: tokenToColorHex(params.baseTokenAddress),
+		x1: scale(getCircleCoord(HexStrings.bufferToUint256String(params.quoteTokenAddress), '16', params.tokenId), '0', '255', '16', '274'),
+		y1: scale(getCircleCoord(HexStrings.bufferToUint256String(params.baseTokenAddress), '16', params.tokenId), '0', '255', '100', '484'),
+		x2: scale(getCircleCoord(HexStrings.bufferToUint256String(params.quoteTokenAddress), '32', params.tokenId), '0', '255', '16', '274'),
+		y2: scale(getCircleCoord(HexStrings.bufferToUint256String(params.baseTokenAddress), '32', params.tokenId), '0', '255', '100', '484'),
+		x3: scale(getCircleCoord(HexStrings.bufferToUint256String(params.quoteTokenAddress), '48', params.tokenId), '0', '255', '16', '274'),
+		y3: scale(getCircleCoord(HexStrings.bufferToUint256String(params.baseTokenAddress), '48', params.tokenId), '0', '255', '100', '484'),
 	};
 
 	return NFTSVG.generateSVG(svgParams);
 }
 
-function overRange(
-	tickLower: Int24String,
-	tickUpper: Int24String,
-	tickCurrent: Int24String,
-): Int8String {
+function overRange(tickLower: Int24String, tickUpper: Int24String, tickCurrent: Int24String): Int8String {
 	if (Int24.from(tickCurrent).lt(tickLower)) {
 		return '-1';
 	}
@@ -534,36 +373,67 @@ function overRange(
 	return '0';
 }
 
-function scale(
-	n: Uint256String,
-	inMn: Uint256String,
-	inMx: Uint256String,
-	outMn: Uint256String,
-	outMx: Uint256String,
-): string {
-	return Uint256.from(n)
-		.sub(inMn)
-		.mul(Uint256.from(outMx).sub(outMn))
-		.div(Uint256.from(inMx).sub(inMn))
-		.add(outMn)
-		.toString();
+function scale(n: Uint256String, inMn: Uint256String, inMx: Uint256String, outMn: Uint256String, outMx: Uint256String): string {
+	return Uint256.from(n).sub(inMn).mul(Uint256.from(outMx).sub(outMn)).div(Uint256.from(inMx).sub(inMn)).add(outMn).toString();
 }
 
-export function tokenToColorHex(token: Buffer, offset: Uint256String): string {
-	const hash = cryptography.utils.hash(token);
-	return HexStrings.toHexString(
-		Uint256.from(`0x${hash.toString('hex')}`)
-			.shr(offset)
-			.toString(),
-		3,
-	);
+export function tokenToColorHex(token: Buffer) {
+	const hash = crc32(token);
+
+	const hue = hash % 360;
+	const saturation = 70 + (hash % 30);
+	const lightness = 50 + (hash % 10);
+
+	const color = hslToHex(hue, saturation, lightness);
+	return color;
 }
 
-function getCircleCoord(
-	tokenAddress: Uint256String,
-	offset: Uint256String,
-	tokenId: Uint256String,
-): Uint256String {
+function hslToHex(h, s, l) {
+	s /= 100;
+	l /= 100;
+
+	const c = (1 - Math.abs(2 * l - 1)) * s;
+	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+	const m = l - c / 2;
+	let r = 0;
+	let g = 0;
+	let b = 0;
+
+	if (h >= 0 && h < 60) {
+		r = c;
+		g = x;
+		b = 0;
+	} else if (h >= 60 && h < 120) {
+		r = x;
+		g = c;
+		b = 0;
+	} else if (h >= 120 && h < 180) {
+		r = 0;
+		g = c;
+		b = x;
+	} else if (h >= 180 && h < 240) {
+		r = 0;
+		g = x;
+		b = c;
+	} else if (h >= 240 && h < 300) {
+		r = x;
+		g = 0;
+		b = c;
+	} else if (h >= 300 && h < 360) {
+		r = c;
+		g = 0;
+		b = x;
+	}
+
+	r = Math.round((r + m) * 255);
+	g = Math.round((g + m) * 255);
+	b = Math.round((b + m) * 255);
+
+	// eslint-disable-next-line no-bitwise
+	return `${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function getCircleCoord(tokenAddress: Uint256String, offset: Uint256String, tokenId: Uint256String): Uint256String {
 	return Uint256.from(sliceTokenHex(tokenAddress, offset)).mul(tokenId).mod(255).toString();
 }
 

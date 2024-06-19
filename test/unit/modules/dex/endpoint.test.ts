@@ -73,13 +73,10 @@ describe('DexEndpoint', () => {
 		it('should quote exact input', async () => {
 			const param: QuoteExactInputParams = {
 				amountIn: '10000',
-				path: encodePath([tokens[2].address, tokens[1].address], [FeeAmount.MEDIUM]).toString(
-					'hex',
-				),
+				path: encodePath([tokens[2].address, tokens[1].address], [FeeAmount.MEDIUM]).toString('hex'),
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
-			const { amountOut, sqrtPriceX96AfterList, initializedTicksCrossedList } =
-				await endpoint.quoteExactInput(context);
+			const { amountOut, sqrtPriceX96AfterList, initializedTicksCrossedList } = await endpoint.quoteExactInput(context);
 
 			expect(sqrtPriceX96AfterList).toHaveLength(1);
 			expect(sqrtPriceX96AfterList[0]).toBe('80018067294531553039351583520');
@@ -122,8 +119,7 @@ describe('DexEndpoint', () => {
 				sqrtPriceLimitX96: '0',
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
-			const { amountOut, sqrtPriceX96After, initializedTicksCrossed } =
-				await endpoint.quoteExactInputSingle(context);
+			const { amountOut, sqrtPriceX96After, initializedTicksCrossed } = await endpoint.quoteExactInputSingle(context);
 
 			expect(sqrtPriceX96After).toBe('80018067294531553039351583520');
 			expect(initializedTicksCrossed).toBe('0');
@@ -225,13 +221,10 @@ describe('DexEndpoint', () => {
 		it('should quote exact output', async () => {
 			const param: QuoteExactOutputParams = {
 				amountOut: '9871',
-				path: encodePath([tokens[1].address, tokens[2].address], [FeeAmount.MEDIUM]).toString(
-					'hex',
-				),
+				path: encodePath([tokens[1].address, tokens[2].address], [FeeAmount.MEDIUM]).toString('hex'),
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
-			const { amountIn, sqrtPriceX96AfterList, initializedTicksCrossedList } =
-				await endpoint.quoteExactOutput(context);
+			const { amountIn, sqrtPriceX96AfterList, initializedTicksCrossedList } = await endpoint.quoteExactOutput(context);
 
 			expect(sqrtPriceX96AfterList).toHaveLength(1);
 			expect(sqrtPriceX96AfterList[0]).toBe('80018020393569259756601362385');
@@ -274,8 +267,7 @@ describe('DexEndpoint', () => {
 				sqrtPriceLimitX96: '0',
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
-			const { amountIn, sqrtPriceX96After, initializedTicksCrossed } =
-				await endpoint.quoteExactOutputSingle(context);
+			const { amountIn, sqrtPriceX96After, initializedTicksCrossed } = await endpoint.quoteExactOutputSingle(context);
 
 			expect(sqrtPriceX96After).toBe('80018020393569259756601362385');
 			expect(initializedTicksCrossed).toBe('0');
@@ -512,7 +504,7 @@ describe('DexEndpoint', () => {
 			const res = await endpoint.getTokenURI(context);
 
 			expect(res).toMatchSnapshot({
-				tokenURI: 'ipfs://bafkreife6klefkcmghsoxqnzmayi3fq5mia5cv3kb7pcawo3xds5kmijxu',
+				tokenURI: 'ipfs://bafkreiby27ig57rycpuqik6azg2yofp4rifauebwjwpa5unzmkjpe26rdq',
 			});
 		});
 
