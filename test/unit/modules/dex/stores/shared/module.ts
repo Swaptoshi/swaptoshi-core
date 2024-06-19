@@ -80,8 +80,8 @@ export async function storeFixture() {
 	const interoperabilityMethod = {} as SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 
-	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
 	module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
+	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
 
 	const observationStore = module.stores.get(ObservationStore);
 	const positionInfoStore = module.stores.get(PositionInfoStore);
