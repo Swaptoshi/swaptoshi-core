@@ -146,8 +146,13 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		this._checkImmutableDependencies();
 		const nextAvailableId = await this.nextAvailableIdStore.getOrDefault(this.immutableContext!.context);
 
-		if (this._skippedTokenID.has(nextAvailableId.nextTokenId)) {
-			nextAvailableId.nextTokenId += BigInt(1);
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			if (this._skippedTokenID.has(nextAvailableId.nextTokenId)) {
+				nextAvailableId.nextTokenId += BigInt(1);
+				continue;
+			}
+			break;
 		}
 
 		return nextAvailableId;
