@@ -16,7 +16,6 @@ import { DexModuleConfig } from '../../../../../../src/app/modules/dex/types';
 import { DEFAULT_TREASURY_ADDRESS } from '../../../../../../src/app/modules/dex/constants';
 import { MockedFeeMethod } from './fee';
 import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/stores/supported_token';
-import { TokenFactoryMethod } from '../../../../../../src/app/modules/token_factory/method';
 import { NFTMethod } from '../../../../../../src/app/modules/nft';
 import { MockedFeeConversionMethod } from './fee_conversion';
 import { FeeConversionMethod } from '../../../../../../src/app/modules/fee_conversion';
@@ -78,14 +77,11 @@ export async function storeFixture() {
 	const nftMethod = new MockedNFTMethod() as NFTMethod;
 	const feeMethod = new MockedFeeMethod() as FeeMethod;
 	const feeConversionMethod = new MockedFeeConversionMethod() as FeeConversionMethod;
-	const tokenFactoryMethod = {
-		isFeeConversion: () => ({ status: false, payload: undefined }),
-	} as unknown as TokenFactoryMethod;
 	const interoperabilityMethod = {} as SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 
 	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
-	module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
+	module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
 
 	const observationStore = module.stores.get(ObservationStore);
 	const positionInfoStore = module.stores.get(PositionInfoStore);
@@ -110,7 +106,6 @@ export async function storeFixture() {
 		nftMethod,
 		feeMethod,
 		feeConversionMethod,
-		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,
@@ -128,7 +123,6 @@ export async function commandContextFixture<T extends object>(command: string, c
 		config,
 		module,
 		tokenMethod,
-		tokenFactoryMethod,
 		interoperabilityMethod,
 		nftMethod,
 		stateStore,
@@ -170,7 +164,6 @@ export async function commandContextFixture<T extends object>(command: string, c
 		module,
 		tokenMethod,
 		nftMethod,
-		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,
@@ -194,7 +187,6 @@ export async function hookContextFixture() {
 		nftMethod,
 		feeMethod,
 		feeConversionMethod,
-		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,
@@ -227,7 +219,6 @@ export async function hookContextFixture() {
 		nftMethod,
 		feeMethod,
 		feeConversionMethod,
-		tokenFactoryMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,

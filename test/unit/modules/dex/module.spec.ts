@@ -36,7 +36,6 @@ import { mock_token_transfer } from './stores/shared/token';
 import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supported_token';
 import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_symbol';
 import { fallbackTokenSymbol } from './utils/token';
-import { TokenFactoryMethod } from '../../../../src/app/modules/token_factory/method';
 import { NFTMethod } from '../../../../src/app/modules/nft';
 import { FeeConversionMethod } from '../../../../src/app/modules/fee_conversion';
 
@@ -63,7 +62,6 @@ describe('DexModule', () => {
 	let nftMethod: NFTMethod;
 	let feeMethod: FeeMethod;
 	let feeConversionMethod: FeeConversionMethod;
-	let tokenFactoryMethod: TokenFactoryMethod;
 	let interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	let verifyContext: TransactionVerifyContext;
 	let executeContext: TransactionExecuteContext;
@@ -78,8 +76,7 @@ describe('DexModule', () => {
 		const nativeTokenIns = new Token();
 		TokenRegistry.createToken(NATIVE_TOKEN_ID, nativeTokenIns);
 
-		({ module, createTransactionVerifyContext, createTransactionExecuteContext, poolStore, positionManagerStore, tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod } =
-			await hookContextFixture());
+		({ module, createTransactionVerifyContext, createTransactionExecuteContext, poolStore, positionManagerStore, tokenMethod, nftMethod, feeMethod, feeConversionMethod } = await hookContextFixture());
 	});
 
 	afterEach(() => {
@@ -203,12 +200,12 @@ describe('DexModule', () => {
 
 		describe('addDependencies', () => {
 			it('should add poolStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
 				expect(mockPoolStore.addDependencies).toHaveBeenCalledWith(tokenMethod);
 			});
 
 			it('should add positionManagerStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
 				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(tokenMethod, nftMethod);
 			});
 		});

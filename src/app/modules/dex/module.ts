@@ -136,7 +136,6 @@ export class DexModule extends BaseInteroperableModule {
 		tokenMethod: TokenMethod,
 		nftMethod: NFTMethod,
 		feeMethod: FeeMethod,
-		tokenFactoryMethod: TokenFactoryMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
 		feeConversionMethod?: FeeConversionMethod,
 	) {
@@ -150,7 +149,6 @@ export class DexModule extends BaseInteroperableModule {
 
 		this._feeMethod = feeMethod;
 		this._tokenMethod = tokenMethod;
-		this._tokenFactoryMethod = tokenFactoryMethod;
 		this._dexInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
 
 		if (feeConversionMethod) {
