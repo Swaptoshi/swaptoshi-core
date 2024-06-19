@@ -15,3 +15,8 @@ export * from './quote_exact_output_single';
 export * from './get_pool';
 export * from './get_position';
 export * from './get_token_uri';
+export * from './get_pool_address_from_collection_id';
+export * from './observe';
+export * from './get_metadata';
+export * from './quote_price';
+export * from './treasurify';

@@ -2,18 +2,13 @@
 import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
 import { MintCommand } from '../../../../../src/app/modules/dex/commands/mint_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
-import { mintCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/mint_command';
+import { mintCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { MintParams } from '../../../../../src/app/modules/dex/types';
 import { invalidAddress, invalidNumberString, invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
 import { NonfungiblePositionManager } from '../../../../../src/app/modules/dex/stores/factory';
 import { FeeAmount, TICK_SPACINGS, getMaxTick, getMinTick } from '../stores/shared/utilities';
-import {
-	senderAddress,
-	senderPublicKey,
-	token0 as token0ID,
-	token1 as token1ID,
-} from '../utils/account';
+import { senderAddress, senderPublicKey, token0 as token0ID, token1 as token1ID } from '../utils/account';
 import { eventResultHaveMinimumLength } from '../../../../utils/events';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
@@ -45,8 +40,7 @@ describe('MintCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, nft } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new MintCommand(module.stores, module.events);
 	});
 
@@ -166,18 +160,7 @@ describe('MintCommand', () => {
 			await command.execute(context);
 
 			expect(NFTRegistry.balanceOf.get(senderAddress.toString('hex'))).toBe('1');
-			const {
-				fee,
-				token0,
-				token1,
-				tickLower,
-				tickUpper,
-				liquidity,
-				tokensOwed0,
-				tokensOwed1,
-				feeGrowthInside0LastX128,
-				feeGrowthInside1LastX128,
-			} = await nft.getPositions('0');
+			const { fee, token0, token1, tickLower, tickUpper, liquidity, tokensOwed0, tokensOwed1, feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await nft.getPositions('0');
 			expect(token0.toString('hex')).toBe(validParam.token0.toString('hex'));
 			expect(token1.toString('hex')).toBe(validParam.token1.toString('hex'));
 			expect(fee).toBe(FeeAmount.MEDIUM);

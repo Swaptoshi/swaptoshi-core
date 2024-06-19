@@ -6,13 +6,7 @@ import { CollectParams } from '../../../../../src/app/modules/dex/types';
 import { invalidAddress, invalidNumberString } from '../utils/invalid';
 import { Tokens, commandFixture } from '../utils/fixtures';
 import { NonfungiblePositionManager } from '../../../../../src/app/modules/dex/stores/factory';
-import {
-	FeeAmount,
-	MaxUint128,
-	TICK_SPACINGS,
-	getMaxTick,
-	getMinTick,
-} from '../stores/shared/utilities';
+import { FeeAmount, MaxUint128, TICK_SPACINGS, getMaxTick, getMinTick } from '../stores/shared/utilities';
 import { poolAddress, senderAddress, senderPublicKey } from '../utils/account';
 import { eventResultHaveMinimumLength } from '../../../../utils/events';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
@@ -20,7 +14,7 @@ import { TokenRegistry } from '../stores/shared/token/token_registry';
 import { CollectCommand } from '../../../../../src/app/modules/dex/commands/collect_command';
 import { mock_token_transfer } from '../stores/shared/token';
 import { CollectPositionEvent } from '../../../../../src/app/modules/dex/events/collect_position';
-import { collectCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/collect_command';
+import { collectCommandSchema } from '../../../../../src/app/modules/dex/schema';
 
 type CommandParam = CollectParams;
 const COMMAND_NAME = 'collect';
@@ -43,8 +37,7 @@ describe('CollectCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new CollectCommand(module.stores, module.events);
 
 		await nft.mint({
@@ -138,11 +131,7 @@ describe('CollectCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress.toString('hex'),
-				senderAddress.toString('hex'),
-				'49',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress.toString('hex'), senderAddress.toString('hex'), '49');
 		});
 
 		it('should add command events', async () => {

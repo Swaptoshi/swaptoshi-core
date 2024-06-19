@@ -5,8 +5,7 @@ import { commandSwapContext } from '../stores/context';
 import { PoolStore } from '../stores/pool';
 import { createPoolCommandSchema } from '../schema';
 import { CreatePoolParams } from '../types';
-import { verifyCreatePoolParam } from '../utils/verify';
-import { inversePriceSqrt } from '../utils';
+import { verifyCreatePoolParam, inversePriceSqrt } from '../utils';
 
 export class CreatePoolCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

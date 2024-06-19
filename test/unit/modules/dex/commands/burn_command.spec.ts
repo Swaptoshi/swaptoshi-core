@@ -2,18 +2,12 @@
 import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
 import { BurnCommand } from '../../../../../src/app/modules/dex/commands/burn_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
-import { burnCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/burn_command';
+import { burnCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { BurnParams } from '../../../../../src/app/modules/dex/types';
 import { invalidAddress, invalidNumberString } from '../utils/invalid';
 import { Tokens, commandFixture } from '../utils/fixtures';
 import { NonfungiblePositionManager } from '../../../../../src/app/modules/dex/stores/factory';
-import {
-	FeeAmount,
-	MaxUint128,
-	TICK_SPACINGS,
-	getMaxTick,
-	getMinTick,
-} from '../stores/shared/utilities';
+import { FeeAmount, MaxUint128, TICK_SPACINGS, getMaxTick, getMinTick } from '../stores/shared/utilities';
 import { poolAddress, senderAddress, senderPublicKey } from '../utils/account';
 import { eventResultHaveMinimumLength } from '../../../../utils/events';
 import { TokenURIDestroyedEvent } from '../../../../../src/app/modules/dex/events/tokenuri_destroyed';
@@ -38,8 +32,7 @@ describe('BurnCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new BurnCommand(module.stores, module.events);
 
 		await nft.mint({
@@ -116,9 +109,7 @@ describe('BurnCommand', () => {
 		it('should delete the tokenId successfully', async () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
-			await expect((async () => nft.getPositions(validParam.tokenId))()).rejects.toThrow(
-				'NFT doesnt exist',
-			);
+			await expect((async () => nft.getPositions(validParam.tokenId))()).rejects.toThrow('NFT doesnt exist');
 		});
 
 		it('should add command events', async () => {

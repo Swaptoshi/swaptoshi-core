@@ -6,7 +6,7 @@ import { BaseModule, FeeMethod, ModuleInitArgs, ModuleMetadata, TokenMethod, Tra
 import { FeeConversionEndpoint } from './endpoint';
 import { FeeConversionMethod } from './method';
 import { FeeConversionMethodRegistry } from './registry';
-import { getRegisteredHandlersEndpointRequestSchema, getRegisteredHandlersEndpointResponseSchema } from './schema/endpoint/get_registered_handler';
+import { getRegisteredHandlersEndpointRequestSchema, getRegisteredHandlersEndpointResponseSchema } from './schema';
 import { FeeConvertedEvent } from './events/fee_converted';
 import { InternalFeeConversionMethod } from './internal_method';
 import { DexMethod } from '../dex/method';

@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { liquidStakingTokenBurnEventSchema } from '../schema/events/lst_burn';
+import { liquidStakingTokenBurnEventSchema } from '../schema';
 
 export interface LiquidStakingTokenBurnEventData {
 	address: Buffer;

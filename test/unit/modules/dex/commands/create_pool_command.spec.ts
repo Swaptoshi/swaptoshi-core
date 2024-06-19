@@ -3,7 +3,7 @@
 import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
 import { CreatePoolCommand } from '../../../../../src/app/modules/dex/commands/create_pool_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
-import { createPoolCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/create_pool_command';
+import { createPoolCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { CreatePoolParams, MutableSwapContext } from '../../../../../src/app/modules/dex/types';
 import { invalidNumberString, invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
@@ -15,17 +15,8 @@ import { TokenRegistry } from '../stores/shared/token/token_registry';
 import { PoolCreatedEvent } from '../../../../../src/app/modules/dex/events/pool_created';
 import { PoolStore } from '../../../../../src/app/modules/dex/stores/pool';
 import { commandSwapContext } from '../../../../../src/app/modules/dex/stores/context';
-import {
-	mock_token_initializeUserAccount,
-	mock_token_lock,
-	mock_token_transfer,
-} from '../stores/shared/token';
-import {
-	DEFAULT_TREASURY_ADDRESS,
-	POSITION_MANAGER_ADDRESS,
-	ROUTER_ADDRESS,
-	defaultConfig,
-} from '../../../../../src/app/modules/dex/constants';
+import { mock_token_initializeUserAccount, mock_token_lock, mock_token_transfer } from '../stores/shared/token';
+import { DEFAULT_TREASURY_ADDRESS, POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS, defaultConfig } from '../../../../../src/app/modules/dex/constants';
 import { PositionManagerStore } from '../../../../../src/app/modules/dex/stores/position_manager';
 import { TokenSymbolStore } from '../../../../../src/app/modules/dex/stores/token_symbol';
 
@@ -56,15 +47,7 @@ describe('CreatePoolCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({
-			module,
-			createCommandExecuteContext,
-			createCommandVerifyContext,
-			poolStore,
-			tokenMethod,
-			positionManagerStore,
-			tokenSymbolStore,
-		} = await commandFixture<CommandParam>(
+		({ module, createCommandExecuteContext, createCommandVerifyContext, poolStore, tokenMethod, positionManagerStore, tokenSymbolStore } = await commandFixture<CommandParam>(
 			COMMAND_NAME,
 			commandSchema,
 			senderPublicKey,
@@ -142,10 +125,7 @@ describe('CreatePoolCommand', () => {
 			swapContext = commandSwapContext(context);
 			await command.execute(context);
 
-			const positionManager = await positionManagerStore.getMutablePositionManager(
-				swapContext,
-				poolAddress2,
-			);
+			const positionManager = await positionManagerStore.getMutablePositionManager(swapContext, poolAddress2);
 			expect(positionManager.poolAddress).toStrictEqual(poolAddress2);
 		});
 
@@ -192,15 +172,9 @@ describe('CreatePoolCommand', () => {
 
 			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(poolAddress2, token2);
 
-			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(
-				POSITION_MANAGER_ADDRESS,
-				token1,
-			);
+			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(POSITION_MANAGER_ADDRESS, token1);
 
-			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(
-				POSITION_MANAGER_ADDRESS,
-				token2,
-			);
+			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(POSITION_MANAGER_ADDRESS, token2);
 
 			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(ROUTER_ADDRESS, token1);
 
@@ -211,15 +185,9 @@ describe('CreatePoolCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(
-				DEFAULT_TREASURY_ADDRESS,
-				token1,
-			);
+			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(DEFAULT_TREASURY_ADDRESS, token1);
 
-			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-			);
+			expect(mock_token_initializeUserAccount).toHaveBeenCalledWith(DEFAULT_TREASURY_ADDRESS, token2);
 		});
 
 		it('should transfer leftover balance to treasury', async () => {
@@ -230,19 +198,9 @@ describe('CreatePoolCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress2,
-				DEFAULT_TREASURY_ADDRESS,
-				token1,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress2, DEFAULT_TREASURY_ADDRESS, token1, BigInt(10));
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress2,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress2, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should lock leftover balance if treasury is not configured', async () => {

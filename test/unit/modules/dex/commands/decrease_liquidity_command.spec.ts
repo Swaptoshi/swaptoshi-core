@@ -10,7 +10,7 @@ import { poolAddress, senderAddress, senderPublicKey } from '../utils/account';
 import { eventResultHaveMinimumLength } from '../../../../utils/events';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
-import { decreaseLiquidityCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/decrease_liquidity_command';
+import { decreaseLiquidityCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { DecreaseLiquidityCommand } from '../../../../../src/app/modules/dex/commands/decrease_liquidity_command';
 import { DecreaseLiquidityEvent } from '../../../../../src/app/modules/dex/events/decrease_liquidity';
 
@@ -36,8 +36,7 @@ describe('DecreaseLiquidityCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new DecreaseLiquidityCommand(module.stores, module.events);
 
 		await nft.mint({

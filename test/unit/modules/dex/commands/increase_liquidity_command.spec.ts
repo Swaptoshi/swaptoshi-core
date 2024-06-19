@@ -12,7 +12,7 @@ import { TokenRegistry } from '../stores/shared/token/token_registry';
 import { IncreaseLiquidityCommand } from '../../../../../src/app/modules/dex/commands/increase_liquidity_command';
 import { IncreaseLiquidityParams } from '../../../../../src/app/modules/dex/types';
 import { IncreaseLiquidityEvent } from '../../../../../src/app/modules/dex/events/increase_liquidity';
-import { increaseLiquidityCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/increase_liquidity_command';
+import { increaseLiquidityCommandSchema } from '../../../../../src/app/modules/dex/schema';
 
 type CommandParam = IncreaseLiquidityParams;
 const COMMAND_NAME = 'increaseLiquidity';
@@ -37,8 +37,7 @@ describe('IncreaseLiquidityCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new IncreaseLiquidityCommand(module.stores, module.events);
 
 		await nft.mint({

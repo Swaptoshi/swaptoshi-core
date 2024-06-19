@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { liquidStakingTokenMintEventSchema } from '../schema/events/lst_mint';
+import { liquidStakingTokenMintEventSchema } from '../schema';
 
 export interface LiquidStakingTokenMintEventData {
 	address: Buffer;

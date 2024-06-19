@@ -5,7 +5,7 @@ import { PoolStore } from '../stores/pool';
 import { commandSwapContext } from '../stores/context';
 import { exactInputCommandSchema } from '../schema';
 import { ExactInputParams } from '../types';
-import { verifyExactInputParam } from '../utils/verify';
+import { verifyExactInputParam } from '../utils';
 
 export class ExactInputCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

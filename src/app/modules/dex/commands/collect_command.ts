@@ -5,7 +5,7 @@ import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { collectCommandSchema } from '../schema';
 import { CollectParams } from '../types';
-import { verifyCollectParam } from '../utils/verify';
+import { verifyCollectParam } from '../utils';
 
 export class CollectCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

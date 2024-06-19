@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 import { CrossChainMessageContext, codec } from 'klayr-sdk';
-import { crossChainNFTTransferMessageParamsSchema } from '../../schema/dependencies/nft';
+import { crossChainNFTTransferMessageParamsSchema } from '../../schema';
 import { TokenFactoryInteroperableMethod } from '../../cc_method';
 import { ICOStore } from '../../stores/ico';
 
@@ -12,25 +12,14 @@ interface TransferNFTParams {
 	data: string;
 }
 
-export async function verifyValidCrossTransfer(
-	this: TokenFactoryInteroperableMethod,
-	context: CrossChainMessageContext,
-) {
+export async function verifyValidCrossTransfer(this: TokenFactoryInteroperableMethod, context: CrossChainMessageContext) {
 	if (context.ccm.module === 'nft' && context.ccm.crossChainCommand === 'crossChainTransfer') {
-		const params = codec.decode<TransferNFTParams>(
-			crossChainNFTTransferMessageParamsSchema,
-			context.ccm.params,
-		);
+		const params = codec.decode<TransferNFTParams>(crossChainNFTTransferMessageParamsSchema, context.ccm.params);
 
 		const icoStore = this.stores.get(ICOStore);
 		if (await icoStore.has(context, params.recipientAddress)) {
 			// throw new Error(`Invalid nft transfer recipient. An ICO pool can't receive any nft`);
-			await this._nftMethod?.transfer(
-				context.getMethodContext(),
-				params.recipientAddress,
-				params.senderAddress,
-				params.nftID,
-			);
+			await this._nftMethod?.transfer(context.getMethodContext(), params.recipientAddress, params.senderAddress, params.nftID);
 		}
 	}
 }

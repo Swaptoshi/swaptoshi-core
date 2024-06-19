@@ -9,7 +9,12 @@ import {
 	verifyGetPoolParam,
 	verifyGetPositionParam,
 	verifyGetTokenURIParam,
-} from './utils/verify';
+	serializer,
+	verifyGetPoolAddressFromCollectionIdParam,
+	verifyObserveParam,
+	verifyGetMetadataParam,
+	verifyPriceParam,
+} from './utils';
 import {
 	DexModuleConfig,
 	GetMetadataParams,
@@ -22,16 +27,11 @@ import {
 	QuoteExactOutputParams,
 	QuoteExactOutputSingleParams,
 	QuotePriceParams,
+	GetPoolAddressFromCollectionIdParams,
 } from './types';
 import { PoolStore } from './stores/pool';
 import { PositionManagerStore } from './stores/position_manager';
-import { verifyObserveParam } from './utils/verify/params/observe';
 import { PoolAddress } from './stores/library/periphery';
-import { verifyGetMetadataParam } from './utils/verify/params/get_metadata';
-import { GetPoolAddressFromCollectionIdParams } from './types/params/get_pool_address_from_collection_id';
-import { verifyGetPoolAddressFromCollectionIdParam } from './utils/verify/params/get_pool_address_from_collection_id';
-import { serializer } from './utils';
-import { verifyPriceParam } from './utils/verify/params/quote_price';
 
 export class DexEndpoint extends BaseEndpoint {
 	public init(config: DexModuleConfig) {
@@ -67,9 +67,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const quoter = new Quoter(_context, this.stores);
-		return serializer(
-			await quoter.quoteExactOutput(Buffer.from(param.path, 'hex'), param.amountOut),
-		);
+		return serializer(await quoter.quoteExactOutput(Buffer.from(param.path, 'hex'), param.amountOut));
 	}
 
 	public async quoteExactOutputSingle(context: ModuleEndpointContext) {
@@ -95,10 +93,7 @@ export class DexEndpoint extends BaseEndpoint {
 		verifyGetPoolAddressFromCollectionIdParam(param);
 
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.get(
-			context,
-			Buffer.from(param.collectionId, 'hex'),
-		);
+		const positionManager = await positionManagerStore.get(context, Buffer.from(param.collectionId, 'hex'));
 
 		return { poolAddress: positionManager.poolAddress.toString('hex') };
 	}
@@ -109,12 +104,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const poolStore = this.stores.get(PoolStore);
-		const pool = await poolStore.getImmutablePool(
-			_context,
-			Buffer.from(param.tokenA, 'hex'),
-			Buffer.from(param.tokenB, 'hex'),
-			param.fee,
-		);
+		const pool = await poolStore.getImmutablePool(_context, Buffer.from(param.tokenA, 'hex'), Buffer.from(param.tokenB, 'hex'), param.fee);
 		return serializer({
 			...pool.toJSON(),
 			klayr32: pool.klayr32,
@@ -129,20 +119,12 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(
-			_context,
-			Buffer.from(param.poolAddress, 'hex'),
-		);
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
 		const poolStore = this.stores.get(PoolStore);
-		const { token0, token1, fee } = PoolAddress.decodePoolAddress(
-			Buffer.from(param.poolAddress, 'hex'),
-		);
+		const { token0, token1, fee } = PoolAddress.decodePoolAddress(Buffer.from(param.poolAddress, 'hex'));
 		const pool = await poolStore.getImmutablePool(_context, token0, token1, fee);
 		const position = await positionManager.getPositions(param.tokenId);
-		const [principal0, principal1] = await positionManager.principal(
-			param.tokenId,
-			pool.slot0.sqrtPriceX96,
-		);
+		const [principal0, principal1] = await positionManager.principal(param.tokenId, pool.slot0.sqrtPriceX96);
 		const [fees0, fees1] = await positionManager.fees(param.tokenId);
 		return serializer({
 			...position,
@@ -161,10 +143,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(
-			_context,
-			Buffer.from(param.poolAddress, 'hex'),
-		);
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
 		return serializer({ tokenURI: await positionManager.tokenURI(param.tokenId) });
 	}
 
@@ -174,10 +153,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(
-			_context,
-			Buffer.from(param.poolAddress, 'hex'),
-		);
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
 		return serializer(await positionManager.getMetadata(param.tokenId));
 	}
 

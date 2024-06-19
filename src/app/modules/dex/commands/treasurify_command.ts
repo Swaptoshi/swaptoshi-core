@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
 import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
-import { verifyTreasurifyParam } from '../utils/verify/params/treasurify';
+import { verifyTreasurifyParam } from '../utils';
 import { TreasurifyParams } from '../types';
 import { treasurifyCommandSchema } from '../schema';
 import { PoolStore } from '../stores/pool';

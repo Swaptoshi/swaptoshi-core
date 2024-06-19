@@ -1,4 +1,4 @@
-import { COLLECTION_ID_LENGTH, POOL_ADDRESS_LENGTH, TOKEN_ID_LENGTH } from '../../constants/verify';
+import { COLLECTION_ID_LENGTH, POOL_ADDRESS_LENGTH, TOKEN_ID_LENGTH } from '../../constants';
 
 export function verifyString(name: string, string: string) {
 	if (string.length === 0) {

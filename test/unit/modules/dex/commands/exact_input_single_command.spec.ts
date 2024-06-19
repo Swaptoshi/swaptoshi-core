@@ -10,7 +10,7 @@ import { FeeAmount, TICK_SPACINGS, getMaxTick, getMinTick } from '../stores/shar
 import { poolAddress, senderAddress, senderPublicKey, token0, token1 } from '../utils/account';
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
-import { exactInputSingleCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/exact_input_single_command';
+import { exactInputSingleCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { ExactInputSingleCommand } from '../../../../../src/app/modules/dex/commands/exact_input_single_command';
 import { Uint } from '../../../../../src/app/modules/dex/stores/library/int';
 import { mock_token_transfer } from '../stores/shared/token';
@@ -39,8 +39,7 @@ describe('ExactInputSingleCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, nft, tokenMethod } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, nft, tokenMethod } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new ExactInputSingleCommand(module.stores, module.events);
 
 		await nft.mint({
@@ -64,10 +63,7 @@ describe('ExactInputSingleCommand', () => {
 	});
 
 	const getBalances = async (who: Buffer, context: CommandExecuteContext<CommandParam>) => {
-		const balances = await Promise.all([
-			await tokenMethod.getAvailableBalance(context, who, token0),
-			await tokenMethod.getAvailableBalance(context, who, token1),
-		]);
+		const balances = await Promise.all([await tokenMethod.getAvailableBalance(context, who, token0), await tokenMethod.getAvailableBalance(context, who, token1)]);
 		return {
 			token0: Uint.from(balances[0]),
 			token1: Uint.from(balances[1]),
@@ -177,17 +173,9 @@ describe('ExactInputSingleCommand', () => {
 			const context = createCommandExecuteContext(validParam);
 			await command.execute(context);
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				senderAddress.toString('hex'),
-				poolAddress.toString('hex'),
-				'3',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(senderAddress.toString('hex'), poolAddress.toString('hex'), '3');
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress.toString('hex'),
-				senderAddress.toString('hex'),
-				'1',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress.toString('hex'), senderAddress.toString('hex'), '1');
 		});
 	});
 });

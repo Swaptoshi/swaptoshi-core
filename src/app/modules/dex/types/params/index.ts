@@ -19,3 +19,4 @@ export * from './observe';
 export * from './treasurify';
 export * from './get_metadata';
 export * from './quote_price';
+export * from './get_pool_address_from_collection_id';

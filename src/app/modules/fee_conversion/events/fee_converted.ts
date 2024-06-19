@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { feeConvertedEventSchema } from '../schema/events/fee_converted';
+import { feeConvertedEventSchema } from '../schema';
 
 export interface FeeConvertedEventData {
 	moduleCommand: string;

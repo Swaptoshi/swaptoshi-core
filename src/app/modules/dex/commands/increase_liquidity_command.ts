@@ -5,7 +5,7 @@ import { increaseLiquidityCommandSchema } from '../schema';
 import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { IncreaseLiquidityParams } from '../types';
-import { verifyIncreaseLiquidityParam } from '../utils/verify';
+import { verifyIncreaseLiquidityParam } from '../utils';
 
 export class IncreaseLiquidityCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

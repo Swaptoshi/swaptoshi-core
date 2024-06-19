@@ -5,7 +5,7 @@ import { exactOutputSingleCommandSchema } from '../schema';
 import { PoolStore } from '../stores/pool';
 import { commandSwapContext } from '../stores/context';
 import { ExactOutputSingleParams } from '../types';
-import { verifyExactOutputSingleParam } from '../utils/verify';
+import { verifyExactOutputSingleParam } from '../utils';
 
 export class ExactOutputSingleCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

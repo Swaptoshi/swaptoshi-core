@@ -5,7 +5,7 @@ import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { burnCommandSchema } from '../schema';
 import { BurnParams } from '../types';
-import { verifyBurnParam } from '../utils/verify';
+import { verifyBurnParam } from '../utils';
 
 export class BurnCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await

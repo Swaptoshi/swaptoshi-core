@@ -3,7 +3,7 @@
 import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
 import { TreasurifyCommand } from '../../../../../src/app/modules/dex/commands/treasurify_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
-import { treasurifyCommandSchema } from '../../../../../src/app/modules/dex/schema/commands/treasurify_command';
+import { treasurifyCommandSchema } from '../../../../../src/app/modules/dex/schema';
 import { TreasurifyParams } from '../../../../../src/app/modules/dex/types';
 import { invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
@@ -12,11 +12,7 @@ import { eventResultHaveLength, eventResultHaveMinimumLength } from '../../../..
 import { NFTRegistry } from '../stores/shared/nft/nft_registry';
 import { TokenRegistry } from '../stores/shared/token/token_registry';
 import { mock_token_transfer, mock_token_unlock } from '../stores/shared/token';
-import {
-	DEFAULT_TREASURY_ADDRESS,
-	ROUTER_ADDRESS,
-	defaultConfig,
-} from '../../../../../src/app/modules/dex/constants';
+import { DEFAULT_TREASURY_ADDRESS, ROUTER_ADDRESS, defaultConfig } from '../../../../../src/app/modules/dex/constants';
 import { TreasurifyEvent } from '../../../../../src/app/modules/dex/events/treasurify';
 import { PoolStore } from '../../../../../src/app/modules/dex/stores/pool';
 
@@ -38,8 +34,7 @@ describe('TreasurifyCommand', () => {
 	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
-		({ module, createCommandExecuteContext, createCommandVerifyContext, tokenMethod, poolStore } =
-			await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
+		({ module, createCommandExecuteContext, createCommandVerifyContext, tokenMethod, poolStore } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
 		command = new TreasurifyCommand(module.stores, module.events);
 	});
 
@@ -93,12 +88,7 @@ describe('TreasurifyCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_transfer).not.toHaveBeenCalledWith(
-				poolAddress,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).not.toHaveBeenCalledWith(poolAddress, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should do nothing if pool doesnt have any leftover balance', async () => {
@@ -113,12 +103,7 @@ describe('TreasurifyCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should transfer leftover router balance to treasury account', async () => {
@@ -130,12 +115,7 @@ describe('TreasurifyCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				ROUTER_ADDRESS,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(ROUTER_ADDRESS, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should transfer locked leftover pool balance to treasury account', async () => {
@@ -147,12 +127,7 @@ describe('TreasurifyCommand', () => {
 
 			expect(mock_token_unlock).toHaveBeenCalledWith(poolAddress, module.name, token2, BigInt(10));
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should transfer locked leftover router balance to treasury account', async () => {
@@ -165,19 +140,9 @@ describe('TreasurifyCommand', () => {
 
 			await command.execute(context);
 
-			expect(mock_token_unlock).toHaveBeenCalledWith(
-				ROUTER_ADDRESS,
-				module.name,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_unlock).toHaveBeenCalledWith(ROUTER_ADDRESS, module.name, token2, BigInt(10));
 
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				ROUTER_ADDRESS,
-				DEFAULT_TREASURY_ADDRESS,
-				token2,
-				BigInt(10),
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(ROUTER_ADDRESS, DEFAULT_TREASURY_ADDRESS, token2, BigInt(10));
 		});
 
 		it('should add command events', async () => {

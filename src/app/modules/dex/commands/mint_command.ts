@@ -6,7 +6,7 @@ import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { PoolAddress } from '../stores/library/periphery';
 import { MintParams } from '../types';
-import { verifyMintParam } from '../utils/verify';
+import { verifyMintParam } from '../utils';
 
 export class MintCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
