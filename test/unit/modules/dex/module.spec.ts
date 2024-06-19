@@ -203,12 +203,12 @@ describe('DexModule', () => {
 
 		describe('addDependencies', () => {
 			it('should add poolStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
 				expect(mockPoolStore.addDependencies).toHaveBeenCalledWith(tokenMethod);
 			});
 
 			it('should add positionManagerStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
+				module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
 				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(tokenMethod, nftMethod);
 			});
 		});

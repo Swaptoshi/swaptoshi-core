@@ -85,7 +85,7 @@ export async function storeFixture() {
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 
 	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
-	module.addDependencies(tokenMethod, nftMethod, feeMethod, feeConversionMethod, tokenFactoryMethod, interoperabilityMethod);
+	module.addDependencies(tokenMethod, nftMethod, feeMethod, tokenFactoryMethod, interoperabilityMethod, feeConversionMethod);
 
 	const observationStore = module.stores.get(ObservationStore);
 	const positionInfoStore = module.stores.get(PositionInfoStore);
