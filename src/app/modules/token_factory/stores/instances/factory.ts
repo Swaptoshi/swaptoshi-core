@@ -46,14 +46,24 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 
 		if (verify) await this.verifyCreate(params);
 
+		let tokenId: Buffer = Buffer.alloc(0);
 		const nextId = await this.getNextAvailableTokenId();
 		const tokenIdBuf = Buffer.allocUnsafe(4);
-		tokenIdBuf.writeUIntBE(Number(nextId.nextTokenId), 0, 4);
-		nextId.nextTokenId += BigInt(1);
 
-		const tokenId = Buffer.concat([Buffer.from(this.genesisConfig.chainID, 'hex'), tokenIdBuf]);
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			tokenIdBuf.writeUIntBE(Number(nextId.nextTokenId), 0, 4);
+			tokenId = Buffer.concat([Buffer.from(this.genesisConfig.chainID, 'hex'), tokenIdBuf]);
 
-		await this.tokenMethod!.initializeToken(this.mutableContext!.context, tokenId);
+			nextId.nextTokenId += BigInt(1);
+
+			const available = await this.tokenMethod!.isTokenIDAvailable(this.immutableContext!.context, tokenId);
+
+			if (!available) continue;
+			await this.tokenMethod!.initializeToken(this.mutableContext!.context, tokenId);
+
+			break;
+		}
 
 		const totalAmountMinted = await this._handleMintDistribution({
 			tokenId,
