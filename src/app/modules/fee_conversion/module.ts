@@ -41,7 +41,7 @@ export class FeeConversionModule extends BaseModule {
 	// Lifecycle hooks
 	public async init(_args: ModuleInitArgs): Promise<void> {
 		this.method.init(this._handler);
-		this._internalMethod.init(this._handler);
+		await this._internalMethod.init(this._handler, _args);
 	}
 
 	public addDependencies(tokenMethod: TokenMethod, feeMethod: FeeMethod, dexMethod: DexMethod) {

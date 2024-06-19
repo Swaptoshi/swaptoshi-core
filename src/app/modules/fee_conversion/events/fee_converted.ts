@@ -3,7 +3,7 @@ import { feeConvertedEventSchema } from '../schema';
 
 export interface FeeConvertedEventData {
 	moduleCommand: string;
-	poolAddress: Buffer;
+	path: Buffer;
 	token: Buffer;
 	amount: string;
 }

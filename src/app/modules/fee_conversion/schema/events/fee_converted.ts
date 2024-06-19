@@ -7,7 +7,7 @@ export const feeConvertedEventSchema = {
 			dataType: 'string',
 			fieldNumber: 1,
 		},
-		poolAddress: {
+		path: {
 			dataType: 'bytes',
 			fieldNumber: 2,
 		},

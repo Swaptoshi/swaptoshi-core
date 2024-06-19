@@ -14,9 +14,7 @@ export interface FeeConversionVerificationResult {
 }
 
 export interface FeeConversionPayload {
-	tokenIn: Buffer;
-	tokenOut: Buffer;
-	fee: string;
+	path: Buffer;
 	txAmount: bigint;
 	amountIn: string;
 	amountOut: string;
@@ -29,4 +27,8 @@ export interface RegisteredMethodResponse {
 export interface RegisteredMethod {
 	module: string;
 	method: string[];
+}
+
+export interface FeeConversionModuleConfig {
+	conversionPath: string[];
 }
