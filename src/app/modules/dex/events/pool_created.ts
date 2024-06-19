@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { poolCreatedEventSchema } from '../schema/events/pool_created';
+import { poolCreatedEventSchema } from '../schema';
 
 export interface PoolCreatedEventData {
 	token0: Buffer;

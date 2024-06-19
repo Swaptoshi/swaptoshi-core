@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { burnEventSchema } from '../schema/events/burn';
+import { burnEventSchema } from '../schema';
 
 export interface BurnEventData {
 	senderAddress: Buffer;

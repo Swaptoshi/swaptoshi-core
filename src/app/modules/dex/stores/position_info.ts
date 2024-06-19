@@ -1,6 +1,6 @@
 import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { PositionInfo } from '../types';
-import { positionInfoStoreSchema } from '../schema/stores/position_info';
+import { positionInfoStoreSchema } from '../schema';
 
 export const defaultPositionInfo: PositionInfo = Object.freeze({
 	liquidity: '0',

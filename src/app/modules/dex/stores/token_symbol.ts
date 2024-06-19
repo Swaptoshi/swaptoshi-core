@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, GenesisConfig, NamedRegistry } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, TokenSymbol } from '../types';
-import { tokenSymbolStoreSchema } from '../schema/stores/token_symbol';
+import { tokenSymbolStoreSchema } from '../schema';
 import { TokenRegisteredEvent } from '../events/token_registered';
 import { getDEXToken, getMainchainToken } from '../utils';
 
@@ -21,23 +21,16 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		return tokenId;
 	}
 
-	public async registerSymbol(
-		ctx: MutableContext,
-		tokenId: Buffer,
-		symbol: string,
-		decimal: number,
-	) {
+	public async registerSymbol(ctx: MutableContext, tokenId: Buffer, symbol: string, decimal: number) {
 		this._checkDependencies();
 		if (await this.has(ctx, this.getKey(tokenId))) return;
 
 		let _symbol = symbol;
 		let _decimal = decimal;
 
-		if (this._isInvalidMainchainToken(tokenId, symbol, decimal))
-			throw new Error('invalid mainchain token parameter');
+		if (this._isInvalidMainchainToken(tokenId, symbol, decimal)) throw new Error('invalid mainchain token parameter');
 
-		if (this._isInvalidDEXToken(tokenId, symbol, decimal))
-			throw new Error('invalid dex token parameter');
+		if (this._isInvalidDEXToken(tokenId, symbol, decimal)) throw new Error('invalid dex token parameter');
 
 		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
 		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
@@ -68,20 +61,14 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
 		const isMainchainToken = this.getKey(tokenId).compare(mainchain.tokenId) === 0;
 
-		return (
-			(isMainchainToken && (symbol !== mainchain.symbol || decimal !== mainchain.decimal)) ||
-			(symbol === mainchain.symbol && (!isMainchainToken || decimal !== mainchain.decimal))
-		);
+		return (isMainchainToken && (symbol !== mainchain.symbol || decimal !== mainchain.decimal)) || (symbol === mainchain.symbol && (!isMainchainToken || decimal !== mainchain.decimal));
 	}
 
 	private _isInvalidDEXToken(tokenId: Buffer, symbol: string, decimal: number) {
 		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
 		const isDEXToken = this.getKey(tokenId).compare(dex.tokenId) === 0;
 
-		return (
-			(isDEXToken && (symbol !== dex.symbol || decimal !== dex.decimal)) ||
-			(symbol === dex.symbol && (!isDEXToken || decimal !== dex.decimal))
-		);
+		return (isDEXToken && (symbol !== dex.symbol || decimal !== dex.decimal)) || (symbol === dex.symbol && (!isDEXToken || decimal !== dex.decimal));
 	}
 
 	private _checkDependencies() {

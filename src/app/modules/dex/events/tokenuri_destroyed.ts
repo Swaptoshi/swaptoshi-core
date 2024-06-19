@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { tokenUriDestroyedEventSchema } from '../schema/events/tokenuri_destroyed';
+import { tokenUriDestroyedEventSchema } from '../schema';
 
 export interface TokenURIDestroyedEventData {
 	tokenURI: string;

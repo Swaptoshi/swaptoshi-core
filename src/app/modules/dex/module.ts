@@ -43,14 +43,32 @@ import { SwapEvent } from './events/swap';
 import { TokenURICreatedEvent } from './events/tokenuri_created';
 import { TokenURIDestroyedEvent } from './events/tokenuri_destroyed';
 import { DexMethod } from './method';
-import { getPoolEndpointRequestSchema, getPoolEndpointResponseSchema } from './schema/endpoint/get_pool';
-import { getPositionEndpointRequestSchema, getPositionEndpointResponseSchema } from './schema/endpoint/get_position';
-import { getTokenURIEndpointRequestSchema, getTokenURIEndpointResponseSchema } from './schema/endpoint/get_token_uri';
-import { observeEndpointRequestSchema, observeEndpointResponseSchema } from './schema/endpoint/observe';
-import { quoteExactInputEndpointRequestSchema, quoteExactInputEndpointResponseSchema } from './schema/endpoint/quote_exact_input';
-import { quoteExactInputSingleEndpointRequestSchema, quoteExactInputSingleEndpointResponseSchema } from './schema/endpoint/quote_exact_input_single';
-import { quoteExactOutputEndpointRequestSchema, quoteExactOutputEndpointResponseSchema } from './schema/endpoint/quote_exact_output';
-import { quoteExactOutputSingleEndpointRequestSchema, quoteExactOutputSingleEndpointResponseSchema } from './schema/endpoint/quote_exact_output_single';
+import {
+	getPoolEndpointRequestSchema,
+	getPoolEndpointResponseSchema,
+	getPositionEndpointRequestSchema,
+	getPositionEndpointResponseSchema,
+	getTokenURIEndpointRequestSchema,
+	getTokenURIEndpointResponseSchema,
+	observeEndpointRequestSchema,
+	observeEndpointResponseSchema,
+	quoteExactInputEndpointRequestSchema,
+	quoteExactInputEndpointResponseSchema,
+	quoteExactInputSingleEndpointRequestSchema,
+	quoteExactInputSingleEndpointResponseSchema,
+	quoteExactOutputEndpointRequestSchema,
+	quoteExactOutputEndpointResponseSchema,
+	quoteExactOutputSingleEndpointRequestSchema,
+	quoteExactOutputSingleEndpointResponseSchema,
+	getMetadataEndpointRequestSchema,
+	getMetadataEndpointResponseSchema,
+	getPoolAddressFromCollectionIdEndpointRequestSchema,
+	getPoolAddressFromCollectionIdEndpointResponseSchema,
+	quotePriceEndpointRequestSchema,
+	quotePriceEndpointResponseSchema,
+	getConfigEndpointRequestSchema,
+	getConfigEndpointResponseSchema,
+} from './schema';
 import { ObservationStore } from './stores/observation';
 import { PoolStore } from './stores/pool';
 import { PositionInfoStore } from './stores/position_info';
@@ -61,14 +79,10 @@ import { TokenSymbolStore } from './stores/token_symbol';
 import { DexModuleConfig } from './types';
 import { verifyMinimumFee, verifySwapByTransfer, executeSwapByTransfer, verifyValidTransfer, verifyBaseFee, executeBaseFee } from './hooks';
 import { defaultConfig } from './constants';
-import { getMetadataEndpointRequestSchema, getMetadataEndpointResponseSchema } from './schema/endpoint/get_metadata';
 import { TreasurifyEvent } from './events/treasurify';
-import { getPoolAddressFromCollectionIdEndpointRequestSchema, getPoolAddressFromCollectionIdEndpointResponseSchema } from './schema/endpoint/get_pool_address_from_collection_id';
-import { quotePriceEndpointRequestSchema, quotePriceEndpointResponseSchema } from './schema/endpoint/quote_price';
 import { TokenRegisteredEvent } from './events/token_registered';
 import { SupportedTokenStore } from './stores/supported_token';
 import { DexInteroperableMethod } from './cc_method';
-import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema } from './schema/endpoint/get_config';
 import { TokenFactoryMethod } from '../token_factory/method';
 import { NFTMethod } from '../nft';
 import { FeeConversionMethod } from '../fee_conversion';

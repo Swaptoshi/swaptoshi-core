@@ -1,23 +1,15 @@
 /* eslint-disable class-methods-use-this */
 
-import {
-	BaseCommand,
-	CommandVerifyContext,
-	CommandExecuteContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
+import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
 import { PoolStore } from '../stores/pool';
 import { commandSwapContext } from '../stores/context';
-import { exactInputCommandSchema } from '../schema/commands/exact_input_command';
+import { exactInputCommandSchema } from '../schema';
 import { ExactInputParams } from '../types';
 import { verifyExactInputParam } from '../utils/verify';
 
 export class ExactInputCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(
-		_context: CommandVerifyContext<ExactInputParams>,
-	): Promise<VerificationResult> {
+	public async verify(_context: CommandVerifyContext<ExactInputParams>): Promise<VerificationResult> {
 		try {
 			verifyExactInputParam(_context.params);
 		} catch (error: unknown) {

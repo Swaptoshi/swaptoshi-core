@@ -1,13 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
-import {
-	BaseCommand,
-	CommandVerifyContext,
-	CommandExecuteContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
-import { mintCommandSchema } from '../schema/commands/mint_command';
+import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { mintCommandSchema } from '../schema';
 import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { PoolAddress } from '../stores/library/periphery';
@@ -33,9 +27,7 @@ export class MintCommand extends BaseCommand {
 		const context = commandSwapContext(_context);
 		const positionManager = await positionManagerStore.getMutablePositionManager(
 			context,
-			PoolAddress.computeAddress(
-				PoolAddress.getPoolKey(_context.params.token0, _context.params.token1, _context.params.fee),
-			),
+			PoolAddress.computeAddress(PoolAddress.getPoolKey(_context.params.token0, _context.params.token1, _context.params.fee)),
 		);
 		await positionManager.mint(_context.params);
 	}

@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { tokenUriCreatedEventSchema } from '../schema/events/tokenuri_created';
+import { tokenUriCreatedEventSchema } from '../schema';
 
 export interface TokenURICreatedEventData {
 	tokenURI: string;

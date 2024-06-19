@@ -1,7 +1,7 @@
 import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { Observation } from '../types';
 import { Int16String } from './library/int';
-import { observationStoreSchema } from '../schema/stores/observation';
+import { observationStoreSchema } from '../schema';
 import { maxUnsigned } from './library/int/base/limit';
 
 export const defaultObservation: Observation = Object.freeze({

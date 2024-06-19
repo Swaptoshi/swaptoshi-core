@@ -1,13 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
-import {
-	BaseCommand,
-	CommandVerifyContext,
-	CommandExecuteContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
-import { exactOutputSingleCommandSchema } from '../schema/commands/exact_output_single_command';
+import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { exactOutputSingleCommandSchema } from '../schema';
 import { PoolStore } from '../stores/pool';
 import { commandSwapContext } from '../stores/context';
 import { ExactOutputSingleParams } from '../types';
@@ -15,9 +9,7 @@ import { verifyExactOutputSingleParam } from '../utils/verify';
 
 export class ExactOutputSingleCommand extends BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(
-		_context: CommandVerifyContext<ExactOutputSingleParams>,
-	): Promise<VerificationResult> {
+	public async verify(_context: CommandVerifyContext<ExactOutputSingleParams>): Promise<VerificationResult> {
 		try {
 			verifyExactOutputSingleParam(_context.params);
 		} catch (error: unknown) {

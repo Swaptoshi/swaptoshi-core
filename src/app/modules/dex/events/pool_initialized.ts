@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { poolInitializedEventSchema } from '../schema/events/pool_initialized';
+import { poolInitializedEventSchema } from '../schema';
 
 export interface PoolInitializedEventData {
 	sqrtPriceX96: string;

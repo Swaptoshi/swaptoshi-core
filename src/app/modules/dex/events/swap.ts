@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { swapEventSchema } from '../schema/events/swap';
+import { swapEventSchema } from '../schema';
 
 export interface SwapEventData {
 	senderAddress: Buffer;

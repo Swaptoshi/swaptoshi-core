@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { mintEventSchema } from '../schema/events/mint';
+import { mintEventSchema } from '../schema';
 
 export interface MintEventData {
 	senderAddress: Buffer;

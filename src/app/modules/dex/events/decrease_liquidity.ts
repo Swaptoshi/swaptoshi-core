@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { decreaseLiquidityEventSchema } from '../schema/events/decrease_liquidity';
+import { decreaseLiquidityEventSchema } from '../schema';
 
 export interface DecreaseLiquidityEventData {
 	tokenId: Buffer;

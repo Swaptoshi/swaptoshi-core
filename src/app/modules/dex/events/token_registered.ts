@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { tokenRegisteredEventSchema } from '../schema/events/token_registered';
+import { tokenRegisteredEventSchema } from '../schema';
 
 export interface TokenRegisteredData {
 	tokenId: Buffer;

@@ -1,15 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
-import {
-	BaseCommand,
-	CommandVerifyContext,
-	CommandExecuteContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
+import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
 import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
-import { burnCommandSchema } from '../schema/commands/burn_command';
+import { burnCommandSchema } from '../schema';
 import { BurnParams } from '../types';
 import { verifyBurnParam } from '../utils/verify';
 
@@ -30,10 +24,7 @@ export class BurnCommand extends BaseCommand {
 	public async execute(_context: CommandExecuteContext<BurnParams>): Promise<void> {
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const context = commandSwapContext(_context);
-		const positionManager = await positionManagerStore.getMutablePositionManager(
-			context,
-			_context.params.poolAddress,
-		);
+		const positionManager = await positionManagerStore.getMutablePositionManager(context, _context.params.poolAddress);
 		await positionManager.burn(_context.params.tokenId);
 	}
 

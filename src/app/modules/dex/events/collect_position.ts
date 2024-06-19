@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { collectPositionEventSchema } from '../schema/events/collect_position';
+import { collectPositionEventSchema } from '../schema';
 
 export interface CollectPositionEventData {
 	tokenId: Buffer;

@@ -1,7 +1,7 @@
 import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { TickBitmap } from '../types';
 import { Int16String } from './library/int';
-import { tickBitmapStoreSchema } from '../schema/stores/tick_bitmap';
+import { tickBitmapStoreSchema } from '../schema';
 import { maxUnsigned } from './library/int/base/limit';
 
 export class TickBitmapStore extends BaseStore<TickBitmap> {

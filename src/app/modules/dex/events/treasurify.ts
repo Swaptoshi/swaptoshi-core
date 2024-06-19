@@ -1,6 +1,6 @@
 import { BaseEvent } from 'klayr-sdk';
 import { Uint256String } from '../stores/library/int';
-import { treasurifyEventSchema } from '../schema/events/treasurify';
+import { treasurifyEventSchema } from '../schema';
 
 export interface TreasurifyEventsData {
 	poolAddress: Buffer;

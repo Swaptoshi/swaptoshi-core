@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { flashEventSchema } from '../schema/events/flash';
+import { flashEventSchema } from '../schema';
 
 export interface FlashEventData {
 	senderAddress: Buffer;

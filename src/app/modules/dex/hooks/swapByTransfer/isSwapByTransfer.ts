@@ -1,6 +1,6 @@
 import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
-import { tokenTransferParamsSchema } from '../../schema/dependencies/token';
+import { tokenTransferParamsSchema } from '../../schema';
 
 interface TransferTokenParams {
 	tokenID: Buffer;
@@ -9,11 +9,7 @@ interface TransferTokenParams {
 	data: string;
 }
 
-export async function isSwapByTransfer(
-	this: { stores: NamedRegistry; events: NamedRegistry },
-	context: ImmutableMethodContext,
-	transaction: Transaction,
-) {
+export async function isSwapByTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, context: ImmutableMethodContext, transaction: Transaction) {
 	if (transaction.module === 'token' && transaction.command === 'transfer') {
 		const params = codec.decode<TransferTokenParams>(tokenTransferParamsSchema, transaction.params);
 

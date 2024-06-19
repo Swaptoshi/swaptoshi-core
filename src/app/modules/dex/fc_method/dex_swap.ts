@@ -3,11 +3,8 @@ import { BaseFeeConversionMethod, FeeConversionVerificationResult, FeeConversion
 import { immutableMethodSwapContext } from '../stores/context';
 import { Quoter } from '../stores/library/lens';
 import { ExactInputParams, ExactInputSingleParams, ExactOutputParams, ExactOutputSingleParams } from '../types';
-import { exactInputCommandSchema } from '../schema/commands/exact_input_command';
 import { Path } from '../stores/library/periphery';
-import { exactOutputCommandSchema } from '../schema/commands/exact_output_command';
-import { exactInputSingleCommandSchema } from '../schema/commands/exact_input_single_command';
-import { exactOutputSingleCommandSchema } from '../schema/commands/exact_output_single_command';
+import { exactInputCommandSchema, exactOutputCommandSchema, exactInputSingleCommandSchema, exactOutputSingleCommandSchema } from '../schema';
 
 export class DexSwapFeeConversionMethod extends BaseFeeConversionMethod {
 	public async verifyFeeConversion(context: TransactionVerifyContext): Promise<FeeConversionVerificationResult> {

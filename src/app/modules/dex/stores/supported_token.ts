@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, MethodContext, StoreGetter, TokenMethod } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, SupportedTokenManager } from '../types';
-import { supportedTokenStoreSchema } from '../schema/stores/supported_token';
+import { supportedTokenStoreSchema } from '../schema';
 
 export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 	public init(config: DexModuleConfig) {

@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { collectEventSchema } from '../schema/events/collect';
+import { collectEventSchema } from '../schema';
 
 export interface CollectEventData {
 	senderAddress: Buffer;

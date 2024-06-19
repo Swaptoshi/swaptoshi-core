@@ -1,7 +1,7 @@
 import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';
-import { nftTransferParamsSchema } from '../../schema/dependencies/nft';
+import { nftTransferParamsSchema } from '../../schema';
 
 interface TransferTokenParams {
 	tokenID: Buffer;
@@ -18,10 +18,7 @@ interface TransferNFTParams {
 
 const INVALID_TRANSFER_RECIPIENTS = [POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS];
 
-export async function verifyValidTransfer(
-	this: { stores: NamedRegistry; events: NamedRegistry },
-	context: TransactionVerifyContext,
-) {
+export async function verifyValidTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, context: TransactionVerifyContext) {
 	if (context.transaction.module === 'token' && context.transaction.command === 'transfer') {
 		const { schema } = new TransferCommand(this.stores, this.events);
 		const params = codec.decode<TransferTokenParams>(schema, context.transaction.params);
@@ -32,10 +29,7 @@ export async function verifyValidTransfer(
 	}
 
 	if (context.transaction.module === 'nft' && context.transaction.command === 'transfer') {
-		const params = codec.decode<TransferNFTParams>(
-			nftTransferParamsSchema,
-			context.transaction.params,
-		);
+		const params = codec.decode<TransferNFTParams>(nftTransferParamsSchema, context.transaction.params);
 
 		if (INVALID_TRANSFER_RECIPIENTS.findIndex(t => t.equals(params.recipientAddress)) >= 0) {
 			throw new Error(`Invalid nft transfer recipient. Address already reserved by dex module`);

@@ -4,17 +4,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GenesisConfig, MethodContext, NamedRegistry, TokenMethod, codec, utils } from 'klayr-sdk';
 import * as IPFSHash from 'ipfs-only-hash';
-import {
-	Uint24String,
-	Int24String,
-	Uint256String,
-	Uint128String,
-	Uint256,
-	Uint160String,
-	Uint128,
-	Uint64String,
-	Int24,
-} from '../library/int';
+import { Uint24String, Int24String, Uint256String, Uint128String, Uint256, Uint160String, Uint128, Uint64String, Int24 } from '../library/int';
 import { PositionInfoStore } from '../position_info';
 import {
 	DexNFTAttribute,
@@ -31,8 +21,7 @@ import {
 } from '../../types';
 import { PoolStore } from '../pool';
 import { DEXPool } from './pool';
-import { dexNFTAttributeSchema } from '../../schema/nft_attribute/dex_nft_attribute';
-import { tokenUriNFTAttributeSchema } from '../../schema/nft_attribute/tokenuri_nft_attribute';
+import { dexNFTAttributeSchema, tokenUriNFTAttributeSchema } from '../../schema';
 
 import * as PositionKey from '../library/periphery/position_key';
 import * as PoolAddress from '../library/periphery/pool_address';
@@ -86,14 +75,7 @@ interface FeeParams {
 }
 
 export class NonfungiblePositionManager {
-	public constructor(
-		positionManager: PositionManager,
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		genesisConfig: GenesisConfig,
-		dexConfig: DexModuleConfig,
-		moduleName: string,
-	) {
+	public constructor(positionManager: PositionManager, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, dexConfig: DexModuleConfig, moduleName: string) {
 		Object.assign(this, utils.objects.cloneDeep(positionManager));
 		this.collectionId = PoolAddress.computePoolId(positionManager.poolAddress);
 		this.events = events;
@@ -113,11 +95,7 @@ export class NonfungiblePositionManager {
 		}) as PositionManager;
 	}
 
-	public addMutableDependencies(
-		context: MutableSwapContext,
-		tokenMethod: TokenMethod,
-		nftMethod: NFTMethod,
-	) {
+	public addMutableDependencies(context: MutableSwapContext, tokenMethod: TokenMethod, nftMethod: NFTMethod) {
 		if (this.mutableDependencyReady || this.immutableDependencyReady) {
 			throw new Error('this instance dependencies already been configured');
 		}
@@ -130,11 +108,7 @@ export class NonfungiblePositionManager {
 		this.mutableDependencyReady = true;
 	}
 
-	public addImmutableDependencies(
-		context: ImmutableSwapContext,
-		tokenMethod: TokenMethod,
-		nftMethod: NFTMethod,
-	) {
+	public addImmutableDependencies(context: ImmutableSwapContext, tokenMethod: TokenMethod, nftMethod: NFTMethod) {
 		if (this.mutableDependencyReady || this.immutableDependencyReady) {
 			throw new Error('this instance dependencies already been configured');
 		}
@@ -172,16 +146,7 @@ export class NonfungiblePositionManager {
 			const { sqrtPriceX96: sqrtPriceX96Existing } = pool.slot0;
 			if (sqrtPriceX96Existing === '0') await pool.initialize(sqrtPriceX96);
 		} catch {
-			pool = await this.poolStore!.createPool(
-				this.mutableContext!,
-				token0,
-				token0Symbol,
-				token0Decimal,
-				token1,
-				token1Symbol,
-				token1Decimal,
-				fee,
-			);
+			pool = await this.poolStore!.createPool(this.mutableContext!, token0, token0Symbol, token0Decimal, token1, token1Symbol, token1Decimal, fee);
 			await pool.initialize(sqrtPriceX96);
 		}
 
@@ -193,26 +158,14 @@ export class NonfungiblePositionManager {
 
 	public async getPositions(tokenId: Uint64String): Promise<DexNFTAttribute> {
 		this._checkImmutableDependency();
-		const nft = await this.nftMethod!.getNFT(
-			this.immutableContext!.context as MethodContext,
-			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
-		);
+		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
 		const dexAttribute = nft.attributesArray.find(t => t.module === this.moduleName);
-		if (!dexAttribute)
-			throw new Error(
-				`attributes '${this.moduleName}' doesnt exist on nft ${PositionKey.getNFTId(
-					this.chainId,
-					this.collectionId,
-					tokenId,
-				).toString('hex')}`,
-			);
+		if (!dexAttribute) throw new Error(`attributes '${this.moduleName}' doesnt exist on nft ${PositionKey.getNFTId(this.chainId, this.collectionId, tokenId).toString('hex')}`);
 		const positionBuf = dexAttribute.attributes;
 		return codec.decode<DexNFTAttribute>(dexNFTAttributeSchema, positionBuf);
 	}
 
-	public async mint(
-		params: MintParams,
-	): Promise<[tokenId: string, liquidity: string, amount0: string, amount1: string]> {
+	public async mint(params: MintParams): Promise<[tokenId: string, liquidity: string, amount0: string, amount1: string]> {
 		this._checkMutableDependency();
 		this._checkDeadline(params.deadline);
 
@@ -238,11 +191,7 @@ export class NonfungiblePositionManager {
 		amount1 = Uint256.from(_amount1);
 
 		const positionKey = PositionKey.compute(this.address, params.tickLower, params.tickUpper);
-		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } =
-			await this.positionInfoStore!.get(
-				this.mutableContext!.context,
-				this.positionInfoStore!.getKey(this.poolAddress, positionKey),
-			);
+		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await this.positionInfoStore!.get(this.mutableContext!.context, this.positionInfoStore!.getKey(this.poolAddress, positionKey));
 
 		const position: DexNFTAttribute = {
 			token0: params.token0,
@@ -257,21 +206,13 @@ export class NonfungiblePositionManager {
 			tokensOwed1: '0',
 		};
 
-		const tokenId = await this.nftMethod!.getNextAvailableIndex(
-			this.mutableContext!.context,
-			this.collectionId,
-		);
-		await this.nftMethod!.create(
-			this.mutableContext!.context,
-			params.recipient,
-			this.collectionId,
-			[
-				{
-					module: this.moduleName,
-					attributes: codec.encode(dexNFTAttributeSchema, position),
-				},
-			],
-		);
+		const tokenId = await this.nftMethod!.getNextAvailableIndex(this.mutableContext!.context, this.collectionId);
+		await this.nftMethod!.create(this.mutableContext!.context, params.recipient, this.collectionId, [
+			{
+				module: this.moduleName,
+				attributes: codec.encode(dexNFTAttributeSchema, position),
+			},
+		]);
 		const { tokenURI } = await this._saveTokenURI(tokenId.toString());
 
 		const events = this.events!.get(IncreaseLiquidityEvent);
@@ -300,9 +241,7 @@ export class NonfungiblePositionManager {
 		return [tokenId.toString(), liquidity.toString(), amount0.toString(), amount1.toString()];
 	}
 
-	public async increaseLiquidity(
-		params: IncreaseLiquidityParams,
-	): Promise<[liquidity: string, amount0: string, amount1: string]> {
+	public async increaseLiquidity(params: IncreaseLiquidityParams): Promise<[liquidity: string, amount0: string, amount1: string]> {
 		this._checkMutableDependency();
 		this._checkDeadline(params.deadline);
 		const position = await this.getPositions(params.tokenId);
@@ -328,30 +267,14 @@ export class NonfungiblePositionManager {
 		amount1 = Uint256.from(_amount1);
 
 		const positionKey = PositionKey.compute(this.address, position.tickLower, position.tickUpper);
-		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } =
-			await this.positionInfoStore!.get(
-				this.mutableContext!.context,
-				this.positionInfoStore!.getKey(this.poolAddress, positionKey),
-			);
+		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await this.positionInfoStore!.get(this.mutableContext!.context, this.positionInfoStore!.getKey(this.poolAddress, positionKey));
 
 		position.tokensOwed0 = Uint128.from(position.tokensOwed0)
-			.add(
-				FullMath.mulDiv(
-					Uint256.from(feeGrowthInside0LastX128).sub(position.feeGrowthInside0LastX128).toString(),
-					position.liquidity,
-					FixedPoint128.Q128,
-				),
-			)
+			.add(FullMath.mulDiv(Uint256.from(feeGrowthInside0LastX128).sub(position.feeGrowthInside0LastX128).toString(), position.liquidity, FixedPoint128.Q128))
 			.toString();
 
 		position.tokensOwed1 = Uint128.from(position.tokensOwed1)
-			.add(
-				FullMath.mulDiv(
-					Uint256.from(feeGrowthInside1LastX128).sub(position.feeGrowthInside1LastX128).toString(),
-					position.liquidity,
-					FixedPoint128.Q128,
-				),
-			)
+			.add(FullMath.mulDiv(Uint256.from(feeGrowthInside1LastX128).sub(position.feeGrowthInside1LastX128).toString(), position.liquidity, FixedPoint128.Q128))
 			.toString();
 
 		position.feeGrowthInside0LastX128 = feeGrowthInside0LastX128;
@@ -360,10 +283,7 @@ export class NonfungiblePositionManager {
 
 		await this._savePosition(params.tokenId, position);
 
-		const nft = await this.nftMethod!.getNFT(
-			this.mutableContext!.context,
-			PositionKey.getNFTId(this.chainId, this.collectionId, params.tokenId),
-		);
+		const nft = await this.nftMethod!.getNFT(this.mutableContext!.context, PositionKey.getNFTId(this.chainId, this.collectionId, params.tokenId));
 		const events = this.events!.get(IncreaseLiquidityEvent);
 		events.add(
 			this.mutableContext!.context,
@@ -380,9 +300,7 @@ export class NonfungiblePositionManager {
 		return [liquidity.toString(), amount0.toString(), amount1.toString()];
 	}
 
-	public async decreaseLiquidity(
-		params: DecreaseLiquidityParams,
-	): Promise<[amount0: string, amount1: string]> {
+	public async decreaseLiquidity(params: DecreaseLiquidityParams): Promise<[amount0: string, amount1: string]> {
 		this._checkMutableDependency();
 		await this._isAuthorizedForToken(this.mutableContext!.senderAddress, params.tokenId);
 		this._checkDeadline(params.deadline);
@@ -394,56 +312,29 @@ export class NonfungiblePositionManager {
 		const position = await this.getPositions(params.tokenId);
 
 		const positionLiquidity = position.liquidity;
-		if (Uint128.from(positionLiquidity).lt(params.liquidity))
-			throw new Error('invalid params.liquidity');
+		if (Uint128.from(positionLiquidity).lt(params.liquidity)) throw new Error('invalid params.liquidity');
 
 		const originalSender = this.mutableContext!.senderAddress;
-		const pool = await this.poolStore!.getMutablePool(
-			this.mutableContext!,
-			position.token0,
-			position.token1,
-			position.fee,
-		);
+		const pool = await this.poolStore!.getMutablePool(this.mutableContext!, position.token0, position.token1, position.fee);
 		pool.setSender(this.address);
 
-		const [_amount0, _amount1] = await pool.burn(
-			position.tickLower,
-			position.tickUpper,
-			params.liquidity,
-		);
+		const [_amount0, _amount1] = await pool.burn(position.tickLower, position.tickUpper, params.liquidity);
 		amount0 = Uint256.from(_amount0);
 		amount1 = Uint256.from(_amount1);
 
-		if (amount0.lt(params.amount0Min) || amount1.lt(params.amount1Min))
-			throw new Error('Price slippage check');
+		if (amount0.lt(params.amount0Min) || amount1.lt(params.amount1Min)) throw new Error('Price slippage check');
 
 		const positionKey = PositionKey.compute(this.address, position.tickLower, position.tickUpper);
-		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } =
-			await this.positionInfoStore!.get(
-				this.mutableContext!.context,
-				this.positionInfoStore!.getKey(this.poolAddress, positionKey),
-			);
+		const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await this.positionInfoStore!.get(this.mutableContext!.context, this.positionInfoStore!.getKey(this.poolAddress, positionKey));
 
 		position.tokensOwed0 = Uint128.from(position.tokensOwed0)
 			.add(amount0)
-			.add(
-				FullMath.mulDiv(
-					Uint256.from(feeGrowthInside0LastX128).sub(position.feeGrowthInside0LastX128).toString(),
-					positionLiquidity,
-					FixedPoint128.Q128,
-				),
-			)
+			.add(FullMath.mulDiv(Uint256.from(feeGrowthInside0LastX128).sub(position.feeGrowthInside0LastX128).toString(), positionLiquidity, FixedPoint128.Q128))
 			.toString();
 
 		position.tokensOwed1 = Uint128.from(position.tokensOwed1)
 			.add(amount1)
-			.add(
-				FullMath.mulDiv(
-					Uint256.from(feeGrowthInside1LastX128).sub(position.feeGrowthInside1LastX128).toString(),
-					positionLiquidity,
-					FixedPoint128.Q128,
-				),
-			)
+			.add(FullMath.mulDiv(Uint256.from(feeGrowthInside1LastX128).sub(position.feeGrowthInside1LastX128).toString(), positionLiquidity, FixedPoint128.Q128))
 			.toString();
 
 		position.feeGrowthInside0LastX128 = feeGrowthInside0LastX128;
@@ -471,75 +362,38 @@ export class NonfungiblePositionManager {
 	public async collect(params: CollectParams): Promise<[amount0: string, amount1: string]> {
 		this._checkMutableDependency();
 		await this._isAuthorizedForToken(this.mutableContext!.senderAddress, params.tokenId);
-		if (Uint128.from(params.amount0Max).lte(0) && Uint128.from(params.amount1Max).lte(0))
-			throw new Error('invalid params amount max');
-		const recipient =
-			params.recipient.compare(Buffer.alloc(0)) === 0 ? this.address : params.recipient;
+		if (Uint128.from(params.amount0Max).lte(0) && Uint128.from(params.amount1Max).lte(0)) throw new Error('invalid params amount max');
+		const recipient = params.recipient.compare(Buffer.alloc(0)) === 0 ? this.address : params.recipient;
 		const position = await this.getPositions(params.tokenId);
 		let { tokensOwed0, tokensOwed1 } = position;
 
 		const originalSender = this.mutableContext!.senderAddress;
-		const pool = await this.poolStore!.getMutablePool(
-			this.mutableContext!,
-			position.token0,
-			position.token1,
-			position.fee,
-		);
+		const pool = await this.poolStore!.getMutablePool(this.mutableContext!, position.token0, position.token1, position.fee);
 		pool.setSender(this.address);
 
 		if (Uint128.from(position.liquidity).gt(0)) {
 			await pool.burn(position.tickLower, position.tickUpper, '0');
-			const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } =
-				await this.positionInfoStore!.get(
-					this.mutableContext!.context,
-					this.positionInfoStore!.getKey(
-						this.poolAddress,
-						PositionKey.compute(this.address, position.tickLower, position.tickUpper),
-					),
-				);
+			const { feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await this.positionInfoStore!.get(
+				this.mutableContext!.context,
+				this.positionInfoStore!.getKey(this.poolAddress, PositionKey.compute(this.address, position.tickLower, position.tickUpper)),
+			);
 
 			tokensOwed0 = Uint128.from(tokensOwed0)
-				.add(
-					FullMath.mulDiv(
-						Uint256.from(feeGrowthInside0LastX128)
-							.sub(position.feeGrowthInside0LastX128)
-							.toString(),
-						position.liquidity,
-						FixedPoint128.Q128,
-					),
-				)
+				.add(FullMath.mulDiv(Uint256.from(feeGrowthInside0LastX128).sub(position.feeGrowthInside0LastX128).toString(), position.liquidity, FixedPoint128.Q128))
 				.toString();
 
 			tokensOwed1 = Uint128.from(tokensOwed1)
-				.add(
-					FullMath.mulDiv(
-						Uint256.from(feeGrowthInside1LastX128)
-							.sub(position.feeGrowthInside1LastX128)
-							.toString(),
-						position.liquidity,
-						FixedPoint128.Q128,
-					),
-				)
+				.add(FullMath.mulDiv(Uint256.from(feeGrowthInside1LastX128).sub(position.feeGrowthInside1LastX128).toString(), position.liquidity, FixedPoint128.Q128))
 				.toString();
 
 			position.feeGrowthInside0LastX128 = feeGrowthInside0LastX128;
 			position.feeGrowthInside1LastX128 = feeGrowthInside1LastX128;
 		}
 
-		const amount0Collect = Uint128.from(params.amount0Max).gt(tokensOwed0)
-			? tokensOwed0
-			: params.amount0Max;
-		const amount1Collect = Uint128.from(params.amount1Max).gt(tokensOwed1)
-			? tokensOwed1
-			: params.amount1Max;
+		const amount0Collect = Uint128.from(params.amount0Max).gt(tokensOwed0) ? tokensOwed0 : params.amount0Max;
+		const amount1Collect = Uint128.from(params.amount1Max).gt(tokensOwed1) ? tokensOwed1 : params.amount1Max;
 
-		const [amount0, amount1] = await pool.collect(
-			recipient,
-			position.tickLower,
-			position.tickUpper,
-			amount0Collect,
-			amount1Collect,
-		);
+		const [amount0, amount1] = await pool.collect(recipient, position.tickLower, position.tickUpper, amount0Collect, amount1Collect);
 
 		position.tokensOwed0 = Uint128.from(tokensOwed0).sub(amount0Collect).toString();
 		position.tokensOwed1 = Uint128.from(tokensOwed1).sub(amount1Collect).toString();
@@ -566,12 +420,7 @@ export class NonfungiblePositionManager {
 		this._checkMutableDependency();
 		await this._isAuthorizedForToken(this.mutableContext!.senderAddress, tokenId);
 		const position = await this.getPositions(tokenId);
-		if (
-			!Uint128.from(position.liquidity).eq(0) ||
-			!Uint128.from(position.tokensOwed0).eq(0) ||
-			!Uint128.from(position.tokensOwed1).eq(0)
-		)
-			throw new Error('Not cleared');
+		if (!Uint128.from(position.liquidity).eq(0) || !Uint128.from(position.tokensOwed0).eq(0) || !Uint128.from(position.tokensOwed1).eq(0)) throw new Error('Not cleared');
 		const tokenURI = await this.tokenURI(tokenId);
 		const nftId = PositionKey.getNFTId(this.chainId, this.collectionId, tokenId);
 
@@ -579,53 +428,26 @@ export class NonfungiblePositionManager {
 		await this.nftMethod!.destroy(this.mutableContext!.context, nft.owner, nftId);
 
 		const events = this.events!.get(TokenURIDestroyedEvent);
-		events.add(this.mutableContext!.context, { tokenURI, tokenId: nftId }, [
-			this.poolAddress,
-			this.mutableContext!.senderAddress,
-		]);
+		events.add(this.mutableContext!.context, { tokenURI, tokenId: nftId }, [this.poolAddress, this.mutableContext!.senderAddress]);
 	}
 
 	public async tokenURI(tokenId: Uint64String): Promise<string> {
 		this._checkImmutableDependency();
-		const nft = await this.nftMethod!.getNFT(
-			this.immutableContext!.context as MethodContext,
-			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
-		);
+		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
 		const tokenUriAttribute = nft.attributesArray.find(t => t.module === TOKENURI_ATTTRIBUTE);
-		if (!tokenUriAttribute)
-			throw new Error(
-				`attributes '${TOKENURI_ATTTRIBUTE}' doesnt exist on nft ${PositionKey.getNFTId(
-					this.chainId,
-					this.collectionId,
-					tokenId,
-				).toString('hex')}`,
-			);
-		return codec.decode<TokenURINFTAttribute>(
-			tokenUriNFTAttributeSchema,
-			tokenUriAttribute.attributes,
-		).tokenURI;
+		if (!tokenUriAttribute) throw new Error(`attributes '${TOKENURI_ATTTRIBUTE}' doesnt exist on nft ${PositionKey.getNFTId(this.chainId, this.collectionId, tokenId).toString('hex')}`);
+		return codec.decode<TokenURINFTAttribute>(tokenUriNFTAttributeSchema, tokenUriAttribute.attributes).tokenURI;
 	}
 
 	public async getMetadata(tokenId: Uint64String): Promise<NFTMetadata> {
 		this._checkImmutableDependency();
 		const { token0, token1, fee, tickLower, tickUpper } = await this.getPositions(tokenId);
-		const pool = await this.poolStore!.getImmutablePool(
-			this.immutableContext!,
-			token0,
-			token1,
-			fee,
-		);
+		const pool = await this.poolStore!.getImmutablePool(this.immutableContext!, token0, token1, fee);
 		const baseTokenAddress = token0;
 		const quoteTokenAddress = token1;
 		const { tick } = pool.slot0;
-		const baseToken = await this.tokenSymbolStore!.get(
-			this.immutableContext!.context,
-			this.tokenSymbolStore!.getKey(baseTokenAddress),
-		);
-		const quoteToken = await this.tokenSymbolStore!.get(
-			this.immutableContext!.context,
-			this.tokenSymbolStore!.getKey(quoteTokenAddress),
-		);
+		const baseToken = await this.tokenSymbolStore!.get(this.immutableContext!.context, this.tokenSymbolStore!.getKey(baseTokenAddress));
+		const quoteToken = await this.tokenSymbolStore!.get(this.immutableContext!.context, this.tokenSymbolStore!.getKey(quoteTokenAddress));
 
 		const uri = NFTDescriptor.constructTokenURI({
 			config: this.dexConfig,
@@ -650,31 +472,17 @@ export class NonfungiblePositionManager {
 		return JSON.parse(decodedJSON) as NFTMetadata;
 	}
 
-	public async total(
-		tokenId: Uint256String,
-		sqrtRatioX96: Uint160String,
-	): Promise<[amount0: string, amount1: string]> {
+	public async total(tokenId: Uint256String, sqrtRatioX96: Uint160String): Promise<[amount0: string, amount1: string]> {
 		this._checkImmutableDependency();
 		const [amount0Principal, amount1Principal] = await this.principal(tokenId, sqrtRatioX96);
 		const [amount0Fee, amount1Fee] = await this.fees(tokenId);
-		return [
-			Uint256.from(amount0Principal).add(amount0Fee).toString(),
-			Uint256.from(amount1Principal).add(amount1Fee).toString(),
-		];
+		return [Uint256.from(amount0Principal).add(amount0Fee).toString(), Uint256.from(amount1Principal).add(amount1Fee).toString()];
 	}
 
-	public async principal(
-		tokenId: Uint256String,
-		sqrtRatioX96: Uint160String,
-	): Promise<[amount0: string, amount1: string]> {
+	public async principal(tokenId: Uint256String, sqrtRatioX96: Uint160String): Promise<[amount0: string, amount1: string]> {
 		this._checkImmutableDependency();
 		const { tickLower, tickUpper, liquidity } = await this.getPositions(tokenId);
-		return LiquidityAmounts.getAmountsForLiquidity(
-			sqrtRatioX96,
-			TickMath.getSqrtRatioAtTick(tickLower),
-			TickMath.getSqrtRatioAtTick(tickUpper),
-			liquidity,
-		);
+		return LiquidityAmounts.getAmountsForLiquidity(sqrtRatioX96, TickMath.getSqrtRatioAtTick(tickLower), TickMath.getSqrtRatioAtTick(tickUpper), liquidity);
 	}
 
 	public async fees(tokenId: Uint256String): Promise<[amount0: string, amount1: string]> {
@@ -710,80 +518,40 @@ export class NonfungiblePositionManager {
 		let amount0 = Uint256.from(0);
 		let amount1 = Uint256.from(0);
 
-		const pool = await this.poolStore!.getImmutablePool(
-			this.immutableContext!,
-			feeParams.token0,
-			feeParams.token1,
-			feeParams.fee,
+		const pool = await this.poolStore!.getImmutablePool(this.immutableContext!, feeParams.token0, feeParams.token1, feeParams.fee);
+
+		const [poolFeeGrowthInside0LastX128, poolFeeGrowthInside1LastX128] = await this._getFeeGrowthInside(pool, feeParams.tickLower, feeParams.tickUpper);
+
+		amount0 = Uint256.from(FullMath.mulDiv(Uint256.from(poolFeeGrowthInside0LastX128).sub(feeParams.positionFeeGrowthInside0LastX128).toString(), feeParams.liquidity, FixedPoint128.Q128)).add(
+			feeParams.tokensOwed0,
 		);
 
-		const [poolFeeGrowthInside0LastX128, poolFeeGrowthInside1LastX128] =
-			await this._getFeeGrowthInside(pool, feeParams.tickLower, feeParams.tickUpper);
-
-		amount0 = Uint256.from(
-			FullMath.mulDiv(
-				Uint256.from(poolFeeGrowthInside0LastX128)
-					.sub(feeParams.positionFeeGrowthInside0LastX128)
-					.toString(),
-				feeParams.liquidity,
-				FixedPoint128.Q128,
-			),
-		).add(feeParams.tokensOwed0);
-
-		amount1 = Uint256.from(
-			FullMath.mulDiv(
-				Uint256.from(poolFeeGrowthInside1LastX128)
-					.sub(feeParams.positionFeeGrowthInside1LastX128)
-					.toString(),
-				feeParams.liquidity,
-				FixedPoint128.Q128,
-			),
-		).add(feeParams.tokensOwed1);
+		amount1 = Uint256.from(FullMath.mulDiv(Uint256.from(poolFeeGrowthInside1LastX128).sub(feeParams.positionFeeGrowthInside1LastX128).toString(), feeParams.liquidity, FixedPoint128.Q128)).add(
+			feeParams.tokensOwed1,
+		);
 
 		return [amount0.toString(), amount1.toString()];
 	}
 
-	private async _getFeeGrowthInside(
-		pool: DEXPool,
-		tickLower: Int24String,
-		tickUpper: Int24String,
-	): Promise<[feeGrowthInside0X128: string, feeGrowthInside1X128: string]> {
+	private async _getFeeGrowthInside(pool: DEXPool, tickLower: Int24String, tickUpper: Int24String): Promise<[feeGrowthInside0X128: string, feeGrowthInside1X128: string]> {
 		let feeGrowthInside0X128 = Uint256.from(0);
 		let feeGrowthInside1X128 = Uint256.from(0);
 
 		const { tick: tickCurrent } = pool.slot0;
-		const {
-			feeGrowthOutside0X128: lowerFeeGrowthOutside0X128,
-			feeGrowthOutside1X128: lowerFeeGrowthOutside1X128,
-		} = await pool.getTick(tickLower);
-		const {
-			feeGrowthOutside0X128: upperFeeGrowthOutside0X128,
-			feeGrowthOutside1X128: upperFeeGrowthOutside1X128,
-		} = await pool.getTick(tickUpper);
+		const { feeGrowthOutside0X128: lowerFeeGrowthOutside0X128, feeGrowthOutside1X128: lowerFeeGrowthOutside1X128 } = await pool.getTick(tickLower);
+		const { feeGrowthOutside0X128: upperFeeGrowthOutside0X128, feeGrowthOutside1X128: upperFeeGrowthOutside1X128 } = await pool.getTick(tickUpper);
 
 		if (Int24.from(tickCurrent).lt(tickLower)) {
-			feeGrowthInside0X128 = Uint256.from(lowerFeeGrowthOutside0X128).sub(
-				upperFeeGrowthOutside0X128,
-			);
-			feeGrowthInside1X128 = Uint256.from(lowerFeeGrowthOutside1X128).sub(
-				upperFeeGrowthOutside1X128,
-			);
+			feeGrowthInside0X128 = Uint256.from(lowerFeeGrowthOutside0X128).sub(upperFeeGrowthOutside0X128);
+			feeGrowthInside1X128 = Uint256.from(lowerFeeGrowthOutside1X128).sub(upperFeeGrowthOutside1X128);
 		} else if (Int24.from(tickCurrent).lt(tickUpper)) {
 			const { feeGrowthGlobal0X128 } = pool;
 			const { feeGrowthGlobal1X128 } = pool;
-			feeGrowthInside0X128 = Uint256.from(feeGrowthGlobal0X128)
-				.sub(lowerFeeGrowthOutside0X128)
-				.sub(upperFeeGrowthOutside0X128);
-			feeGrowthInside1X128 = Uint256.from(feeGrowthGlobal1X128)
-				.sub(lowerFeeGrowthOutside1X128)
-				.sub(upperFeeGrowthOutside1X128);
+			feeGrowthInside0X128 = Uint256.from(feeGrowthGlobal0X128).sub(lowerFeeGrowthOutside0X128).sub(upperFeeGrowthOutside0X128);
+			feeGrowthInside1X128 = Uint256.from(feeGrowthGlobal1X128).sub(lowerFeeGrowthOutside1X128).sub(upperFeeGrowthOutside1X128);
 		} else {
-			feeGrowthInside0X128 = Uint256.from(upperFeeGrowthOutside0X128).sub(
-				lowerFeeGrowthOutside0X128,
-			);
-			feeGrowthInside1X128 = Uint256.from(upperFeeGrowthOutside1X128).sub(
-				lowerFeeGrowthOutside1X128,
-			);
+			feeGrowthInside0X128 = Uint256.from(upperFeeGrowthOutside0X128).sub(lowerFeeGrowthOutside0X128);
+			feeGrowthInside1X128 = Uint256.from(upperFeeGrowthOutside1X128).sub(lowerFeeGrowthOutside1X128);
 		}
 		return [feeGrowthInside0X128.toString(), feeGrowthInside1X128.toString()];
 	}
@@ -798,30 +566,18 @@ export class NonfungiblePositionManager {
 		return `ipfs://${cid}`;
 	}
 
-	private async _saveTokenURI(
-		tokenId: Uint64String,
-	): Promise<{ tokenURI: string; metadata: NFTMetadata }> {
+	private async _saveTokenURI(tokenId: Uint64String): Promise<{ tokenURI: string; metadata: NFTMetadata }> {
 		const metadata = await this.getMetadata(tokenId);
 		const tokenURI = await this._metadataToIPFS(metadata);
 		const encodedTokenURI = codec.encode(tokenUriNFTAttributeSchema, { tokenURI });
-		await this.nftMethod!.setAttributes(
-			this.mutableContext!.context,
-			TOKENURI_ATTTRIBUTE,
-			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
-			encodedTokenURI,
-		);
+		await this.nftMethod!.setAttributes(this.mutableContext!.context, TOKENURI_ATTTRIBUTE, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId), encodedTokenURI);
 
 		return { tokenURI, metadata };
 	}
 
 	private async _savePosition(tokenId: Uint64String, position: DexNFTAttribute) {
 		const encodedPosition = codec.encode(dexNFTAttributeSchema, position);
-		await this.nftMethod!.setAttributes(
-			this.mutableContext!.context,
-			this.moduleName,
-			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
-			encodedPosition,
-		);
+		await this.nftMethod!.setAttributes(this.mutableContext!.context, this.moduleName, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId), encodedPosition);
 	}
 
 	private _checkImmutableDependency() {
@@ -837,82 +593,41 @@ export class NonfungiblePositionManager {
 	}
 
 	private async _pay(token: Buffer, payer: Buffer, recipient: Buffer, value: Uint256String) {
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			payer,
-			recipient,
-			token,
-			BigInt(value),
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, payer, recipient, token, BigInt(value));
 	}
 
 	// LiquidityManagement
-	private async _mintCallback(
-		amount0Owed: Uint256String,
-		amount1Owed: Uint256String,
-		data: string,
-	) {
+	private async _mintCallback(amount0Owed: Uint256String, amount1Owed: Uint256String, data: string) {
 		const decoded = JSON.parse(data) as MintCallbackData;
 
-		const pool = await this.poolStore!.getMutablePool(
-			this.mutableContext!,
-			Buffer.from(decoded.poolKey.token0, 'hex'),
-			Buffer.from(decoded.poolKey.token1, 'hex'),
-			decoded.poolKey.fee,
-		);
+		const pool = await this.poolStore!.getMutablePool(this.mutableContext!, Buffer.from(decoded.poolKey.token0, 'hex'), Buffer.from(decoded.poolKey.token1, 'hex'), decoded.poolKey.fee);
 
 		if (Uint256.from(amount0Owed).gt(0)) {
-			await this._pay(
-				Buffer.from(decoded.poolKey.token0, 'hex'),
-				Buffer.from(decoded.payer, 'hex'),
-				pool.address,
-				amount0Owed,
-			);
+			await this._pay(Buffer.from(decoded.poolKey.token0, 'hex'), Buffer.from(decoded.payer, 'hex'), pool.address, amount0Owed);
 		}
 		if (Uint256.from(amount1Owed).gt(0)) {
-			await this._pay(
-				Buffer.from(decoded.poolKey.token1, 'hex'),
-				Buffer.from(decoded.payer, 'hex'),
-				pool.address,
-				amount1Owed,
-			);
+			await this._pay(Buffer.from(decoded.poolKey.token1, 'hex'), Buffer.from(decoded.payer, 'hex'), pool.address, amount1Owed);
 		}
 	}
 
 	private _checkDeadline(deadline: Uint256String) {
-		if (Uint256.from(this.mutableContext!.timestamp).gt(deadline))
-			throw new Error('Transaction too old');
+		if (Uint256.from(this.mutableContext!.timestamp).gt(deadline)) throw new Error('Transaction too old');
 	}
 
-	private async _addLiquidity(
-		params: AddLiquidityParams,
-	): Promise<
-		[liquidity: Uint128String, amount0: Uint256String, amount1: Uint256String, pool: DEXPool]
-	> {
+	private async _addLiquidity(params: AddLiquidityParams): Promise<[liquidity: Uint128String, amount0: Uint256String, amount1: Uint256String, pool: DEXPool]> {
 		const poolKey: PoolAddress.PoolKey = {
 			token0: params.token0,
 			token1: params.token1,
 			fee: params.fee,
 		};
 
-		const pool = await this.poolStore!.getMutablePool(
-			this.mutableContext!,
-			params.token0,
-			params.token1,
-			params.fee,
-		);
+		const pool = await this.poolStore!.getMutablePool(this.mutableContext!, params.token0, params.token1, params.fee);
 
 		const { sqrtPriceX96 } = pool.slot0;
 		const sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(params.tickLower);
 		const sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(params.tickUpper);
 
-		const liquidity = LiquidityAmounts.getLiquidityForAmounts(
-			sqrtPriceX96,
-			sqrtRatioAX96,
-			sqrtRatioBX96,
-			params.amount0Desired,
-			params.amount1Desired,
-		);
+		const liquidity = LiquidityAmounts.getLiquidityForAmounts(sqrtPriceX96, sqrtRatioAX96, sqrtRatioBX96, params.amount0Desired, params.amount1Desired);
 		const data = JSON.stringify({
 			poolKey: {
 				token0: poolKey.token0.toString('hex'),
@@ -922,19 +637,9 @@ export class NonfungiblePositionManager {
 			payer: this.mutableContext!.senderAddress.toString('hex'),
 		});
 
-		const [amount0, amount1] = await pool.mint(
-			params.recipient,
-			params.tickLower,
-			params.tickUpper,
-			liquidity,
-			data,
-			this._mintCallback.bind(this),
-		);
+		const [amount0, amount1] = await pool.mint(params.recipient, params.tickLower, params.tickUpper, liquidity, data, this._mintCallback.bind(this));
 
-		if (
-			Uint256.from(amount0).lt(params.amount0Min) ||
-			Uint256.from(amount1).lt(params.amount1Min)
-		) {
+		if (Uint256.from(amount0).lt(params.amount0Min) || Uint256.from(amount1).lt(params.amount1Min)) {
 			throw new Error('Price slippage check');
 		}
 
@@ -942,10 +647,7 @@ export class NonfungiblePositionManager {
 	}
 
 	private async _isAuthorizedForToken(sender: Buffer, tokenId: Uint64String) {
-		const nft = await this.nftMethod!.getNFT(
-			this.mutableContext!.context,
-			PositionKey.getNFTId(this.chainId, this.collectionId, tokenId),
-		);
+		const nft = await this.nftMethod!.getNFT(this.mutableContext!.context, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
 		if (nft.owner.compare(sender) !== 0) {
 			throw new Error('Not approved');
 		}

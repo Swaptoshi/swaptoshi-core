@@ -1,5 +1,5 @@
 import { BaseEvent } from 'klayr-sdk';
-import { increaseObservationCardinalityNextEventSchema } from '../schema/events/increase_observation_cardinality_next';
+import { increaseObservationCardinalityNextEventSchema } from '../schema';
 
 export interface IncreaseObservationCardinalityNextEventData {
 	observationCardinalityNextOld: string;
