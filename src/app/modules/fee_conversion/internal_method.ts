@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
+import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext, utils } from 'klayr-sdk';
 import { FeeConversionModuleConfig, FeeConversionPayload, FeeConversionVerifyStatus } from './types';
 import { FeeConversionMethodRegistry } from './registry';
 import { DexMethod } from '../dex/method';
@@ -22,7 +22,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 
 	public async init(handler: FeeConversionMethodRegistry, args: ModuleInitArgs) {
 		this._handler = handler;
-		this._config = { ...defaultConfig, ...args.moduleConfig };
+		this._config = utils.objects.mergeDeep({}, defaultConfig, args.moduleConfig) as FeeConversionModuleConfig;
 		await this._verifyConfig(args);
 	}
 

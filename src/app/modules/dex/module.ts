@@ -15,6 +15,7 @@ import {
 	TransactionVerifyContext,
 	VerificationResult,
 	VerifyStatus,
+	utils,
 } from 'klayr-sdk';
 import { BurnCommand } from './commands/burn_command';
 import { CollectCommand } from './commands/collect_command';
@@ -242,7 +243,7 @@ export class DexModule extends BaseInteroperableModule {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = { ...defaultConfig, ..._args.moduleConfig };
+		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as DexModuleConfig;
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportedTokenStore = this.stores.get(SupportedTokenStore);

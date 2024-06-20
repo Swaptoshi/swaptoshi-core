@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
+import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext, utils } from 'klayr-sdk';
 import { LiquidPosEndpoint } from './endpoint';
 import { LiquidPosMethod } from './method';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
@@ -49,7 +49,7 @@ export class LiquidPosModule extends BaseModule {
 	}
 
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = { ...defaultConfig, ..._args.moduleConfig };
+		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as LiquidPosModuleConfig;
 		this._internalMethod.init(_args.genesisConfig, this._config);
 	}
 

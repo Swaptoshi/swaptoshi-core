@@ -14,6 +14,7 @@ import {
 	TransactionVerifyContext,
 	VerificationResult,
 	VerifyStatus,
+	utils,
 } from 'klayr-sdk';
 import { AirdropCreateCommand } from './commands/airdrop_create_command';
 import { AirdropDistributeCommand } from './commands/airdrop_distribute_command';
@@ -233,7 +234,7 @@ export class TokenFactoryModule extends BaseModule {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = { ...defaultConfig, ..._args.moduleConfig };
+		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as TokenFactoryModuleConfig;
 		const airdropStore = this.stores.get(AirdropStore);
 		const factoryStore = this.stores.get(FactoryStore);
 		const icoStore = this.stores.get(ICOStore);
