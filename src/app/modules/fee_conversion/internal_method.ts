@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext, utils } from 'klayr-sdk';
+import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
 import { FeeConversionModuleConfig, FeeConversionPayload, FeeConversionVerifyStatus } from './types';
 import { FeeConversionMethodRegistry } from './registry';
 import { DexMethod } from '../dex/method';
 import { FeeConvertedEvent } from './events/fee_converted';
-import { PATH_MINIMUM_LENGTH, PATH_OFFSET_LENGTH, TOKEN_ID_LENGTH, defaultConfig } from './constants';
+import { PATH_MINIMUM_LENGTH, PATH_OFFSET_LENGTH, TOKEN_ID_LENGTH } from './constants';
 import { FEE_SIZE } from '../token_factory/stores/library';
 
 interface HandlerExecutionResult {
@@ -20,10 +20,10 @@ export class InternalFeeConversionMethod extends BaseMethod {
 	private _feeMethod: FeeMethod | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 
-	public async init(handler: FeeConversionMethodRegistry, args: ModuleInitArgs) {
+	public async init(handler: FeeConversionMethodRegistry, args: ModuleInitArgs, config: FeeConversionModuleConfig) {
 		this._handler = handler;
-		this._config = utils.objects.mergeDeep({}, defaultConfig, args.moduleConfig) as FeeConversionModuleConfig;
-		await this._verifyConfig(args);
+		this._config = config;
+		await this._verifyConfig(args.genesisConfig);
 	}
 
 	public addDependencies(feeMethod: FeeMethod, tokenMethod: TokenMethod, dexMethod: DexMethod) {
@@ -204,8 +204,8 @@ export class InternalFeeConversionMethod extends BaseMethod {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _verifyConfig(args: ModuleInitArgs) {
-		const { chainID } = args.genesisConfig;
+	private async _verifyConfig(genesisConfig: ModuleInitArgs['genesisConfig']) {
+		const { chainID } = genesisConfig;
 
 		for (const path of this._config!.conversionPath) {
 			const tokenOut = path.substring(0, TOKEN_ID_LENGTH * 2);
