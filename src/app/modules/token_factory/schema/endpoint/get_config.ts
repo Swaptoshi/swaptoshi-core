@@ -1,19 +1,26 @@
 export const getConfigEndpointResponseSchema = {
 	$id: '/tokenFactory/endpoint/response/getConfig',
 	type: 'object',
-	required: ['icoLeftOverAddress', 'icoFeeConversionEnabled', 'minTransactionFee', 'baseFee'],
+	required: ['skippedTokenID', 'icoLeftOverAddress', 'icoFeeConversionEnabled', 'minTransactionFee', 'baseFee'],
 	properties: {
+		skippedTokenID: {
+			type: 'array',
+			fieldNumber: 1,
+			items: {
+				dataType: 'uint32',
+			},
+		},
 		icoLeftOverAddress: {
 			dataType: 'string',
-			fieldNumber: 1,
+			fieldNumber: 2,
 		},
 		icoFeeConversionEnabled: {
 			dataType: 'boolean',
-			fieldNumber: 2,
+			fieldNumber: 3,
 		},
 		minTransactionFee: {
 			type: 'object',
-			fieldNumber: 3,
+			fieldNumber: 4,
 			properties: {
 				factoryTransferOwnership: {
 					dataType: 'string',
@@ -83,7 +90,7 @@ export const getConfigEndpointResponseSchema = {
 		},
 		baseFee: {
 			type: 'object',
-			fieldNumber: 4,
+			fieldNumber: 5,
 			properties: {
 				factoryTransferOwnership: {
 					dataType: 'string',
