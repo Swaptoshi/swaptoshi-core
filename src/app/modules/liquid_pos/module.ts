@@ -7,7 +7,7 @@ import { LiquidPosEndpoint } from './endpoint';
 import { LiquidPosMethod } from './method';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
 import { LiquidStakingTokenBurnEvent } from './events/lst_burn';
-import { getLSTTokenIDEndpointRequestSchema, getLSTTokenIDEndpointResponseSchema } from './schema';
+import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema, getLSTTokenIDEndpointRequestSchema, getLSTTokenIDEndpointResponseSchema } from './schema';
 import { InternalLiquidPosMethod } from './internal_method';
 import { LiquidPosModuleConfig } from './types';
 import { defaultConfig } from './constants';
@@ -39,6 +39,11 @@ export class LiquidPosModule extends BaseModule {
 			...this.baseMetadata(),
 			endpoints: [
 				{
+					name: this.endpoint.getConfig.name,
+					request: getConfigEndpointRequestSchema,
+					response: getConfigEndpointResponseSchema,
+				},
+				{
 					name: this.endpoint.getLSTTokenID.name,
 					request: getLSTTokenIDEndpointRequestSchema,
 					response: getLSTTokenIDEndpointResponseSchema,
@@ -50,6 +55,7 @@ export class LiquidPosModule extends BaseModule {
 
 	public async init(_args: ModuleInitArgs): Promise<void> {
 		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as LiquidPosModuleConfig;
+		this.endpoint.init(this._config);
 		this._internalMethod.init(_args.genesisConfig, this._config);
 	}
 
