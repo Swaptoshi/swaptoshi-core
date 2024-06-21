@@ -1,16 +1,7 @@
 export const getConfigEndpointResponseSchema = {
 	$id: '/dex/endpoint/response/get_config',
 	type: 'object',
-	required: [
-		'feeAmountTickSpacing',
-		'feeProtocol',
-		'feeProtocolPool',
-		'feeConversionEnabled',
-		'supportAllTokens',
-		'minTransactionFee',
-		'baseFee',
-		'nftPositionMetadata',
-	],
+	required: ['feeAmountTickSpacing', 'feeProtocol', 'feeProtocolPool', 'feeConversionEnabled', 'supportAllTokens', 'minTransactionFee', 'baseFee', 'nftPositionMetadata', 'nftPositionColorRange'],
 	properties: {
 		feeAmountTickSpacing: {
 			type: 'array',
@@ -41,19 +32,7 @@ export const getConfigEndpointResponseSchema = {
 		minTransactionFee: {
 			type: 'object',
 			fieldNumber: 6,
-			required: [
-				'createPool',
-				'mint',
-				'burn',
-				'collect',
-				'increaseLiquidity',
-				'decreaseLiquidity',
-				'exactInput',
-				'exactInputSingle',
-				'exactOutput',
-				'exactOutputSingle',
-				'treasurify',
-			],
+			required: ['createPool', 'mint', 'burn', 'collect', 'increaseLiquidity', 'decreaseLiquidity', 'exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle', 'treasurify'],
 			properties: {
 				createPool: {
 					dataType: 'string',
@@ -104,19 +83,7 @@ export const getConfigEndpointResponseSchema = {
 		baseFee: {
 			type: 'object',
 			fieldNumber: 7,
-			required: [
-				'createPool',
-				'mint',
-				'burn',
-				'collect',
-				'increaseLiquidity',
-				'decreaseLiquidity',
-				'exactInput',
-				'exactInputSingle',
-				'exactOutput',
-				'exactOutputSingle',
-				'treasurify',
-			],
+			required: ['createPool', 'mint', 'burn', 'collect', 'increaseLiquidity', 'decreaseLiquidity', 'exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle', 'treasurify'],
 			properties: {
 				createPool: {
 					dataType: 'string',
@@ -201,6 +168,34 @@ export const getConfigEndpointResponseSchema = {
 							fieldNumber: 2,
 							dataType: 'uint32',
 						},
+					},
+				},
+			},
+		},
+		nftPositionColorRange: {
+			type: 'object',
+			fieldNumber: 9,
+			required: ['hue', 'saturation', 'lightness'],
+			properties: {
+				hue: {
+					type: 'array',
+					fieldNumber: 1,
+					items: {
+						dataType: 'uint32',
+					},
+				},
+				saturation: {
+					type: 'array',
+					fieldNumber: 2,
+					items: {
+						dataType: 'uint32',
+					},
+				},
+				lightness: {
+					type: 'array',
+					fieldNumber: 3,
+					items: {
+						dataType: 'uint32',
 					},
 				},
 			},
