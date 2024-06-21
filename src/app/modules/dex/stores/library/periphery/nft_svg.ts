@@ -41,19 +41,10 @@ export interface SVGParams {
 export function generateSVG(params: SVGParams): string {
 	return [
 		generateSVGDefs(params),
-		generateSVGBorderText(
-			params.quoteToken,
-			params.baseToken,
-			params.quoteTokenSymbol,
-			params.baseTokenSymbol,
-		),
+		generateSVGBorderText(params.quoteToken, params.baseToken, params.quoteTokenSymbol, params.baseTokenSymbol),
 		generateSVGCardMantle(params.quoteTokenSymbol, params.baseTokenSymbol, params.feeTier),
 		generageSvgCurve(params.tickLower, params.tickUpper, params.tickSpacing, params.overRange),
-		generateSVGPositionDataAndLocationCurve(
-			params.tokenId.toString(),
-			params.tickLower,
-			params.tickUpper,
-		),
+		generateSVGPositionDataAndLocationCurve(params.tokenId.toString(), params.tickLower, params.tickUpper),
 		generateSVGRareSparkle(params.tokenId, params.poolAddress),
 		'</svg>',
 	].join('');
@@ -65,49 +56,27 @@ function generateSVGDefs(params: SVGParams): string {
 		" xmlns:xlink='http://www.w3.org/1999/xlink'>",
 		'<defs>',
 		'<filter id="f1"><feImage result="p0" xlink:href="data:image/svg+xml;base64,',
-		Buffer.from(
-			[
-				"<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><rect width='290px' height='500px' fill='#",
-				params.color0,
-				"'/></svg>",
-			].join(''),
-		).toString('base64'),
+		Buffer.from(["<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><rect width='290px' height='500px' fill='#", params.color0, "'/></svg>"].join('')).toString(
+			'base64',
+		),
 		'"/><feImage result="p1" xlink:href="data:image/svg+xml;base64,',
 		Buffer.from(
-			[
-				"<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='",
-				params.x1,
-				"' cy='",
-				params.y1,
-				"' r='120px' fill='#",
-				params.color1,
-				"'/></svg>",
-			].join(''),
+			["<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='", params.x1, "' cy='", params.y1, "' r='120px' fill='#", params.color1, "'/></svg>"].join(
+				'',
+			),
 		).toString('base64'),
 		'"/><feImage result="p2" xlink:href="data:image/svg+xml;base64,',
 		Buffer.from(
-			[
-				"<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='",
-				params.x2,
-				"' cy='",
-				params.y2,
-				"' r='120px' fill='#",
-				params.color2,
-				"'/></svg>",
-			].join(''),
+			["<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='", params.x2, "' cy='", params.y2, "' r='120px' fill='#", params.color2, "'/></svg>"].join(
+				'',
+			),
 		).toString('base64'),
 		'" />',
 		'<feImage result="p3" xlink:href="data:image/svg+xml;base64,',
 		Buffer.from(
-			[
-				"<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='",
-				params.x3,
-				"' cy='",
-				params.y3,
-				"' r='100px' fill='#",
-				params.color3,
-				"'/></svg>",
-			].join(''),
+			["<svg width='290' height='500' viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'><circle cx='", params.x3, "' cy='", params.y3, "' r='100px' fill='#", params.color3, "'/></svg>"].join(
+				'',
+			),
 		).toString('base64'),
 		'" /><feBlend mode="overlay" in="p0" in2="p1" /><feBlend mode="exclusion" in2="p2" /><feBlend mode="overlay" in2="p3" result="blendOut" /><feGaussianBlur ',
 		'in="blendOut" stdDeviation="42" /></filter> <clipPath id="corners"><rect width="290" height="500" rx="42" ry="42" /></clipPath>',
@@ -136,12 +105,7 @@ function generateSVGDefs(params: SVGParams): string {
 	return svg;
 }
 
-function generateSVGBorderText(
-	quoteToken: string,
-	baseToken: string,
-	quoteTokenSymbol: string,
-	baseTokenSymbol: string,
-): string {
+function generateSVGBorderText(quoteToken: string, baseToken: string, quoteTokenSymbol: string, baseTokenSymbol: string): string {
 	const svg: string = [
 		'<text text-rendering="optimizeSpeed">',
 		'<textPath startOffset="-100%" fill="white" font-family="\'Courier New\', monospace" font-size="10px" xlink:href="#text-path-a">',
@@ -168,11 +132,7 @@ function generateSVGBorderText(
 	return svg;
 }
 
-function generateSVGCardMantle(
-	quoteTokenSymbol: string,
-	baseTokenSymbol: string,
-	feeTier: string,
-): string {
+function generateSVGCardMantle(quoteTokenSymbol: string, baseTokenSymbol: string, feeTier: string): string {
 	const svg: string = [
 		'<g mask="url(#fade-symbol)"><rect fill="none" x="0px" y="0px" width="290px" height="200px" /> <text y="70px" x="32px" fill="white" font-family="\'Courier New\', monospace" font-weight="200" font-size="36px">',
 		quoteTokenSymbol,
@@ -186,18 +146,8 @@ function generateSVGCardMantle(
 	return svg;
 }
 
-function generageSvgCurve(
-	tickLower: Int24String,
-	tickUpper: Int24String,
-	tickSpacing: Int24String,
-	overRange: Int8String,
-): string {
-	const fade: string =
-		parseInt(overRange, 10) === 1
-			? '#fade-up'
-			: parseInt(overRange, 10) === -1
-			? '#fade-down'
-			: '#none';
+function generageSvgCurve(tickLower: Int24String, tickUpper: Int24String, tickSpacing: Int24String, overRange: Int8String): string {
+	const fade: string = parseInt(overRange, 10) === 1 ? '#fade-up' : parseInt(overRange, 10) === -1 ? '#fade-down' : '#none';
 	const curve: string = getCurve(tickLower, tickUpper, tickSpacing);
 	const svg: string = [
 		'<g mask="url(',
@@ -221,11 +171,7 @@ function generageSvgCurve(
 	return svg;
 }
 
-function getCurve(
-	tickLower: Int24String,
-	tickUpper: Int24String,
-	tickSpacing: Int24String,
-): string {
+function getCurve(tickLower: Int24String, tickUpper: Int24String, tickSpacing: Int24String): string {
 	const tickRange = (parseInt(tickUpper, 10) - parseInt(tickLower, 10)) / parseInt(tickSpacing, 10);
 	let curve: string;
 	if (tickRange <= 4) {
@@ -268,27 +214,12 @@ function generateSVGCurveCircle(overRange: Int8String): string {
 			'px" r="24px" fill="none" stroke="white" />',
 		].join('');
 	} else {
-		svg = [
-			'<circle cx="',
-			curvex1,
-			'px" cy="',
-			curvey1,
-			'px" r="4px" fill="white" />',
-			'<circle cx="',
-			curvex2,
-			'px" cy="',
-			curvey2,
-			'px" r="4px" fill="white" />',
-		].join('');
+		svg = ['<circle cx="', curvex1, 'px" cy="', curvey1, 'px" r="4px" fill="white" />', '<circle cx="', curvex2, 'px" cy="', curvey2, 'px" r="4px" fill="white" />'].join('');
 	}
 	return svg;
 }
 
-function generateSVGPositionDataAndLocationCurve(
-	tokenId: string,
-	tickLower: Int24String,
-	tickUpper: Int24String,
-): string {
+function generateSVGPositionDataAndLocationCurve(tokenId: string, tickLower: Int24String, tickUpper: Int24String): string {
 	const tickLowerStr = tickToString(tickLower);
 	const tickUpperStr = tickToString(tickUpper);
 
@@ -394,9 +325,5 @@ export function isRare(tokenId: string, poolAddress: Buffer): boolean {
 	const h = `0x${createHash('sha256')
 		.update(tokenId + poolAddress.toString('hex'))
 		.digest('hex')}`;
-	return Uint256.from(h).lt(
-		Uint256.from(Uint256.MAX).div(
-			1 + parseInt(BitMath.mostSignificantBit(Uint64.from(tokenId).add(1).toString()), 10) * 2,
-		),
-	);
+	return Uint256.from(h).lt(Uint256.from(Uint256.MAX).div(1 + parseInt(BitMath.mostSignificantBit(Uint64.from(tokenId).add(1).toString()), 10) * 2));
 }

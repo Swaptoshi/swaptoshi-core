@@ -1,13 +1,7 @@
 import { cryptography } from 'klayr-sdk';
 import { DexModuleConfig } from '../types';
 import { DEFAULT_TREASURY_ADDRESS } from './address';
-import {
-	DEX_DEFAULT_NAME,
-	DEX_DEFAULT_TOKEN_DECIMAL,
-	DEX_DEFAULT_TOKEN_SYMBOL,
-	MAINCHAIN_DEFAULT_TOKEN_DECIMAL,
-	MAINCHAIN_DEFAULT_TOKEN_SYMBOL,
-} from './token_symbol';
+import { DEX_DEFAULT_NAME, DEX_DEFAULT_TOKEN_DECIMAL, DEX_DEFAULT_TOKEN_SYMBOL, MAINCHAIN_DEFAULT_TOKEN_DECIMAL, MAINCHAIN_DEFAULT_TOKEN_SYMBOL } from './token_symbol';
 
 export const defaultConfig: DexModuleConfig = {
 	feeAmountTickSpacing: [
@@ -55,5 +49,10 @@ export const defaultConfig: DexModuleConfig = {
 			symbol: MAINCHAIN_DEFAULT_TOKEN_SYMBOL,
 			decimal: MAINCHAIN_DEFAULT_TOKEN_DECIMAL,
 		},
+	},
+	nftPositionColorRange: {
+		hue: [0, 360],
+		saturation: [70, 100],
+		lightness: [50, 60],
 	},
 };

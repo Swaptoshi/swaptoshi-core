@@ -41,4 +41,9 @@ export interface DexModuleConfig {
 			decimal: number;
 		};
 	};
+	nftPositionColorRange: {
+		hue: [number, number];
+		saturation: [number, number];
+		lightness: [number, number];
+	};
 }

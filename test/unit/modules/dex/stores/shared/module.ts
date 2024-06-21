@@ -69,6 +69,11 @@ export const moduleConfig: DexModuleConfig = {
 			decimal: 8,
 		},
 	},
+	nftPositionColorRange: {
+		hue: [0, 360],
+		saturation: [70, 100],
+		lightness: [50, 60],
+	},
 };
 
 export async function storeFixture() {

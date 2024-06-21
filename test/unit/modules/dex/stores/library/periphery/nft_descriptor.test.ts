@@ -705,16 +705,16 @@ describe('NFTDescriptor', () => {
 
 	describe('#tokenToColorHex', () => {
 		it('returns the output as RGB string (6 length)', async () => {
-			const rgb = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'));
+			const rgb = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'), moduleConfig);
 			expect(rgb).toHaveLength(6);
 		});
 		it('returns the output as RGB bytes (3 byte buffer)', async () => {
-			const rgb = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'));
+			const rgb = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'), moduleConfig);
 			expect(Buffer.from(rgb, 'hex').toString('hex')).toHaveLength(6);
 		});
 		it('should return different value for different token id', async () => {
-			const rgb1 = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'));
-			const rgb2 = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000002', 'hex'));
+			const rgb1 = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000001', 'hex'), moduleConfig);
+			const rgb2 = nftDescriptor.tokenToColorHex(Buffer.from('0000000000000002', 'hex'), moduleConfig);
 			expect(rgb1 === rgb2).toBeFalsy();
 		});
 	});

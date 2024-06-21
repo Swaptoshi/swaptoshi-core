@@ -348,10 +348,10 @@ export function generateSVGImage(params: ConstructTokenURIParams): string {
 		tickSpacing: params.tickSpacing,
 		overRange: overRange(params.tickLower, params.tickUpper, params.tickCurrent),
 		tokenId: params.tokenId,
-		color0: tokenToColorHex(params.quoteTokenAddress),
-		color1: tokenToColorHex(params.baseTokenAddress),
-		color2: tokenToColorHex(params.quoteTokenAddress),
-		color3: tokenToColorHex(params.baseTokenAddress),
+		color0: tokenToColorHex(params.quoteTokenAddress, params.config),
+		color1: tokenToColorHex(params.baseTokenAddress, params.config),
+		color2: tokenToColorHex(params.quoteTokenAddress, params.config),
+		color3: tokenToColorHex(params.baseTokenAddress, params.config),
 		x1: scale(getCircleCoord(HexStrings.bufferToUint256String(params.quoteTokenAddress), '16', params.tokenId), '0', '255', '16', '274'),
 		y1: scale(getCircleCoord(HexStrings.bufferToUint256String(params.baseTokenAddress), '16', params.tokenId), '0', '255', '100', '484'),
 		x2: scale(getCircleCoord(HexStrings.bufferToUint256String(params.quoteTokenAddress), '32', params.tokenId), '0', '255', '16', '274'),
@@ -377,12 +377,12 @@ function scale(n: Uint256String, inMn: Uint256String, inMx: Uint256String, outMn
 	return Uint256.from(n).sub(inMn).mul(Uint256.from(outMx).sub(outMn)).div(Uint256.from(inMx).sub(inMn)).add(outMn).toString();
 }
 
-export function tokenToColorHex(token: Buffer) {
+export function tokenToColorHex(token: Buffer, config: DexModuleConfig) {
 	const hash = crc32(token);
 
-	const hue = hash % 360;
-	const saturation = 70 + (hash % 30);
-	const lightness = 50 + (hash % 10);
+	const hue = config.nftPositionColorRange.hue[0] + (hash % (config.nftPositionColorRange.hue[1] - config.nftPositionColorRange.hue[0]));
+	const saturation = config.nftPositionColorRange.saturation[0] + (hash % (config.nftPositionColorRange.saturation[1] - config.nftPositionColorRange.saturation[0]));
+	const lightness = config.nftPositionColorRange.lightness[0] + (hash % (config.nftPositionColorRange.lightness[1] - config.nftPositionColorRange.lightness[0]));
 
 	const color = hslToHex(hue, saturation, lightness);
 	return color;

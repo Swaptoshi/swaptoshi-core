@@ -92,6 +92,11 @@
 					"symbol": "KLY",
 					"decimal": 8
 				}
+			},
+			"nftPositionColorRange": {
+				"hue": [0, 360],
+				"saturation": [70, 100],
+				"lightness": [50, 60]
 			}
 		},
 		"tokenFactory": {
