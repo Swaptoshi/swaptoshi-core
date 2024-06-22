@@ -1,5 +1,5 @@
 import { DexModuleConfig } from '../../types';
-import { verifyBoolean, verifyKlayer32Address, verifyNumber, verifyNumberString, verifyString } from './base';
+import { verifyBoolean, verifyKlayer32Address, verifyNumber, verifyNumberString, verifyPositiveNumber, verifyString } from './base';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyModuleConfig(config: DexModuleConfig) {
@@ -7,10 +7,13 @@ export async function verifyModuleConfig(config: DexModuleConfig) {
 		for (const feeAmountTickSpacings of config.feeAmountTickSpacing) {
 			verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
 			verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
+			verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
+			verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
 		}
 	}
 
 	verifyNumber('config.feeProtocol', config.feeProtocol);
+	verifyPositiveNumber('config.feeProtocol', config.feeProtocol);
 
 	if (config.feeProtocolPool) {
 		verifyKlayer32Address('config.feeProtocolPool', config.feeProtocolPool);
@@ -21,17 +24,21 @@ export async function verifyModuleConfig(config: DexModuleConfig) {
 
 	for (const commands of Object.keys(config.minTransactionFee)) {
 		verifyNumberString(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof DexModuleConfig['minTransactionFee']]);
+		verifyPositiveNumber(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof DexModuleConfig['minTransactionFee']]);
 	}
 
 	for (const commands of Object.keys(config.baseFee)) {
 		verifyNumberString(`config.baseFee.${commands}`, config.baseFee[commands as keyof DexModuleConfig['baseFee']]);
+		verifyPositiveNumber(`config.baseFee.${commands}`, config.baseFee[commands as keyof DexModuleConfig['baseFee']]);
 	}
 
 	verifyString('config.nftPositionMetadata.dex.name', config.nftPositionMetadata.dex.name);
 	verifyString('config.nftPositionMetadata.dex.symbol', config.nftPositionMetadata.dex.symbol);
 	verifyNumber('config.nftPositionMetadata.dex.decimal', config.nftPositionMetadata.dex.decimal);
+	verifyPositiveNumber('config.nftPositionMetadata.dex.decimal', config.nftPositionMetadata.dex.decimal);
 	verifyString('config.nftPositionMetadata.mainchain.symbol', config.nftPositionMetadata.mainchain.symbol);
 	verifyNumber('config.nftPositionMetadata.mainchain.decimal', config.nftPositionMetadata.mainchain.decimal);
+	verifyPositiveNumber('config.nftPositionMetadata.mainchain.decimal', config.nftPositionMetadata.mainchain.decimal);
 
 	verifyNumber('config.nftPositionColorRange.hue[0]', config.nftPositionColorRange.hue[0]);
 	verifyNumber('config.nftPositionColorRange.hue[1]', config.nftPositionColorRange.hue[1]);

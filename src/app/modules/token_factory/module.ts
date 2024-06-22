@@ -82,6 +82,7 @@ import { executeBaseFee, executeSwapByTransfer, executeVestingUnlock, verifyBase
 import { NFTMethod } from '../nft';
 import { FeeConversionMethod } from '../fee_conversion';
 import { TokenFactoryICOPurchaseFeeConversionMethod, TokenFactoryTransferFeeConversionMethod } from './fc_method';
+import { verifyModuleConfig } from './utils';
 
 export class TokenFactoryModule extends BaseModule {
 	public _config: TokenFactoryModuleConfig | undefined;
@@ -235,6 +236,8 @@ export class TokenFactoryModule extends BaseModule {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
 		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as TokenFactoryModuleConfig;
+		await verifyModuleConfig(this._config);
+
 		const airdropStore = this.stores.get(AirdropStore);
 		const factoryStore = this.stores.get(FactoryStore);
 		const icoStore = this.stores.get(ICOStore);

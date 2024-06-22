@@ -1,4 +1,5 @@
 import { cryptography } from 'klayr-sdk';
+import Decimal from 'decimal.js';
 import { COLLECTION_ID_LENGTH, POOL_ADDRESS_LENGTH, TOKEN_ID_LENGTH } from '../../constants';
 
 export function verifyString(name: string, string: string) {
@@ -25,6 +26,12 @@ export function verifyAddress(name: string, address: Buffer) {
 	}
 }
 
+export function verifyPositiveNumber(name: string, number: bigint | number | string) {
+	if (new Decimal(Number(number)).lt(0)) {
+		throw new Error(`${name}, must be a positive number`);
+	}
+}
+
 export function verifyNumberString(name: string, value: string) {
 	try {
 		BigInt(value);
@@ -34,8 +41,11 @@ export function verifyNumberString(name: string, value: string) {
 }
 
 export function verifyKlayer32Address(name: string, value: string) {
-	const valid = cryptography.address.validateKlayr32Address(value);
-	if (!valid) throw new Error(`${name} needs to be in Klayr32 string format`);
+	try {
+		cryptography.address.validateKlayr32Address(value);
+	} catch {
+		throw new Error(`${name} needs to be in Klayr32 string format`);
+	}
 }
 
 export function verifyNumber(name: string, value: number) {
