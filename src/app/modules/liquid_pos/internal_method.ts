@@ -16,7 +16,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	public async init(genesisConfig: GenesisConfig, moduleConfig: LiquidPosModuleConfig) {
 		this._config = moduleConfig;
 		this._chainID = Buffer.from(genesisConfig.chainID, 'hex');
-		await this._parseLstTokenID();
+		await this._verifyConfig();
 	}
 
 	public addDependencies(tokenMethod: TokenMethod) {
@@ -82,7 +82,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _parseLstTokenID() {
+	private async _verifyConfig() {
 		const { tokenID } = this._config!;
 		const chainID = this._chainID!;
 
