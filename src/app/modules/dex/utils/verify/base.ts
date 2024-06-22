@@ -1,3 +1,4 @@
+import { cryptography } from 'klayr-sdk';
 import { COLLECTION_ID_LENGTH, POOL_ADDRESS_LENGTH, TOKEN_ID_LENGTH } from '../../constants';
 
 export function verifyString(name: string, string: string) {
@@ -29,5 +30,22 @@ export function verifyNumberString(name: string, value: string) {
 		BigInt(value);
 	} catch {
 		throw new Error(`${name} needs to be in number string format`);
+	}
+}
+
+export function verifyKlayer32Address(name: string, value: string) {
+	const valid = cryptography.address.validateKlayr32Address(value);
+	if (!valid) throw new Error(`${name} needs to be in Klayr32 string format`);
+}
+
+export function verifyNumber(name: string, value: number) {
+	if (typeof value !== 'number') {
+		throw new Error(`${name}, needs to be a number`);
+	}
+}
+
+export function verifyBoolean(name: string, value: boolean) {
+	if (typeof value !== 'boolean') {
+		throw new Error(`${name}, needs to be a boolean`);
 	}
 }

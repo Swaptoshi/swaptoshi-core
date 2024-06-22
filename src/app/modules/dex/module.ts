@@ -88,6 +88,7 @@ import { TokenFactoryMethod } from '../token_factory/method';
 import { NFTMethod } from '../nft';
 import { FeeConversionMethod } from '../fee_conversion';
 import { DexSwapFeeConversionMethod, DexTransferFeeConversionMethod } from './fc_method';
+import { verifyModuleConfig } from './utils';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexModuleConfig | undefined;
@@ -244,6 +245,8 @@ export class DexModule extends BaseInteroperableModule {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
 		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as DexModuleConfig;
+		await verifyModuleConfig(this._config);
+
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportedTokenStore = this.stores.get(SupportedTokenStore);
