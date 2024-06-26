@@ -261,7 +261,7 @@ export class DexModule extends BaseInteroperableModule {
 		this.endpoint.init(this._config);
 
 		if (this._config.feeConversionEnabled && !this._feeConversionMethod) {
-			throw new Error('feeConversionMethod dependencies is not configured');
+			throw new Error('feeConversionMethod dependencies is not configured, make sure to add FeeConversionModule.method to DexModule.addDependencies()');
 		}
 
 		if (!this._tokenMethod || !this._feeMethod) {
