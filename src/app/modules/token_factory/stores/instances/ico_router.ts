@@ -22,13 +22,7 @@ import { TOKEN_ID_LENGTH } from '../../constants';
 import { ICOQuoter } from './ico_quoter';
 
 export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		genesisConfig: GenesisConfig,
-		config: TokenFactoryModuleConfig,
-		moduleName: string,
-	) {
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string) {
 		super(ICOStore, stores, events, genesisConfig, config, moduleName, Buffer.alloc(0));
 		this.quoter = new ICOQuoter(stores, events, genesisConfig, config, moduleName);
 	}
@@ -61,6 +55,11 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 
 	public async verifyExactInput(params: ICOExactInputParams) {
 		this._checkImmutableDependencies();
+
+		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+			throw new Error('exactInput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
+		}
+
 		verifyToken('tokenOut', params.tokenOut);
 		verifyPositiveNumber('amountIn', params.amountIn);
 
@@ -72,11 +71,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 
 		if (verify) await this.verifyExactInput(params);
 
-		const swapRouter = await this.dexMethod!.getRouter(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
-			Number(this.mutableContext!.timestamp),
-		);
+		const swapRouter = await this.dexMethod!.getRouter(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
 
 		let icoAmountIn = params.amountIn.toString();
 
@@ -99,13 +94,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenOut: params.tokenOut,
 		});
 
-		await this._icoSwapInternal(
-			params.recipient,
-			BigInt(icoAmountIn),
-			icoAmountOut,
-			tokenIn,
-			params.tokenOut,
-		);
+		await this._icoSwapInternal(params.recipient, BigInt(icoAmountIn), icoAmountOut, tokenIn, params.tokenOut);
 	}
 
 	public async verifyExactInputSingle(params: ICOExactInputSingleParams) {
@@ -129,17 +118,16 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenIn: params.tokenIn,
 			tokenOut: params.tokenOut,
 		});
-		await this._icoSwapInternal(
-			params.recipient,
-			params.amountIn,
-			amountOut,
-			params.tokenIn,
-			params.tokenOut,
-		);
+		await this._icoSwapInternal(params.recipient, params.amountIn, amountOut, params.tokenIn, params.tokenOut);
 	}
 
 	public async verifyExactOutput(params: ICOExactOutputParams) {
 		this._checkImmutableDependencies();
+
+		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+			throw new Error('exactOutput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
+		}
+
 		verifyToken('tokenOut', params.tokenOut);
 		verifyPositiveNumber('amountOut', params.amountOut);
 
@@ -151,11 +139,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 
 		if (verify) await this.verifyExactOutput(params);
 
-		const swapRouter = await this.dexMethod!.getRouter(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
-			Number(this.mutableContext!.timestamp),
-		);
+		const swapRouter = await this.dexMethod!.getRouter(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
 
 		const tokenIn = params.path.subarray(0, TOKEN_ID_LENGTH);
 		await this._updateInstance(tokenIn, params.tokenOut);
@@ -176,13 +160,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			});
 		}
 
-		await this._icoSwapInternal(
-			params.recipient,
-			swapAmountOut,
-			params.amountOut,
-			tokenIn,
-			params.tokenOut,
-		);
+		await this._icoSwapInternal(params.recipient, swapAmountOut, params.amountOut, tokenIn, params.tokenOut);
 	}
 
 	public async verifyExactOuputSingle(params: ICOExactOutputSingleParams) {
@@ -206,55 +184,22 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			tokenIn: params.tokenIn,
 			tokenOut: params.tokenOut,
 		});
-		await this._icoSwapInternal(
-			params.recipient,
-			amountIn,
-			params.amountOut,
-			params.tokenIn,
-			params.tokenOut,
-		);
+		await this._icoSwapInternal(params.recipient, amountIn, params.amountOut, params.tokenIn, params.tokenOut);
 	}
 
 	private async _updateInstance(tokenIn: Buffer, tokenOut: Buffer) {
 		const poolAddress = computeICOPoolAddress({ tokenIn, tokenOut });
-		const icoData = await this.instanceStore.getOrDefault(
-			this.mutableContext!.context,
-			poolAddress,
-		);
+		const icoData = await this.instanceStore.getOrDefault(this.mutableContext!.context, poolAddress);
 		this._setKey(poolAddress);
 		Object.assign(this, utils.objects.cloneDeep(icoData));
 	}
 
-	private async _icoSwapInternal(
-		recipient: Buffer,
-		amountIn: bigint,
-		amountOut: bigint,
-		tokenIn: Buffer,
-		tokenOut: Buffer,
-	) {
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
-			this.key,
-			tokenIn,
-			amountIn,
-		);
+	private async _icoSwapInternal(recipient: Buffer, amountIn: bigint, amountOut: bigint, tokenIn: Buffer, tokenOut: Buffer) {
+		await this.tokenMethod!.transfer(this.mutableContext!.context, this.mutableContext!.senderAddress, this.key, tokenIn, amountIn);
 
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			this.key,
-			this.providerAddress,
-			tokenIn,
-			amountIn,
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, this.key, this.providerAddress, tokenIn, amountIn);
 
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			this.key,
-			recipient,
-			tokenOut,
-			amountOut,
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, this.key, recipient, tokenOut, amountOut);
 
 		const events = this.events.get(IcoSwapEvent);
 		events.add(
@@ -287,12 +232,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 			pathTokenOut = path.subarray(0, TOKEN_ID_LENGTH);
 		}
 
-		if (
-			!(await this.instanceStore.has(
-				this.immutableContext!.context,
-				computeICOPoolAddress({ tokenIn: pathTokenOut, tokenOut }),
-			))
-		) {
+		if (!(await this.instanceStore.has(this.immutableContext!.context, computeICOPoolAddress({ tokenIn: pathTokenOut, tokenOut })))) {
 			throw new Error('params.path leads to non existent ICO pool');
 		}
 	}

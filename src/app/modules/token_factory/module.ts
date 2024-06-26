@@ -145,8 +145,8 @@ export class TokenFactoryModule extends BaseModule {
 		tokenMethod: TokenMethod,
 		feeMethod: FeeMethod,
 		nftMethod: NFTMethod,
-		dexMethod: DexMethod,
 		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
+		dexMethod?: DexMethod,
 		feeConversionMethod?: FeeConversionMethod,
 	) {
 		const dependencies = { tokenMethod, feeMethod, dexMethod };
@@ -164,9 +164,12 @@ export class TokenFactoryModule extends BaseModule {
 		this._feeMethod = feeMethod;
 		this._tokenMethod = tokenMethod;
 		this._nftMethod = nftMethod;
-		this._dexMethod = dexMethod;
 
 		this._tokenFactoryInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
+
+		if (dexMethod) {
+			this._dexMethod = dexMethod;
+		}
 
 		if (feeConversionMethod) {
 			this._feeConversionMethod = feeConversionMethod;
@@ -251,7 +254,15 @@ export class TokenFactoryModule extends BaseModule {
 		this.endpoint.init(this._config);
 
 		if (this._config.icoFeeConversionEnabled && !this._feeConversionMethod) {
-			throw new Error('feeConversionMethod dependencies is not configured');
+			throw new Error('feeConversionMethod dependencies is not configured, make sure to add FeeConversionModule.method to TokenFactoryModule.addDependencies()');
+		}
+
+		if (this._config.icoDexPathEnabled && !this._dexMethod) {
+			throw new Error('dexMethod dependencies is not configured, make sure to add DexModule.method to TokenFactoryModule.addDependencies()');
+		}
+
+		if (!this._feeMethod || !this._tokenMethod || !this._nftMethod) {
+			throw new Error('token_factory module dependencies is not configured, make sure TokenFactoryModule.addDependencies() is called before module registration');
 		}
 
 		if (this._feeConversionMethod && this._config.icoFeeConversionEnabled) {

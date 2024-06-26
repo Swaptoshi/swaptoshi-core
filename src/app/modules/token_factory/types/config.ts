@@ -2,6 +2,7 @@ export interface TokenFactoryModuleConfig {
 	skippedTokenID: number[];
 	icoLeftOverAddress: string;
 	icoFeeConversionEnabled: boolean;
+	icoDexPathEnabled: boolean;
 	minTransactionFee: {
 		factoryTransferOwnership: string;
 		tokenCreate: string;

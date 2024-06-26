@@ -103,6 +103,7 @@
 			"skippedTokenID": [1],
 			"icoLeftOverAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"icoFeeConversionEnabled": true,
+			"icoDexPathEnabled": true,
 			"minTransactionFee": {
 				"airdropCreate": "0",
 				"airdropDistribute": "0",

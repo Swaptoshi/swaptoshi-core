@@ -12,6 +12,8 @@ export async function verifyModuleConfig(config: TokenFactoryModuleConfig) {
 
 	verifyBoolean('config.icoFeeConversionEnabled', config.icoFeeConversionEnabled);
 
+	verifyBoolean('config.icoDexPathEnabled', config.icoDexPathEnabled);
+
 	for (const commands of Object.keys(config.minTransactionFee)) {
 		verifyNumberString(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof TokenFactoryModuleConfig['minTransactionFee']]);
 		verifyPositiveNumber(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof TokenFactoryModuleConfig['minTransactionFee']]);

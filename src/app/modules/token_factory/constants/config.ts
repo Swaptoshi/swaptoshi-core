@@ -6,6 +6,7 @@ export const defaultConfig: TokenFactoryModuleConfig = {
 	skippedTokenID: [],
 	icoLeftOverAddress: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_LEFTOVER_ADDRESS),
 	icoFeeConversionEnabled: true,
+	icoDexPathEnabled: false,
 	minTransactionFee: {
 		airdropCreate: '0',
 		airdropDistribute: '0',

@@ -17,7 +17,6 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
 			feeMethod: this.feeMethod!,
-			dexMethod: this.dexMethod!,
 		});
 		return ico;
 	}
@@ -30,8 +29,39 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
 			feeMethod: this.feeMethod!,
-			dexMethod: this.dexMethod!,
 		});
+		return ico;
+	}
+
+	public async getMutableICOPool(ctx: MutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
+		this._checkDependencies();
+
+		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
+
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+
+		ico.addMutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+
+		return ico;
+	}
+
+	public async getImmutableICOPool(ctx: ImmutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
+		this._checkDependencies();
+
+		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
+
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+
+		ico.addImmutableDependencies({
+			context: ctx,
+			tokenMethod: this.tokenMethod!,
+			feeMethod: this.feeMethod!,
+		});
+
 		return ico;
 	}
 
@@ -56,40 +86,6 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 		this._checkDependencies();
 
 		const ico = new ICORouter(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName);
-
-		ico.addImmutableDependencies({
-			context: ctx,
-			tokenMethod: this.tokenMethod!,
-			feeMethod: this.feeMethod!,
-			dexMethod: this.dexMethod!,
-		});
-
-		return ico;
-	}
-
-	public async getMutableICOPool(ctx: MutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
-		this._checkDependencies();
-
-		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
-
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
-
-		ico.addMutableDependencies({
-			context: ctx,
-			tokenMethod: this.tokenMethod!,
-			feeMethod: this.feeMethod!,
-			dexMethod: this.dexMethod!,
-		});
-
-		return ico;
-	}
-
-	public async getImmutableICOPool(ctx: ImmutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
-		this._checkDependencies();
-
-		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
-
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
 
 		ico.addImmutableDependencies({
 			context: ctx,
