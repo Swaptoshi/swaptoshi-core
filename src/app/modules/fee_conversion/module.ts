@@ -52,6 +52,7 @@ export class FeeConversionModule extends BaseModule {
 		this.method.init(this._handler);
 		this.endpoint.init(this._handler, this._config);
 		await this._internalMethod.init(this._handler, _args, this._config);
+		await this._internalMethod.checkDependencies();
 	}
 
 	public addDependencies(tokenMethod: TokenMethod, feeMethod: FeeMethod, dexMethod: DexMethod) {

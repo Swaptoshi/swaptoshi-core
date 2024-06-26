@@ -90,32 +90,36 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		}
 	}
 
-	private async _executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
+	public checkDependencies() {
 		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod || !this._config) {
 			throw new Error('InternalFeeConversionMethod dependencies is not configured properly');
 		}
+	}
+
+	private async _executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
+		this.checkDependencies();
 
 		const key = `${context.transaction.module}:${context.transaction.command}`;
 
-		if (!this._handler.has(key)) return { status: FeeConversionVerifyStatus.NO_CONVERSION };
+		if (!this._handler!.has(key)) return { status: FeeConversionVerifyStatus.NO_CONVERSION };
 
-		for (const method of this._handler.get(key)) {
+		for (const method of this._handler!.get(key)) {
 			const { status: handlerStatus, payload: handlerPayload } = await method.verifyFeeConversion(context);
 			if (handlerStatus === FeeConversionVerifyStatus.WITH_CONVERSION && handlerPayload) {
-				const tokenOut = this._feeMethod.getFeeTokenID();
+				const tokenOut = this._feeMethod!.getFeeTokenID();
 				const sender = context.transaction.senderAddress;
-				const senderFeeBalance = await this._tokenMethod.getAvailableBalance(context, sender, tokenOut);
+				const senderFeeBalance = await this._tokenMethod!.getAvailableBalance(context, sender, tokenOut);
 				const feeDifference = senderFeeBalance - context.transaction.fee;
 
 				const amount = (feeDifference * BigInt(-1)).toString();
 
-				const dexQuoter = await this._dexMethod.getQuoter(context, context.transaction.senderAddress, context.header.timestamp);
-				const dexConfig = await this._dexMethod.getConfig();
+				const dexQuoter = await this._dexMethod!.getQuoter(context, context.transaction.senderAddress, context.header.timestamp);
+				const dexConfig = await this._dexMethod!.getConfig();
 
 				for (const feeTickSpaingMap of dexConfig.feeAmountTickSpacing) {
 					const [fee] = feeTickSpaingMap;
 
-					if (await this._dexMethod.poolExists(context, handlerPayload.tokenId, tokenOut, fee)) {
+					if (await this._dexMethod!.poolExists(context, handlerPayload.tokenId, tokenOut, fee)) {
 						const { amountIn } = await dexQuoter.quoteExactOutputSingle({
 							tokenIn: handlerPayload.tokenId.toString('hex'),
 							tokenOut: tokenOut.toString('hex'),
@@ -143,9 +147,9 @@ export class InternalFeeConversionMethod extends BaseMethod {
 						};
 					}
 
-					for (const conversionPath of this._config.conversionPath) {
+					for (const conversionPath of this._config!.conversionPath) {
 						const pathTokenIn = Buffer.from(conversionPath.substring(conversionPath.length - TOKEN_ID_LENGTH * 2, conversionPath.length), 'hex');
-						if ((await this._dexMethod.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
+						if ((await this._dexMethod!.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
 							const path = Buffer.concat([
 								Buffer.from(conversionPath, 'hex'),
 								Buffer.from(
