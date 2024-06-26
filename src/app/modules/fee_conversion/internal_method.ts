@@ -92,7 +92,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 
 	public checkDependencies() {
 		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod || !this._config) {
-			throw new Error('InternalFeeConversionMethod dependencies is not configured properly');
+			throw new Error('fee_conversion module dependencies is not configured, make sure FeeConversionModule.addDependencies() is called before module registration');
 		}
 	}
 
