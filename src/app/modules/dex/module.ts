@@ -264,6 +264,10 @@ export class DexModule extends BaseInteroperableModule {
 			throw new Error('feeConversionMethod dependencies is not configured');
 		}
 
+		if (!this._tokenMethod || !this._feeMethod) {
+			throw new Error('dex module dependencies is not configured, make sure DexModule.addDependencies() is called before module registration');
+		}
+
 		if (this._feeConversionMethod && this._config.feeConversionEnabled) {
 			this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
 			this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
