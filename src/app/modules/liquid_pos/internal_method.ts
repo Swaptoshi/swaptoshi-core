@@ -28,14 +28,14 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	}
 
 	public async handleInitGenesisState(context: GenesisBlockExecuteContext) {
-		await this._checkDependencies();
+		this.checkDependencies();
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (!isTokenIDAvailable) throw new Error('specified tokenID on liquid_pos config is not available');
 	}
 
 	public async handleAfterCommandExecute(context: TransactionExecuteContext) {
-		await this._checkDependencies();
+		this.checkDependencies();
 
 		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
 			let totalStake = BigInt(0);
@@ -51,7 +51,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	}
 
 	public async mint(context: MethodContext, address: Buffer, amount: bigint) {
-		await this._checkDependencies();
+		this.checkDependencies();
 		if (amount < BigInt(0)) throw new Error("amount minted can't be negative");
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
@@ -63,7 +63,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	}
 
 	public async burn(context: MethodContext, address: Buffer, amount: bigint) {
-		await this._checkDependencies();
+		this.checkDependencies();
 		if (amount < BigInt(0)) throw new Error("amount burned can't be negative");
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
@@ -74,10 +74,9 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		events.add(context, { address, tokenID: this._lstTokenID!, amount }, [address]);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _checkDependencies() {
+	public checkDependencies() {
 		if (!this._chainID || !this._config || !this._tokenMethod || !this._lstTokenID) {
-			throw new Error('InternalLiquidPosMethod dependencies is not configured');
+			throw new Error('liquid_pos module dependencies is not configured, make sure LiquidPos.addDependencies() is called before module registration');
 		}
 	}
 

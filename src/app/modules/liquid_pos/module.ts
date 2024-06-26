@@ -57,6 +57,7 @@ export class LiquidPosModule extends BaseModule {
 		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as LiquidPosModuleConfig;
 		this.endpoint.init(this._config);
 		this._internalMethod.init(_args.genesisConfig, this._config);
+		await this._internalMethod.checkDependencies();
 	}
 
 	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {
