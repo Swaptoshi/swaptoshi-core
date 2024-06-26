@@ -189,8 +189,10 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			const tokenA = Buffer.from(path.substring(0, TOKEN_ID_LENGTH * 2), 'hex');
-			const fee = path.substring(TOKEN_ID_LENGTH * 2, FEE_SIZE * 2);
-			const tokenB = Buffer.from(path.substring(PATH_OFFSET_LENGTH * 2, TOKEN_ID_LENGTH * 2), 'hex');
+			const tokenB = Buffer.from(path.substring(PATH_OFFSET_LENGTH * 2, PATH_MINIMUM_LENGTH * 2), 'hex');
+			const fee = Buffer.from(path.substring(TOKEN_ID_LENGTH * 2, PATH_OFFSET_LENGTH * 2), 'hex')
+				.readIntBE(0, FEE_SIZE)
+				.toString();
 
 			const exist = await this._dexMethod.poolExists(context, tokenA, tokenB, fee);
 
