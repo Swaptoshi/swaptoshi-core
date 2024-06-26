@@ -3,13 +3,11 @@ import { verifyBoolean, verifyKlayer32Address, verifyNumber, verifyNumberString,
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyModuleConfig(config: DexModuleConfig) {
-	if (config.feeAmountTickSpacing.length > 0) {
-		for (const feeAmountTickSpacings of config.feeAmountTickSpacing) {
-			verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
-			verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
-			verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
-			verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
-		}
+	for (const feeAmountTickSpacings of config.feeAmountTickSpacing) {
+		verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
+		verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
+		verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
+		verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
 	}
 
 	verifyNumber('config.feeProtocol', config.feeProtocol);
