@@ -221,11 +221,11 @@ export class InternalFeeConversionMethod extends BaseMethod {
 			}
 
 			if (path.length < PATH_MINIMUM_LENGTH * 2) {
-				throw new Error(`invalid conversion path: ${path}, path should have minimum ${PATH_MINIMUM_LENGTH} character`);
+				throw new Error(`invalid conversion path: ${path}, path should have minimum ${PATH_MINIMUM_LENGTH * 2} character (${PATH_MINIMUM_LENGTH} bytes)`);
 			}
 
 			if (path.length > PATH_MINIMUM_LENGTH * 2 && (path.length - PATH_MINIMUM_LENGTH * 2) % (PATH_OFFSET_LENGTH * 2) !== 0) {
-				throw new Error(`invalid conversion path: ${path}, path should have valid offset of ${PATH_OFFSET_LENGTH} character`);
+				throw new Error(`invalid conversion path: ${path}, path should have valid offset of ${PATH_OFFSET_LENGTH * 2} character (${PATH_OFFSET_LENGTH} bytes)`);
 			}
 		}
 	}
