@@ -10,6 +10,7 @@ import { FactoryCreatedEvent } from '../../events/factory_created';
 import { BaseInstance } from './base';
 import { VestingUnlockStore } from '../vesting_unlock';
 import { serializer, verifyAddress, verifyPositiveNumber, verifyToken } from '../../utils';
+import { FactoryOwnerChangedEvent } from '../../events/factory_owner_changed';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
 	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
@@ -140,6 +141,16 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 
 		this.owner = params.ownerAddress;
 		await this._saveStore();
+
+		const events = this.events.get(FactoryOwnerChangedEvent);
+		events.add(
+			this.mutableContext!.context,
+			{
+				ownerAddress: params.ownerAddress,
+				tokenId: params.tokenId,
+			},
+			[params.ownerAddress],
+		);
 	}
 
 	public async getNextAvailableTokenId() {
