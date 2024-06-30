@@ -1,16 +1,23 @@
 /* eslint-disable */
-import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
+import { BaseEndpoint, ModuleEndpointContext, Transaction, TransactionVerifyContext, codec, cryptography, transactionSchema } from 'klayr-sdk';
 import { FeeConversionMethodRegistry } from './registry';
-import { FeeConversionModuleConfig, RegisteredMethod, RegisteredMethodResponse } from './types';
+import { DryRunTransactionResponse, FeeConversionModuleConfig, FeeConversionVerifyStatus, RegisteredMethod, RegisteredMethodResponse } from './types';
 import { serializer } from './utils';
+import { InternalFeeConversionMethod } from './internal_method';
+import { TOKEN_ID_LENGTH } from './constants';
 
 export class FeeConversionEndpoint extends BaseEndpoint {
 	protected _handler: FeeConversionMethodRegistry | undefined;
 	protected _config: FeeConversionModuleConfig | undefined;
+	protected _internalMethod: InternalFeeConversionMethod | undefined;
 
 	public async init(handler: FeeConversionMethodRegistry, config: FeeConversionModuleConfig) {
 		this._handler = handler;
 		this._config = config;
+	}
+
+	public async addDependencies(internalMethod: InternalFeeConversionMethod) {
+		this._internalMethod = internalMethod;
 	}
 
 	public getConfig(_context: ModuleEndpointContext) {
@@ -28,5 +35,38 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 		}
 
 		return { handlers };
+	}
+
+	public async dryRunTransaction(_context: ModuleEndpointContext): Promise<DryRunTransactionResponse> {
+		if (!this._internalMethod) throw new Error('FeeConversionEndpoint is not initialized');
+
+		const result: DryRunTransactionResponse = {
+			status: FeeConversionVerifyStatus.NO_CONVERSION,
+			data: { moduleCommand: '', path: '', token: '', amount: '' },
+			errorMessage: '',
+		};
+
+		try {
+			const tx = codec.decode<Transaction>(transactionSchema, Buffer.from(_context.params.transaction as string, 'hex'));
+			const transaction = { ...tx, senderAddress: cryptography.address.getAddressFromPublicKey(tx.senderPublicKey) };
+			const context = { ..._context, transaction } as unknown as TransactionVerifyContext;
+			const handlerResult = await this._internalMethod.executeHandlers(context);
+
+			if (handlerResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && handlerResult.payload) {
+				result.status = handlerResult.status;
+				result.data = {
+					moduleCommand: `${context.transaction.module}:${context.transaction.command}`,
+					path: handlerResult.payload.path.toString('hex'),
+					token: handlerResult.payload.path.subarray(handlerResult.payload.path.length - TOKEN_ID_LENGTH, handlerResult.payload.path.length).toString('hex'),
+					amount: handlerResult.payload.amountIn,
+				};
+				await this._internalMethod.verify(context);
+			}
+		} catch (err: unknown) {
+			result.status = FeeConversionVerifyStatus.ERROR;
+			result.errorMessage = (err as { message: string }).message;
+		}
+
+		return serializer(result);
 	}
 }

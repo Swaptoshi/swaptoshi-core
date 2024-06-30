@@ -1,17 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
 import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
-import { FeeConversionModuleConfig, FeeConversionPayload, FeeConversionVerifyStatus } from './types';
+import { FeeConversionModuleConfig, FeeConversionVerifyStatus, HandlerExecutionResult } from './types';
 import { FeeConversionMethodRegistry } from './registry';
 import { DexMethod } from '../dex/method';
 import { FeeConvertedEvent } from './events/fee_converted';
 import { PATH_MINIMUM_LENGTH, PATH_OFFSET_LENGTH, TOKEN_ID_LENGTH } from './constants';
 import { FEE_SIZE } from '../token_factory/stores/library';
-
-interface HandlerExecutionResult {
-	status: FeeConversionVerifyStatus;
-	payload?: FeeConversionPayload;
-}
 
 export class InternalFeeConversionMethod extends BaseMethod {
 	private _config: FeeConversionModuleConfig | undefined;
@@ -33,7 +28,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 	}
 
 	public async verify(context: TransactionVerifyContext) {
-		const handlerExecutionResult = await this._executeHandlers(context);
+		const handlerExecutionResult = await this.executeHandlers(context);
 
 		if (handlerExecutionResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && handlerExecutionResult.payload) {
 			const { path } = handlerExecutionResult.payload;
@@ -96,7 +91,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		}
 	}
 
-	private async _executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
+	public async executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
 		this.checkDependencies();
 
 		const key = `${context.transaction.module}:${context.transaction.command}`;

@@ -6,7 +6,14 @@ import { BaseModule, FeeMethod, ModuleInitArgs, ModuleMetadata, TokenMethod, Tra
 import { FeeConversionEndpoint } from './endpoint';
 import { FeeConversionMethod } from './method';
 import { FeeConversionMethodRegistry } from './registry';
-import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema, getRegisteredHandlersEndpointRequestSchema, getRegisteredHandlersEndpointResponseSchema } from './schema';
+import {
+	dryRunTransactionEndpointRequestSchema,
+	dryRunTransactionEndpointResponseSchema,
+	getConfigEndpointRequestSchema,
+	getConfigEndpointResponseSchema,
+	getRegisteredHandlersEndpointRequestSchema,
+	getRegisteredHandlersEndpointResponseSchema,
+} from './schema';
 import { FeeConvertedEvent } from './events/fee_converted';
 import { InternalFeeConversionMethod } from './internal_method';
 import { DexMethod } from '../dex/method';
@@ -41,6 +48,11 @@ export class FeeConversionModule extends BaseModule {
 					request: getRegisteredHandlersEndpointRequestSchema,
 					response: getRegisteredHandlersEndpointResponseSchema,
 				},
+				{
+					name: this.endpoint.dryRunTransaction.name,
+					request: dryRunTransactionEndpointRequestSchema,
+					response: dryRunTransactionEndpointResponseSchema,
+				},
 			],
 			assets: [],
 		};
@@ -57,6 +69,7 @@ export class FeeConversionModule extends BaseModule {
 
 	public addDependencies(tokenMethod: TokenMethod, feeMethod: FeeMethod, dexMethod: DexMethod) {
 		this._internalMethod.addDependencies(feeMethod, tokenMethod, dexMethod);
+		this.endpoint.addDependencies(this._internalMethod);
 	}
 
 	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
