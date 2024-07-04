@@ -16,7 +16,7 @@
 	"network": {
 		"version": "1.0",
 		"seedPeers": [],
-		"port": 7667
+		"port": 8778
 	},
 	"transactionPool": {
 		"maxTransactions": 1024,
