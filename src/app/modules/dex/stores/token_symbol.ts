@@ -39,8 +39,8 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 			_symbol = mainchain.symbol;
 			_decimal = mainchain.decimal;
 		} else if (this.getKey(tokenId).compare(dex.tokenId) === 0) {
-			_symbol = mainchain.symbol;
-			_decimal = mainchain.decimal;
+			_symbol = dex.symbol;
+			_decimal = dex.decimal;
 		}
 
 		await this.set(ctx, this.getKey(tokenId), { symbol: _symbol, decimal: _decimal });
