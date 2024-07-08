@@ -9,15 +9,12 @@ BigNumber.config({ EXPONENTIAL_AT: 999999, DECIMAL_PLACES: 40 });
 const TEN = Uint.from(10);
 const FIVE_SIG_FIGS_POW = new Decimal(10).pow(5);
 
-export function decodePriceSqrt(
-	sqrtRatioX96: string,
-	decimalsToken0 = 8,
-	decimalsToken1 = 8,
-	inverse = false,
-	disableFiveSigPrecision = false,
-) {
-	const ratioNum = ((parseInt(sqrtRatioX96.toString(), 10) / 2 ** 96) ** 2).toPrecision(5);
-	let ratio = new Decimal(ratioNum.toString());
+export function decodePriceSqrt(sqrtRatioX96: string, decimalsToken0 = 8, decimalsToken1 = 8, inverse = false, disableFiveSigPrecision = false) {
+	const ratioNum = new Decimal(sqrtRatioX96)
+		.div(2 ** 96)
+		.pow(2)
+		.toPrecision(5);
+	let ratio = new Decimal(ratioNum);
 
 	if (decimalsToken1 < decimalsToken0) {
 		ratio = ratio.mul(TEN.pow(decimalsToken0 - decimalsToken1).toString());
@@ -37,14 +34,7 @@ export function decodePriceSqrt(
 }
 
 export function encodePriceSqrt(reserve1: BigIntAble, reserve0: BigIntAble): Uint {
-	return Uint.from(
-		new BigNumber(reserve1.toString())
-			.div(reserve0.toString())
-			.sqrt()
-			.multipliedBy(new BigNumber(2).pow(96))
-			.integerValue(3)
-			.toString(),
-	);
+	return Uint.from(new BigNumber(reserve1.toString()).div(reserve0.toString()).sqrt().multipliedBy(new BigNumber(2).pow(96)).integerValue(3).toString());
 }
 
 export function encodeFeeGrowth(feeGrowth: Uint256String, liquidity: Uint256String) {
