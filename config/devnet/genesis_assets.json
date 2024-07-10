@@ -131,6 +131,12 @@
 						"lockedBalances": []
 					},
 					{
+						"address": "klyof58j7a5fvs55utdnv6xmkv3b6swjmjaotbt85",
+						"tokenID": "0455555500000000",
+						"availableBalance": "119364000000",
+						"lockedBalances": []
+					},
+					{
 						"address": "kly9m4eeakaqbv5m9dars48wh4pb2gzgv44b6ywfe",
 						"tokenID": "0455555500000000",
 						"availableBalance": "100000000000000",
@@ -326,7 +332,7 @@
 				"supplySubstore": [
 					{
 						"tokenID": "0455555500000000",
-						"totalSupply": "5300000000000000"
+						"totalSupply": "5300119364000000"
 					}
 				],
 				"escrowSubstore": [],
@@ -1477,13 +1483,7 @@
 			"schema": {
 				"$id": "/interoperability/module/genesis",
 				"type": "object",
-				"required": [
-					"ownChainName",
-					"ownChainNonce",
-					"chainInfos",
-					"terminatedStateAccounts",
-					"terminatedOutboxAccounts"
-				],
+				"required": ["ownChainName", "ownChainNonce", "chainInfos", "terminatedStateAccounts", "terminatedOutboxAccounts"],
 				"properties": {
 					"ownChainName": {
 						"dataType": "string",
@@ -1555,13 +1555,7 @@
 								"channelData": {
 									"$id": "/modules/interoperability/channel",
 									"type": "object",
-									"required": [
-										"inbox",
-										"outbox",
-										"partnerChainOutboxRoot",
-										"messageFeeTokenID",
-										"minReturnFeePerByte"
-									],
+									"required": ["inbox", "outbox", "partnerChainOutboxRoot", "messageFeeTokenID", "minReturnFeePerByte"],
 									"properties": {
 										"inbox": {
 											"type": "object",
