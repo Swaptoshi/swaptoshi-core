@@ -146,6 +146,7 @@
 			"dangerouslySkipBalanceVerification": true
 		},
 		"pos": {
+			"minWeightStandby": "1000000000",
 			"failSafeInactiveWindow": 403200,
 			"punishmentWindowStaking": 806400,
 			"punishmentWindowSelfStaking": 2419200,
