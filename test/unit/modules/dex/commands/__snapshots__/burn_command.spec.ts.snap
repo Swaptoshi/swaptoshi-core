@@ -7,6 +7,7 @@ exports[`BurnCommand constructor should have valid schema 1`] = `
     "poolAddress": {
       "dataType": "bytes",
       "fieldNumber": 1,
+      "format": "klayr32",
     },
     "tokenId": {
       "dataType": "string",

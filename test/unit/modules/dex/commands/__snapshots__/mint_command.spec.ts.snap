@@ -31,6 +31,7 @@ exports[`MintCommand constructor should have valid schema 1`] = `
     "recipient": {
       "dataType": "bytes",
       "fieldNumber": 10,
+      "format": "klayr32",
     },
     "tickLower": {
       "dataType": "string",

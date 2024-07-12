@@ -23,6 +23,7 @@ exports[`IcoExactOutputCommand constructor should have valid schema 1`] = `
     "recipient": {
       "dataType": "bytes",
       "fieldNumber": 4,
+      "format": "klayr32",
     },
     "tokenOut": {
       "dataType": "bytes",

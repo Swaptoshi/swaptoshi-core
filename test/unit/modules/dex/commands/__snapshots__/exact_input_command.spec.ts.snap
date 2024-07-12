@@ -23,6 +23,7 @@ exports[`ExactInputCommand constructor should have valid schema 1`] = `
     "recipient": {
       "dataType": "bytes",
       "fieldNumber": 2,
+      "format": "klayr32",
     },
   },
   "type": "object",

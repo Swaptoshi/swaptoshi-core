@@ -15,6 +15,7 @@ exports[`IcoCreateCommand constructor should have valid schema 1`] = `
     "providerAddress": {
       "dataType": "bytes",
       "fieldNumber": 5,
+      "format": "klayr32",
     },
     "tokenIn": {
       "dataType": "bytes",

@@ -23,6 +23,7 @@ exports[`ExactInputSingleCommand constructor should have valid schema 1`] = `
     "recipient": {
       "dataType": "bytes",
       "fieldNumber": 4,
+      "format": "klayr32",
     },
     "sqrtPriceLimitX96": {
       "dataType": "string",
