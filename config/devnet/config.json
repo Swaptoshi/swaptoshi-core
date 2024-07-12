@@ -153,7 +153,7 @@
 			"lockingPeriodStaking": 86400,
 			"lockingPeriodSelfStaking": 806400
 		},
-		"reward": {
+		"dynamicReward": {
 			"offset": 201559,
 			"distance": 42000000,
 			"brackets": [
