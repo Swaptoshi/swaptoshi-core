@@ -154,7 +154,7 @@
 			"lockingPeriodSelfStaking": 806400
 		},
 		"reward": {
-			"offset": 0,
+			"offset": 201559,
 			"distance": 42000000,
 			"brackets": [
 				"25000000",
