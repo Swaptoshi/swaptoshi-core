@@ -5,10 +5,12 @@ export const icoTreasurifyEventSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		leftOverAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		token: {

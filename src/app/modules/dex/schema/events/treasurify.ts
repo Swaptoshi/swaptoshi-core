@@ -5,10 +5,12 @@ export const treasurifyEventSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		treasuryAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		token: {

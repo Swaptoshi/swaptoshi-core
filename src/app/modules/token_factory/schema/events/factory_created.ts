@@ -5,6 +5,7 @@ export const factoryCreatedEventSchema = {
 	properties: {
 		ownerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {

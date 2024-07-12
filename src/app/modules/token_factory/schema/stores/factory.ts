@@ -5,6 +5,7 @@ export const factoryStoreSchema = {
 	properties: {
 		owner: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 	},

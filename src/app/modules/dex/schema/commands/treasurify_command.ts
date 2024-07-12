@@ -4,6 +4,7 @@ export const treasurifyCommandSchema = {
 	properties: {
 		address: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		token: {

@@ -9,6 +9,7 @@ export const collectPositionEventSchema = {
 		},
 		recipientAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		amount0Collect: {

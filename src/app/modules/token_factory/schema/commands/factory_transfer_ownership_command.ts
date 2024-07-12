@@ -8,6 +8,7 @@ export const factoryTransferOwnershipCommandSchema = {
 		},
 		ownerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 	},

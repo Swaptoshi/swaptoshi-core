@@ -9,6 +9,7 @@ export const airdropRecipientsChangedEventSchema = {
 		},
 		recipientAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		amountDelta: {

@@ -15,6 +15,7 @@ export const vestingUnlockStoreSchema = {
 					},
 					address: {
 						dataType: 'bytes',
+						format: 'klayr32',
 						fieldNumber: 2,
 					},
 					amount: {

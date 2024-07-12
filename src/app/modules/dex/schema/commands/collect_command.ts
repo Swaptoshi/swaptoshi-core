@@ -4,6 +4,7 @@ export const collectCommandSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {
@@ -12,6 +13,7 @@ export const collectCommandSchema = {
 		},
 		recipient: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 3,
 		},
 		amount0Max: {

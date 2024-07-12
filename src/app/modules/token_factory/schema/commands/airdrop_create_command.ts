@@ -8,6 +8,7 @@ export const airdropCreateCommandSchema = {
 		},
 		providerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		recipients: {
@@ -18,6 +19,7 @@ export const airdropCreateCommandSchema = {
 				properties: {
 					address: {
 						dataType: 'bytes',
+						format: 'klayr32',
 						fieldNumber: 1,
 					},
 					amountDelta: {

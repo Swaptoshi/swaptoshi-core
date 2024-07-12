@@ -40,6 +40,7 @@ export const mintCommandSchema = {
 		},
 		recipient: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 10,
 		},
 		deadline: {

@@ -16,6 +16,7 @@ export const icoExactInputSingleCommandSchema = {
 		},
 		recipient: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 4,
 		},
 	},

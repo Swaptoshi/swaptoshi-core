@@ -5,6 +5,7 @@ export const vestedTokenUnlockedEventSchema = {
 	properties: {
 		recipientAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {

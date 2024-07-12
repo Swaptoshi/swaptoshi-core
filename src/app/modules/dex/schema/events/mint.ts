@@ -1,23 +1,16 @@
 export const mintEventSchema = {
 	$id: '/dex/events/mint',
 	type: 'object',
-	required: [
-		'senderAddress',
-		'recipientAddress',
-		'tickLower',
-		'tickUpper',
-		'lowerLiquidityNetBefore',
-		'lowerLiquidityNet',
-		'upperLiquidityNetBefore',
-		'upperLiquidityNet',
-	],
+	required: ['senderAddress', 'recipientAddress', 'tickLower', 'tickUpper', 'lowerLiquidityNetBefore', 'lowerLiquidityNet', 'upperLiquidityNetBefore', 'upperLiquidityNet'],
 	properties: {
 		senderAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		recipientAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		tickLower: {

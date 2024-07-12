@@ -4,6 +4,7 @@ export const decreaseLiquidityCommandSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {

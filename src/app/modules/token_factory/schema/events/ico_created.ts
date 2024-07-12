@@ -17,6 +17,7 @@ export const icoCreatedEventSchema = {
 		},
 		providerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 4,
 		},
 	},

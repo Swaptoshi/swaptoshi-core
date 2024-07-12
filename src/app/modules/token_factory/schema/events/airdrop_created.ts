@@ -9,6 +9,7 @@ export const airdropCreatedEventSchema = {
 		},
 		providerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 	},

@@ -10,14 +10,7 @@ import {
 	QuoteICOExactOutputSingleParams,
 	TokenFactoryModuleConfig,
 } from './types';
-import {
-	numberToBytes,
-	serializer,
-	verifyAddress,
-	verifyPositiveNumber,
-	verifyString,
-	verifyToken,
-} from './utils';
+import { numberToBytes, serializer, verifyAddress, verifyPositiveNumber, verifyString, verifyToken } from './utils';
 import { endpointFactoryContext } from './stores/context';
 import { ICOStore } from './stores/ico';
 import { AirdropStore } from './stores/airdrop';
@@ -43,13 +36,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		verifyToken('tokenOut', Buffer.from(param.tokenOut, 'hex'));
 
 		const _context = endpointFactoryContext(context);
-		const icoPool = await this.stores
-			.get(ICOStore)
-			.getImmutableICOPool(
-				_context,
-				Buffer.from(param.tokenIn, 'hex'),
-				Buffer.from(param.tokenOut, 'hex'),
-			);
+		const icoPool = await this.stores.get(ICOStore).getImmutableICOPool(_context, Buffer.from(param.tokenIn, 'hex'), Buffer.from(param.tokenOut, 'hex'));
 
 		const poolAddress = computeICOPoolAddress({
 			tokenIn: Buffer.from(param.tokenIn, 'hex'),
@@ -146,13 +133,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		verifyAddress('providerAddress', Buffer.from(param.providerAddress, 'hex'));
 
 		const _context = endpointFactoryContext(context);
-		const airdrop = await this.stores
-			.get(AirdropStore)
-			.getImmutableAirdrop(
-				_context,
-				Buffer.from(param.tokenId, 'hex'),
-				Buffer.from(param.providerAddress, 'hex'),
-			);
+		const airdrop = await this.stores.get(AirdropStore).getImmutableAirdrop(_context, Buffer.from(param.tokenId, 'hex'), Buffer.from(param.providerAddress, 'hex'));
 		return airdrop.toJSON();
 	}
 
@@ -162,9 +143,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		verifyToken('tokenId', Buffer.from(param.tokenId, 'hex'));
 
 		const _context = endpointFactoryContext(context);
-		const factory = await this.stores
-			.get(FactoryStore)
-			.getImmutableFactory(_context, Buffer.from(param.tokenId, 'hex'));
+		const factory = await this.stores.get(FactoryStore).getImmutableFactory(_context, Buffer.from(param.tokenId, 'hex'));
 		return factory.toJSON();
 	}
 

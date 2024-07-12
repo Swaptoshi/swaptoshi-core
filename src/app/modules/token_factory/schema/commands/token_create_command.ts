@@ -10,6 +10,7 @@ export const tokenCreateCommandSchema = {
 				properties: {
 					recipientAddress: {
 						dataType: 'bytes',
+						format: 'klayr32',
 						fieldNumber: 1,
 					},
 					amount: {

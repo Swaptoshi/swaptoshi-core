@@ -9,10 +9,12 @@ export const airdropDistributedEventSchema = {
 		},
 		senderAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		recipientAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 3,
 		},
 		amount: {

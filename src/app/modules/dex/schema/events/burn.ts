@@ -1,18 +1,11 @@
 export const burnEventSchema = {
 	$id: '/dex/events/burn',
 	type: 'object',
-	required: [
-		'senderAddress',
-		'tickLower',
-		'tickUpper',
-		'lowerLiquidityNetBefore',
-		'lowerLiquidityNet',
-		'upperLiquidityNetBefore',
-		'upperLiquidityNet',
-	],
+	required: ['senderAddress', 'tickLower', 'tickUpper', 'lowerLiquidityNetBefore', 'lowerLiquidityNet', 'upperLiquidityNetBefore', 'upperLiquidityNet'],
 	properties: {
 		senderAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tickLower: {

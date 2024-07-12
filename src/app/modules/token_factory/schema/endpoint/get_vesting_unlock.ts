@@ -14,7 +14,7 @@ export const getVestingUnlockEndpointResponseSchema = {
 						fieldNumber: 1,
 					},
 					address: {
-						dataType: 'bytes',
+						dataType: 'string',
 						fieldNumber: 2,
 					},
 					amount: {

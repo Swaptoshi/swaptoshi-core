@@ -10,7 +10,7 @@ export const getAirdropEndpointResponseSchema = {
 				type: 'object',
 				properties: {
 					address: {
-						dataType: 'bytes',
+						dataType: 'string',
 						fieldNumber: 1,
 					},
 					amount: {

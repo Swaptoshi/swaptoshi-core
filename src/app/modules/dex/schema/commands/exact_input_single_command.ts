@@ -16,6 +16,7 @@ export const exactInputSingleCommandSchema = {
 		},
 		recipient: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 4,
 		},
 		deadline: {

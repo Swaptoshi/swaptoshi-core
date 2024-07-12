@@ -5,6 +5,7 @@ export const icoStoreSchema = {
 	properties: {
 		providerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		price: {

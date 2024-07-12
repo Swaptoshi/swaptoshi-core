@@ -20,6 +20,7 @@ export const icoCreateCommandSchema = {
 		},
 		providerAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 5,
 		},
 	},
