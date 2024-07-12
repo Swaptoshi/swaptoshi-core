@@ -153,6 +153,16 @@
 			"lockingPeriodStaking": 86400,
 			"lockingPeriodSelfStaking": 806400
 		},
+		"governance": {
+			"treasuryAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"treasuryReward": {
+				"tokenID": "0455555500000000",
+				"offset": 1,
+				"distance": 1,
+				"blockRewardTaxBracket": ["10%"],
+				"mintBracket": []
+			}
+		},
 		"dynamicReward": {
 			"offset": 201559,
 			"distance": 42000000,
