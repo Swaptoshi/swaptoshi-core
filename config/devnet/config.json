@@ -142,6 +142,7 @@
 			}
 		},
 		"fee": {
+			"feeTokenID": "0455555500000000",
 			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"dangerouslySkipBalanceVerification": true
 		},
@@ -151,7 +152,9 @@
 			"punishmentWindowStaking": 806400,
 			"punishmentWindowSelfStaking": 2419200,
 			"lockingPeriodStaking": 86400,
-			"lockingPeriodSelfStaking": 806400
+			"lockingPeriodSelfStaking": 806400,
+			"maxBFTWeightCap": 1000,
+			"useInvalidBLSKey": false
 		},
 		"governance": {
 			"treasuryAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
