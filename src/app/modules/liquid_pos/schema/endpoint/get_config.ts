@@ -1,11 +1,15 @@
 export const getConfigEndpointResponseSchema = {
 	$id: '/liquid_pos/endpoint/response/get_config',
 	type: 'object',
-	required: ['tokenID'],
+	required: ['tokenID', 'ratio'],
 	properties: {
 		tokenID: {
 			dataType: 'uint32',
 			fieldNumber: 1,
+		},
+		ratio: {
+			dataType: 'uint32',
+			fieldNumber: 2,
 		},
 	},
 };

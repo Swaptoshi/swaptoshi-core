@@ -41,7 +41,8 @@
 	},
 	"modules": {
 		"liquidPos": {
-			"tokenID": 1
+			"tokenID": 1,
+			"ratio": 1
 		},
 		"feeConversion": {
 			"conversionPath": ["04555555000000000001f40455555500000001"]

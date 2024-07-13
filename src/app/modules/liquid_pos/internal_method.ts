@@ -57,9 +57,9 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		await this._tokenMethod!.mint(context, address, this._lstTokenID!, amount);
+		await this._tokenMethod!.mint(context, address, this._lstTokenID!, amount * BigInt(this._config!.ratio));
 		const events = this.events.get(LiquidStakingTokenMintEvent);
-		events.add(context, { address, tokenID: this._lstTokenID!, amount }, [address]);
+		events.add(context, { address, tokenID: this._lstTokenID!, amount: amount * BigInt(this._config!.ratio) }, [address]);
 	}
 
 	public async burn(context: MethodContext, address: Buffer, amount: bigint) {
@@ -69,9 +69,9 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		await this._tokenMethod!.burn(context, address, this._lstTokenID!, amount);
+		await this._tokenMethod!.burn(context, address, this._lstTokenID!, amount * BigInt(this._config!.ratio));
 		const events = this.events.get(LiquidStakingTokenBurnEvent);
-		events.add(context, { address, tokenID: this._lstTokenID!, amount }, [address]);
+		events.add(context, { address, tokenID: this._lstTokenID!, amount: amount * BigInt(this._config!.ratio) }, [address]);
 	}
 
 	public checkDependencies() {
@@ -82,8 +82,10 @@ export class InternalLiquidPosMethod extends BaseMethod {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	private async _verifyConfig() {
-		const { tokenID } = this._config!;
+		const { tokenID, ratio } = this._config!;
 		const chainID = this._chainID!;
+
+		if (ratio < 1) throw new Error('liquid_pos ratio config should be greater than 0');
 
 		if (typeof tokenID === 'number') {
 			const buff = Buffer.allocUnsafe(4);
