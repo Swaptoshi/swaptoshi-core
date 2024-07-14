@@ -3,6 +3,7 @@ export * from './airdrop_distributed';
 export * from './airdrop_recipients_changed';
 export * from './factory_created';
 export * from './factory_owner_changed';
+export * from './factory_set_attributes';
 export * from './ico_created';
 export * from './ico_deposit';
 export * from './ico_price_changed';

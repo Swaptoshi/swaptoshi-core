@@ -3,14 +3,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import { FactoryStoreData, FactoryTransferOwnershipParams, TokenBurnParams, TokenCreateParams, TokenFactoryModuleConfig, TokenMintParams } from '../../types';
+import {
+	FactorySetAttributesParams,
+	FactoryStoreData,
+	FactoryTransferOwnershipParams,
+	TokenBurnParams,
+	TokenCreateParams,
+	TokenFactoryAttributes,
+	TokenFactoryModuleConfig,
+	TokenMintParams,
+} from '../../types';
 import { FactoryStore } from '../factory';
 import { NextAvailableTokenIdStore } from '../next_available_token_id';
 import { FactoryCreatedEvent } from '../../events/factory_created';
 import { BaseInstance } from './base';
 import { VestingUnlockStore } from '../vesting_unlock';
-import { serializer, verifyAddress, verifyPositiveNumber, verifyToken } from '../../utils';
+import { serializer, verifyAddress, verifyBuffer, verifyPositiveNumber, verifyString, verifyToken } from '../../utils';
 import { FactoryOwnerChangedEvent } from '../../events/factory_owner_changed';
+import { FactorySetAttributesEvent } from '../../events/factory_set_attributes';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
 	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
@@ -26,14 +36,17 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		return utils.objects.cloneDeep(
 			serializer<FactoryStoreData>({
 				owner: this.owner,
+				attributesArray: this.attributesArray,
 			}),
 		) as JSONObject<FactoryStoreData>;
 	}
 
 	public toObject() {
-		return utils.objects.cloneDeep({
+		const obj: FactoryStoreData = {
 			owner: this.owner,
-		} as FactoryStoreData) as FactoryStoreData;
+			attributesArray: this.attributesArray,
+		};
+		return utils.objects.cloneDeep({ ...obj }) as FactoryStoreData;
 	}
 
 	public async verifyCreate(params: TokenCreateParams) {
@@ -150,6 +163,41 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 				tokenId: params.tokenId,
 			},
 			[params.ownerAddress],
+		);
+	}
+
+	public async verifySetAttributes(params: FactorySetAttributesParams) {
+		this._checkImmutableDependencies();
+		verifyToken('tokenId', params.tokenId);
+		verifyString('key', params.key);
+		verifyBuffer('attributes', params.attributes);
+
+		await this._checkFactoryExists(params.tokenId);
+		await this._checkIsFactoryOwner();
+	}
+
+	public async setAttributes(params: FactorySetAttributesParams, verify = true) {
+		this._checkMutableDependencies();
+
+		if (verify) await this.verifySetAttributes(params);
+
+		const index = this.attributesArray.findIndex(attr => attr.key === params.key);
+		if (index > -1) {
+			this.attributesArray[index] = { key: params.key, attributes: params.attributes };
+		} else {
+			this.attributesArray.push({ key: params.key, attributes: params.attributes });
+		}
+		await this._saveStore();
+
+		const events = this.events.get(FactorySetAttributesEvent);
+		events.add(
+			this.mutableContext!.context,
+			{
+				tokenId: params.tokenId,
+				key: params.key,
+				attributes: params.attributes,
+			},
+			[this.owner, params.tokenId],
 		);
 	}
 
@@ -273,6 +321,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 	}
 
 	public owner: Buffer = Buffer.alloc(0);
+	public attributesArray: TokenFactoryAttributes[] = [];
 
 	private readonly nextAvailableIdStore: NextAvailableTokenIdStore;
 	private readonly _skippedTokenID: Set<bigint> = new Set();

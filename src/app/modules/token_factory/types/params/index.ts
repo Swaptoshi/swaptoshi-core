@@ -2,6 +2,7 @@ export * from './airdrop_create_command';
 export * from './airdrop_distribute_command';
 export * from './airdrop_edit_recipients_command';
 export * from './factory_transfer_ownership_command';
+export * from './factory_set_attributes_command';
 export * from './ico_change_price';
 export * from './ico_create_command';
 export * from './ico_deposit_command';

@@ -8,6 +8,12 @@ export function verifyString(name: string, string: string) {
 	}
 }
 
+export function verifyBuffer(name: string, buffer: Buffer) {
+	if (buffer.length === 0) {
+		throw new Error(`${name}, cant be an empty buffer`);
+	}
+}
+
 export function verifyToken(name: string, token: Buffer) {
 	if (token.length !== TOKEN_ID_LENGTH) {
 		throw new Error(`${name}, needs to be exactly ${TOKEN_ID_LENGTH} bytes`);

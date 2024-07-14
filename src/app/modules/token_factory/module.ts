@@ -12,13 +12,18 @@ import {
 	TokenMethod,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
+	utils,
 	VerificationResult,
 	VerifyStatus,
-	utils,
 } from 'klayr-sdk';
+import { DexMethod } from '../dex/method';
+import { FeeConversionMethod } from '../fee_conversion';
+import { NFTMethod } from '../nft';
+import { TokenFactoryInteroperableMethod } from './cc_method';
 import { AirdropCreateCommand } from './commands/airdrop_create_command';
 import { AirdropDistributeCommand } from './commands/airdrop_distribute_command';
 import { AirdropEditRecipientsCommand } from './commands/airdrop_edit_recipients_command';
+import { FactorySetAttributesCommand } from './commands/factory_set_attributes_command';
 import { FactoryTransferOwnershipCommand } from './commands/factory_transfer_ownership_command';
 import { IcoChangePriceCommand } from './commands/ico_change_price_command';
 import { IcoCreateCommand } from './commands/ico_create_command';
@@ -32,21 +37,14 @@ import { IcoWithdrawCommand } from './commands/ico_withdraw_command';
 import { TokenBurnCommand } from './commands/token_burn_command';
 import { TokenCreateCommand } from './commands/token_create_command';
 import { TokenMintCommand } from './commands/token_mint_command';
+import { defaultConfig } from './constants';
 import { TokenFactoryEndpoint } from './endpoint';
-import { TokenFactoryMethod } from './method';
-import { TokenFactoryModuleConfig } from './types';
-import { DexMethod } from '../dex/method';
-import { TokenFactoryInteroperableMethod } from './cc_method';
-import { AirdropStore } from './stores/airdrop';
-import { FactoryStore } from './stores/factory';
-import { ICOStore } from './stores/ico';
-import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
-import { VestingUnlockStore } from './stores/vesting_unlock';
 import { AirdropCreatedEvent } from './events/airdrop_created';
 import { AirdropDistributedEvent } from './events/airdrop_distributed';
 import { AirdropRecipientsChangedEvent } from './events/airdrop_recipients_changed';
 import { FactoryCreatedEvent } from './events/factory_created';
 import { FactoryOwnerChangedEvent } from './events/factory_owner_changed';
+import { FactorySetAttributesEvent } from './events/factory_set_attributes';
 import { IcoCreatedEvent } from './events/ico_created';
 import { IcoDepositEvent } from './events/ico_deposit';
 import { IcoPriceChangedEvent } from './events/ico_price_changed';
@@ -55,6 +53,9 @@ import { IcoTreasurifyEvent } from './events/ico_treasurify';
 import { IcoWithdrawEvent } from './events/ico_withdraw';
 import { VestedTokenLockedEvent } from './events/vested_token_locked';
 import { VestedTokenUnlockedEvent } from './events/vested_token_unlocked';
+import { TokenFactoryICOPurchaseFeeConversionMethod, TokenFactoryTransferFeeConversionMethod } from './fc_method';
+import { executeBaseFee, executeSwapByTransfer, executeVestingUnlock, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
+import { TokenFactoryMethod } from './method';
 import {
 	getAirdropEndpointRequestSchema,
 	getAirdropEndpointResponseSchema,
@@ -77,11 +78,12 @@ import {
 	quoteICOExactOutputSingleEndpointRequestSchema,
 	quoteICOExactOutputSingleEndpointResponseSchema,
 } from './schema';
-import { defaultConfig } from './constants';
-import { executeBaseFee, executeSwapByTransfer, executeVestingUnlock, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
-import { NFTMethod } from '../nft';
-import { FeeConversionMethod } from '../fee_conversion';
-import { TokenFactoryICOPurchaseFeeConversionMethod, TokenFactoryTransferFeeConversionMethod } from './fc_method';
+import { AirdropStore } from './stores/airdrop';
+import { FactoryStore } from './stores/factory';
+import { ICOStore } from './stores/ico';
+import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
+import { VestingUnlockStore } from './stores/vesting_unlock';
+import { TokenFactoryModuleConfig } from './types';
 import { verifyModuleConfig } from './utils';
 
 export class TokenFactoryModule extends BaseModule {
@@ -103,6 +105,7 @@ export class TokenFactoryModule extends BaseModule {
 		new TokenMintCommand(this.stores, this.events),
 		new TokenBurnCommand(this.stores, this.events),
 		new FactoryTransferOwnershipCommand(this.stores, this.events),
+		new FactorySetAttributesCommand(this.stores, this.events),
 		new IcoCreateCommand(this.stores, this.events),
 		new IcoChangePriceCommand(this.stores, this.events),
 		new IcoDepositCommand(this.stores, this.events),
@@ -130,6 +133,7 @@ export class TokenFactoryModule extends BaseModule {
 		this.events.register(AirdropDistributedEvent, new AirdropDistributedEvent(this.name));
 		this.events.register(AirdropRecipientsChangedEvent, new AirdropRecipientsChangedEvent(this.name));
 		this.events.register(FactoryCreatedEvent, new FactoryCreatedEvent(this.name));
+		this.events.register(FactorySetAttributesEvent, new FactorySetAttributesEvent(this.name));
 		this.events.register(FactoryOwnerChangedEvent, new FactoryOwnerChangedEvent(this.name));
 		this.events.register(IcoCreatedEvent, new IcoCreatedEvent(this.name));
 		this.events.register(IcoDepositEvent, new IcoDepositEvent(this.name));

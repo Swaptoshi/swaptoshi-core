@@ -1,3 +1,5 @@
+import { TokenFactoryAttributes } from '../stores';
+
 export interface TokenCreateParams {
 	distribution: {
 		recipientAddress: Buffer;
@@ -7,4 +9,5 @@ export interface TokenCreateParams {
 			amount: bigint;
 		}[];
 	}[];
+	attributes: TokenFactoryAttributes[];
 }

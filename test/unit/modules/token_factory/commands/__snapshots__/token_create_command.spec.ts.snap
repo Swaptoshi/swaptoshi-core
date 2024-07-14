@@ -4,6 +4,27 @@ exports[`TokenCreateCommand constructor should have valid schema 1`] = `
 {
   "$id": "/tokenFactory/command/tokenCreate",
   "properties": {
+    "attributes": {
+      "fieldNumber": 2,
+      "items": {
+        "properties": {
+          "attributes": {
+            "dataType": "bytes",
+            "fieldNumber": 2,
+          },
+          "key": {
+            "dataType": "string",
+            "fieldNumber": 1,
+          },
+        },
+        "required": [
+          "key",
+          "attributes",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
     "distribution": {
       "fieldNumber": 1,
       "items": {

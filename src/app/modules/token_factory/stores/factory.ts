@@ -71,5 +71,5 @@ export class FactoryStore extends BaseStoreWithInstance<FactoryStoreData> {
 	}
 
 	public schema = factoryStoreSchema;
-	protected readonly default = { owner: Buffer.alloc(0) };
+	protected readonly default = { owner: Buffer.alloc(0), attributesArray: [] };
 }

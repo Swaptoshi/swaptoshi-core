@@ -37,5 +37,23 @@ export const tokenCreateCommandSchema = {
 				},
 			},
 		},
+		attributes: {
+			type: 'array',
+			fieldNumber: 2,
+			items: {
+				type: 'object',
+				required: ['key', 'attributes'],
+				properties: {
+					key: {
+						dataType: 'string',
+						fieldNumber: 1,
+					},
+					attributes: {
+						dataType: 'bytes',
+						fieldNumber: 2,
+					},
+				},
+			},
+		},
 	},
 };

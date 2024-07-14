@@ -3,7 +3,7 @@ import { BaseMethod, ImmutableMethodContext, MethodContext } from 'klayr-sdk';
 import { ICOPool } from './stores/instances/ico_pool';
 import { Airdrop } from './stores/instances/airdrop';
 import { Factory } from './stores/instances/factory';
-import { AirdropCreateParams, NextAvailableTokenIdStoreData, StoreInstance, TokenCreateParams } from './types';
+import { AirdropCreateParams, NextAvailableTokenIdStoreData, StoreInstance, TokenCreateParams, TokenFactoryAttributes } from './types';
 import { VestingUnlock } from './stores/instances/vesting_unlock';
 import { ICOStore } from './stores/ico';
 import { immutableMethodFactoryContext, methodFactoryContext } from './stores/context';
@@ -57,12 +57,20 @@ export class TokenFactoryMethod extends BaseMethod {
 		});
 	}
 
-	public async createTokenFactory(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, distribution: TokenCreateParams['distribution']) {
+	public async createTokenFactory(
+		context: MethodContext,
+		senderAddress: Buffer,
+		timestamp: number,
+		height: number,
+		distribution: TokenCreateParams['distribution'],
+		attributesArray: TokenFactoryAttributes[],
+	) {
 		const factoryStore = this.stores.get(FactoryStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		const factory = await factoryStore.getMutableEmptyFactory(_context);
 		await factory.create({
 			distribution,
+			attributes: attributesArray,
 		});
 	}
 
