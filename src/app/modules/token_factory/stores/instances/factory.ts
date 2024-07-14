@@ -85,7 +85,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 			distribution: params.distribution,
 		});
 
-		await this._registerFactory(tokenId);
+		await this._registerFactory(tokenId, params);
 		await this.nextAvailableIdStore.set(this.mutableContext!.context, Buffer.alloc(0), nextId);
 
 		const events = this.events.get(FactoryCreatedEvent);
@@ -182,12 +182,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 
 		if (verify) await this.verifySetAttributes(params);
 
-		const index = this.attributesArray.findIndex(attr => attr.key === params.key);
-		if (index > -1) {
-			this.attributesArray[index] = { key: params.key, attributes: params.attributes };
-		} else {
-			this.attributesArray.push({ key: params.key, attributes: params.attributes });
-		}
+		await this._setAttributes(params.key, params.attributes);
 		await this._saveStore();
 
 		const events = this.events.get(FactorySetAttributesEvent);
@@ -245,9 +240,20 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		return totalAmountMinted;
 	}
 
-	private async _registerFactory(tokenId: Buffer): Promise<void> {
+	// eslint-disable-next-line @typescript-eslint/require-await
+	private async _setAttributes(key: string, attributes: Buffer) {
+		const index = this.attributesArray.findIndex(attr => attr.key === key);
+		if (index > -1) {
+			this.attributesArray[index] = { key, attributes };
+		} else {
+			this.attributesArray.push({ key, attributes });
+		}
+	}
+
+	private async _registerFactory(tokenId: Buffer, params: TokenCreateParams): Promise<void> {
 		if (await this._isFactoryExists(tokenId)) throw new Error(`factory for ${tokenId.toString('hex')} already registered`);
 		this.owner = this.mutableContext!.senderAddress;
+		this.attributesArray = params.attributes;
 		this._setKey(tokenId);
 		await this._saveStore();
 	}
