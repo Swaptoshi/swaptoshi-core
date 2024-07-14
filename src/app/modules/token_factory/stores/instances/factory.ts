@@ -52,6 +52,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 	public async verifyCreate(params: TokenCreateParams) {
 		this._checkImmutableDependencies();
 		await this._verifyHandleMintDistribution(params.distribution);
+		await this._verifyAttributesArray(params.attributes);
 		await this._checkNextTokenIdAtMaxCapacity();
 	}
 
@@ -249,6 +250,14 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		this.owner = this.mutableContext!.senderAddress;
 		this._setKey(tokenId);
 		await this._saveStore();
+	}
+
+	// eslint-disable-next-line @typescript-eslint/require-await
+	private async _verifyAttributesArray(attributesArray: TokenFactoryAttributes[]) {
+		for (const attributes of attributesArray) {
+			verifyString('attributes.key', attributes.key);
+			verifyBuffer('attributes.attributes', attributes.attributes);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
