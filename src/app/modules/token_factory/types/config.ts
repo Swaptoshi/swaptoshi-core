@@ -5,6 +5,7 @@ export interface TokenFactoryModuleConfig {
 	icoDexPathEnabled: boolean;
 	minTransactionFee: {
 		factoryTransferOwnership: string;
+		factorySetAttributes: string;
 		tokenCreate: string;
 		tokenMint: string;
 		tokenBurn: string;
@@ -23,6 +24,7 @@ export interface TokenFactoryModuleConfig {
 	};
 	baseFee: {
 		factoryTransferOwnership: string;
+		factorySetAttributes: string;
 		tokenCreate: string;
 		tokenMint: string;
 		tokenBurn: string;
