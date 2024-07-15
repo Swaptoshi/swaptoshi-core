@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
 import { BaseMethod, GenesisBlockExecuteContext, GenesisConfig, MethodContext, TokenMethod, TransactionExecuteContext, codec } from 'klayr-sdk';
+import BigNumber from 'bignumber.js';
 import { LiquidPosModuleConfig, StakeTransactionParams } from './types';
 import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { stakeCommandParamsSchema } from './schema';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
 import { LiquidStakingTokenBurnEvent } from './events/lst_burn';
+
+BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 
 export class InternalLiquidPosMethod extends BaseMethod {
 	private _chainID: Buffer | undefined;
@@ -50,28 +53,32 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		}
 	}
 
-	public async mint(context: MethodContext, address: Buffer, amount: bigint) {
+	public async mint(context: MethodContext, address: Buffer, baseAmount: bigint) {
 		this.checkDependencies();
-		if (amount < BigInt(0)) throw new Error("amount minted can't be negative");
+		if (baseAmount < BigInt(0)) throw new Error("baseAmount minted can't be negative");
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		await this._tokenMethod!.mint(context, address, this._lstTokenID!, amount * BigInt(this._config!.ratio));
+		const mintedAmount = BigInt(new BigNumber(baseAmount.toString()).multipliedBy(this._config!.ratio).toFixed(0));
+
+		await this._tokenMethod!.mint(context, address, this._lstTokenID!, mintedAmount);
 		const events = this.events.get(LiquidStakingTokenMintEvent);
-		events.add(context, { address, tokenID: this._lstTokenID!, amount: amount * BigInt(this._config!.ratio) }, [address]);
+		events.add(context, { address, tokenID: this._lstTokenID!, amount: mintedAmount }, [address]);
 	}
 
-	public async burn(context: MethodContext, address: Buffer, amount: bigint) {
+	public async burn(context: MethodContext, address: Buffer, baseBurned: bigint) {
 		this.checkDependencies();
-		if (amount < BigInt(0)) throw new Error("amount burned can't be negative");
+		if (baseBurned < BigInt(0)) throw new Error("baseBurned burned can't be negative");
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		await this._tokenMethod!.burn(context, address, this._lstTokenID!, amount * BigInt(this._config!.ratio));
+		const burnedAmount = BigInt(new BigNumber(baseBurned.toString()).multipliedBy(this._config!.ratio).toFixed(0));
+
+		await this._tokenMethod!.burn(context, address, this._lstTokenID!, burnedAmount);
 		const events = this.events.get(LiquidStakingTokenBurnEvent);
-		events.add(context, { address, tokenID: this._lstTokenID!, amount: amount * BigInt(this._config!.ratio) }, [address]);
+		events.add(context, { address, tokenID: this._lstTokenID!, amount: burnedAmount }, [address]);
 	}
 
 	public checkDependencies() {
@@ -85,7 +92,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		const { tokenID, ratio } = this._config!;
 		const chainID = this._chainID!;
 
-		if (ratio < 1) throw new Error('liquid_pos ratio config should be greater than 0');
+		if (ratio <= 0) throw new Error('liquid_pos ratio config should be greater than 0');
 
 		if (typeof tokenID === 'number') {
 			const buff = Buffer.allocUnsafe(4);
