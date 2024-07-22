@@ -10,7 +10,7 @@ export const getVestingUnlockEndpointResponseSchema = {
 				type: 'object',
 				properties: {
 					tokenId: {
-						dataType: 'bytes',
+						dataType: 'string',
 						fieldNumber: 1,
 					},
 					address: {

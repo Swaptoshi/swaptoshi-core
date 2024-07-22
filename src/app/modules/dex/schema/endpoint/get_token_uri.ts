@@ -11,8 +11,7 @@ export const getTokenURIEndpointRequestSchema = {
 	required: ['poolAddress', 'tokenId'],
 	properties: {
 		poolAddress: {
-			dataType: 'bytes',
-			format: 'klayr32',
+			dataType: 'string',
 			fieldNumber: 1,
 		},
 		tokenId: {

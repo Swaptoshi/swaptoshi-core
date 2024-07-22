@@ -4,7 +4,7 @@ export const getLSTTokenIDEndpointResponseSchema = {
 	required: ['tokenID'],
 	properties: {
 		tokenID: {
-			dataType: 'bytes',
+			dataType: 'string',
 			fieldNumber: 1,
 		},
 	},
