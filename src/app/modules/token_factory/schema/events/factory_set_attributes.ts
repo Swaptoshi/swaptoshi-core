@@ -1,7 +1,7 @@
 export const factorySetAttributesEventSchema = {
 	$id: '/tokenFactory/events/setAttributes',
 	type: 'object',
-	required: ['tokenId', 'key', 'attributes'],
+	required: ['tokenId', 'key'],
 	properties: {
 		tokenId: {
 			dataType: 'bytes',
@@ -10,10 +10,6 @@ export const factorySetAttributesEventSchema = {
 		key: {
 			dataType: 'string',
 			fieldNumber: 2,
-		},
-		attributes: {
-			dataType: 'bytes',
-			fieldNumber: 3,
 		},
 	},
 };

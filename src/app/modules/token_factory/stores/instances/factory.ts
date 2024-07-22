@@ -98,6 +98,18 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 			},
 			[this.mutableContext!.senderAddress],
 		);
+
+		for (const attributes of params.attributes) {
+			const setAttributesEvent = this.events.get(FactorySetAttributesEvent);
+			setAttributesEvent.add(
+				this.mutableContext!.context,
+				{
+					tokenId,
+					key: attributes.key,
+				},
+				[this.owner, tokenId],
+			);
+		}
 	}
 
 	public async verifyMint(params: TokenMintParams) {
@@ -191,7 +203,6 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 			{
 				tokenId: params.tokenId,
 				key: params.key,
-				attributes: params.attributes,
 			},
 			[this.owner, params.tokenId],
 		);
