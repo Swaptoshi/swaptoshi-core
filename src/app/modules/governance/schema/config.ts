@@ -1,39 +1,48 @@
-export const configSchema = {
+import { GovernanceModuleConfig, TypedSchema } from '../types';
+
+export const configSchema: TypedSchema<GovernanceModuleConfig> = {
 	$id: '/governance/config',
 	type: 'object',
 	required: ['treasuryAddress', 'treasuryReward'],
 	properties: {
 		treasuryAddress: {
-			type: 'string',
+			dataType: 'string',
+			fieldNumber: 1,
 		},
 		treasuryReward: {
 			type: 'object',
+			fieldNumber: 2,
 			required: ['tokenID', 'offset', 'distance', 'mintBracket', 'blockRewardTaxBracket'],
 			properties: {
 				tokenID: {
-					type: 'string',
+					dataType: 'string',
+					fieldNumber: 1,
 					format: 'hex',
 					minLength: 16,
 					maxLength: 16,
 				},
 				offset: {
-					type: 'integer',
+					dataType: 'uint32',
+					fieldNumber: 2,
 					minimum: 1,
 				},
 				distance: {
-					type: 'integer',
+					dataType: 'uint32',
+					fieldNumber: 3,
 					minimum: 1,
 				},
 				mintBracket: {
 					type: 'array',
+					fieldNumber: 4,
 					items: {
-						type: 'string',
+						dataType: 'string',
 					},
 				},
 				blockRewardTaxBracket: {
 					type: 'array',
+					fieldNumber: 5,
 					items: {
-						type: 'string',
+						dataType: 'string',
 					},
 				},
 			},

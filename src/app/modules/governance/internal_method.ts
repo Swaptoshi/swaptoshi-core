@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, BlockAfterExecuteContext, TokenMethod, cryptography, validator } from 'klayr-sdk';
-import { GovernanceModuleConfig } from './types';
+import { BaseMethod, BlockAfterExecuteContext, BlockExecuteContext, ImmutableStoreGetter, TokenMethod, cryptography } from 'klayr-sdk';
 import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD } from './constants';
-import { configSchema } from './schema';
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tex';
+import { GovernanceGovernableConfig } from './config';
+import { GovernableConfigRegistry } from './registry';
 
 interface BlockReward {
 	blockReward: bigint;
@@ -13,37 +13,45 @@ interface BlockReward {
 }
 
 export class GovernanceInternalMethod extends BaseMethod {
-	private _config: GovernanceModuleConfig | undefined;
+	private _governableConfig: GovernableConfigRegistry | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 
-	public init(moduleConfig: GovernanceModuleConfig) {
-		this._config = moduleConfig;
-		this._verifyConfig();
+	public addDependencies(token: TokenMethod, governableConfig: GovernableConfigRegistry) {
+		this._tokenMethod = token;
+		this._governableConfig = governableConfig;
 	}
 
-	public addDependencies(token: TokenMethod) {
-		this._tokenMethod = token;
+	public async initializeGovernableConfig(context: BlockExecuteContext) {
+		if (!this._governableConfig) throw new Error('GovernanceInternalMethod dependencies is not configured');
+
+		if (context.header.height === 1) {
+			const governableConfigList = this._governableConfig.values();
+
+			for (const governableConfig of governableConfigList) {
+				await governableConfig.initConfig(context);
+			}
+		}
 	}
 
 	public async addTreasuryReward(context: BlockAfterExecuteContext) {
-		if (!this._config) throw new Error('GovernanceInternalMethod is not initialized');
 		if (!this._tokenMethod) throw new Error('GovernanceInternalMethod dependencies is not configured');
 
+		const config = await this._getGovernanceConfig(context);
 		const dynamicReward = this._getRewardDeduction(context);
-		const treasuryAddress = cryptography.address.getAddressFromKlayr32Address(this._config.treasuryAddress);
+		const treasuryAddress = cryptography.address.getAddressFromKlayr32Address(config.treasuryAddress);
 
-		const mintedTreasury = this._getMintBracket(dynamicReward, context.header.height);
+		const mintedTreasury = await this._getMintBracket(context, dynamicReward, context.header.height);
 		if (mintedTreasury > BigInt(0)) {
-			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(this._config.treasuryReward.tokenID, 'hex'), mintedTreasury);
+			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), mintedTreasury);
 
 			const events = this.events.get(TreasuryMintEvent);
 			events.add(context, { amount: mintedTreasury }, [treasuryAddress]);
 		}
 
-		const taxedBlockRewardForTreasury = this._getBlockRewardTaxBracket(dynamicReward, context.header.height);
+		const taxedBlockRewardForTreasury = await this._getBlockRewardTaxBracket(context, dynamicReward, context.header.height);
 		if (taxedBlockRewardForTreasury > BigInt(0)) {
-			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(this._config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
-			await this._tokenMethod.burn(context, context.header.generatorAddress, Buffer.from(this._config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
+			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
+			await this._tokenMethod.burn(context, context.header.generatorAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
 
 			const events = this.events.get(TreasuryBlockRewardTaxEvent);
 			events.add(
@@ -57,9 +65,9 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	private _getMintBracket(reward: BlockReward, height: number) {
-		if (!this._config) throw new Error('GovernanceInternalMethod is not initialized');
-		const bracket = this._getBracket(this._config.treasuryReward.mintBracket, height);
+	private async _getMintBracket(context: BlockAfterExecuteContext, reward: BlockReward, height: number) {
+		const config = await this._getGovernanceConfig(context);
+		const bracket = await this._getBracket(context, config.treasuryReward.mintBracket, height);
 
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
@@ -69,9 +77,9 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return BigInt(bracket);
 	}
 
-	private _getBlockRewardTaxBracket(reward: BlockReward, height: number) {
-		if (!this._config) throw new Error('GovernanceInternalMethod is not initialized');
-		const bracket = this._getBracket(this._config.treasuryReward.blockRewardTaxBracket, height);
+	private async _getBlockRewardTaxBracket(context: BlockAfterExecuteContext, reward: BlockReward, height: number) {
+		const config = await this._getGovernanceConfig(context);
+		const bracket = await this._getBracket(context, config.treasuryReward.blockRewardTaxBracket, height);
 
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
@@ -91,25 +99,23 @@ export class GovernanceInternalMethod extends BaseMethod {
 		};
 	}
 
-	private _getBracketLocation(height: number): number {
-		if (!this._config) throw new Error('GovernanceInternalMethod is not initialized');
+	private async _getBracketLocation(context: BlockAfterExecuteContext, height: number): Promise<number> {
+		const config = await this._getGovernanceConfig(context);
 
-		if (height < this._config.treasuryReward.offset) {
+		if (height < config.treasuryReward.offset) {
 			return 0;
 		}
 
-		const rewardDistance = Math.floor(this._config.treasuryReward.distance);
-		const location = Math.trunc((height - this._config.treasuryReward.offset) / rewardDistance);
+		const rewardDistance = Math.floor(config.treasuryReward.distance);
+		const location = Math.trunc((height - config.treasuryReward.offset) / rewardDistance);
 
 		return location;
 	}
 
-	private _getBracket(brackets: string[], height: number) {
-		if (!this._config) throw new Error('GovernanceInternalMethod is not initialized');
-
+	private async _getBracket(context: BlockAfterExecuteContext, brackets: string[], height: number) {
 		if (brackets.length === 0) return '0';
 
-		const location = this._getBracketLocation(height);
+		const location = await this._getBracketLocation(context, height);
 		const lastBracket = brackets[brackets.length - 1];
 
 		const bracket = location > brackets.length - 1 ? brackets.lastIndexOf(lastBracket) : location;
@@ -117,25 +123,8 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return brackets[bracket];
 	}
 
-	private _verifyConfig() {
-		validator.validator.validate<GovernanceModuleConfig>(configSchema, this._config);
-		cryptography.address.validateKlayr32Address(this._config.treasuryAddress);
-
-		for (const mintBracket of this._config.treasuryReward.mintBracket) {
-			if (!this._isValidNonNegativeIntegerOrPercentage(mintBracket)) throw new Error(`Invalid mintBracket: ${mintBracket}`);
-		}
-
-		for (const blockRewardTaxBracket of this._config.treasuryReward.blockRewardTaxBracket) {
-			if (!this._isValidNonNegativeIntegerOrPercentage(blockRewardTaxBracket)) throw new Error(`Invalid blockRewardTaxBracket: ${blockRewardTaxBracket}`);
-		}
-	}
-
-	private _isValidNonNegativeIntegerOrPercentage(str: string) {
-		// Regular expression to match a valid non-negative integer
-		const integerRegex = /^\d+$/;
-		// Regular expression to match a valid non-negative integer percentage ending with %
-		const percentageRegex = /^\d+%$/;
-
-		return integerRegex.test(str) || percentageRegex.test(str);
+	private async _getGovernanceConfig(context: ImmutableStoreGetter) {
+		const configStore = this.stores.get(GovernanceGovernableConfig);
+		return configStore.getConfig(context);
 	}
 }

@@ -21,8 +21,9 @@ export class FeeConversionMethod extends BaseMethod {
 		if (!this._handler) throw new Error('FeeConversionMethod is not initialized');
 		if (!this._tokenMethod || !this._feeMethod) throw new Error('FeeConversionMethod dependencies is not properly setup');
 
+		handler.addDependencies(this._tokenMethod, this._feeMethod);
+
 		for (const command of [...new Set(commands)]) {
-			handler.addDependencies(this._tokenMethod, this._feeMethod);
 			this._handler.register(`${module}:${command}`, handler);
 		}
 	}
