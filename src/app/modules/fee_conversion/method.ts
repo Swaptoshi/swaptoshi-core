@@ -27,4 +27,15 @@ export class FeeConversionMethod extends BaseMethod {
 			this._handler.register(`${module}:${command}`, handler);
 		}
 	}
+
+	public unregister(module: string, commands: string[], handler: BaseFeeConversionMethod): void {
+		if (!this._handler) throw new Error('FeeConversionMethod is not initialized');
+		if (!this._tokenMethod || !this._feeMethod) throw new Error('FeeConversionMethod dependencies is not properly setup');
+
+		handler.addDependencies(this._tokenMethod, this._feeMethod);
+
+		for (const command of [...new Set(commands)]) {
+			this._handler.unregister(`${module}:${command}`, handler);
+		}
+	}
 }

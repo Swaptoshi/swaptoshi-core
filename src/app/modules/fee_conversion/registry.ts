@@ -13,6 +13,32 @@ export class FeeConversionMethodRegistry {
 		}
 	}
 
+	public unregister(key: string, value: BaseFeeConversionMethod): boolean {
+		if (!this._registry.has(key)) {
+			return false;
+		}
+
+		const methods = this._registry.get(key);
+		if (!methods) {
+			return false;
+		}
+
+		const index = methods.findIndex(method => method.name === value.name);
+		if (index === -1) {
+			return false;
+		}
+
+		methods.splice(index, 1);
+
+		if (methods.length === 0) {
+			this._registry.delete(key);
+		} else {
+			this._registry.set(key, methods);
+		}
+
+		return true;
+	}
+
 	public get(key: string): BaseFeeConversionMethod[] {
 		const named = this._registry.get(key);
 		if (!named) {
