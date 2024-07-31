@@ -17,6 +17,11 @@ export class GovernanceMethod extends BaseMethod {
 		this._governableConfig.register(module, governableConfig);
 	}
 
+	public getGovernableConfig<T extends object>(module: string): BaseGovernableConfig<T> {
+		if (!this._governableConfig) throw new Error('GovernanceMethod is not initialized');
+		return this._governableConfig.get(module) as BaseGovernableConfig<T>;
+	}
+
 	public async getGovernanceConfig(context: MethodContext) {
 		const configStore = this.stores.get(GovernanceGovernableConfig);
 		const config = await configStore.getConfig(context);
