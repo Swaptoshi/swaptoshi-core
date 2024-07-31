@@ -9,6 +9,15 @@ export class GovernableConfigRegistry {
 		this._registry.set(key, value);
 	}
 
+	public unregister(key: string): boolean {
+		if (!this._registry.has(key)) {
+			return false;
+		}
+
+		this._registry.delete(key);
+		return true;
+	}
+
 	public get(key: string): BaseGovernableConfig<Record<string, unknown>> {
 		const named = this._registry.get(key);
 		if (!named) {

@@ -79,6 +79,18 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	}
 
 	/**
+	 * Unregisters the events associated with the governable config.
+	 *
+	 * @param events - The registry of named events.
+	 * @param treasuryAddress - The treasury address, as configured on governance module.
+	 */
+	public unregister() {
+		this.method = undefined;
+		this.genesisConfig = undefined;
+		this.registered = false;
+	}
+
+	/**
 	 * Hook called before the configuration initialization.
 	 * Should be extended by children class as needed
 	 *
@@ -147,7 +159,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async setConfig(ctx: MethodContext, value: T): Promise<void> {
-		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not initialized`);
+		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
@@ -221,7 +233,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async dryRunSetConfig(ctx: MethodContext, value: T): Promise<UpdatedProperty[]> {
-		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not initialized`);
+		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
