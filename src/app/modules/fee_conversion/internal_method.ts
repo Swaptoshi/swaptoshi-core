@@ -1,24 +1,22 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, FeeMethod, ModuleInitArgs, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
-import { FeeConversionModuleConfig, FeeConversionVerifyStatus, HandlerExecutionResult } from './types';
+import { BaseMethod, FeeMethod, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
+import { FeeConversionVerifyStatus, HandlerExecutionResult } from './types';
 import { FeeConversionMethodRegistry } from './registry';
 import { DexMethod } from '../dex/method';
 import { FeeConvertedEvent } from './events/fee_converted';
 import { PATH_MINIMUM_LENGTH, PATH_OFFSET_LENGTH, TOKEN_ID_LENGTH } from './constants';
 import { FEE_SIZE } from '../token_factory/stores/library';
+import { FeeConversionGovernableConfig } from './config';
 
 export class InternalFeeConversionMethod extends BaseMethod {
-	private _config: FeeConversionModuleConfig | undefined;
 	private _handler: FeeConversionMethodRegistry | undefined;
 	private _dexMethod: DexMethod | undefined;
 	private _feeMethod: FeeMethod | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 
-	public async init(handler: FeeConversionMethodRegistry, args: ModuleInitArgs, config: FeeConversionModuleConfig) {
+	public init(handler: FeeConversionMethodRegistry) {
 		this._handler = handler;
-		this._config = config;
-		await this._verifyConfig(args.genesisConfig);
 	}
 
 	public addDependencies(feeMethod: FeeMethod, tokenMethod: TokenMethod, dexMethod: DexMethod) {
@@ -86,13 +84,16 @@ export class InternalFeeConversionMethod extends BaseMethod {
 	}
 
 	public checkDependencies() {
-		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod || !this._config) {
+		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod) {
 			throw new Error('fee_conversion module dependencies is not configured, make sure FeeConversionModule.addDependencies() is called before module registration');
 		}
 	}
 
 	public async executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
 		this.checkDependencies();
+
+		const configStore = this.stores.get(FeeConversionGovernableConfig);
+		const config = await configStore.getConfig(context);
 
 		const key = `${context.transaction.module}:${context.transaction.command}`;
 
@@ -142,7 +143,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 						};
 					}
 
-					for (const conversionPath of this._config!.conversionPath) {
+					for (const conversionPath of config.conversionPath) {
 						const pathTokenIn = Buffer.from(conversionPath.substring(conversionPath.length - TOKEN_ID_LENGTH * 2, conversionPath.length), 'hex');
 						if ((await this._dexMethod!.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
 							const path = Buffer.concat([
@@ -175,7 +176,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 	}
 
 	private async _verifyPath(context: TransactionVerifyContext, _path: string): Promise<boolean> {
-		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod || !this._config) {
+		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod) {
 			throw new Error('InternalFeeConversionMethod dependencies is not configured properly');
 		}
 
@@ -202,26 +203,5 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		}
 
 		return true;
-	}
-
-	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _verifyConfig(genesisConfig: ModuleInitArgs['genesisConfig']) {
-		const { chainID } = genesisConfig;
-
-		for (const path of this._config!.conversionPath) {
-			const tokenOut = path.substring(0, TOKEN_ID_LENGTH * 2);
-
-			if (tokenOut !== `${chainID}00000000`) {
-				throw new Error(`invalid conversion path: ${path}, path needs to starts with native token as tokenOut`);
-			}
-
-			if (path.length < PATH_MINIMUM_LENGTH * 2) {
-				throw new Error(`invalid conversion path: ${path}, path should have minimum ${PATH_MINIMUM_LENGTH * 2} character (${PATH_MINIMUM_LENGTH} bytes)`);
-			}
-
-			if (path.length > PATH_MINIMUM_LENGTH * 2 && (path.length - PATH_MINIMUM_LENGTH * 2) % (PATH_OFFSET_LENGTH * 2) !== 0) {
-				throw new Error(`invalid conversion path: ${path}, path should have valid offset of ${PATH_OFFSET_LENGTH * 2} character (${PATH_OFFSET_LENGTH} bytes)`);
-			}
-		}
 	}
 }

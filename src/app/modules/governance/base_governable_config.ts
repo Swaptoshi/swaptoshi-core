@@ -31,6 +31,7 @@ import { GovernanceMethod } from './method';
  * The `BaseGovernableConfig` provides a framework for implementing on-chain configurations that can be managed through proposals in the `governance` module.
  */
 export abstract class BaseGovernableConfig<T extends object> extends BaseStore<GovernableConfigStoreData> {
+	protected genesisConfig: GenesisConfig | undefined;
 	protected storeKey = Buffer.alloc(0);
 	protected events: NamedRegistry = new NamedRegistry();
 	protected registered: boolean = false;
@@ -72,6 +73,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	public register(events: NamedRegistry, governanceMethod: GovernanceMethod, args: ModuleInitArgs) {
 		this.events = events;
 		this.method = governanceMethod;
+		this.genesisConfig = args.genesisConfig;
 		this.init(args);
 		this.registered = true;
 	}
@@ -137,7 +139,9 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async setConfig(ctx: MethodContext, value: T): Promise<void> {
-		const verify = await this.verify({ config: value });
+		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not initialized`);
+
+		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
@@ -207,7 +211,9 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async dryRunSetConfig(ctx: MethodContext, value: T): Promise<UpdatedProperty[]> {
-		const verify = await this.verify({ config: value });
+		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not initialized`);
+
+		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 

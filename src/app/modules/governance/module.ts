@@ -28,6 +28,8 @@ export class GovernanceModule extends BaseModule {
 		this.events.register(TreasuryMintEvent, new TreasuryMintEvent(this.name));
 		this.events.register(ConfigUpdatedEvent, new ConfigUpdatedEvent(this.name));
 		this.events.register(TreasuryBlockRewardTaxEvent, new TreasuryBlockRewardTaxEvent(this.name));
+
+		this.method.init(this._governableConfig);
 	}
 
 	public metadata(): ModuleMetadata {
@@ -39,7 +41,6 @@ export class GovernanceModule extends BaseModule {
 	}
 
 	public async init(args: ModuleInitArgs): Promise<void> {
-		this.method.init(this._governableConfig);
 		this.method.registerGovernableConfig(args, this.name, this._config);
 	}
 

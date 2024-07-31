@@ -1,28 +1,27 @@
 /* eslint-disable */
 import { BaseEndpoint, ModuleEndpointContext, Transaction, TransactionVerifyContext, codec, cryptography, transactionSchema } from 'klayr-sdk';
 import { FeeConversionMethodRegistry } from './registry';
-import { DryRunTransactionResponse, FeeConversionModuleConfig, FeeConversionVerifyStatus, RegisteredMethod, RegisteredMethodResponse } from './types';
+import { DryRunTransactionResponse, FeeConversionVerifyStatus, RegisteredMethod, RegisteredMethodResponse } from './types';
 import { serializer } from './utils';
 import { InternalFeeConversionMethod } from './internal_method';
 import { TOKEN_ID_LENGTH } from './constants';
+import { FeeConversionGovernableConfig } from './config';
 
 export class FeeConversionEndpoint extends BaseEndpoint {
 	protected _handler: FeeConversionMethodRegistry | undefined;
-	protected _config: FeeConversionModuleConfig | undefined;
 	protected _internalMethod: InternalFeeConversionMethod | undefined;
 
-	public async init(handler: FeeConversionMethodRegistry, config: FeeConversionModuleConfig) {
+	public async init(handler: FeeConversionMethodRegistry) {
 		this._handler = handler;
-		this._config = config;
 	}
 
 	public async addDependencies(internalMethod: InternalFeeConversionMethod) {
 		this._internalMethod = internalMethod;
 	}
 
-	public getConfig(_context: ModuleEndpointContext) {
-		if (!this._config) throw new Error('config not initialized');
-		return serializer(this._config);
+	public async getConfig(_context: ModuleEndpointContext) {
+		const configStore = this.stores.get(FeeConversionGovernableConfig);
+		return configStore.getConfig(_context);
 	}
 
 	public getRegisteredHandlers(_context: ModuleEndpointContext): RegisteredMethodResponse {

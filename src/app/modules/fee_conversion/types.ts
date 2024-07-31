@@ -1,5 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { FeeMethod, JSONObject, TokenMethod } from 'klayr-sdk';
 import { FeeConvertedEventData } from './events/fee_converted';
+import { DexMethod } from '../dex/method';
+import { GovernanceMethod } from '../governance';
 
 export enum FeeConversionVerifyStatus {
 	WITH_CONVERSION = 1,
@@ -46,4 +48,11 @@ export interface FeeConversionModuleConfig {
 export interface HandlerExecutionResult {
 	status: FeeConversionVerifyStatus;
 	payload?: FeeConversionPayload;
+}
+
+export interface FeeConversionModuleDependencies {
+	tokenMethod: TokenMethod;
+	feeMethod: FeeMethod;
+	dexMethod: DexMethod;
+	governanceMethod?: GovernanceMethod;
 }
