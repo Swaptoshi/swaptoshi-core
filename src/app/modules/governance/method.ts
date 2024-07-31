@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { BaseMethod, MethodContext } from 'klayr-sdk';
+import { BaseMethod, MethodContext, ModuleInitArgs } from 'klayr-sdk';
 import { GovernableConfigRegistry } from './registry';
 import { BaseGovernableConfig } from './base_governable_config';
 import { GovernanceGovernableConfig } from './config';
@@ -11,9 +11,9 @@ export class GovernanceMethod extends BaseMethod {
 		this._governableConfig = governableConfig;
 	}
 
-	public registerGovernableConfig(module: string, governableConfig: BaseGovernableConfig<any>): void {
+	public registerGovernableConfig(module: string, governableConfig: BaseGovernableConfig<any>, args: ModuleInitArgs): void {
 		if (!this._governableConfig) throw new Error('GovernanceMethod is not initialized');
-		governableConfig.register(this.events, this);
+		governableConfig.register(this.events, this, args);
 		this._governableConfig.register(module, governableConfig);
 	}
 

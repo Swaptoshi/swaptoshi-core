@@ -69,9 +69,10 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param events - The registry of named events.
 	 * @param treasuryAddress - The treasury address, as configured on governance module.
 	 */
-	public register(events: NamedRegistry, governanceMethod: GovernanceMethod) {
+	public register(events: NamedRegistry, governanceMethod: GovernanceMethod, args: ModuleInitArgs) {
 		this.events = events;
 		this.method = governanceMethod;
+		this.init(args);
 		this.registered = true;
 	}
 
@@ -96,7 +97,6 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 	/**
 	 * Initializes the module with the provided configuration arguments.
-	 * Should be called at module.init()
 	 *
 	 * @param args - The initialization arguments including the genesis configuration and module configuration.
 	 */
