@@ -2,19 +2,21 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext, utils } from 'klayr-sdk';
+import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
 import { LiquidPosEndpoint } from './endpoint';
 import { LiquidPosMethod } from './method';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
 import { LiquidStakingTokenBurnEvent } from './events/lst_burn';
 import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema, getLSTTokenIDEndpointRequestSchema, getLSTTokenIDEndpointResponseSchema } from './schema';
 import { InternalLiquidPosMethod } from './internal_method';
-import { LiquidPosModuleConfig } from './types';
-import { defaultConfig } from './constants';
+import { LiquidPosModuleDependencies } from './types';
+import { GovernanceMethod } from '../governance';
+import { LiquidPosGovernableConfig } from './config';
 
 export class LiquidPosModule extends BaseModule {
-	public _config: LiquidPosModuleConfig | undefined;
+	public _config = new LiquidPosGovernableConfig(this.name, 0);
 	public _tokenMethod: TokenMethod | undefined;
+	public _governanceMethod: GovernanceMethod | undefined;
 	private _internalMethod: InternalLiquidPosMethod = new InternalLiquidPosMethod(this.stores, this.events);
 
 	public endpoint = new LiquidPosEndpoint(this.stores, this.offchainStores);
@@ -23,13 +25,16 @@ export class LiquidPosModule extends BaseModule {
 
 	public constructor() {
 		super();
+		this.stores.register(LiquidPosGovernableConfig, this._config);
+
 		this.events.register(LiquidStakingTokenMintEvent, new LiquidStakingTokenMintEvent(this.name));
 		this.events.register(LiquidStakingTokenBurnEvent, new LiquidStakingTokenBurnEvent(this.name));
 	}
 
-	public addDependencies(tokenMethod: TokenMethod) {
-		this._tokenMethod = tokenMethod;
-		this._internalMethod.addDependencies(tokenMethod);
+	public addDependencies(dependencies: LiquidPosModuleDependencies) {
+		this._tokenMethod = dependencies.tokenMethod;
+		this._governanceMethod = dependencies.governanceMethod;
+		this._internalMethod.addDependencies(dependencies.tokenMethod);
 		this.endpoint.addDependencies(this._internalMethod);
 		this.method.addDependencies(this._internalMethod);
 	}
@@ -54,10 +59,12 @@ export class LiquidPosModule extends BaseModule {
 	}
 
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as LiquidPosModuleConfig;
-		this.endpoint.init(this._config);
-		this._internalMethod.init(_args.genesisConfig, this._config);
-		await this._internalMethod.checkDependencies();
+		if (this._governanceMethod) {
+			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
+		}
+
+		this._internalMethod.init(this._config.default, _args.genesisConfig);
+		this._internalMethod.checkDependencies();
 	}
 
 	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {

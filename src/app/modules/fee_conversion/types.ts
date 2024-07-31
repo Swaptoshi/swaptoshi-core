@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { FeeMethod, JSONObject, TokenMethod } from 'klayr-sdk';
 import { FeeConvertedEventData } from './events/fee_converted';
 import { DexMethod } from '../dex/method';

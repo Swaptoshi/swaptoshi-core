@@ -1,5 +1,8 @@
+import { TokenMethod } from 'klayr-sdk';
+import { GovernanceMethod } from '../governance';
+
 export interface LiquidPosModuleConfig {
-	tokenID: string | number;
+	tokenID: string;
 	ratio: number;
 }
 
@@ -10,4 +13,9 @@ export interface StakeTransactionParams {
 export interface StakeObject {
 	validatorAddress: Buffer;
 	amount: bigint;
+}
+
+export interface LiquidPosModuleDependencies {
+	tokenMethod: TokenMethod;
+	governanceMethod?: GovernanceMethod;
 }

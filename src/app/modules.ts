@@ -37,7 +37,7 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 	const liquidPosModule = new LiquidPosModule();
 	const governanceModule = new GovernanceModule();
 
-	liquidPosModule.addDependencies(method.token);
+	liquidPosModule.addDependencies({ tokenMethod: method.token, governanceMethod: governanceModule.method });
 	feeConversionModule.addDependencies({ tokenMethod: method.token, feeMethod: method.fee, dexMethod: dexModule.method, governanceMethod: governanceModule.method });
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
 	dexModule.addDependencies(method.token, nftModule.method, method.fee, method.interoperability, feeConversionModule.method);

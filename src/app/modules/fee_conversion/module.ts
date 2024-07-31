@@ -33,6 +33,7 @@ export class FeeConversionModule extends BaseModule {
 	public constructor() {
 		super();
 		this.stores.register(FeeConversionGovernableConfig, this._config);
+
 		this.events.register(FeeConvertedEvent, new FeeConvertedEvent(this.name));
 	}
 

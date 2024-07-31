@@ -21,7 +21,8 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 
 	public async getConfig(_context: ModuleEndpointContext) {
 		const configStore = this.stores.get(FeeConversionGovernableConfig);
-		return configStore.getConfig(_context);
+		const config = await configStore.getConfig(_context);
+		return serializer(config);
 	}
 
 	public getRegisteredHandlers(_context: ModuleEndpointContext): RegisteredMethodResponse {
@@ -33,7 +34,7 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 			handlers.push({ module: key, method: this._handler.get(key).map(t => t.name) });
 		}
 
-		return { handlers };
+		return serializer({ handlers });
 	}
 
 	public async dryRunTransaction(_context: ModuleEndpointContext): Promise<DryRunTransactionResponse> {

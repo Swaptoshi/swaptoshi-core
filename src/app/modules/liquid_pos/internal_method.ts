@@ -7,19 +7,18 @@ import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { stakeCommandParamsSchema } from './schema';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
 import { LiquidStakingTokenBurnEvent } from './events/lst_burn';
+import { LiquidPosGovernableConfig } from './config';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 
 export class InternalLiquidPosMethod extends BaseMethod {
 	private _chainID: Buffer | undefined;
-	private _config: LiquidPosModuleConfig | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 	private _lstTokenID: Buffer | undefined;
 
-	public async init(genesisConfig: GenesisConfig, moduleConfig: LiquidPosModuleConfig) {
-		this._config = moduleConfig;
+	public async init(moduleConfig: LiquidPosModuleConfig, genesisConfig: GenesisConfig) {
 		this._chainID = Buffer.from(genesisConfig.chainID, 'hex');
-		await this._verifyConfig();
+		await this._assignLstTokenID(moduleConfig);
 	}
 
 	public addDependencies(tokenMethod: TokenMethod) {
@@ -57,10 +56,13 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		this.checkDependencies();
 		if (baseAmount < BigInt(0)) throw new Error("baseAmount minted can't be negative");
 
+		const configStore = this.stores.get(LiquidPosGovernableConfig);
+		const config = await configStore.getConfig(context);
+
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		const mintedAmount = BigInt(new BigNumber(baseAmount.toString()).multipliedBy(this._config!.ratio).toFixed(0));
+		const mintedAmount = BigInt(new BigNumber(baseAmount.toString()).multipliedBy(config.ratio).toFixed(0));
 
 		await this._tokenMethod!.mint(context, address, this._lstTokenID!, mintedAmount);
 		const events = this.events.get(LiquidStakingTokenMintEvent);
@@ -71,10 +73,13 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		this.checkDependencies();
 		if (baseBurned < BigInt(0)) throw new Error("baseBurned burned can't be negative");
 
+		const configStore = this.stores.get(LiquidPosGovernableConfig);
+		const config = await configStore.getConfig(context);
+
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		const burnedAmount = BigInt(new BigNumber(baseBurned.toString()).multipliedBy(this._config!.ratio).toFixed(0));
+		const burnedAmount = BigInt(new BigNumber(baseBurned.toString()).multipliedBy(config.ratio).toFixed(0));
 
 		await this._tokenMethod!.burn(context, address, this._lstTokenID!, burnedAmount);
 		const events = this.events.get(LiquidStakingTokenBurnEvent);
@@ -82,34 +87,21 @@ export class InternalLiquidPosMethod extends BaseMethod {
 	}
 
 	public checkDependencies() {
-		if (!this._chainID || !this._config || !this._tokenMethod || !this._lstTokenID) {
+		if (!this._chainID || !this._tokenMethod || !this._lstTokenID) {
 			throw new Error('liquid_pos module dependencies is not configured, make sure LiquidPos.addDependencies() is called before module registration');
 		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _verifyConfig() {
-		const { tokenID, ratio } = this._config!;
+	public async _assignLstTokenID(config: LiquidPosModuleConfig) {
+		const { tokenID } = config;
 		const chainID = this._chainID!;
 
-		if (ratio <= 0) throw new Error('liquid_pos ratio config should be greater than 0');
-
-		if (typeof tokenID === 'number') {
-			const buff = Buffer.allocUnsafe(4);
-			buff.writeUIntBE(tokenID, 0, 4);
+		if (tokenID.length === 16) {
+			this._lstTokenID = Buffer.from(tokenID, 'hex');
+		} else if (tokenID.length === 8) {
+			const buff = Buffer.from(tokenID, 'hex');
 			this._lstTokenID = Buffer.concat([chainID, buff]);
-		} else if (typeof tokenID === 'string') {
-			if (tokenID.length === 16) {
-				if (!tokenID.startsWith(chainID.toString('hex'))) throw new Error('invalid liquid_pos tokenID config chainID');
-				this._lstTokenID = Buffer.from(tokenID, 'hex');
-			} else if (tokenID.length === 8) {
-				const buff = Buffer.from(tokenID, 'hex');
-				this._lstTokenID = Buffer.concat([chainID, buff]);
-			} else {
-				throw new Error('invalid liquid_pos tokenID config string length');
-			}
-		} else {
-			throw new Error('invalid liquid_pos tokenID config type');
 		}
 	}
 }
