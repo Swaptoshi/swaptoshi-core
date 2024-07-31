@@ -1,11 +1,4 @@
-import { ConfigPathKeys, ConfigPathType } from '../types';
-
-export interface UpdatedProperty {
-	path: string;
-	old: string;
-	new: string;
-	type: 'string' | 'number' | 'bigint';
-}
+import { ConfigPathKeys, ConfigPathType, UpdatedProperty } from '../types';
 
 type Primitive = string | number | bigint | null | undefined;
 

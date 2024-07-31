@@ -20,9 +20,9 @@ import {
 } from 'klayr-sdk';
 import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
-import { ConfigPathKeys, ConfigPathType, GovernableConfigStoreData, GovernableConfigVerifyContext } from './types';
+import { ConfigPathKeys, ConfigPathType, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
 import { governableConfigSchema } from './schema';
-import { UpdatedProperty, getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
+import { getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
 import { ConfigUpdatedEvent } from './events/config_updated';
 
 /**

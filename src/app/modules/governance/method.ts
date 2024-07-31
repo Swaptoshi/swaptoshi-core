@@ -10,7 +10,7 @@ export class GovernanceMethod extends BaseMethod {
 		this._governableConfig = governableConfig;
 	}
 
-	public async register(module: string, governableConfig: BaseGovernableConfig<any>): Promise<void> {
+	public registerGovernableConfig(module: string, governableConfig: BaseGovernableConfig<any>): void {
 		if (!this._governableConfig) throw new Error('GovernanceMethod is not initialized');
 		governableConfig.register(this.events);
 		this._governableConfig.register(module, governableConfig);

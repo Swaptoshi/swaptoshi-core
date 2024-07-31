@@ -41,7 +41,7 @@ export class GovernanceModule extends BaseModule {
 	public async init(args: ModuleInitArgs): Promise<void> {
 		this._config.init(args);
 		this.method.init(this._governableConfig);
-		await this.method.register(this.name, this._config);
+		this.method.registerGovernableConfig(this.name, this._config);
 	}
 
 	public addDependencies(token: TokenMethod) {
