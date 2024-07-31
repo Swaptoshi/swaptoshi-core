@@ -11,10 +11,10 @@ export class GovernanceMethod extends BaseMethod {
 		this._governableConfig = governableConfig;
 	}
 
-	public registerGovernableConfig(module: string, governableConfig: BaseGovernableConfig<any>, args: ModuleInitArgs): void {
+	public registerGovernableConfig(args: ModuleInitArgs, moduleName: string, governableConfig: BaseGovernableConfig<any>): void {
 		if (!this._governableConfig) throw new Error('GovernanceMethod is not initialized');
 		governableConfig.register(this.events, this, args);
-		this._governableConfig.register(module, governableConfig);
+		this._governableConfig.register(moduleName, governableConfig);
 	}
 
 	public getGovernableConfig<T extends object>(module: string): BaseGovernableConfig<T> {
