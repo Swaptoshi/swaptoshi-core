@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
 import { GenesisConfig, VerificationResult, VerifyStatus, cryptography, utils } from 'klayr-sdk';
 import { BaseGovernableConfig } from './base_governable_config';
