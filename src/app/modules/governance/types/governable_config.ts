@@ -9,3 +9,7 @@ export interface GovernableConfigVerifyContext<T extends object> {
 	config: T;
 	genesisConfig: GenesisConfig;
 }
+
+export interface GovernableConfigAfterSetConfigContext<T> extends MethodContext {
+	config: T;
+}

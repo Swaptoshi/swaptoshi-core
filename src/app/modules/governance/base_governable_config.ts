@@ -21,7 +21,7 @@ import {
 } from 'klayr-sdk';
 import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
-import { ConfigPathKeys, ConfigPathType, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
+import { ConfigPathKeys, ConfigPathType, GovernableConfigAfterSetConfigContext, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
 import { governableConfigSchema } from './schema';
 import { getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
 import { ConfigUpdatedEvent } from './events/config_updated';
@@ -85,6 +85,14 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param _genesisConfig - The genesis configuration.
 	 */
 	public beforeConfigInit(_genesisConfig: GenesisConfig): void {}
+
+	/**
+	 * Hook called after on-chain config is changed.
+	 * Should be extended by children class as needed
+	 *
+	 * @param _ctx - The after set config context, consist of MethodContext & config.
+	 */
+	public async afterSetConfig(_ctx: GovernableConfigAfterSetConfigContext<T>): Promise<void> {}
 
 	/**
 	 * Hook called before the storing on-chain configuration.
@@ -168,6 +176,8 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 				);
 			});
 		}
+
+		await this.afterSetConfig({ ...ctx, config: value });
 	}
 
 	/**
