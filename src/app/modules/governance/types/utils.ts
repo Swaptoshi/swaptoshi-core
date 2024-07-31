@@ -34,5 +34,5 @@ export interface UpdatedProperty {
 	path: string;
 	old: string;
 	new: string;
-	type: 'string' | 'number' | 'bigint';
+	type: string;
 }

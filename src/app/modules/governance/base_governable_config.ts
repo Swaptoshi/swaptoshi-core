@@ -148,7 +148,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		if (this.registered) {
 			const events = this.events.get(ConfigUpdatedEvent);
-			const updatedPaths = getUpdatedProperties(oldConfig, value);
+			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
 
 			updatedPaths.forEach(updated => {
 				events.add(
@@ -215,7 +215,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		if (await this.has(ctx, this.storeKey)) oldConfig = (await this.getConfig(ctx)) as T;
 
 		if (this.registered) {
-			const updatedPaths = getUpdatedProperties(oldConfig, value);
+			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
 			return updatedPaths;
 		}
 
