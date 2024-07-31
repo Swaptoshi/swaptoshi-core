@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable import/no-extraneous-dependencies */
@@ -24,6 +25,7 @@ import { ConfigPathKeys, ConfigPathType, GovernableConfigStoreData, GovernableCo
 import { governableConfigSchema } from './schema';
 import { getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
 import { ConfigUpdatedEvent } from './events/config_updated';
+import { GovernanceMethod } from './method';
 
 /**
  * The `BaseGovernableConfig` provides a framework for implementing on-chain configurations that can be managed through proposals in the `governance` module.
@@ -33,6 +35,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	protected events: NamedRegistry = new NamedRegistry();
 	protected registered: boolean = false;
 	protected module: string = '';
+	protected method: GovernanceMethod | undefined;
 
 	public constructor(moduleName: string, index: number) {
 		super(moduleName, index);
@@ -66,8 +69,9 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param events - The registry of named events.
 	 * @param treasuryAddress - The treasury address, as configured on governance module.
 	 */
-	public register(events: NamedRegistry) {
+	public register(events: NamedRegistry, governanceMethod: GovernanceMethod) {
 		this.events = events;
+		this.method = governanceMethod;
 		this.registered = true;
 	}
 
