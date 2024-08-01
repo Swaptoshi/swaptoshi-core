@@ -21,7 +21,7 @@ import {
 } from 'klayr-sdk';
 import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
-import { ConfigPathKeys, ConfigPathType, GovernableConfigAfterSetConfigContext, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
+import { ConfigPathKeys, ConfigPathType, GovernableConfigSetContext, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
 import { governableConfigSchema } from './schema';
 import { getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
 import { ConfigUpdatedEvent } from './events/config_updated';
@@ -99,12 +99,20 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	public beforeConfigInit(_genesisConfig: GenesisConfig): void {}
 
 	/**
+	 * Hook called before on-chain config is changed.
+	 * Should be extended by children class as needed
+	 *
+	 * @param _ctx - The before set config context, consist of MethodContext & config.
+	 */
+	public async beforeSetConfig(_ctx: GovernableConfigSetContext<T>): Promise<void> {}
+
+	/**
 	 * Hook called after on-chain config is changed.
 	 * Should be extended by children class as needed
 	 *
 	 * @param _ctx - The after set config context, consist of MethodContext & config.
 	 */
-	public async afterSetConfig(_ctx: GovernableConfigAfterSetConfigContext<T>): Promise<void> {}
+	public async afterSetConfig(_ctx: GovernableConfigSetContext<T>): Promise<void> {}
 
 	/**
 	 * Hook called before the storing on-chain configuration.
@@ -165,8 +173,10 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
-		let oldConfig: object = {};
+		let oldConfig: T = {} as T;
 		if (await this.has(ctx, this.storeKey)) oldConfig = (await this.getConfig(ctx)) as T;
+
+		await this.beforeSetConfig({ ...ctx, config: oldConfig });
 
 		await this.set(ctx, this.storeKey, { data: codec.encode(this.schema, value) });
 
