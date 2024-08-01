@@ -1,25 +1,21 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { TransactionVerifyContext } from 'klayr-sdk';
-import { TokenFactoryModuleConfig } from '../../types';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyMinimumFee(
 	this: {
 		name: string;
-		_config: TokenFactoryModuleConfig | undefined;
+		_config: TokenFactoryGovernableConfig;
 	},
 	context: TransactionVerifyContext,
 ) {
 	if (context.transaction.module === this.name) {
-		if (
-			context.transaction.fee <
-			BigInt(this._config!.minTransactionFee[context.transaction.command] as string)
-		) {
-			throw new Error(
-				`Insufficient transaction fee. Minimum required fee is ${
-					this._config!.minTransactionFee[context.transaction.command] as string
-				}.`,
-			);
+		const config = await this._config.getConfig(context);
+
+		if (context.transaction.fee < BigInt(config.minTransactionFee[context.transaction.command] as string)) {
+			throw new Error(`Insufficient transaction fee. Minimum required fee is ${config.minTransactionFee[context.transaction.command] as string}.`);
 		}
 	}
 }

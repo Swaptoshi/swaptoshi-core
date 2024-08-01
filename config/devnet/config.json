@@ -101,7 +101,7 @@
 			}
 		},
 		"tokenFactory": {
-			"skippedTokenID": [1],
+			"skippedTokenID": ["0455555500000001"],
 			"icoLeftOverAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"icoFeeConversionEnabled": true,
 			"icoDexPathEnabled": true,

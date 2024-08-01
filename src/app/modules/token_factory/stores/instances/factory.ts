@@ -3,16 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import {
-	FactorySetAttributesParams,
-	FactoryStoreData,
-	FactoryTransferOwnershipParams,
-	TokenBurnParams,
-	TokenCreateParams,
-	TokenFactoryAttributes,
-	TokenFactoryModuleConfig,
-	TokenMintParams,
-} from '../../types';
+import { FactorySetAttributesParams, FactoryStoreData, FactoryTransferOwnershipParams, TokenBurnParams, TokenCreateParams, TokenFactoryAttributes, TokenMintParams } from '../../types';
 import { FactoryStore } from '../factory';
 import { NextAvailableTokenIdStore } from '../next_available_token_id';
 import { FactoryCreatedEvent } from '../../events/factory_created';
@@ -23,13 +14,12 @@ import { FactoryOwnerChangedEvent } from '../../events/factory_owner_changed';
 import { FactorySetAttributesEvent } from '../../events/factory_set_attributes';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
-		super(FactoryStore, stores, events, genesisConfig, config, moduleName, tokenId);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
+		super(FactoryStore, stores, events, genesisConfig, moduleName, tokenId);
 
 		Object.assign(this, utils.objects.cloneDeep(factory));
 
 		this.nextAvailableIdStore = stores.get(NextAvailableTokenIdStore);
-		this._parseSkippedTokenID();
 	}
 
 	public toJSON() {
@@ -210,11 +200,19 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 
 	public async getNextAvailableTokenId() {
 		this._checkImmutableDependencies();
+		const skippedTokenIDs = new Set();
+
+		const config = await this.getConfig(this.immutableContext!.context);
 		const nextAvailableId = await this.nextAvailableIdStore.getOrDefault(this.immutableContext!.context);
+
+		for (const skippedTokenId of config.skippedTokenID) {
+			const id = this._tokenIdToBigint(skippedTokenId);
+			skippedTokenIDs.add(id);
+		}
 
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
-			if (this._skippedTokenID.has(nextAvailableId.nextTokenId)) {
+			if (skippedTokenIDs.has(nextAvailableId.nextTokenId)) {
 				nextAvailableId.nextTokenId += BigInt(1);
 				continue;
 			}
@@ -318,31 +316,13 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		}
 	}
 
-	private _parseSkippedTokenID() {
-		for (const skippedTokenId of this.config.skippedTokenID) {
-			const id = this._tokenStringOrNumberToBigint(skippedTokenId);
-			this._skippedTokenID.add(id);
+	private _tokenIdToBigint(tokenId: string) {
+		if (tokenId.length === 16) {
+			return BigInt(`0x${tokenId.substring(8, 16)}`);
 		}
-	}
-
-	private _tokenStringOrNumberToBigint(stringOrNumber: string | number) {
-		const { chainID } = this.genesisConfig;
-
-		if (typeof stringOrNumber === 'number') {
-			return BigInt(stringOrNumber);
+		if (tokenId.length === 8) {
+			return BigInt(`0x${tokenId.substring(0, 8)}`);
 		}
-
-		if (typeof stringOrNumber === 'string') {
-			if (stringOrNumber.length === 16) {
-				if (!stringOrNumber.startsWith(chainID)) throw new Error('invalid tokenFactory skippedTokenID config chainID');
-				return BigInt(`0x${stringOrNumber.substring(8, 16)}`);
-			}
-			if (stringOrNumber.length === 8) {
-				return BigInt(`0x${stringOrNumber.substring(0, 8)}`);
-			}
-			throw new Error('invalid tokenFactory skippedTokenID config string length');
-		}
-
 		throw new Error('invalid tokenFactory skippedTokenID config type');
 	}
 
@@ -350,5 +330,4 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 	public attributesArray: TokenFactoryAttributes[] = [];
 
 	private readonly nextAvailableIdStore: NextAvailableTokenIdStore;
-	private readonly _skippedTokenID: Set<bigint> = new Set();
 }

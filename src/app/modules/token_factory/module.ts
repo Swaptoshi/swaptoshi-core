@@ -5,14 +5,11 @@ import {
 	BaseModule,
 	BlockExecuteContext,
 	FeeMethod,
-	MainchainInteroperabilityMethod,
 	ModuleInitArgs,
 	ModuleMetadata,
-	SidechainInteroperabilityMethod,
 	TokenMethod,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
-	utils,
 	VerificationResult,
 	VerifyStatus,
 } from 'klayr-sdk';
@@ -37,7 +34,6 @@ import { IcoWithdrawCommand } from './commands/ico_withdraw_command';
 import { TokenBurnCommand } from './commands/token_burn_command';
 import { TokenCreateCommand } from './commands/token_create_command';
 import { TokenMintCommand } from './commands/token_mint_command';
-import { defaultConfig } from './constants';
 import { TokenFactoryEndpoint } from './endpoint';
 import { AirdropCreatedEvent } from './events/airdrop_created';
 import { AirdropDistributedEvent } from './events/airdrop_distributed';
@@ -53,7 +49,6 @@ import { IcoTreasurifyEvent } from './events/ico_treasurify';
 import { IcoWithdrawEvent } from './events/ico_withdraw';
 import { VestedTokenLockedEvent } from './events/vested_token_locked';
 import { VestedTokenUnlockedEvent } from './events/vested_token_unlocked';
-import { TokenFactoryICOPurchaseFeeConversionMethod, TokenFactoryTransferFeeConversionMethod } from './fc_method';
 import { executeBaseFee, executeSwapByTransfer, executeVestingUnlock, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
 import { TokenFactoryMethod } from './method';
 import {
@@ -83,16 +78,18 @@ import { FactoryStore } from './stores/factory';
 import { ICOStore } from './stores/ico';
 import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { VestingUnlockStore } from './stores/vesting_unlock';
-import { TokenFactoryModuleConfig } from './types';
-import { verifyModuleConfig } from './utils';
+import { TokenFactoryModuleDependencies } from './types';
+import { TokenFactoryGovernableConfig } from './config';
+import { GovernanceMethod } from '../governance';
 
 export class TokenFactoryModule extends BaseModule {
-	public _config: TokenFactoryModuleConfig | undefined;
+	public _config: TokenFactoryGovernableConfig = new TokenFactoryGovernableConfig(this.name, 5);
 	public _feeMethod: FeeMethod | undefined;
 	public _feeConversionMethod: FeeConversionMethod | undefined;
 	public _tokenMethod: TokenMethod | undefined;
 	public _nftMethod: NFTMethod | undefined;
 	public _dexMethod: DexMethod | undefined;
+	public _governanceMethod: GovernanceMethod | undefined;
 	public _tokenFactoryInteroperableMethod = new TokenFactoryInteroperableMethod(this.stores, this.events);
 
 	public crossChainCommand = [];
@@ -128,6 +125,7 @@ export class TokenFactoryModule extends BaseModule {
 		this.stores.register(ICOStore, new ICOStore(this.name, 2, this.stores, this.events));
 		this.stores.register(NextAvailableTokenIdStore, new NextAvailableTokenIdStore(this.name, 3));
 		this.stores.register(VestingUnlockStore, new VestingUnlockStore(this.name, 4, this.stores, this.events));
+		this.stores.register(TokenFactoryGovernableConfig, this._config); // index number 5
 
 		this.events.register(AirdropCreatedEvent, new AirdropCreatedEvent(this.name));
 		this.events.register(AirdropDistributedEvent, new AirdropDistributedEvent(this.name));
@@ -145,16 +143,7 @@ export class TokenFactoryModule extends BaseModule {
 		this.events.register(VestedTokenUnlockedEvent, new VestedTokenUnlockedEvent(this.name));
 	}
 
-	public addDependencies(
-		tokenMethod: TokenMethod,
-		feeMethod: FeeMethod,
-		nftMethod: NFTMethod,
-		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
-		dexMethod?: DexMethod,
-		feeConversionMethod?: FeeConversionMethod,
-	) {
-		const dependencies = { tokenMethod, feeMethod, dexMethod };
-
+	public addDependencies(dependencies: TokenFactoryModuleDependencies) {
 		const airdropStore = this.stores.get(AirdropStore);
 		const factoryStore = this.stores.get(FactoryStore);
 		const icoStore = this.stores.get(ICOStore);
@@ -165,19 +154,21 @@ export class TokenFactoryModule extends BaseModule {
 		icoStore.addDependencies(dependencies);
 		vestingUnlockStore.addDependencies(dependencies);
 
-		this._feeMethod = feeMethod;
-		this._tokenMethod = tokenMethod;
-		this._nftMethod = nftMethod;
+		this._feeMethod = dependencies.feeMethod;
+		this._tokenMethod = dependencies.tokenMethod;
+		this._nftMethod = dependencies.nftMethod;
+		this._governanceMethod = dependencies.governanceMethod;
 
-		this._tokenFactoryInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
+		this._tokenFactoryInteroperableMethod.addDependencies(dependencies.interoperabilityMethod, dependencies.tokenMethod, dependencies.nftMethod);
+		this._config.addDependencies(this.stores, dependencies.dexMethod, dependencies.feeConversionMethod);
 
-		if (dexMethod) {
-			this._dexMethod = dexMethod;
+		if (dependencies.dexMethod) {
+			this._dexMethod = dependencies.dexMethod;
 		}
 
-		if (feeConversionMethod) {
-			this._feeConversionMethod = feeConversionMethod;
-			this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+		if (dependencies.feeConversionMethod) {
+			this._feeConversionMethod = dependencies.feeConversionMethod;
+			this._feeConversionMethod.addDependencies(dependencies.tokenMethod, dependencies.feeMethod);
 		}
 	}
 
@@ -242,40 +233,22 @@ export class TokenFactoryModule extends BaseModule {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as TokenFactoryModuleConfig;
-		await verifyModuleConfig(this._config);
-
 		const airdropStore = this.stores.get(AirdropStore);
 		const factoryStore = this.stores.get(FactoryStore);
 		const icoStore = this.stores.get(ICOStore);
 		const vestingUnlockStore = this.stores.get(VestingUnlockStore);
 
-		airdropStore.init(_args.genesisConfig, this._config);
-		factoryStore.init(_args.genesisConfig, this._config);
-		icoStore.init(_args.genesisConfig, this._config);
-		vestingUnlockStore.init(_args.genesisConfig, this._config);
+		airdropStore.init(_args.genesisConfig);
+		factoryStore.init(_args.genesisConfig);
+		icoStore.init(_args.genesisConfig);
+		vestingUnlockStore.init(_args.genesisConfig);
 
-		this.endpoint.init(this._config);
-
-		if (this._config.icoFeeConversionEnabled && !this._feeConversionMethod) {
-			throw new Error('feeConversionMethod dependencies is not configured, make sure to add FeeConversionModule.method to TokenFactoryModule.addDependencies()');
-		}
-
-		if (this._config.icoDexPathEnabled && !this._dexMethod) {
-			throw new Error('dexMethod dependencies is not configured, make sure to add DexModule.method to TokenFactoryModule.addDependencies()');
+		if (this._governanceMethod) {
+			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
 		}
 
 		if (!this._feeMethod || !this._tokenMethod || !this._nftMethod) {
 			throw new Error('token_factory module dependencies is not configured, make sure TokenFactoryModule.addDependencies() is called before module registration');
-		}
-
-		if (this._feeConversionMethod && this._config.icoFeeConversionEnabled) {
-			this._feeConversionMethod.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
-			this._feeConversionMethod.register(
-				this.name,
-				['icoExactInput', 'icoExactInputSingle', 'icoExactOutput', 'icoExactOutputSingle'],
-				new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.events),
-			);
 		}
 	}
 

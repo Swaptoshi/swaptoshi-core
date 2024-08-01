@@ -3,15 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'klayr-sdk';
-import {
-	ICOChangePriceParams,
-	ICOCreateParams,
-	ICODepositParams,
-	ICOStoreData,
-	ICOTreasurifyParams,
-	ICOWithdrawParams,
-	TokenFactoryModuleConfig,
-} from '../../types';
+import { ICOChangePriceParams, ICOCreateParams, ICODepositParams, ICOStoreData, ICOTreasurifyParams, ICOWithdrawParams } from '../../types';
 import { BaseInstance } from './base';
 import { ICOStore } from '../ico';
 import { IcoCreatedEvent } from '../../events/ico_created';
@@ -25,16 +17,8 @@ import { IcoWithdrawEvent } from '../../events/ico_withdraw';
 import { ICO_MODULE_SUFFIX } from '../../constants';
 
 export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		genesisConfig: GenesisConfig,
-		config: TokenFactoryModuleConfig,
-		moduleName: string,
-		ico: ICOStoreData,
-		poolAddress: Buffer,
-	) {
-		super(ICOStore, stores, events, genesisConfig, config, moduleName, poolAddress);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, ico: ICOStoreData, poolAddress: Buffer) {
+		super(ICOStore, stores, events, genesisConfig, moduleName, poolAddress);
 
 		if (ico) Object.assign(this, utils.objects.cloneDeep(ico));
 		this.factoryStore = stores.get(FactoryStore);
@@ -73,82 +57,32 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 
 		if (verify) await this.verifyCreate(params);
 
+		const config = await this.getConfig(this.immutableContext!.context);
 		const poolAddress = computeICOPoolAddress(params);
 
-		await this.tokenMethod!.initializeUserAccount(
-			this.mutableContext!.context,
-			poolAddress,
-			params.tokenIn,
-		);
-		await this.tokenMethod!.initializeUserAccount(
-			this.mutableContext!.context,
-			poolAddress,
-			params.tokenOut,
-		);
+		await this.tokenMethod!.initializeUserAccount(this.mutableContext!.context, poolAddress, params.tokenIn);
+		await this.tokenMethod!.initializeUserAccount(this.mutableContext!.context, poolAddress, params.tokenOut);
 
-		const tokenInBalance = await this.tokenMethod!.getAvailableBalance(
-			this.mutableContext!.context,
-			poolAddress,
-			params.tokenIn,
-		);
-		const tokenOutBalance = await this.tokenMethod!.getAvailableBalance(
-			this.mutableContext!.context,
-			poolAddress,
-			params.tokenOut,
-		);
+		const tokenInBalance = await this.tokenMethod!.getAvailableBalance(this.mutableContext!.context, poolAddress, params.tokenIn);
+		const tokenOutBalance = await this.tokenMethod!.getAvailableBalance(this.mutableContext!.context, poolAddress, params.tokenOut);
 
-		if (this.config.icoLeftOverAddress) {
-			const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(
-				this.config.icoLeftOverAddress,
-				this.config.icoLeftOverAddress.substring(0, 3),
-			);
-			await this.tokenMethod!.initializeUserAccount(
-				this.mutableContext!.context,
-				leftOverAddress,
-				params.tokenIn,
-			);
-			await this.tokenMethod!.initializeUserAccount(
-				this.mutableContext!.context,
-				leftOverAddress,
-				params.tokenOut,
-			);
+		if (config.icoLeftOverAddress) {
+			const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(config.icoLeftOverAddress, config.icoLeftOverAddress.substring(0, 3));
+			await this.tokenMethod!.initializeUserAccount(this.mutableContext!.context, leftOverAddress, params.tokenIn);
+			await this.tokenMethod!.initializeUserAccount(this.mutableContext!.context, leftOverAddress, params.tokenOut);
 
 			if (tokenInBalance > BigInt(0)) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					poolAddress,
-					leftOverAddress,
-					params.tokenIn,
-					tokenInBalance,
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, poolAddress, leftOverAddress, params.tokenIn, tokenInBalance);
 			}
 			if (tokenOutBalance > BigInt(0)) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					poolAddress,
-					leftOverAddress,
-					params.tokenOut,
-					tokenOutBalance,
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, poolAddress, leftOverAddress, params.tokenOut, tokenOutBalance);
 			}
 		} else {
 			if (tokenInBalance > BigInt(0)) {
-				await this.tokenMethod!.lock(
-					this.mutableContext!.context,
-					poolAddress,
-					`${this.moduleName}_${ICO_MODULE_SUFFIX}`,
-					params.tokenIn,
-					tokenInBalance,
-				);
+				await this.tokenMethod!.lock(this.mutableContext!.context, poolAddress, `${this.moduleName}_${ICO_MODULE_SUFFIX}`, params.tokenIn, tokenInBalance);
 			}
 			if (tokenOutBalance > BigInt(0)) {
-				await this.tokenMethod!.lock(
-					this.mutableContext!.context,
-					poolAddress,
-					`${this.moduleName}_${ICO_MODULE_SUFFIX}`,
-					params.tokenOut,
-					tokenOutBalance,
-				);
+				await this.tokenMethod!.lock(this.mutableContext!.context, poolAddress, `${this.moduleName}_${ICO_MODULE_SUFFIX}`, params.tokenOut, tokenOutBalance);
 			}
 		}
 
@@ -219,13 +153,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		if (verify) await this.verifyDeposit(params);
 
 		const poolKey = decodeICOPoolAddress(this.key);
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			this.mutableContext!.senderAddress,
-			this.key,
-			poolKey.tokenOut,
-			params.amount,
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, this.mutableContext!.senderAddress, this.key, poolKey.tokenOut, params.amount);
 
 		const events = this.events.get(IcoDepositEvent);
 		events.add(
@@ -253,13 +181,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 		if (verify) await this.verifyDeposit(params);
 
 		const poolKey = decodeICOPoolAddress(this.key);
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			this.key,
-			this.mutableContext!.senderAddress,
-			poolKey.tokenOut,
-			params.amount,
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, this.key, this.mutableContext!.senderAddress, poolKey.tokenOut, params.amount);
 
 		const events = this.events.get(IcoWithdrawEvent);
 		events.add(
@@ -286,56 +208,31 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 
 		if (verify) await this.verifyTreasurify(params);
 
-		if (this.config.icoLeftOverAddress) {
+		const config = await this.getConfig(this.immutableContext!.context);
+
+		if (config.icoLeftOverAddress) {
 			const poolKey = decodeICOPoolAddress(params.poolAddress);
-			if (
-				params.tokenId.compare(poolKey.tokenIn) === 0 ||
-				params.tokenId.compare(poolKey.tokenOut) === 0
-			) {
+			if (params.tokenId.compare(poolKey.tokenIn) === 0 || params.tokenId.compare(poolKey.tokenOut) === 0) {
 				throw new Error(`invalid attempt to treasurify pool's tokenIn or tokenOut`);
 			}
 
 			let tokenToBeTransferred = BigInt(0);
 			let tokenToBeUnlocked = BigInt(0);
 
-			tokenToBeUnlocked = await this.tokenMethod!.getLockedAmount(
-				this.mutableContext!.context,
-				params.poolAddress,
-				params.tokenId,
-				this.moduleName,
-			);
-			tokenToBeTransferred = await this.tokenMethod!.getAvailableBalance(
-				this.mutableContext!.context,
-				params.poolAddress,
-				params.tokenId,
-			);
+			tokenToBeUnlocked = await this.tokenMethod!.getLockedAmount(this.mutableContext!.context, params.poolAddress, params.tokenId, this.moduleName);
+			tokenToBeTransferred = await this.tokenMethod!.getAvailableBalance(this.mutableContext!.context, params.poolAddress, params.tokenId);
 
 			if (tokenToBeTransferred > BigInt(0) || tokenToBeUnlocked > BigInt(0)) {
-				const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(
-					this.config.icoLeftOverAddress,
-					this.config.icoLeftOverAddress.substring(0, 3),
-				);
+				const leftOverAddress = cryptography.address.getAddressFromKlayr32Address(config.icoLeftOverAddress, config.icoLeftOverAddress.substring(0, 3));
 
 				let amount = tokenToBeTransferred;
 
 				if (tokenToBeUnlocked > BigInt(0)) {
-					await this.tokenMethod!.unlock(
-						this.mutableContext!.context,
-						params.poolAddress,
-						`${this.moduleName}_${ICO_MODULE_SUFFIX}`,
-						params.tokenId,
-						tokenToBeUnlocked,
-					);
+					await this.tokenMethod!.unlock(this.mutableContext!.context, params.poolAddress, `${this.moduleName}_${ICO_MODULE_SUFFIX}`, params.tokenId, tokenToBeUnlocked);
 					amount += tokenToBeUnlocked;
 				}
 
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					params.poolAddress,
-					leftOverAddress,
-					params.tokenId,
-					amount,
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, params.poolAddress, leftOverAddress, params.tokenId, amount);
 
 				const events = this.events.get(IcoTreasurifyEvent);
 				events.add(
@@ -353,12 +250,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 	}
 
 	private async _checkICONotCreatedYet(tokenIn: Buffer, tokenOut: Buffer) {
-		if (
-			await this.instanceStore.has(
-				this.immutableContext!.context,
-				computeICOPoolAddress({ tokenIn, tokenOut }),
-			)
-		) {
+		if (await this.instanceStore.has(this.immutableContext!.context, computeICOPoolAddress({ tokenIn, tokenOut }))) {
 			throw new Error('ICO pool already exists');
 		}
 	}
@@ -371,10 +263,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 
 	private async _checkFactoryOwner(factoryToken: Buffer) {
 		this._checkImmutableDependencies();
-		const factory = await this.factoryStore.getImmutableFactory(
-			this.immutableContext!,
-			factoryToken,
-		);
+		const factory = await this.factoryStore.getImmutableFactory(this.immutableContext!, factoryToken);
 		if (!(await factory.isFactoryOwner())) throw new Error('sender is not factory owner');
 	}
 

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { TransactionVerifyContext } from 'klayr-sdk';
 import { BaseFeeConversionMethod, FeeConversionVerificationResult, FeeConversionVerifyStatus } from '../../fee_conversion';
 import { isSwapByTransfer } from '../hooks';

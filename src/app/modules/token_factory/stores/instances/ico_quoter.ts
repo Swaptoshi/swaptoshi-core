@@ -4,7 +4,7 @@
 
 import { GenesisConfig, NamedRegistry } from 'klayr-sdk';
 import Decimal from 'decimal.js';
-import { ICOStoreData, TokenFactoryModuleConfig } from '../../types';
+import { ICOStoreData } from '../../types';
 import { BaseInstance } from './base';
 import { ICOStore } from '../ico';
 import { computeICOPoolAddress } from '../library';
@@ -35,8 +35,8 @@ interface QuoteExactOutputSingleParams {
 }
 
 export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string) {
-		super(ICOStore, stores, events, genesisConfig, config, moduleName, Buffer.alloc(0));
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string) {
+		super(ICOStore, stores, events, genesisConfig, moduleName, Buffer.alloc(0));
 	}
 
 	public async quoteExactInputSingle(params: QuoteExactInputSingleParams) {
@@ -64,7 +64,9 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 	public async quoteExactInput(params: QuoteExactInputParams) {
 		this._checkImmutableDependencies();
 
-		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+		const config = await this.getConfig(this.immutableContext!.context);
+
+		if (!config.icoDexPathEnabled || !this.dexMethod) {
 			throw new Error('quoteExactInput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
 		}
 
@@ -86,7 +88,9 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 	public async quoteExactOutput(params: QuoteExactOutputParams) {
 		this._checkImmutableDependencies();
 
-		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+		const config = await this.getConfig(this.immutableContext!.context);
+
+		if (!config.icoDexPathEnabled || !this.dexMethod) {
 			throw new Error('quoteExactOutput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
 		}
 

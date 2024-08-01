@@ -1,5 +1,5 @@
 export interface TokenFactoryModuleConfig {
-	skippedTokenID: number[];
+	skippedTokenID: string[];
 	icoLeftOverAddress: string;
 	icoFeeConversionEnabled: boolean;
 	icoDexPathEnabled: boolean;

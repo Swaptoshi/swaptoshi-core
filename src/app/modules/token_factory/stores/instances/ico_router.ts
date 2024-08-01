@@ -3,16 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import {
-	ICOExactInputParams,
-	ICOExactInputSingleParams,
-	ICOExactOutputParams,
-	ICOExactOutputSingleParams,
-	ICOStoreData,
-	ImmutableFactoryContext,
-	MutableFactoryContext,
-	TokenFactoryModuleConfig,
-} from '../../types';
+import { ICOExactInputParams, ICOExactInputSingleParams, ICOExactOutputParams, ICOExactOutputSingleParams, ICOStoreData, ImmutableFactoryContext, MutableFactoryContext } from '../../types';
 import { AddDependenciesParam, BaseInstance } from './base';
 import { ICOStore } from '../ico';
 import { serializer, verifyPositiveNumber, verifyToken } from '../../utils';
@@ -22,9 +13,9 @@ import { TOKEN_ID_LENGTH } from '../../constants';
 import { ICOQuoter } from './ico_quoter';
 
 export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string) {
-		super(ICOStore, stores, events, genesisConfig, config, moduleName, Buffer.alloc(0));
-		this.quoter = new ICOQuoter(stores, events, genesisConfig, config, moduleName);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string) {
+		super(ICOStore, stores, events, genesisConfig, moduleName, Buffer.alloc(0));
+		this.quoter = new ICOQuoter(stores, events, genesisConfig, moduleName);
 	}
 
 	public addImmutableDependencies(param: AddDependenciesParam<ImmutableFactoryContext>): void {
@@ -56,7 +47,9 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 	public async verifyExactInput(params: ICOExactInputParams) {
 		this._checkImmutableDependencies();
 
-		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+		const config = await this.getConfig(this.immutableContext!.context);
+
+		if (!config.icoDexPathEnabled || !this.dexMethod) {
 			throw new Error('exactInput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
 		}
 
@@ -124,7 +117,9 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 	public async verifyExactOutput(params: ICOExactOutputParams) {
 		this._checkImmutableDependencies();
 
-		if (!this.config.icoDexPathEnabled || !this.dexMethod) {
+		const config = await this.getConfig(this.immutableContext!.context);
+
+		if (!config.icoDexPathEnabled || !this.dexMethod) {
 			throw new Error('exactOutput is disabled, since config.icoDexPathEnabled is false or dexMethod dependencies is not configured');
 		}
 

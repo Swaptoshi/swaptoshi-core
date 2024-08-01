@@ -1,8 +1,9 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, FeeMethod, GenesisConfig, JSONObject, NamedRegistry, TokenMethod } from 'klayr-sdk';
-import { Constructor, ImmutableFactoryContext, MutableFactoryContext, TokenFactoryModuleConfig } from '../../types';
+import { Constructor, ImmutableContext, ImmutableFactoryContext, MutableFactoryContext } from '../../types';
 import { DexMethod } from '../../../dex/method';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export interface AddDependenciesParam<T extends ImmutableFactoryContext | MutableFactoryContext> {
 	context: T;
@@ -12,12 +13,11 @@ export interface AddDependenciesParam<T extends ImmutableFactoryContext | Mutabl
 }
 
 export class BaseInstance<T, K extends BaseStore<T>> {
-	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, config: TokenFactoryModuleConfig, moduleName: string, key?: Buffer) {
+	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, key?: Buffer) {
 		this.stores = stores;
 		this.events = events;
 		this.moduleName = moduleName;
 		this.genesisConfig = genesisConfig;
-		this.config = config;
 		this.instanceStore = stores.get(storeKey) as unknown as K;
 		if (key) this.key = key;
 	}
@@ -62,6 +62,12 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 		this.addMutableDependencies(param);
 	}
 
+	public async getConfig(context: ImmutableContext) {
+		const configStore = this.stores.get(TokenFactoryGovernableConfig);
+		const config = await configStore.getConfig(context);
+		return config;
+	}
+
 	protected _checkMutableDependencies() {
 		if (!this.mutableDependencyReady) {
 			throw new Error('dependencies not configured');
@@ -95,7 +101,6 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 	protected readonly instanceStore: K;
 	protected readonly stores: NamedRegistry;
 	protected readonly events: NamedRegistry;
-	protected readonly config: TokenFactoryModuleConfig;
 	protected readonly genesisConfig: GenesisConfig;
 	protected readonly moduleName: string;
 

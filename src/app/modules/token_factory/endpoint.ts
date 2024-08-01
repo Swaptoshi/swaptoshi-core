@@ -8,7 +8,6 @@ import {
 	QuoteICOExactInputSingleParams,
 	QuoteICOExactOutputParams,
 	QuoteICOExactOutputSingleParams,
-	TokenFactoryModuleConfig,
 } from './types';
 import { numberToBytes, serializer, verifyAddress, verifyPositiveNumber, verifyString, verifyToken } from './utils';
 import { endpointFactoryContext } from './stores/context';
@@ -18,15 +17,13 @@ import { computeICOPoolAddress } from './stores/library';
 import { FactoryStore } from './stores/factory';
 import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { VestingUnlockStore } from './stores/vesting_unlock';
+import { TokenFactoryGovernableConfig } from './config';
 
 export class TokenFactoryEndpoint extends BaseEndpoint {
-	public init(config: TokenFactoryModuleConfig) {
-		this._config = config;
-	}
-
-	public getConfig(_context: ModuleEndpointContext) {
-		if (!this._config) throw new Error('config not initialized');
-		return serializer(this._config);
+	public async getConfig(_context: ModuleEndpointContext) {
+		const configStore = this.stores.get(TokenFactoryGovernableConfig);
+		const config = await configStore.getConfig(_context);
+		return serializer(config);
 	}
 
 	public async getICOPool(context: ModuleEndpointContext) {
@@ -163,6 +160,4 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 
 		return serializer(vesting);
 	}
-
-	public _config: TokenFactoryModuleConfig | undefined;
 }

@@ -12,7 +12,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async getMutableEmptyICOPool(ctx: MutableFactoryContext) {
 		this._checkDependencies();
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, this.default, Buffer.alloc(0));
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0));
 		ico.addMutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
@@ -24,7 +24,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async getImmutableEmptyICOPool(ctx: ImmutableFactoryContext) {
 		this._checkDependencies();
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, this.default, Buffer.alloc(0));
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0));
 		ico.addImmutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
@@ -38,7 +38,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 
 		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
 
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
 
 		ico.addMutableDependencies({
 			context: ctx,
@@ -54,7 +54,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 
 		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
 
-		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+		const ico = new ICOPool(this.stores, this.events, this.genesisConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
 
 		ico.addImmutableDependencies({
 			context: ctx,
@@ -69,7 +69,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	public async getMutableICORouter(ctx: MutableFactoryContext): Promise<StoreInstance<ICORouter>> {
 		this._checkDependencies();
 
-		const ico = new ICORouter(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName);
+		const ico = new ICORouter(this.stores, this.events, this.genesisConfig!, this.moduleName);
 
 		ico.addMutableDependencies({
 			context: ctx,
@@ -85,7 +85,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	public async getImmutableICORouter(ctx: ImmutableFactoryContext): Promise<StoreInstance<ICORouter>> {
 		this._checkDependencies();
 
-		const ico = new ICORouter(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName);
+		const ico = new ICORouter(this.stores, this.events, this.genesisConfig!, this.moduleName);
 
 		ico.addImmutableDependencies({
 			context: ctx,
@@ -101,7 +101,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	public async getImmutableICOQuoter(ctx: ImmutableFactoryContext): Promise<StoreInstance<ICOQuoter>> {
 		this._checkDependencies();
 
-		const quoter = new ICOQuoter(this.stores, this.events, this.genesisConfig!, this.factoryConfig!, this.moduleName);
+		const quoter = new ICOQuoter(this.stores, this.events, this.genesisConfig!, this.moduleName);
 
 		quoter.addImmutableDependencies({
 			context: ctx,

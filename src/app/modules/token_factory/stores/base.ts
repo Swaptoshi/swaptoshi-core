@@ -1,14 +1,4 @@
-import {
-	BaseStore,
-	FeeMethod,
-	GenesisConfig,
-	ImmutableStoreGetter,
-	NamedRegistry,
-	TokenMethod,
-	db,
-	utils,
-} from 'klayr-sdk';
-import { TokenFactoryModuleConfig } from '../types';
+import { BaseStore, FeeMethod, GenesisConfig, ImmutableStoreGetter, NamedRegistry, TokenMethod, db, utils } from 'klayr-sdk';
 import { DexMethod } from '../../dex/method';
 
 interface AddDependenciesParam {
@@ -18,12 +8,7 @@ interface AddDependenciesParam {
 }
 
 export class BaseStoreWithInstance<T> extends BaseStore<T> {
-	public constructor(
-		moduleName: string,
-		index: number,
-		stores: NamedRegistry,
-		events: NamedRegistry,
-	) {
+	public constructor(moduleName: string, index: number, stores: NamedRegistry, events: NamedRegistry) {
 		super(moduleName, index);
 		this.stores = stores;
 		this.events = events;
@@ -61,13 +46,11 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 
 	public addDependencies(params: AddDependenciesParam) {
 		Object.assign(this, params);
-		if (this.genesisConfig !== undefined && this.factoryConfig !== undefined)
-			this.dependencyReady = true;
+		if (this.genesisConfig !== undefined) this.dependencyReady = true;
 	}
 
-	public init(genesisConfig: GenesisConfig, factoryConfig: TokenFactoryModuleConfig) {
+	public init(genesisConfig: GenesisConfig) {
 		this.genesisConfig = genesisConfig;
-		this.factoryConfig = factoryConfig;
 		if (this.tokenMethod !== undefined && this.feeMethod !== undefined) this.dependencyReady = true;
 	}
 
@@ -86,7 +69,6 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 	protected dexMethod: DexMethod | undefined;
 
 	protected genesisConfig: GenesisConfig | undefined = undefined;
-	protected factoryConfig: TokenFactoryModuleConfig | undefined = undefined;
 	protected dependencyReady = false;
 
 	protected readonly default: T | undefined = undefined;

@@ -102,17 +102,17 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * Hook called before on-chain config is changed.
 	 * Should be extended by children class as needed
 	 *
-	 * @param _ctx - The before set config context, consist of MethodContext & config.
+	 * @param _context - The before set config context, consist of MethodContext & config.
 	 */
-	public async beforeSetConfig(_ctx: GovernableConfigSetContext<T>): Promise<void> {}
+	public async beforeSetConfig(_context: GovernableConfigSetContext<T>): Promise<void> {}
 
 	/**
 	 * Hook called after on-chain config is changed.
 	 * Should be extended by children class as needed
 	 *
-	 * @param _ctx - The after set config context, consist of MethodContext & config.
+	 * @param _context - The after set config context, consist of MethodContext & config.
 	 */
-	public async afterSetConfig(_ctx: GovernableConfigSetContext<T>): Promise<void> {}
+	public async afterSetConfig(_context: GovernableConfigSetContext<T>): Promise<void> {}
 
 	/**
 	 * Hook called before the storing on-chain configuration.
@@ -152,33 +152,33 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	/**
 	 * Retrieves the current on-chain configuration.
 	 *
-	 * @param ctx - The context for retrieving the immutable store.
+	 * @param context - The context for retrieving the immutable store.
 	 * @returns The current configuration.
 	 */
-	public async getConfig(ctx: ImmutableStoreGetter): Promise<T> {
-		const configStore = await this.get(ctx, this.storeKey);
+	public async getConfig(context: ImmutableStoreGetter): Promise<T> {
+		const configStore = await this.get(context, this.storeKey);
 		return codec.decode<T>(this.schema, configStore.data);
 	}
 
 	/**
 	 * Sets the on-chain configuration.
 	 *
-	 * @param ctx - The context for setting the store.
+	 * @param context - The context for setting the store.
 	 * @param value - The new configuration value.
 	 */
-	public async setConfig(ctx: MethodContext, value: T): Promise<void> {
+	public async setConfig(context: MethodContext, value: T): Promise<void> {
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
-		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
+		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
 		let oldConfig: T = {} as T;
-		if (await this.has(ctx, this.storeKey)) oldConfig = (await this.getConfig(ctx)) as T;
+		if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
 
-		await this.beforeSetConfig({ ...ctx, config: oldConfig });
+		await this.beforeSetConfig({ ...context, config: oldConfig });
 
-		await this.set(ctx, this.storeKey, { data: codec.encode(this.schema, value) });
+		await this.set(context, this.storeKey, { data: codec.encode(this.schema, value) });
 
 		if (this.registered) {
 			const events = this.events.get(ConfigUpdatedEvent);
@@ -186,7 +186,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 			updatedPaths.forEach(updated => {
 				events.add(
-					ctx,
+					context,
 					{
 						module: this.module,
 						path: updated.path,
@@ -199,19 +199,19 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 			});
 		}
 
-		await this.afterSetConfig({ ...ctx, config: value });
+		await this.afterSetConfig({ ...context, config: value });
 	}
 
 	/**
 	 * Retrieves an on-chain configuration value using a dot-separated path.
 	 *
-	 * @param ctx - The context for retrieving the immutable store.
+	 * @param context - The context for retrieving the immutable store.
 	 * @param path - The dot-separated path to the configuration value.
 	 * @returns The value at the specified path in the configuration.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async getConfigWithPath<P extends ConfigPathKeys<T>>(ctx: ImmutableStoreGetter, path: P): Promise<ConfigPathType<T, P>> {
-		const config = (await this.getConfig(ctx)) as T;
+	public async getConfigWithPath<P extends ConfigPathKeys<T>>(context: ImmutableStoreGetter, path: P): Promise<ConfigPathType<T, P>> {
+		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
 		}
@@ -222,35 +222,35 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	/**
 	 * Sets the on-chain configuration value using a dot-separated path.
 	 *
-	 * @param ctx - The context for setting the store.
+	 * @param context - The context for setting the store.
 	 * @param path - The dot-separated path to the configuration value.
 	 * @param value - The value to set at the specified path.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async setConfigWithPath<P extends ConfigPathKeys<T>>(ctx: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<void> {
-		const config = (await this.getConfig(ctx)) as T;
+	public async setConfigWithPath<P extends ConfigPathKeys<T>>(context: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<void> {
+		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
 		}
 		const updatedConfig = updateValueFromPath(config, path, value);
-		await this.setConfig(ctx, updatedConfig);
+		await this.setConfig(context, updatedConfig);
 	}
 
 	/**
 	 * Dry running set the on-chain configuration.
 	 *
-	 * @param ctx - The context for setting the store.
+	 * @param context - The context for setting the store.
 	 * @param value - The new configuration value.
 	 */
-	public async dryRunSetConfig(ctx: MethodContext, value: T): Promise<UpdatedProperty[]> {
+	public async dryRunSetConfig(context: MethodContext, value: T): Promise<UpdatedProperty[]> {
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
-		const verify = await this.verify({ context: ctx, config: value, genesisConfig: this.genesisConfig });
+		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
 		let oldConfig: object = {};
-		if (await this.has(ctx, this.storeKey)) oldConfig = (await this.getConfig(ctx)) as T;
+		if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
 
 		if (this.registered) {
 			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
@@ -263,44 +263,44 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	/**
 	 * Dry running set the on-chain configuration value using a dot-separated path.
 	 *
-	 * @param ctx - The context for setting the store.
+	 * @param context - The context for setting the store.
 	 * @param path - The dot-separated path to the configuration value.
 	 * @param value - The value to set at the specified path.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(ctx: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
-		const config = (await this.getConfig(ctx)) as T;
+	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(context: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
+		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
 		}
 		const updatedConfig = updateValueFromPath(config, path, value);
-		return this.dryRunSetConfig(ctx, updatedConfig);
+		return this.dryRunSetConfig(context, updatedConfig);
 	}
 
 	// Below this are Klayr SDK BaseStore overriden implementation
 
-	public async get(ctx: ImmutableStoreGetter, key: Buffer): Promise<GovernableConfigStoreData> {
-		const subStore = ctx.getStore(this.storePrefix, this.subStorePrefix);
+	public async get(context: ImmutableStoreGetter, key: Buffer): Promise<GovernableConfigStoreData> {
+		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.getWithSchema<GovernableConfigStoreData>(key, governableConfigSchema);
 	}
 
-	public async has(ctx: ImmutableStoreGetter, key: Buffer): Promise<boolean> {
-		const subStore = ctx.getStore(this.storePrefix, this.subStorePrefix);
+	public async has(context: ImmutableStoreGetter, key: Buffer): Promise<boolean> {
+		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.has(key);
 	}
 
-	public async iterate(ctx: ImmutableStoreGetter, options: IterateOptions): Promise<{ key: Buffer; value: GovernableConfigStoreData }[]> {
-		const subStore = ctx.getStore(this.storePrefix, this.subStorePrefix);
+	public async iterate(context: ImmutableStoreGetter, options: IterateOptions): Promise<{ key: Buffer; value: GovernableConfigStoreData }[]> {
+		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.iterateWithSchema<GovernableConfigStoreData>(options, governableConfigSchema);
 	}
 
-	public async set(ctx: StoreGetter, key: Buffer, value: GovernableConfigStoreData): Promise<void> {
-		const subStore = ctx.getStore(this.storePrefix, this.subStorePrefix);
+	public async set(context: StoreGetter, key: Buffer, value: GovernableConfigStoreData): Promise<void> {
+		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.setWithSchema(key, value, governableConfigSchema);
 	}
 
-	public async del(ctx: StoreGetter, key: Buffer): Promise<void> {
-		const subStore = ctx.getStore(this.storePrefix, this.subStorePrefix);
+	public async del(context: StoreGetter, key: Buffer): Promise<void> {
+		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.del(key);
 	}
 }

@@ -13,15 +13,7 @@ export class VestingUnlockStore extends BaseStoreWithInstance<VestingUnlockStore
 
 		const vestingUnlockData = await this.getOrDefault(ctx.context, numberToBytes(ctx.height));
 
-		const vestingUnlock = new VestingUnlock(
-			this.stores,
-			this.events,
-			this.genesisConfig!,
-			this.factoryConfig!,
-			this.moduleName,
-			vestingUnlockData,
-			ctx.height,
-		);
+		const vestingUnlock = new VestingUnlock(this.stores, this.events, this.genesisConfig!, this.moduleName, vestingUnlockData, ctx.height);
 
 		vestingUnlock.addMutableDependencies({
 			context: ctx,

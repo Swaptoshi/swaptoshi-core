@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { NamedRegistry, TransactionVerifyContext, codec } from 'klayr-sdk';
 import { nftTransferParamsSchema } from '../../schema';
 import { ICOStore } from '../../stores/ico';
