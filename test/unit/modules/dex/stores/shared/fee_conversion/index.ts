@@ -8,6 +8,7 @@ import { FeeConversionMethodRegistry } from '../../../../../../../src/app/module
 export const mock_fee_conversion_init = jest.fn();
 export const mock_fee_conversion_add_dependencies = jest.fn();
 export const mock_fee_conversion_register = jest.fn();
+export const mock_fee_conversion_unregister = jest.fn();
 
 export class MockedFeeConversionMethod implements Omit<FeeConversionMethod, ''> {
 	public init(handler: FeeConversionMethodRegistry): void {
@@ -20,5 +21,9 @@ export class MockedFeeConversionMethod implements Omit<FeeConversionMethod, ''> 
 
 	public register(module: string, commands: string[], handler: BaseFeeConversionMethod): void {
 		mock_fee_conversion_register(module, commands, handler);
+	}
+
+	public unregister(module: string, commands: string[], handler: BaseFeeConversionMethod): void {
+		mock_fee_conversion_unregister(module, commands, handler);
 	}
 }

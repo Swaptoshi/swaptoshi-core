@@ -9,6 +9,7 @@ import { BaseInstance } from './base';
 import { ICOStore } from '../ico';
 import { computeICOPoolAddress } from '../library';
 import { TOKEN_ID_LENGTH } from '../../constants';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 interface QuoteExactInputParams {
 	path: Buffer;
@@ -35,8 +36,8 @@ interface QuoteExactOutputSingleParams {
 }
 
 export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string) {
-		super(ICOStore, stores, events, genesisConfig, moduleName, Buffer.alloc(0));
+	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string) {
+		super(ICOStore, stores, events, config, genesisConfig, moduleName, Buffer.alloc(0));
 	}
 
 	public async quoteExactInputSingle(params: QuoteExactInputSingleParams) {

@@ -11,11 +11,12 @@ import { computeICOPoolAddress } from '../library';
 import { IcoSwapEvent } from '../../events/ico_swap';
 import { TOKEN_ID_LENGTH } from '../../constants';
 import { ICOQuoter } from './ico_quoter';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string) {
-		super(ICOStore, stores, events, genesisConfig, moduleName, Buffer.alloc(0));
-		this.quoter = new ICOQuoter(stores, events, genesisConfig, moduleName);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string) {
+		super(ICOStore, stores, events, config, genesisConfig, moduleName, Buffer.alloc(0));
+		this.quoter = new ICOQuoter(stores, events, config, genesisConfig, moduleName);
 	}
 
 	public addImmutableDependencies(param: AddDependenciesParam<ImmutableFactoryContext>): void {

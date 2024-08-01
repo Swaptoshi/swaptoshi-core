@@ -238,10 +238,10 @@ export class TokenFactoryModule extends BaseModule {
 		const icoStore = this.stores.get(ICOStore);
 		const vestingUnlockStore = this.stores.get(VestingUnlockStore);
 
-		airdropStore.init(_args.genesisConfig);
-		factoryStore.init(_args.genesisConfig);
-		icoStore.init(_args.genesisConfig);
-		vestingUnlockStore.init(_args.genesisConfig);
+		airdropStore.init(_args.genesisConfig, this._config);
+		factoryStore.init(_args.genesisConfig, this._config);
+		icoStore.init(_args.genesisConfig, this._config);
+		vestingUnlockStore.init(_args.genesisConfig, this._config);
 
 		if (this._governanceMethod) {
 			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);

@@ -15,10 +15,11 @@ import { IcoPriceChangedEvent } from '../../events/ico_price_changed';
 import { IcoDepositEvent } from '../../events/ico_deposit';
 import { IcoWithdrawEvent } from '../../events/ico_withdraw';
 import { ICO_MODULE_SUFFIX } from '../../constants';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, ico: ICOStoreData, poolAddress: Buffer) {
-		super(ICOStore, stores, events, genesisConfig, moduleName, poolAddress);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, ico: ICOStoreData, poolAddress: Buffer) {
+		super(ICOStore, stores, events, config, genesisConfig, moduleName, poolAddress);
 
 		if (ico) Object.assign(this, utils.objects.cloneDeep(ico));
 		this.factoryStore = stores.get(FactoryStore);

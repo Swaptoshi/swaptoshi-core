@@ -12,10 +12,11 @@ import { VestingUnlockStore } from '../vesting_unlock';
 import { serializer, verifyAddress, verifyBuffer, verifyPositiveNumber, verifyString, verifyToken } from '../../utils';
 import { FactoryOwnerChangedEvent } from '../../events/factory_owner_changed';
 import { FactorySetAttributesEvent } from '../../events/factory_set_attributes';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
-		super(FactoryStore, stores, events, genesisConfig, moduleName, tokenId);
+	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
+		super(FactoryStore, stores, events, config, genesisConfig, moduleName, tokenId);
 
 		Object.assign(this, utils.objects.cloneDeep(factory));
 

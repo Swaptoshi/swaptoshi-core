@@ -11,7 +11,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 	public async getMutableEmptyAirdrop(ctx: MutableFactoryContext): Promise<StoreInstance<Airdrop>> {
 		this._checkDependencies();
 
-		const airdrop = new Airdrop(this.stores, this.events, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0), Buffer.alloc(0));
+		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0), Buffer.alloc(0));
 
 		airdrop.addMutableDependencies({
 			context: ctx,
@@ -26,7 +26,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 	public async getImmutableEmptyAirdrop(ctx: ImmutableFactoryContext): Promise<StoreInstance<Airdrop>> {
 		this._checkDependencies();
 
-		const airdrop = new Airdrop(this.stores, this.events, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0), Buffer.alloc(0));
+		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, this.default, Buffer.alloc(0), Buffer.alloc(0));
 
 		airdrop.addImmutableDependencies({
 			context: ctx,
@@ -42,7 +42,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 
 		const airdropData = await this.get(ctx.context, this._getKey(tokenId, providerAddress));
 
-		const airdrop = new Airdrop(this.stores, this.events, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
+		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
 
 		airdrop.addMutableDependencies({
 			context: ctx,
@@ -58,7 +58,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 
 		const airdropData = await this.get(ctx.context, this._getKey(tokenId, providerAddress));
 
-		const airdrop = new Airdrop(this.stores, this.events, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
+		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
 
 		airdrop.addImmutableDependencies({
 			context: ctx,

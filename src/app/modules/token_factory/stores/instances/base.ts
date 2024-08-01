@@ -13,10 +13,11 @@ export interface AddDependenciesParam<T extends ImmutableFactoryContext | Mutabl
 }
 
 export class BaseInstance<T, K extends BaseStore<T>> {
-	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, key?: Buffer) {
+	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, key?: Buffer) {
 		this.stores = stores;
 		this.events = events;
 		this.moduleName = moduleName;
+		this.config = config;
 		this.genesisConfig = genesisConfig;
 		this.instanceStore = stores.get(storeKey) as unknown as K;
 		if (key) this.key = key;
@@ -63,8 +64,7 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 	}
 
 	public async getConfig(context: ImmutableContext) {
-		const configStore = this.stores.get(TokenFactoryGovernableConfig);
-		const config = await configStore.getConfig(context);
+		const config = await this.config.getConfig(context);
 		return config;
 	}
 
@@ -103,6 +103,7 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 	protected readonly events: NamedRegistry;
 	protected readonly genesisConfig: GenesisConfig;
 	protected readonly moduleName: string;
+	protected readonly config: TokenFactoryGovernableConfig;
 
 	protected readonly tokenMethod: TokenMethod | undefined;
 	protected readonly feeMethod: FeeMethod | undefined;

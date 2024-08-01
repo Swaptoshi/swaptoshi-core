@@ -11,10 +11,20 @@ import { serializer, verifyAddress, verifyPositiveNumber, verifyToken } from '..
 import { AirdropCreatedEvent } from '../../events/airdrop_created';
 import { AirdropRecipientsChangedEvent } from '../../events/airdrop_recipients_changed';
 import { AirdropDistributedEvent } from '../../events/airdrop_distributed';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export class Airdrop extends BaseInstance<AirdropStoreData, AirdropStore> implements AirdropStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, airdrop: AirdropStoreData, tokenId: Buffer, providerAddress: Buffer) {
-		super(AirdropStore, stores, events, genesisConfig, moduleName, Buffer.concat([tokenId, providerAddress]));
+	public constructor(
+		stores: NamedRegistry,
+		events: NamedRegistry,
+		config: TokenFactoryGovernableConfig,
+		genesisConfig: GenesisConfig,
+		moduleName: string,
+		airdrop: AirdropStoreData,
+		tokenId: Buffer,
+		providerAddress: Buffer,
+	) {
+		super(AirdropStore, stores, events, config, genesisConfig, moduleName, Buffer.concat([tokenId, providerAddress]));
 
 		Object.assign(this, utils.objects.cloneDeep(airdrop));
 

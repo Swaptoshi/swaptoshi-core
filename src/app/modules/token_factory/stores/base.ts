@@ -1,5 +1,7 @@
+/* eslint-disable import/no-cycle */
 import { BaseStore, FeeMethod, GenesisConfig, ImmutableStoreGetter, NamedRegistry, TokenMethod, db, utils } from 'klayr-sdk';
 import { DexMethod } from '../../dex/method';
+import { TokenFactoryGovernableConfig } from '../config';
 
 interface AddDependenciesParam {
 	tokenMethod?: TokenMethod;
@@ -46,11 +48,12 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 
 	public addDependencies(params: AddDependenciesParam) {
 		Object.assign(this, params);
-		if (this.genesisConfig !== undefined) this.dependencyReady = true;
+		if (this.genesisConfig !== undefined && this.config !== undefined) this.dependencyReady = true;
 	}
 
-	public init(genesisConfig: GenesisConfig) {
+	public init(genesisConfig: GenesisConfig, governableConfig: TokenFactoryGovernableConfig) {
 		this.genesisConfig = genesisConfig;
+		this.config = governableConfig;
 		if (this.tokenMethod !== undefined && this.feeMethod !== undefined) this.dependencyReady = true;
 	}
 
@@ -69,6 +72,7 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 	protected dexMethod: DexMethod | undefined;
 
 	protected genesisConfig: GenesisConfig | undefined = undefined;
+	protected config: TokenFactoryGovernableConfig | undefined = undefined;
 	protected dependencyReady = false;
 
 	protected readonly default: T | undefined = undefined;

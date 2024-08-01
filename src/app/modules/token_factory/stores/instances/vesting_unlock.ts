@@ -10,10 +10,19 @@ import { VestingUnlockStore } from '../vesting_unlock';
 import { VestedTokenUnlockedEvent } from '../../events/vested_token_unlocked';
 import { VestedTokenLockedEvent } from '../../events/vested_token_locked';
 import { VESTING_MODULE_SUFFIX } from '../../constants';
+import { TokenFactoryGovernableConfig } from '../../config';
 
 export class VestingUnlock extends BaseInstance<VestingUnlockStoreData, VestingUnlockStore> implements VestingUnlockStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, moduleName: string, vestingUnlock: VestingUnlockStoreData, height: number) {
-		super(VestingUnlockStore, stores, events, genesisConfig, moduleName, numberToBytes(height));
+	public constructor(
+		stores: NamedRegistry,
+		events: NamedRegistry,
+		config: TokenFactoryGovernableConfig,
+		genesisConfig: GenesisConfig,
+		moduleName: string,
+		vestingUnlock: VestingUnlockStoreData,
+		height: number,
+	) {
+		super(VestingUnlockStore, stores, events, config, genesisConfig, moduleName, numberToBytes(height));
 		Object.assign(this, utils.objects.cloneDeep(vestingUnlock));
 	}
 
