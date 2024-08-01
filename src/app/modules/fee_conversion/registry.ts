@@ -7,7 +7,12 @@ export class FeeConversionMethodRegistry {
 	public register(key: string, value: BaseFeeConversionMethod): void {
 		if (this._registry.has(key)) {
 			const methods = this._registry.get(key);
-			methods?.push(value);
+			const index = methods?.findIndex(method => method.name === value.name);
+			if (index !== undefined && index !== -1 && methods) {
+				methods.splice(index, 1, value);
+			} else {
+				methods?.push(value);
+			}
 		} else {
 			this._registry.set(key, [value]);
 		}
