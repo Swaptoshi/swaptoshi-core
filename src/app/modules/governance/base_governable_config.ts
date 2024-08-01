@@ -34,6 +34,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	protected storeKey = Buffer.alloc(0);
 	protected events: NamedRegistry = new NamedRegistry();
 	protected registered: boolean = false;
+	protected initialized: boolean = false;
 	protected module: string = '';
 	protected method: GovernanceMethod | undefined;
 
@@ -131,12 +132,15 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 	/**
 	 * Initializes the module with the provided configuration arguments.
+	 * Should be called if config is not registered
 	 *
 	 * @param args - The initialization arguments including the genesis configuration and module configuration.
 	 */
 	public init(args: ModuleInitArgs): void {
 		this.beforeConfigInit(args.genesisConfig);
 		this.default = utils.objects.mergeDeep({}, this.default, args.moduleConfig) as T;
+		validator.validator.validate(this.schema, this.default);
+		this.initialized = true;
 	}
 
 	/**
@@ -145,7 +149,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 *
 	 * @param context - The genesis block execution context.
 	 */
-	public async initConfig(context: BlockExecuteContext): Promise<void> {
+	public async initRegisteredConfig(context: BlockExecuteContext): Promise<void> {
 		if (await this.has(context, this.storeKey)) return;
 
 		if (Object.keys(this.schema.properties).length === 0) throw new Error(`schema for ${this.name} is not configured`);
@@ -155,13 +159,19 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 	/**
 	 * Retrieves the current on-chain configuration.
+	 * Will use in-memory config, if config is not registered as governable
 	 *
 	 * @param context - The context for retrieving the immutable store.
 	 * @returns The current configuration.
 	 */
 	public async getConfig(context: ImmutableStoreGetter): Promise<T> {
-		const configStore = await this.get(context, this.storeKey);
-		return codec.decode<T>(this.schema, configStore.data);
+		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
+
+		if (this.registered) {
+			const configStore = await this.get(context, this.storeKey);
+			return codec.decode<T>(this.schema, configStore.data);
+		}
+		return this.default;
 	}
 
 	/**
@@ -171,20 +181,21 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async setConfig(context: MethodContext, value: T): Promise<void> {
+		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
-		let oldConfig: T = {} as T;
-		if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
-
-		await this.beforeSetConfig({ ...context, config: oldConfig });
-
-		await this.set(context, this.storeKey, { data: codec.encode(this.schema, value) });
-
 		if (this.registered) {
+			let oldConfig: T = {} as T;
+			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
+
+			await this.beforeSetConfig({ ...context, config: oldConfig });
+
+			await this.set(context, this.storeKey, { data: codec.encode(this.schema, value) });
+
 			const events = this.events.get(ConfigUpdatedEvent);
 			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
 
@@ -201,6 +212,8 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 					[this.storePrefix],
 				);
 			});
+		} else {
+			this.default = value;
 		}
 
 		await this.afterSetConfig({ ...context, config: value });
@@ -208,6 +221,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 	/**
 	 * Retrieves an on-chain configuration value using a dot-separated path.
+	 * Will use in-memory config, if config is not registered as governable
 	 *
 	 * @param context - The context for retrieving the immutable store.
 	 * @param path - The dot-separated path to the configuration value.
@@ -247,16 +261,17 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async dryRunSetConfig(context: MethodContext, value: T): Promise<UpdatedProperty[]> {
+		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(this.schema, value);
 
-		let oldConfig: object = {};
-		if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
-
 		if (this.registered) {
+			let oldConfig: object = {};
+			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
+
 			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
 			return updatedPaths;
 		}

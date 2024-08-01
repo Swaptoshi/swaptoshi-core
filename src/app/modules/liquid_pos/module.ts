@@ -61,6 +61,8 @@ export class LiquidPosModule extends BaseModule {
 	public async init(_args: ModuleInitArgs): Promise<void> {
 		if (this._governanceMethod) {
 			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
+		} else {
+			this._config.init(_args);
 		}
 
 		this._internalMethod.init(this._config.default, _args.genesisConfig);

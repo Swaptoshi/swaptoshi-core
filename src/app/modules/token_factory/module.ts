@@ -245,6 +245,8 @@ export class TokenFactoryModule extends BaseModule {
 
 		if (this._governanceMethod) {
 			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
+		} else {
+			this._config.init(_args);
 		}
 
 		if (!this._feeMethod || !this._tokenMethod || !this._nftMethod) {
