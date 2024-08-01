@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, BlockAfterExecuteContext, BlockExecuteContext, ImmutableStoreGetter, TokenMethod, cryptography } from 'klayr-sdk';
+import { BaseMethod, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ImmutableStoreGetter, TokenMethod, VerifyStatus, cryptography, validator } from 'klayr-sdk';
 import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD } from './constants';
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tex';
@@ -30,6 +30,21 @@ export class GovernanceInternalMethod extends BaseMethod {
 			for (const governableConfig of governableConfigList) {
 				await governableConfig.initConfig(context);
 			}
+		}
+	}
+
+	public async verifyGovernableConfig(context: GenesisBlockExecuteContext) {
+		if (!this._governableConfig) throw new Error('GovernanceInternalMethod dependencies is not configured');
+
+		const governableConfigList = this._governableConfig.values();
+
+		for (const governableConfig of governableConfigList) {
+			if (!governableConfig.genesisConfig) throw new Error(`${governableConfig.name} genesis config is not registered`);
+
+			const verify = await governableConfig.verify({ context, config: governableConfig.default, genesisConfig: governableConfig.genesisConfig });
+
+			if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${governableConfig.name}: ${verify.error ? verify.error.message : 'unknown'}`);
+			validator.validator.validate(governableConfig.schema, governableConfig.default);
 		}
 	}
 

@@ -31,7 +31,6 @@ import { GovernanceMethod } from './method';
  * The `BaseGovernableConfig` provides a framework for implementing on-chain configurations that can be managed through proposals in the `governance` module.
  */
 export abstract class BaseGovernableConfig<T extends object> extends BaseStore<GovernableConfigStoreData> {
-	protected genesisConfig: GenesisConfig | undefined;
 	protected storeKey = Buffer.alloc(0);
 	protected events: NamedRegistry = new NamedRegistry();
 	protected registered: boolean = false;
@@ -52,6 +51,11 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * The default configuration values.
 	 */
 	public default: T = {} as T;
+
+	/**
+	 * The chain genesis configuration.
+	 */
+	public genesisConfig: GenesisConfig | undefined;
 
 	/**
 	 * The governable config name is the unique identifier for the config.

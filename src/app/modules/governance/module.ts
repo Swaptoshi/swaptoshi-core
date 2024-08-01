@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, BlockAfterExecuteContext, BlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod } from 'klayr-sdk';
+import { BaseModule, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod } from 'klayr-sdk';
 import { GovernanceEndpoint } from './endpoint';
 import { GovernanceMethod } from './method';
 import { GovernanceInternalMethod } from './internal_method';
@@ -54,5 +54,9 @@ export class GovernanceModule extends BaseModule {
 
 	public async beforeTransactionsExecute(context: BlockExecuteContext): Promise<void> {
 		await this._internalMethod.initializeGovernableConfig(context);
+	}
+
+	public async initGenesisState(context: GenesisBlockExecuteContext): Promise<void> {
+		await this._internalMethod.verifyGovernableConfig(context);
 	}
 }
