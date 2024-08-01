@@ -5,6 +5,21 @@ import { ConfigPathKeys, ConfigPathType, UpdatedProperty } from '../types';
 type iSchema = Schema & { dataType: string; items: Schema & { dataType: string; items: any } };
 type Primitive = string | number | bigint | boolean | null | undefined;
 
+export function getSchemaByPath(schema: Schema, path: string): Schema {
+	const pathParts = path.split('.').filter(Boolean);
+	let currentSchema: Schema = schema;
+
+	for (const part of pathParts) {
+		if (currentSchema?.properties && currentSchema.properties[part]) {
+			currentSchema = currentSchema.properties[part] as Schema;
+		} else {
+			throw new Error(`Schema not found for path: ${path}`);
+		}
+	}
+
+	return currentSchema;
+}
+
 export function getUpdatedProperties(oldObject: object, newObject: object, schema: Schema): UpdatedProperty[] {
 	const updatedProperties: UpdatedProperty[] = [];
 
@@ -27,18 +42,12 @@ export function getUpdatedProperties(oldObject: object, newObject: object, schem
 			if (typeof oldVal === 'object' && oldVal !== null) {
 				const keys = new Set([...Object.keys(oldVal), ...Object.keys(newVal)]);
 				keys.forEach(key => {
-					const newSchema = schemaDef?.properties ? (schemaDef.properties[key] as Schema) : undefined;
-					if (!newSchema) {
-						throw new Error(`Schema not found for path: ${path}.${key}`);
-					}
+					const newSchema = getSchemaByPath(schema, path ? `${path}.${key}` : key);
 					deepCompare(oldVal[key] as Primitive | object, newVal[key] as Primitive | object, path ? `${path}.${key}` : key, newSchema);
 				});
 			} else {
 				Object.keys(newVal).forEach(key => {
-					const newSchema = schemaDef?.properties ? (schemaDef.properties[key] as Schema) : undefined;
-					if (!newSchema) {
-						throw new Error(`Schema not found for path: ${path}.${key}`);
-					}
+					const newSchema = getSchemaByPath(schema, path ? `${path}.${key}` : key);
 					deepCompare(undefined, newVal[key] as Primitive | object, path ? `${path}.${key}` : key, newSchema);
 				});
 			}
