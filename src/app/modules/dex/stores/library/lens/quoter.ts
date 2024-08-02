@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-constant-condition */
@@ -7,26 +8,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { NamedRegistry } from 'klayr-sdk';
-import {
-	Uint256String,
-	Uint24String,
-	Uint160String,
-	Int24String,
-	Int256String,
-	Int256,
-	Uint256,
-	Uint160,
-	Int128String,
-	Uint128String,
-	Int16String,
-	Int24,
-} from '../int';
-import {
-	ImmutableSwapContext,
-	QuoteExactInputSingleParams,
-	QuoteExactOutputSingleParams,
-	DEXPoolData,
-} from '../../../types';
+import { Uint256String, Uint24String, Uint160String, Int24String, Int256String, Int256, Uint256, Uint160, Int128String, Uint128String, Int16String, Int24 } from '../int';
+import { ImmutableSwapContext, QuoteExactInputSingleParams, QuoteExactOutputSingleParams, DEXPoolData } from '../../../types';
 import { PoolStore } from '../../pool';
 
 import * as Path from '../periphery/path';
@@ -57,23 +40,12 @@ export class Quoter {
 		this.tokenSymbolStore = stores.get(TokenSymbolStore);
 	}
 
-	public async getPopulatedTicksInWord(
-		tokenA: Buffer,
-		tokenB: Buffer,
-		fee: Int24String,
-		tickBitmapIndex: Int16String,
-	): Promise<PopulatedTick[]> {
-		const pool = await this.poolStore!.getImmutablePool(
-			this.immutableContext!,
-			tokenA,
-			tokenB,
-			fee,
-		);
+	public async getPopulatedTicksInWord(tokenA: Buffer, tokenB: Buffer, fee: Int24String, tickBitmapIndex: Int16String): Promise<PopulatedTick[]> {
+		const pool = await this.poolStore!.getImmutablePool(this.immutableContext!, tokenA, tokenB, fee);
 		const bitmap = Uint256.from(await pool.getTickBitmap(tickBitmapIndex));
 		let numberOfPopulatedTicks = Uint256.from(0);
 		for (let i = 0; i < 256; i += 1) {
-			if (bitmap.and(Uint256.from(1).shl(i)).gt(0))
-				numberOfPopulatedTicks = numberOfPopulatedTicks.add(1);
+			if (bitmap.and(Uint256.from(1).shl(i)).gt(0)) numberOfPopulatedTicks = numberOfPopulatedTicks.add(1);
 		}
 
 		const populatedTicks = new Array<PopulatedTick>(numberOfPopulatedTicks.toNumber());
@@ -94,17 +66,9 @@ export class Quoter {
 		return populatedTicks;
 	}
 
-	public async quoteExactInputSingle(
-		params: QuoteExactInputSingleParams,
-	): Promise<{ amountOut: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
-		const zeroForOne =
-			Buffer.from(params.tokenIn, 'hex').compare(Buffer.from(params.tokenOut, 'hex')) < 0;
-		const pool = await this.poolStore!.getImmutablePool(
-			this.immutableContext!,
-			Buffer.from(params.tokenIn, 'hex'),
-			Buffer.from(params.tokenOut, 'hex'),
-			params.fee,
-		);
+	public async quoteExactInputSingle(params: QuoteExactInputSingleParams): Promise<{ amountOut: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
+		const zeroForOne = Buffer.from(params.tokenIn, 'hex').compare(Buffer.from(params.tokenOut, 'hex')) < 0;
+		const pool = await this.poolStore!.getImmutablePool(this.immutableContext!, Buffer.from(params.tokenIn, 'hex'), Buffer.from(params.tokenOut, 'hex'), params.fee);
 
 		try {
 			await pool
@@ -150,14 +114,13 @@ export class Quoter {
 		while (true) {
 			const [tokenIn, tokenOut, fee] = Path.decodeFirstPool(_path);
 
-			const { amountOut, sqrtPriceX96After, initializedTicksCrossed } =
-				await this.quoteExactInputSingle({
-					tokenIn: tokenIn.toString('hex'),
-					tokenOut: tokenOut.toString('hex'),
-					fee,
-					amountIn,
-					sqrtPriceLimitX96: '0',
-				});
+			const { amountOut, sqrtPriceX96After, initializedTicksCrossed } = await this.quoteExactInputSingle({
+				tokenIn: tokenIn.toString('hex'),
+				tokenOut: tokenOut.toString('hex'),
+				fee,
+				amountIn,
+				sqrtPriceLimitX96: '0',
+			});
 
 			sqrtPriceX96AfterList[i.toNumber()] = sqrtPriceX96After;
 			initializedTicksCrossedList[i.toNumber()] = initializedTicksCrossed;
@@ -172,17 +135,9 @@ export class Quoter {
 		}
 	}
 
-	public async quoteExactOutputSingle(
-		params: QuoteExactOutputSingleParams,
-	): Promise<{ amountIn: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
-		const zeroForOne =
-			Buffer.from(params.tokenIn, 'hex').compare(Buffer.from(params.tokenOut, 'hex')) < 0;
-		const pool = await this.poolStore!.getImmutablePool(
-			this.immutableContext!,
-			Buffer.from(params.tokenIn, 'hex'),
-			Buffer.from(params.tokenOut, 'hex'),
-			params.fee,
-		);
+	public async quoteExactOutputSingle(params: QuoteExactOutputSingleParams): Promise<{ amountIn: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
+		const zeroForOne = Buffer.from(params.tokenIn, 'hex').compare(Buffer.from(params.tokenOut, 'hex')) < 0;
+		const pool = await this.poolStore!.getImmutablePool(this.immutableContext!, Buffer.from(params.tokenIn, 'hex'), Buffer.from(params.tokenOut, 'hex'), params.fee);
 
 		let amountOutCached: Uint256String | undefined;
 		if (params.sqrtPriceLimitX96 === '0') amountOutCached = params.amount;
@@ -199,13 +154,7 @@ export class Quoter {
 							? Uint160.from(TickMath.MIN_SQRT_RATIO).add(1).toString()
 							: Uint160.from(TickMath.MAX_SQRT_RATIO).sub(1).toString()
 						: params.sqrtPriceLimitX96,
-					this._createPayload(
-						params.tokenOut,
-						params.tokenIn,
-						params.fee,
-						pool.slot0.tick,
-						amountOutCached,
-					),
+					this._createPayload(params.tokenOut, params.tokenIn, params.fee, pool.slot0.tick, amountOutCached),
 					this._swapCallback.bind(this),
 				);
 		} catch (err: unknown) {
@@ -237,14 +186,13 @@ export class Quoter {
 		while (true) {
 			const [tokenOut, tokenIn, fee] = Path.decodeFirstPool(_path);
 
-			const { amountIn, sqrtPriceX96After, initializedTicksCrossed } =
-				await this.quoteExactOutputSingle({
-					tokenIn: tokenIn.toString('hex'),
-					tokenOut: tokenOut.toString('hex'),
-					fee,
-					amount: amountOut,
-					sqrtPriceLimitX96: '0',
-				});
+			const { amountIn, sqrtPriceX96After, initializedTicksCrossed } = await this.quoteExactOutputSingle({
+				tokenIn: tokenIn.toString('hex'),
+				tokenOut: tokenOut.toString('hex'),
+				fee,
+				amount: amountOut,
+				sqrtPriceLimitX96: '0',
+			});
 
 			sqrtPriceX96AfterList[i.toNumber()] = sqrtPriceX96After;
 			initializedTicksCrossedList[i.toNumber()] = initializedTicksCrossed;
@@ -265,30 +213,12 @@ export class Quoter {
 		let baseToken = '';
 		while (true) {
 			const [tokenIn, tokenOut, fee] = Path.decodeFirstPool(_path);
-			const { token0, slot0 } = await this.poolStore!.getImmutablePool(
-				this.immutableContext!,
-				tokenIn,
-				tokenOut,
-				fee,
-			);
-			const tokenInInfo = await this.tokenSymbolStore!.get(
-				this.immutableContext!.context,
-				this.tokenSymbolStore!.getKey(tokenIn),
-			);
-			const tokenOutInfo = await this.tokenSymbolStore!.get(
-				this.immutableContext!.context,
-				this.tokenSymbolStore!.getKey(tokenOut),
-			);
+			const { token0, slot0 } = await this.poolStore!.getImmutablePool(this.immutableContext!, tokenIn, tokenOut, fee);
+			const tokenInInfo = await this.tokenSymbolStore!.get(this.immutableContext!.context, this.tokenSymbolStore!.getKey(tokenIn));
+			const tokenOutInfo = await this.tokenSymbolStore!.get(this.immutableContext!.context, this.tokenSymbolStore!.getKey(tokenOut));
 			if (!baseToken) baseToken = tokenInInfo.symbol;
 
-			const decodedPrice = parseFloat(
-				decodePriceSqrt(
-					slot0.sqrtPriceX96,
-					tokenInInfo.decimal,
-					tokenOutInfo.decimal,
-					tokenIn.compare(token0) !== 0,
-				),
-			);
+			const decodedPrice = parseFloat(decodePriceSqrt(slot0.sqrtPriceX96, tokenInInfo.decimal, tokenOutInfo.decimal, tokenIn.compare(token0) !== 0));
 			price *= decodedPrice;
 
 			if (Path.hasMultiplePools(_path)) {
@@ -299,51 +229,27 @@ export class Quoter {
 		}
 	}
 
-	private _createPayload(
-		tokenIn: string,
-		tokenOut: string,
-		fee: Uint24String,
-		tickBefore: Int24String,
-		amountOutCached?: Uint256String,
-	) {
+	private _createPayload(tokenIn: string, tokenOut: string, fee: Uint24String, tickBefore: Int24String, amountOutCached?: Uint256String) {
 		const feeBuff = Buffer.allocUnsafe(3);
 		feeBuff.writeUIntBE(parseInt(fee, 10), 0, 3);
 		return JSON.stringify({
-			path: Buffer.concat([
-				Buffer.from(tokenIn, 'hex'),
-				feeBuff,
-				Buffer.from(tokenOut, 'hex'),
-			]).toString('hex'),
+			path: Buffer.concat([Buffer.from(tokenIn, 'hex'), feeBuff, Buffer.from(tokenOut, 'hex')]).toString('hex'),
 			amountOutCached,
 			tickBefore,
 		});
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	private async _swapCallback(
-		amount0Delta: Int256String,
-		amount1Delta: Int256String,
-		_data: string,
-		pool?: DEXPoolData,
-	) {
+	private async _swapCallback(amount0Delta: Int256String, amount1Delta: Int256String, _data: string, pool?: DEXPoolData) {
 		if (pool === undefined) throw new Error('no pool supplied');
 
 		const payload = JSON.parse(_data) as SwapPayload;
-		if (Int256.from(amount0Delta).lte(0) && Int256.from(amount1Delta).lte(0))
-			throw new Error('swaps entirely within 0-liquidity regions are not supported');
+		if (Int256.from(amount0Delta).lte(0) && Int256.from(amount1Delta).lte(0)) throw new Error('swaps entirely within 0-liquidity regions are not supported');
 		const [tokenIn, tokenOut] = Path.decodeFirstPool(Buffer.from(payload.path, 'hex'));
 
 		const [isExactInput, amountToPay, amountReceived] = Int256.from(amount0Delta).gt(0)
-			? [
-					tokenIn.compare(tokenOut) < 0,
-					Uint256.from(0).add(amount0Delta).toString(),
-					Uint256.from(0).sub(amount1Delta).toString(),
-			  ]
-			: [
-					tokenOut.compare(tokenIn) < 0,
-					Uint256.from(amount1Delta).toString(),
-					Uint256.from(0).sub(amount0Delta).toString(),
-			  ];
+			? [tokenIn.compare(tokenOut) < 0, Uint256.from(0).add(amount0Delta).toString(), Uint256.from(0).sub(amount1Delta).toString()]
+			: [tokenOut.compare(tokenIn) < 0, Uint256.from(amount1Delta).toString(), Uint256.from(0).sub(amount0Delta).toString()];
 
 		const { sqrtPriceX96: sqrtPriceX96After, tick: tickAfter } = pool.slot0;
 
@@ -356,8 +262,7 @@ export class Quoter {
 			};
 			throw new Error(JSON.stringify(data));
 		} else {
-			if (payload.amountOutCached !== undefined && amountReceived !== payload.amountOutCached)
-				throw new Error('full output amount must be received');
+			if (payload.amountOutCached !== undefined && amountReceived !== payload.amountOutCached) throw new Error('full output amount must be received');
 			const data = {
 				amount: amountToPay,
 				sqrtPriceX96After,
@@ -368,14 +273,7 @@ export class Quoter {
 		}
 	}
 
-	private _parseRevertReason(
-		jsonData: string,
-	): [
-		amount: Uint256String,
-		sqrtPriceX96After: Uint160String,
-		tickAfter: Int24String,
-		tickBefore: Int24String,
-	] {
+	private _parseRevertReason(jsonData: string): [amount: Uint256String, sqrtPriceX96After: Uint160String, tickAfter: Int24String, tickBefore: Int24String] {
 		try {
 			const data = JSON.parse(jsonData);
 
@@ -384,33 +282,19 @@ export class Quoter {
 			const { tickAfter } = data;
 			const { tickBefore } = data;
 
-			return [
-				amount.toString(),
-				sqrtPriceX96After.toString(),
-				tickAfter.toString(),
-				tickBefore.toString(),
-			];
+			return [amount.toString(), sqrtPriceX96After.toString(), tickAfter.toString(), tickBefore.toString()];
 		} catch (err: unknown) {
 			throw new Error(jsonData);
 		}
 	}
 
-	private async _handleRevert(
-		reason: string,
-		pool: DEXPool,
-	): Promise<{ amount: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
+	private async _handleRevert(reason: string, pool: DEXPool): Promise<{ amount: string; sqrtPriceX96After: string; initializedTicksCrossed: string }> {
 		const [amount, sqrtPriceX96After, _tickAfter, _tickBefore] = this._parseRevertReason(reason);
 
 		const tickBefore = _tickBefore;
 		const tickAfter = _tickAfter;
 
-		const initializedTicksCrossed = await PoolTicksCounter.countInitializedTicksCrossed(
-			this.tickBitmapStore!,
-			this.immutableContext!.context,
-			pool,
-			tickBefore,
-			tickAfter,
-		);
+		const initializedTicksCrossed = await PoolTicksCounter.countInitializedTicksCrossed(this.tickBitmapStore!, this.immutableContext!.context, pool, tickBefore, tickAfter);
 		return { amount, sqrtPriceX96After, initializedTicksCrossed };
 	}
 

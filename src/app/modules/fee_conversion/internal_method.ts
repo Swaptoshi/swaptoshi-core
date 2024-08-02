@@ -9,6 +9,11 @@ import { PATH_MINIMUM_LENGTH, PATH_OFFSET_LENGTH, TOKEN_ID_LENGTH } from './cons
 import { FEE_SIZE } from '../token_factory/stores/library';
 import { FeeConversionGovernableConfig } from './config';
 
+interface ConversionCheck {
+	path: Buffer;
+	amountIn: string;
+}
+
 export class InternalFeeConversionMethod extends BaseMethod {
 	private _handler: FeeConversionMethodRegistry | undefined;
 	private _dexMethod: DexMethod | undefined;
@@ -112,22 +117,47 @@ export class InternalFeeConversionMethod extends BaseMethod {
 				const dexQuoter = await this._dexMethod!.getQuoter(context, context.transaction.senderAddress, context.header.timestamp);
 				const dexConfig = await this._dexMethod!.getConfig(context);
 
+				let nativeConversionCheck: ConversionCheck | undefined;
+				let customConversionCheck: ConversionCheck | undefined;
+
 				for (const feeTickSpaingMap of dexConfig.feeAmountTickSpacing) {
 					const { fee } = feeTickSpaingMap;
 
 					if (await this._dexMethod!.poolExists(context, handlerPayload.tokenId, tokenOut, fee)) {
-						const { amountIn } = await dexQuoter.quoteExactOutputSingle({
-							tokenIn: handlerPayload.tokenId.toString('hex'),
-							tokenOut: tokenOut.toString('hex'),
-							amount: amount.toString(),
-							fee,
-							sqrtPriceLimitX96: '0',
-						});
-						return {
-							status: handlerStatus,
-							payload: {
-								path: Buffer.concat([
-									tokenOut,
+						try {
+							const { amountIn } = await dexQuoter.quoteExactOutputSingle({
+								tokenIn: handlerPayload.tokenId.toString('hex'),
+								tokenOut: tokenOut.toString('hex'),
+								amount: amount.toString(),
+								fee,
+								sqrtPriceLimitX96: '0',
+							});
+							if (!nativeConversionCheck || BigInt(amountIn) < BigInt(nativeConversionCheck.amountIn)) {
+								nativeConversionCheck = {
+									path: Buffer.concat([
+										tokenOut,
+										Buffer.from(
+											parseInt(fee, 10)
+												.toString(16)
+												.padStart(2 * FEE_SIZE, '0'),
+											'hex',
+										),
+										handlerPayload.tokenId,
+									]),
+									amountIn,
+								};
+							}
+						} catch {
+							/* empty */
+						}
+					}
+
+					for (const conversionPath of config.conversionPath) {
+						const pathTokenIn = Buffer.from(conversionPath.substring(conversionPath.length - TOKEN_ID_LENGTH * 2, conversionPath.length), 'hex');
+						if ((await this._dexMethod!.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
+							try {
+								const path = Buffer.concat([
+									Buffer.from(conversionPath, 'hex'),
 									Buffer.from(
 										parseInt(fee, 10)
 											.toString(16)
@@ -135,39 +165,43 @@ export class InternalFeeConversionMethod extends BaseMethod {
 										'hex',
 									),
 									handlerPayload.tokenId,
-								]),
-								txAmount: handlerPayload.txAmount,
-								amountIn,
-								amountOut: amount,
-							},
-						};
-					}
-
-					for (const conversionPath of config.conversionPath) {
-						const pathTokenIn = Buffer.from(conversionPath.substring(conversionPath.length - TOKEN_ID_LENGTH * 2, conversionPath.length), 'hex');
-						if ((await this._dexMethod!.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
-							const path = Buffer.concat([
-								Buffer.from(conversionPath, 'hex'),
-								Buffer.from(
-									parseInt(fee, 10)
-										.toString(16)
-										.padStart(2 * FEE_SIZE, '0'),
-									'hex',
-								),
-								handlerPayload.tokenId,
-							]);
-							const { amountIn } = await dexQuoter.quoteExactOutput(path, amount.toString());
-							return {
-								status: handlerStatus,
-								payload: {
-									path,
-									txAmount: handlerPayload.txAmount,
-									amountIn,
-									amountOut: amount,
-								},
-							};
+								]);
+								const { amountIn } = await dexQuoter.quoteExactOutput(path, amount.toString());
+								if (!customConversionCheck || BigInt(amountIn) < BigInt(customConversionCheck.amountIn)) {
+									customConversionCheck = {
+										path,
+										amountIn,
+									};
+								}
+							} catch {
+								/* empty */
+							}
 						}
 					}
+				}
+
+				if (nativeConversionCheck !== undefined) {
+					return {
+						status: handlerStatus,
+						payload: {
+							path: nativeConversionCheck.path,
+							txAmount: handlerPayload.txAmount,
+							amountIn: nativeConversionCheck.amountIn,
+							amountOut: amount,
+						},
+					};
+				}
+
+				if (customConversionCheck !== undefined) {
+					return {
+						status: handlerStatus,
+						payload: {
+							path: customConversionCheck.path,
+							txAmount: handlerPayload.txAmount,
+							amountIn: customConversionCheck.amountIn,
+							amountOut: amount,
+						},
+					};
 				}
 			}
 		}
