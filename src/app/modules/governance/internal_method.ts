@@ -39,6 +39,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		const governableConfigList = this._governableConfig.values();
 
 		for (const governableConfig of governableConfigList) {
+			if (!governableConfig.initialized) throw new Error(`${governableConfig.name} config not initialized. Call .init() in module.init() if not governable.`);
 			if (!governableConfig.genesisConfig) throw new Error(`${governableConfig.name} genesis config is not registered`);
 
 			const verify = await governableConfig.verify({ context, config: governableConfig.default, genesisConfig: governableConfig.genesisConfig });

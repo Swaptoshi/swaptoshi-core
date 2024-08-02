@@ -33,8 +33,6 @@ import { GovernanceMethod } from './method';
 export abstract class BaseGovernableConfig<T extends object> extends BaseStore<GovernableConfigStoreData> {
 	protected storeKey = Buffer.alloc(0);
 	protected events: NamedRegistry = new NamedRegistry();
-	protected registered: boolean = false;
-	protected initialized: boolean = false;
 	protected module: string = '';
 	protected method: GovernanceMethod | undefined;
 
@@ -42,6 +40,17 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		super(moduleName, index);
 		this.module = moduleName;
 	}
+
+	/**
+	 * Indicates whether this instance is registered as a governable config in the governance module.
+	 * If false, this instance will function as a standard in-memory config sourced from config.json.
+	 */
+	public registered: boolean = false;
+
+	/**
+	 * Whether this instance is initialized and ready to use.
+	 */
+	public initialized: boolean = false;
 
 	/**
 	 * The schema defining the structure of the governable configuration.
