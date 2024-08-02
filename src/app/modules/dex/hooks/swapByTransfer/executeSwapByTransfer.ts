@@ -1,13 +1,11 @@
+/* eslint-disable import/no-cycle */
 import { NamedRegistry, TransactionExecuteContext } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { PoolAddress } from '../../stores/library/periphery';
 import { mutableHookSwapContext } from '../../stores/context';
 import { isSwapByTransfer } from './isSwapByTransfer';
 
-export async function executeSwapByTransfer(
-	this: { stores: NamedRegistry; events: NamedRegistry },
-	ctx: TransactionExecuteContext,
-) {
+export async function executeSwapByTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, ctx: TransactionExecuteContext) {
 	const check = await isSwapByTransfer.bind(this)(ctx, ctx.transaction);
 	if (check.status && check.payload) {
 		const poolStore = this.stores.get(PoolStore);
@@ -17,16 +15,13 @@ export async function executeSwapByTransfer(
 				senderAddress: check.payload.recipientAddress,
 			};
 			const key = PoolAddress.decodePoolAddress(check.payload.recipientAddress);
-			if (
-				key.token0.compare(check.payload.tokenID) !== 0 &&
-				key.token1.compare(check.payload.tokenID) !== 0
-			) {
+			if (key.token0.compare(check.payload.tokenID) !== 0 && key.token1.compare(check.payload.tokenID) !== 0) {
 				throw new Error('transfering incompatible token to pool address');
 			}
 
 			const tokenIn = key.token0.compare(check.payload.tokenID) === 0 ? key.token0 : key.token1;
 			const tokenOut = key.token0.compare(check.payload.tokenID) === 0 ? key.token1 : key.token0;
-			const router = poolStore.getMutableRouter(_ctx);
+			const router = await poolStore.getMutableRouter(_ctx);
 			await router.exactInputSingle({
 				tokenIn,
 				tokenOut,

@@ -6,18 +6,15 @@ import { Uint24String } from './stores/library/int';
 import { PositionManagerStore } from './stores/position_manager';
 import { Quoter } from './stores/library/lens';
 import { NonfungiblePositionManager, SwapRouter, DEXPool } from './stores/factory';
-import { DexModuleConfig } from './types';
 import { PoolAddress } from './stores/library/periphery';
+import { DexGovernableConfig } from './config';
 
 export class DexMethod extends BaseMethod {
-	public init(config: DexModuleConfig) {
-		this.config = config;
-	}
-
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async getConfig() {
-		if (!this.config) throw new Error('config not initialized');
-		return this.config;
+	public async getConfig(context: ImmutableMethodContext) {
+		const configStore = this.stores.get(DexGovernableConfig);
+		const config = await configStore.getConfig(context);
+		return config;
 	}
 
 	public async createPool(
@@ -67,6 +64,4 @@ export class DexMethod extends BaseMethod {
 		const _context = immutableMethodSwapContext(context, senderAddress, timestamp);
 		return new Quoter(_context, this.stores);
 	}
-
-	private config: DexModuleConfig | undefined;
 }

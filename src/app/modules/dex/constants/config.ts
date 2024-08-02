@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { cryptography } from 'klayr-sdk';
 import { DexModuleConfig } from '../types';
 import { DEFAULT_TREASURY_ADDRESS } from './address';
@@ -5,9 +6,18 @@ import { DEX_DEFAULT_NAME, DEX_DEFAULT_TOKEN_DECIMAL, DEX_DEFAULT_TOKEN_SYMBOL, 
 
 export const defaultConfig: DexModuleConfig = {
 	feeAmountTickSpacing: [
-		['500', '10'],
-		['3000', '60'],
-		['10000', '200'],
+		{
+			fee: '500',
+			tickSpacing: '10',
+		},
+		{
+			fee: '3000',
+			tickSpacing: '60',
+		},
+		{
+			fee: '10000',
+			tickSpacing: '200',
+		},
 	],
 	feeProtocol: 0,
 	feeProtocolPool: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),

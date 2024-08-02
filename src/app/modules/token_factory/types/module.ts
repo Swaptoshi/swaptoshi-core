@@ -1,8 +1,8 @@
 import { TokenMethod, FeeMethod, SidechainInteroperabilityMethod, MainchainInteroperabilityMethod } from 'klayr-sdk';
-import { DexMethod } from '../../../dex/method';
-import { FeeConversionMethod } from '../../../fee_conversion';
-import { NFTMethod } from '../../../nft';
-import { GovernanceMethod } from '../../../governance';
+import { DexMethod } from '../../dex/method';
+import { FeeConversionMethod } from '../../fee_conversion';
+import { NFTMethod } from '../../nft';
+import { GovernanceMethod } from '../../governance';
 
 export interface TokenFactoryModuleDependencies {
 	tokenMethod: TokenMethod;

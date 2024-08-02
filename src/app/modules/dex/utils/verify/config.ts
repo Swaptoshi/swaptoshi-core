@@ -1,13 +1,14 @@
+/* eslint-disable import/no-cycle */
 import { DexModuleConfig } from '../../types';
 import { verifyBoolean, verifyKlayer32Address, verifyNumber, verifyNumberString, verifyPositiveNumber, verifyString } from './base';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyModuleConfig(config: DexModuleConfig) {
 	for (const feeAmountTickSpacings of config.feeAmountTickSpacing) {
-		verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
-		verifyNumberString('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
-		verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[0]);
-		verifyPositiveNumber('config.feeAmountTickSpacing', feeAmountTickSpacings[1]);
+		verifyNumberString('config.feeAmountTickSpacing.fee', feeAmountTickSpacings.fee);
+		verifyNumberString('config.feeAmountTickSpacing.tickSpacing', feeAmountTickSpacings.tickSpacing);
+		verifyPositiveNumber('config.feeAmountTickSpacing.fee', feeAmountTickSpacings.fee);
+		verifyPositiveNumber('config.feeAmountTickSpacing.tickSpacing', feeAmountTickSpacings.tickSpacing);
 	}
 
 	verifyNumber('config.feeProtocol', config.feeProtocol);

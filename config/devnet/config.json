@@ -49,9 +49,18 @@
 		},
 		"dex": {
 			"feeAmountTickSpacing": [
-				["500", "10"],
-				["3000", "60"],
-				["10000", "200"]
+				{
+					"fee": "500",
+					"tickSpacing": "10"
+				},
+				{
+					"fee": "3000",
+					"tickSpacing": "60"
+				},
+				{
+					"fee": "10000",
+					"tickSpacing": "200"
+				}
 			],
 			"feeProtocol": 170,
 			"feeProtocolPool": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",

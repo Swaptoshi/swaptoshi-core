@@ -25,9 +25,9 @@ export class TokenFactoryGovernableConfig extends BaseGovernableConfig<TokenFact
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async afterSetConfig(_ctx: GovernableConfigSetContext<TokenFactoryModuleConfig>): Promise<void> {
+	public async afterSetConfig(_context: GovernableConfigSetContext<TokenFactoryModuleConfig>): Promise<void> {
 		if (this._feeConversionMethod) {
-			if (_ctx.config.icoFeeConversionEnabled) {
+			if (_context.config.icoFeeConversionEnabled) {
 				this._feeConversionMethod.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
 				this._feeConversionMethod.register(
 					this.name,

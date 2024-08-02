@@ -24,7 +24,7 @@ export class ExactOutputSingleCommand extends BaseCommand {
 	public async execute(_context: CommandExecuteContext<ExactOutputSingleParams>): Promise<void> {
 		const poolStore = this.stores.get(PoolStore);
 		const context = commandSwapContext(_context);
-		const router = poolStore.getMutableRouter(context);
+		const router = await poolStore.getMutableRouter(context);
 		await router.exactOutputSingle(_context.params);
 	}
 

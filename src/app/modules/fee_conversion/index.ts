@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 export { FeeConversionModule } from './module';
 export { FeeConversionMethod } from './method';
 export { FeeConversionEndpoint } from './endpoint';

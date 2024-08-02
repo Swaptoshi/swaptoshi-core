@@ -110,10 +110,10 @@ export class InternalFeeConversionMethod extends BaseMethod {
 				const amount = (feeDifference * BigInt(-1)).toString();
 
 				const dexQuoter = await this._dexMethod!.getQuoter(context, context.transaction.senderAddress, context.header.timestamp);
-				const dexConfig = await this._dexMethod!.getConfig();
+				const dexConfig = await this._dexMethod!.getConfig(context);
 
 				for (const feeTickSpaingMap of dexConfig.feeAmountTickSpacing) {
-					const [fee] = feeTickSpaingMap;
+					const { fee } = feeTickSpaingMap;
 
 					if (await this._dexMethod!.poolExists(context, handlerPayload.tokenId, tokenOut, fee)) {
 						const { amountIn } = await dexQuoter.quoteExactOutputSingle({

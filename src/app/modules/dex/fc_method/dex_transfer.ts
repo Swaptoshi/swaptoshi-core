@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
 import { TransactionVerifyContext } from 'klayr-sdk';
 import { BaseFeeConversionMethod, FeeConversionVerificationResult, FeeConversionVerifyStatus } from '../../fee_conversion';

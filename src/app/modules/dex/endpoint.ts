@@ -16,7 +16,6 @@ import {
 	verifyPriceParam,
 } from './utils';
 import {
-	DexModuleConfig,
 	GetMetadataParams,
 	GetPoolParams,
 	GetPositionParams,
@@ -32,15 +31,13 @@ import {
 import { PoolStore } from './stores/pool';
 import { PositionManagerStore } from './stores/position_manager';
 import { PoolAddress } from './stores/library/periphery';
+import { DexGovernableConfig } from './config';
 
 export class DexEndpoint extends BaseEndpoint {
-	public init(config: DexModuleConfig) {
-		this._config = config;
-	}
-
-	public getConfig(_context: ModuleEndpointContext) {
-		if (!this._config) throw new Error('config not initialized');
-		return serializer(this._config);
+	public async getConfig(_context: ModuleEndpointContext) {
+		const configStore = this.stores.get(DexGovernableConfig);
+		const config = await configStore.getConfig(_context);
+		return serializer(config);
 	}
 
 	public async quoteExactInput(context: ModuleEndpointContext) {
@@ -167,6 +164,4 @@ export class DexEndpoint extends BaseEndpoint {
 		const pool = await poolStore.getImmutablePool(_context, key.token0, key.token1, key.fee);
 		return serializer(await pool.observe(param.secondsAgos));
 	}
-
-	public _config: DexModuleConfig | undefined;
 }

@@ -1,5 +1,5 @@
 export interface DexModuleConfig {
-	feeAmountTickSpacing: [string, string][];
+	feeAmountTickSpacing: { fee: string; tickSpacing: string }[];
 	feeProtocol: number;
 	feeProtocolPool: string;
 	feeConversionEnabled: boolean;

@@ -41,7 +41,14 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 	governanceModule.addDependencies(method.token);
 	liquidPosModule.addDependencies({ tokenMethod: method.token, governanceMethod: governanceModule.method });
 	feeConversionModule.addDependencies({ tokenMethod: method.token, feeMethod: method.fee, dexMethod: dexModule.method, governanceMethod: governanceModule.method });
-	dexModule.addDependencies(method.token, nftModule.method, method.fee, method.interoperability, feeConversionModule.method);
+	dexModule.addDependencies({
+		tokenMethod: method.token,
+		nftMethod: nftModule.method,
+		feeMethod: method.fee,
+		interoperabilityMethod: method.interoperability,
+		feeConversionMethod: feeConversionModule.method,
+		governanceMethod: governanceModule.method,
+	});
 	tokenFactoryModule.addDependencies({
 		tokenMethod: method.token,
 		feeMethod: method.fee,
@@ -52,13 +59,13 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 		governanceMethod: governanceModule.method,
 	});
 
-	app.registerModulePriority(feeConversionModule);
+	app.registerModulePriority(governanceModule);
+	app.registerModulePriority(feeConversionModule); // the later the registerModulePriority, the higher the priority (unshift)
 
 	app.registerModule(nftModule);
 	app.registerModule(tokenFactoryModule);
 	app.registerModule(dexModule);
 	app.registerModule(liquidPosModule);
-	app.registerModule(governanceModule);
 
 	app.registerInteroperableModule(nftModule);
 	app.registerInteroperableModule(tokenFactoryModule);

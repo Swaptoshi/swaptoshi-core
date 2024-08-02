@@ -2,24 +2,12 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
 import { TokenMethod } from 'klayr-sdk';
-import {
-	NonfungiblePositionManager,
-	SwapRouter,
-	DEXPool,
-} from '../../../../../../src/app/modules/dex/stores/factory';
+import { NonfungiblePositionManager, SwapRouter, DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import * as PoolAddress from '../../../../../../src/app/modules/dex/stores/library/periphery/pool_address';
 import { completeFixture } from '../shared/pool';
 import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
-import {
-	FeeAmount,
-	MaxUint128,
-	TICK_SPACINGS,
-	encodePriceSqrt,
-	expandTo18Decimals,
-	getMaxTick,
-	getMinTick,
-} from '../shared/utilities';
+import { FeeAmount, MaxUint128, TICK_SPACINGS, encodePriceSqrt, expandTo18Decimals, getMaxTick, getMinTick } from '../shared/utilities';
 import { PositionManagerStore } from '../../../../../../src/app/modules/dex/stores/position_manager';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import { methodContextFixture } from '../shared/module';
@@ -48,39 +36,14 @@ describe('NonfungiblePositionManager', () => {
 		pool: DEXPool;
 		router: SwapRouter;
 	}> = async (_sender: Buffer) => {
-		const {
-			module,
-			createMethodContext,
-			poolStore: _poolStore,
-			tokenMethod: _tokenMethod,
-			nftMethod: _nftMethod,
-		} = await methodContextFixture();
+		const { module, createMethodContext, poolStore: _poolStore, tokenMethod: _tokenMethod, nftMethod: _nftMethod } = await methodContextFixture();
 		tokenMethod = _tokenMethod;
 		poolStore = _poolStore;
 		context = methodSwapContext(createMethodContext(), _sender, 0);
-		const {
-			token0,
-			token1,
-			token2,
-			token0Decimal,
-			token0Symbol,
-			token1Decimal,
-			token1Symbol,
-			token2Decimal,
-			token2Symbol,
-		} = await completeFixture(context, module);
-		const router = poolStore.getMutableRouter(context);
+		const { token0, token1, token2, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol } = await completeFixture(context, module);
+		const router = await poolStore.getMutableRouter(context);
 
-		const _pool = await poolStore.createPool(
-			context,
-			token0,
-			token0Symbol,
-			parseInt(token0Decimal, 10),
-			token1,
-			token1Symbol,
-			parseInt(token1Decimal, 10),
-			FeeAmount.MEDIUM,
-		);
+		const _pool = await poolStore.createPool(context, token0, token0Symbol, parseInt(token0Decimal, 10), token1, token1Symbol, parseInt(token1Decimal, 10), FeeAmount.MEDIUM);
 		await _pool.initialize(encodePriceSqrt(1, 1).toString());
 
 		const positionManagerStore = module.stores.get(PositionManagerStore);
@@ -92,18 +55,10 @@ describe('NonfungiblePositionManager', () => {
 			{ address: token2, symbol: () => token2Symbol, decimals: () => token2Decimal },
 		];
 
-		_tokens.sort((a, b) =>
-			a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-		);
+		_tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 		for (const token of _tokens) {
-			await tokenMethod.transfer(
-				context.context,
-				_sender,
-				other,
-				token.address,
-				expandTo18Decimals(1_000_000).toBigInt(),
-			);
+			await tokenMethod.transfer(context.context, _sender, other, token.address, expandTo18Decimals(1_000_000).toBigInt());
 		}
 
 		return {
@@ -127,16 +82,7 @@ describe('NonfungiblePositionManager', () => {
 	}
 
 	async function createPool(tokenA: Buffer, tokenB: Buffer, fee: string) {
-		const _pool = await poolStore.createPool(
-			context,
-			tokenA,
-			fallbackTokenSymbol(tokenA, 'TKNA'),
-			8,
-			tokenB,
-			fallbackTokenSymbol(tokenB, 'TKNB'),
-			8,
-			fee,
-		);
+		const _pool = await poolStore.createPool(context, tokenA, fallbackTokenSymbol(tokenA, 'TKNA'), 8, tokenB, fallbackTokenSymbol(tokenB, 'TKNB'), 8, fee);
 		return _pool;
 	}
 
@@ -151,10 +97,7 @@ describe('NonfungiblePositionManager', () => {
 
 	describe('#createAndInitializePoolIfNecessary', () => {
 		it('creates the pool at the expected address', async () => {
-			const expectedAddress = computePoolAddress(
-				[tokens[0].address, tokens[1].address],
-				FeeAmount.MEDIUM,
-			);
+			const expectedAddress = computePoolAddress([tokens[0].address, tokens[1].address], FeeAmount.MEDIUM);
 			const _pool = await nft.createAndInitializePoolIfNecessary(
 				tokens[0].address,
 				tokens[0].symbol(),
@@ -169,15 +112,8 @@ describe('NonfungiblePositionManager', () => {
 		});
 
 		it('works if pool is created but not initialized', async () => {
-			const expectedAddress = computePoolAddress(
-				[Buffer.from('0000000000000000', 'hex'), tokens[1].address],
-				FeeAmount.MEDIUM,
-			);
-			const _pool = await createPool(
-				Buffer.from('0000000000000000', 'hex'),
-				tokens[1].address,
-				FeeAmount.MEDIUM,
-			);
+			const expectedAddress = computePoolAddress([Buffer.from('0000000000000000', 'hex'), tokens[1].address], FeeAmount.MEDIUM);
+			const _pool = await createPool(Buffer.from('0000000000000000', 'hex'), tokens[1].address, FeeAmount.MEDIUM);
 			expect(_pool.address.toString('hex')).toBe(expectedAddress.toString('hex'));
 			await nft.createAndInitializePoolIfNecessary(
 				Buffer.from('0000000000000000', 'hex'),
@@ -192,21 +128,13 @@ describe('NonfungiblePositionManager', () => {
 		});
 
 		it('works if pool is created and initialized', async () => {
-			const expectedAddress = computePoolAddress(
-				[tokens[0].address, tokens[1].address],
-				FeeAmount.MEDIUM,
-			);
+			const expectedAddress = computePoolAddress([tokens[0].address, tokens[1].address], FeeAmount.MEDIUM);
 			let _pool: DEXPool;
 			try {
 				_pool = await createPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM);
 				await _pool.initialize(encodePriceSqrt(3, 1).toString());
 			} catch {
-				_pool = await poolStore.getMutablePool(
-					context,
-					tokens[0].address,
-					tokens[1].address,
-					FeeAmount.MEDIUM,
-				);
+				_pool = await poolStore.getMutablePool(context, tokens[0].address, tokens[1].address, FeeAmount.MEDIUM);
 			}
 			expect(_pool.address.toString('hex')).toBe(expectedAddress.toString('hex'));
 			await nft.createAndInitializePoolIfNecessary(
@@ -268,18 +196,7 @@ describe('NonfungiblePositionManager', () => {
 				deadline: '10',
 			});
 			expect(NFTRegistry.balanceOf.get(other.toString('hex'))).toBe('1');
-			const {
-				fee,
-				token0,
-				token1,
-				tickLower,
-				tickUpper,
-				liquidity,
-				tokensOwed0,
-				tokensOwed1,
-				feeGrowthInside0LastX128,
-				feeGrowthInside1LastX128,
-			} = await nft.getPositions('0');
+			const { fee, token0, token1, tickLower, tickUpper, liquidity, tokensOwed0, tokensOwed1, feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await nft.getPositions('0');
 			expect(token0.toString('hex')).toBe(tokens[0].address.toString('hex'));
 			expect(token1.toString('hex')).toBe(tokens[1].address.toString('hex'));
 			expect(fee).toBe(FeeAmount.MEDIUM);
@@ -559,10 +476,7 @@ describe('NonfungiblePositionManager', () => {
 				amount1Min: '0',
 				deadline: '1',
 			});
-			const poolAddress = computePoolAddress(
-				[tokens[0].address, tokens[1].address],
-				FeeAmount.MEDIUM,
-			);
+			const poolAddress = computePoolAddress([tokens[0].address, tokens[1].address], FeeAmount.MEDIUM);
 			nft.setSender(other);
 			await nft.collect({
 				poolAddress: pool.address,
@@ -571,11 +485,7 @@ describe('NonfungiblePositionManager', () => {
 				amount0Max: MaxUint128.toString(),
 				amount1Max: MaxUint128.toString(),
 			});
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				poolAddress.toString('hex'),
-				sender.toString('hex'),
-				'49',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress.toString('hex'), sender.toString('hex'), '49');
 		});
 	});
 
@@ -789,10 +699,7 @@ describe('NonfungiblePositionManager', () => {
 			});
 
 			it('actually collected', async () => {
-				const poolAddress = computePoolAddress(
-					[tokens[0].address, tokens[1].address],
-					FeeAmount.MEDIUM,
-				);
+				const poolAddress = computePoolAddress([tokens[0].address, tokens[1].address], FeeAmount.MEDIUM);
 
 				nft.setSender(sender);
 
@@ -804,11 +711,7 @@ describe('NonfungiblePositionManager', () => {
 					amount1Max: MaxUint128.toString(),
 				});
 
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					poolAddress.toString('hex'),
-					sender.toString('hex'),
-					'2501',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress.toString('hex'), sender.toString('hex'), '2501');
 
 				await nft.collect({
 					poolAddress: pool.address,
@@ -818,11 +721,7 @@ describe('NonfungiblePositionManager', () => {
 					amount1Max: MaxUint128.toString(),
 				});
 
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					poolAddress.toString('hex'),
-					sender.toString('hex'),
-					'7503',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(poolAddress.toString('hex'), sender.toString('hex'), '7503');
 			});
 		});
 	});

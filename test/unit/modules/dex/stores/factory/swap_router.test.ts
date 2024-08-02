@@ -5,10 +5,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { TokenMethod } from 'klayr-sdk';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
-import {
-	NonfungiblePositionManager,
-	SwapRouter,
-} from '../../../../../../src/app/modules/dex/stores/factory';
+import { NonfungiblePositionManager, SwapRouter } from '../../../../../../src/app/modules/dex/stores/factory';
 import { Uint } from '../../../../../../src/app/modules/dex/stores/library/int';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
 import { PositionManagerStore } from '../../../../../../src/app/modules/dex/stores/position_manager';
@@ -16,14 +13,7 @@ import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types'
 import { methodContextFixture } from '../shared/module';
 import { encodePath } from '../shared/path';
 import { NATIVE_TOKEN_ID, completeFixture } from '../shared/pool';
-import {
-	expandTo18Decimals,
-	FeeAmount,
-	encodePriceSqrt,
-	getMinTick,
-	TICK_SPACINGS,
-	getMaxTick,
-} from '../shared/utilities';
+import { expandTo18Decimals, FeeAmount, encodePriceSqrt, getMinTick, TICK_SPACINGS, getMaxTick } from '../shared/utilities';
 import { mock_token_transfer } from '../shared/token';
 import { fallbackTokenSymbol } from '../../utils/token';
 
@@ -45,38 +35,14 @@ describe('SwapRouter', () => {
 		nft: NonfungiblePositionManager;
 		tokens: [Tokens, Tokens, Tokens];
 	}> = async (_sender: Buffer) => {
-		const {
-			module,
-			createMethodContext,
-			poolStore: _poolStore,
-			tokenMethod: _tokenMethod,
-		} = await methodContextFixture();
+		const { module, createMethodContext, poolStore: _poolStore, tokenMethod: _tokenMethod } = await methodContextFixture();
 		tokenMethod = _tokenMethod;
 		poolStore = _poolStore;
 		context = methodSwapContext(createMethodContext(), _sender, 0);
-		const {
-			token0,
-			token1,
-			token2,
-			token0Decimal,
-			token0Symbol,
-			token1Decimal,
-			token1Symbol,
-			token2Decimal,
-			token2Symbol,
-		} = await completeFixture(context, module);
-		const router = poolStore.getMutableRouter(context);
+		const { token0, token1, token2, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol } = await completeFixture(context, module);
+		const router = await poolStore.getMutableRouter(context);
 
-		const _pool = await poolStore.createPool(
-			context,
-			token0,
-			token0Symbol,
-			parseInt(token0Decimal, 10),
-			token1,
-			token1Symbol,
-			parseInt(token1Decimal, 10),
-			FeeAmount.MEDIUM,
-		);
+		const _pool = await poolStore.createPool(context, token0, token0Symbol, parseInt(token0Decimal, 10), token1, token1Symbol, parseInt(token1Decimal, 10), FeeAmount.MEDIUM);
 		await _pool.initialize(encodePriceSqrt(1, 1).toString());
 
 		const positionManagerStore = module.stores.get(PositionManagerStore);
@@ -88,18 +54,10 @@ describe('SwapRouter', () => {
 			{ address: token2, symbol: () => token2Symbol, decimals: () => token2Decimal },
 		];
 
-		_tokens.sort((a, b) =>
-			a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-		);
+		_tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 		for (const token of _tokens) {
-			await tokenMethod.transfer(
-				context.context,
-				_sender,
-				trader,
-				token.address,
-				expandTo18Decimals(1_000_000).toBigInt(),
-			);
+			await tokenMethod.transfer(context.context, _sender, trader, token.address, expandTo18Decimals(1_000_000).toBigInt());
 		}
 
 		return {
@@ -152,18 +110,9 @@ describe('SwapRouter', () => {
 	afterEach(async () => {
 		const balances = await getBalances(router.address);
 		expect(Object.values(balances).every(b => b.eq(0))).toBe(true);
-		const balance = await tokenMethod.getAvailableBalance(
-			context.context,
-			router.address,
-			NATIVE_TOKEN_ID,
-		);
+		const balance = await tokenMethod.getAvailableBalance(context.context, router.address, NATIVE_TOKEN_ID);
 		expect(balance === BigInt(0)).toBe(true);
-		await tokenMethod.burn(
-			context.context,
-			trader,
-			NATIVE_TOKEN_ID,
-			await tokenMethod.getAvailableBalance(context.context, sender, NATIVE_TOKEN_ID),
-		);
+		await tokenMethod.burn(context.context, trader, NATIVE_TOKEN_ID, await tokenMethod.getAvailableBalance(context.context, sender, NATIVE_TOKEN_ID));
 	});
 
 	afterEach(jest.clearAllMocks);
@@ -171,8 +120,7 @@ describe('SwapRouter', () => {
 	describe('swaps', () => {
 		const liquidity = 1000000;
 		async function createPool(tokenAddressA: string, tokenAddressB: string) {
-			if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
-				[tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA];
+			if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase()) [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA];
 
 			await nft.createAndInitializePoolIfNecessary(
 				Buffer.from(tokenAddressA, 'hex'),
@@ -214,11 +162,7 @@ describe('SwapRouter', () => {
 		});
 
 		describe('#exactInput', () => {
-			async function exactInput(
-				_tokens: Buffer[],
-				amountIn = 3,
-				amountOutMinimum = 1,
-			): Promise<void> {
+			async function exactInput(_tokens: Buffer[], amountIn = 3, amountOutMinimum = 1): Promise<void> {
 				const inputIsWETH = NATIVE_TOKEN_ID.compare(_tokens[0]) === 0;
 
 				const outputIsWETH9 = NATIVE_TOKEN_ID.compare(_tokens[_tokens.length - 1]) === 0;
@@ -233,13 +177,7 @@ describe('SwapRouter', () => {
 				};
 
 				// optimized for the gas test
-				await tokenMethod.transfer(
-					context.context,
-					trader,
-					router.address,
-					NATIVE_TOKEN_ID,
-					BigInt(value),
-				);
+				await tokenMethod.transfer(context.context, trader, router.address, NATIVE_TOKEN_ID, BigInt(value));
 
 				router.setSender(trader);
 				await router.exactInput(params);
@@ -350,37 +288,13 @@ describe('SwapRouter', () => {
 						1,
 					);
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						trader.toString('hex'),
-						(
-							await getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						'5',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(trader.toString('hex'), (await getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)).address.toString('hex'), '5');
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						(
-							await getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						router.address.toString('hex'),
-						'3',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith((await getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)).address.toString('hex'), router.address.toString('hex'), '3');
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						router.address.toString('hex'),
-						(
-							await getPool(tokens[1].address, tokens[2].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						'3',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(router.address.toString('hex'), (await getPool(tokens[1].address, tokens[2].address, FeeAmount.MEDIUM)).address.toString('hex'), '3');
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						(
-							await getPool(tokens[1].address, tokens[2].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						trader.toString('hex'),
-						'1',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith((await getPool(tokens[1].address, tokens[2].address, FeeAmount.MEDIUM)).address.toString('hex'), trader.toString('hex'), '1');
 				});
 
 				describe('ETH input', () => {
@@ -461,13 +375,7 @@ describe('SwapRouter', () => {
 		});
 
 		describe('#exactInputSingle', () => {
-			async function exactInputSingle(
-				tokenIn: Buffer,
-				tokenOut: Buffer,
-				amountIn = 3,
-				amountOutMinimum = 1,
-				sqrtPriceLimitX96?: Uint,
-			): Promise<void> {
+			async function exactInputSingle(tokenIn: Buffer, tokenOut: Buffer, amountIn = 3, amountOutMinimum = 1, sqrtPriceLimitX96?: Uint): Promise<void> {
 				const inputIsWETH = NATIVE_TOKEN_ID.compare(tokenIn) === 0;
 				const outputIsWETH9 = tokenOut.compare(NATIVE_TOKEN_ID) === 0;
 
@@ -478,8 +386,7 @@ describe('SwapRouter', () => {
 					tokenOut,
 					fee: FeeAmount.MEDIUM,
 					sqrtPriceLimitX96:
-						sqrtPriceLimitX96 ??
-						tokenIn.toString('hex').toLowerCase() < tokenOut.toString('hex').toLowerCase()
+						sqrtPriceLimitX96 ?? tokenIn.toString('hex').toLowerCase() < tokenOut.toString('hex').toLowerCase()
 							? Uint.from('4295128740').toString()
 							: Uint.from('1461446703485210103287273052203988822378723970341').toString(),
 					recipient: outputIsWETH9 ? Buffer.alloc(20) : trader,
@@ -489,25 +396,14 @@ describe('SwapRouter', () => {
 				};
 
 				// optimized for the gas test
-				await tokenMethod.transfer(
-					context.context,
-					trader,
-					router.address,
-					NATIVE_TOKEN_ID,
-					BigInt(value),
-				);
+				await tokenMethod.transfer(context.context, trader, router.address, NATIVE_TOKEN_ID, BigInt(value));
 				router.setSender(trader);
 				await router.exactInputSingle(params);
 				router.setSender(sender);
 			}
 
 			it('should fail if the limit is any tighter', async () => {
-				const [tokenIn, tokenOut, amountIn, amountOutMinimum] = [
-					tokens[0].address,
-					tokens[1].address,
-					3,
-					1,
-				];
+				const [tokenIn, tokenOut, amountIn, amountOutMinimum] = [tokens[0].address, tokens[1].address, 3, 1];
 				const outputIsWETH9 = tokenOut.compare(NATIVE_TOKEN_ID) === 0;
 
 				const params = {
@@ -628,34 +524,21 @@ describe('SwapRouter', () => {
 		});
 
 		describe('#exactOutput', () => {
-			async function exactOutput(
-				_tokens: Buffer[],
-				amountOut = 1,
-				amountInMaximum = 3,
-			): Promise<void> {
+			async function exactOutput(_tokens: Buffer[], amountOut = 1, amountInMaximum = 3): Promise<void> {
 				const inputIsWETH9 = _tokens[0].compare(NATIVE_TOKEN_ID) === 0;
 				const outputIsWETH9 = _tokens[_tokens.length - 1].compare(NATIVE_TOKEN_ID) === 0;
 
 				const value = inputIsWETH9 ? amountInMaximum : 0;
 
 				const params = {
-					path: encodePath(
-						_tokens.slice().reverse(),
-						new Array(_tokens.length - 1).fill(FeeAmount.MEDIUM),
-					),
+					path: encodePath(_tokens.slice().reverse(), new Array(_tokens.length - 1).fill(FeeAmount.MEDIUM)),
 					recipient: outputIsWETH9 ? Buffer.alloc(20) : trader,
 					deadline: '1',
 					amountOut: amountOut.toString(),
 					amountInMaximum: amountInMaximum.toString(),
 				};
 
-				await tokenMethod.transfer(
-					context.context,
-					trader,
-					router.address,
-					NATIVE_TOKEN_ID,
-					BigInt(value),
-				);
+				await tokenMethod.transfer(context.context, trader, router.address, NATIVE_TOKEN_ID, BigInt(value));
 				router.setSender(trader);
 				await router.exactOutput(params);
 			}
@@ -668,10 +551,7 @@ describe('SwapRouter', () => {
 				const outputIsWETH9 = token[token.length - 1] === NATIVE_TOKEN_ID;
 
 				const params = {
-					path: encodePath(
-						token.slice().reverse(),
-						new Array(token.length - 1).fill(FeeAmount.MEDIUM),
-					),
+					path: encodePath(token.slice().reverse(), new Array(token.length - 1).fill(FeeAmount.MEDIUM)),
 					recipient: outputIsWETH9 ? Buffer.alloc(20) : trader,
 					deadline: '1',
 					amountOut: amountOut.toString(),
@@ -768,31 +648,15 @@ describe('SwapRouter', () => {
 						5,
 					);
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						(
-							await getPool(tokens[2].address, tokens[1].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						trader.toString('hex'),
-						'1',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith((await getPool(tokens[2].address, tokens[1].address, FeeAmount.MEDIUM)).address.toString('hex'), trader.toString('hex'), '1');
 
 					expect(mock_token_transfer).toHaveBeenCalledWith(
-						(
-							await getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						(
-							await getPool(tokens[2].address, tokens[1].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
+						(await getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)).address.toString('hex'),
+						(await getPool(tokens[2].address, tokens[1].address, FeeAmount.MEDIUM)).address.toString('hex'),
 						'3',
 					);
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						trader.toString('hex'),
-						(
-							await getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
-						).address.toString('hex'),
-						'5',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(trader.toString('hex'), (await getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)).address.toString('hex'), '5');
 				});
 			});
 
@@ -873,13 +737,7 @@ describe('SwapRouter', () => {
 		});
 
 		describe('#exactOutputSingle', () => {
-			async function exactOutputSingle(
-				tokenIn: Buffer,
-				tokenOut: Buffer,
-				amountOut = 1,
-				amountInMaximum = 3,
-				sqrtPriceLimitX96?: Uint,
-			): Promise<void> {
+			async function exactOutputSingle(tokenIn: Buffer, tokenOut: Buffer, amountOut = 1, amountInMaximum = 3, sqrtPriceLimitX96?: Uint): Promise<void> {
 				const inputIsWETH9 = tokenIn.compare(NATIVE_TOKEN_ID) === 0;
 				const outputIsWETH9 = tokenOut.compare(NATIVE_TOKEN_ID) === 0;
 
@@ -894,19 +752,12 @@ describe('SwapRouter', () => {
 					amountOut: amountOut.toString(),
 					amountInMaximum: amountInMaximum.toString(),
 					sqrtPriceLimitX96:
-						sqrtPriceLimitX96 ??
-						tokenIn.toString('hex').toLowerCase() < tokenOut.toString('hex').toLowerCase()
+						sqrtPriceLimitX96 ?? tokenIn.toString('hex').toLowerCase() < tokenOut.toString('hex').toLowerCase()
 							? Uint.from('4295128740').toString()
 							: Uint.from('1461446703485210103287273052203988822378723970341').toString(),
 				};
 
-				await tokenMethod.transfer(
-					context.context,
-					trader,
-					router.address,
-					NATIVE_TOKEN_ID,
-					BigInt(value),
-				);
+				await tokenMethod.transfer(context.context, trader, router.address, NATIVE_TOKEN_ID, BigInt(value));
 				router.setSender(trader);
 				await router.exactOutputSingle(params);
 				router.setSender(sender);

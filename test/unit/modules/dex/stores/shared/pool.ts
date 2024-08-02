@@ -12,28 +12,14 @@ import { TestCallee } from './fixtures/TestCallee';
 import { TestRouter } from './fixtures/TestRouter';
 import { methodContextFixture, tokenID } from './module';
 import { defaultConfig } from '../../../../../../src/app/modules/dex/constants';
-import {
-	token0 as token0ID,
-	token1 as token1ID,
-	token2 as token2ID,
-	token3 as token3ID,
-	token0Symbol,
-	token1Symbol,
-	token2Symbol,
-	token3Symbol,
-} from '../../utils/account';
+import { token0 as token0ID, token1 as token1ID, token2 as token2ID, token3 as token3ID, token0Symbol, token1Symbol, token2Symbol, token3Symbol } from '../../utils/account';
 
 type Fixture<T> = (context: MutableSwapContext, module: DexModule) => Promise<T>;
 
 interface PoolFixture extends TokensFixture {
 	swapTargetCallee: TestCallee;
 	swapTargetRouter: TestRouter;
-	createPool(
-		fee: string,
-		tickSpacing: string,
-		firstToken?: Buffer,
-		secondToken?: Buffer,
-	): Promise<DEXPool>;
+	createPool(fee: string, tickSpacing: string, firstToken?: Buffer, secondToken?: Buffer): Promise<DEXPool>;
 }
 
 interface CompleteFixture extends PoolFixture {
@@ -92,9 +78,7 @@ async function tokensFixture(sender: Buffer): Promise<TokensFixture> {
 	TokenRegistry.createToken(tokenDID, tokenD);
 	await tokenMethod.mint(undefined as any, sender, tokenDID, Uint.from(2).pow(255).toBigInt());
 
-	const [token0, token1, token2, token3] = [tokenAID, tokenBID, tokenCID, tokenDID].sort(
-		(tokenAi, tokenBi) => Buffer.compare(tokenAi, tokenBi),
-	);
+	const [token0, token1, token2, token3] = [tokenAID, tokenBID, tokenCID, tokenDID].sort((tokenAi, tokenBi) => Buffer.compare(tokenAi, tokenBi));
 
 	return {
 		nativeTokenId,
@@ -113,21 +97,8 @@ async function tokensFixture(sender: Buffer): Promise<TokensFixture> {
 	};
 }
 
-export const poolFixture: Fixture<PoolFixture> = async (
-	context: MutableSwapContext,
-	module: DexModule,
-): Promise<PoolFixture> => {
-	const {
-		nativeTokenId,
-		token0,
-		token1,
-		token2,
-		token3,
-		token0Decimal,
-		token1Decimal,
-		token2Decimal,
-		token3Decimal,
-	} = await tokensFixture(context.senderAddress);
+export const poolFixture: Fixture<PoolFixture> = async (context: MutableSwapContext, module: DexModule): Promise<PoolFixture> => {
+	const { nativeTokenId, token0, token1, token2, token3, token0Decimal, token1Decimal, token2Decimal, token3Decimal } = await tokensFixture(context.senderAddress);
 
 	const swapTargetCallee = new TestCallee(context, module);
 	const swapTargetRouter = new TestRouter(context, module);
@@ -148,13 +119,15 @@ export const poolFixture: Fixture<PoolFixture> = async (
 		token3Decimal,
 		swapTargetCallee,
 		swapTargetRouter,
-		createPool: async (fee, _tickSpacing, firstToken = token0, secondToken = token1) => {
+		createPool: async (fee, tickSpacing, firstToken = token0, secondToken = token1) => {
 			const poolStore = module.stores.get(PoolStore);
 			await poolStore.del(context.context, poolStore.getKey(firstToken, secondToken, fee));
-			poolStore.init({
+			// eslint-disable-next-line no-param-reassign
+			module._config.default = {
 				...defaultConfig,
-				feeAmountTickSpacing: [[fee, _tickSpacing]],
-			});
+				feeAmountTickSpacing: [{ fee, tickSpacing }],
+			};
+			poolStore.init(module._config);
 			const pool = await poolStore.createPool(
 				context,
 				firstToken,
@@ -165,23 +138,16 @@ export const poolFixture: Fixture<PoolFixture> = async (
 				8,
 				fee,
 			);
-			pool.tickSpacing = _tickSpacing;
+			pool.tickSpacing = tickSpacing;
 
 			return pool;
 		},
 	};
 };
 
-export const completeFixture: Fixture<CompleteFixture> = async (
-	context: MutableSwapContext,
-	module: DexModule,
-) => {
+export const completeFixture: Fixture<CompleteFixture> = async (context: MutableSwapContext, module: DexModule) => {
 	const fixture = await methodContextFixture();
-	const uninitializedRouter = new SwapRouter(
-		fixture.module.stores,
-		fixture.config,
-		fixture.module.name,
-	);
+	const uninitializedRouter = new SwapRouter(fixture.module.stores, fixture.config, fixture.module.name);
 	const pools = await poolFixture(context, module);
 
 	return {

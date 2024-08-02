@@ -78,10 +78,11 @@ describe('TreasurifyCommand', () => {
 
 	describe('execute', () => {
 		it('should do nothing if treasury is not configured', async () => {
-			poolStore.init({
+			module._config.default = {
 				...defaultConfig,
 				feeProtocolPool: '',
-			});
+			};
+			poolStore.init(module._config);
 
 			const context = createCommandExecuteContext(validParam);
 			await tokenMethod.mint(context, poolAddress, token2, BigInt(10));

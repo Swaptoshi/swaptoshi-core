@@ -24,7 +24,7 @@ export class ExactInputSingleCommand extends BaseCommand {
 	public async execute(_context: CommandExecuteContext<ExactInputSingleParams>): Promise<void> {
 		const poolStore = this.stores.get(PoolStore);
 		const context = commandSwapContext(_context);
-		const router = poolStore.getMutableRouter(context);
+		const router = await poolStore.getMutableRouter(context);
 		await router.exactInputSingle(_context.params);
 	}
 

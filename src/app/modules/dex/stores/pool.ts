@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
-import { DEXPoolData, DexModuleConfig, Slot0, ImmutableSwapContext, MutableSwapContext, MutableContext, TreasurifyParams } from '../types';
+import { DEXPoolData, Slot0, ImmutableSwapContext, MutableSwapContext, MutableContext, TreasurifyParams } from '../types';
 import { Uint24String } from './library/int';
 import { NFTDescriptor, PoolAddress } from './library/periphery';
 import { Tick } from './library/core';
@@ -13,6 +13,7 @@ import { TokenSymbolStore } from './token_symbol';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../constants';
 import { TreasurifyEvent } from '../events/treasurify';
 import { SupportedTokenStore } from './supported_token';
+import { DexGovernableConfig } from '../config';
 
 export const defaultSlot0: Slot0 = Object.freeze({
 	sqrtPriceX96: '0',
@@ -35,9 +36,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		if (this.config !== undefined) this.dependencyReady = true;
 	}
 
-	public init(config: DexModuleConfig) {
+	public init(config: DexGovernableConfig) {
 		this.config = config;
-		this.feeAmountTickSpacing = new Map(config.feeAmountTickSpacing);
 		if (this.tokenMethod !== undefined) this.dependencyReady = true;
 	}
 
@@ -45,9 +45,10 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		return PoolAddress.computeAddress(PoolAddress.getPoolKey(tokenA, tokenB, fee));
 	}
 
-	public getMutableRouter(ctx: MutableSwapContext) {
+	public async getMutableRouter(ctx: MutableSwapContext) {
 		this._checkDependencies();
-		return createMutableRouterInstance(ctx, this.stores, this.tokenMethod!, this.config!, this.moduleName);
+		const config = await this.config!.getConfig(ctx.context);
+		return createMutableRouterInstance(ctx, this.stores, this.tokenMethod!, config, this.moduleName);
 	}
 
 	public async getImmutablePool(ctx: ImmutableSwapContext, tokenA: Buffer, tokenB: Buffer, fee: Uint24String): Promise<DEXPool> {
@@ -59,7 +60,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
 		const pool = await subStore.getWithSchema<DEXPoolData>(this.getKey(tokenA, tokenB, fee), this.schema);
-		return createImmutablePoolInstance(ctx, pool, this.stores, this.events, this.tokenMethod!, this.config!, this.moduleName);
+		const config = await this.config!.getConfig(ctx.context);
+		return createImmutablePoolInstance(ctx, pool, this.stores, this.events, this.tokenMethod!, config, this.moduleName);
 	}
 
 	public async getMutablePool(ctx: MutableSwapContext, tokenA: Buffer, tokenB: Buffer, fee: Uint24String): Promise<DEXPool> {
@@ -71,7 +73,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
 		const pool = await subStore.getWithSchema<DEXPoolData>(this.getKey(tokenA, tokenB, fee), this.schema);
-		return createMutablePoolInstance(ctx, pool, this.stores, this.events, this.tokenMethod!, this.config!, this.moduleName);
+		const config = await this.config!.getConfig(ctx.context);
+		return createMutablePoolInstance(ctx, pool, this.stores, this.events, this.tokenMethod!, config, this.moduleName);
 	}
 
 	public async createPool(
@@ -88,8 +91,10 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 		if (tokenA.subarray(0, 1).compare(tokenB.subarray(0, 1)) !== 0) throw new Error('tokenA and tokenB are not from same network');
 
-		const tickSpacing = this.feeAmountTickSpacing.get(fee) ?? '0';
-		if (tickSpacing === '0') throw new Error('tickSpacing unsupported');
+		const config = await this.config!.getConfig(ctx.context);
+
+		const feeAmountTickSpacing = config.feeAmountTickSpacing.find(t => t.fee === fee);
+		if (!feeAmountTickSpacing) throw new Error('tickSpacing unsupported');
 
 		const key = this.getKey(tokenA, tokenB, fee);
 		const orderedTokenKey = PoolAddress.getPoolKey(tokenA, tokenB, fee);
@@ -97,8 +102,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 		const pool: DEXPoolData = {
 			...orderedTokenKey,
-			tickSpacing,
-			maxLiquidityPerTick: Tick.tickSpacingToMaxLiquidityPerTick(tickSpacing),
+			tickSpacing: feeAmountTickSpacing.tickSpacing,
+			maxLiquidityPerTick: Tick.tickSpacingToMaxLiquidityPerTick(feeAmountTickSpacing.tickSpacing),
 			feeGrowthGlobal0X128: '0',
 			feeGrowthGlobal1X128: '0',
 			liquidity: '0',
@@ -119,8 +124,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		const tokenABalance = await this.tokenMethod!.getAvailableBalance(ctx.context, key, tokenA);
 		const tokenBBalance = await this.tokenMethod!.getAvailableBalance(ctx.context, key, tokenB);
 
-		if (this.config!.feeProtocolPool) {
-			const treasury = cryptography.address.getAddressFromKlayr32Address(this.config!.feeProtocolPool, this.config!.feeProtocolPool.substring(0, 3));
+		if (config.feeProtocolPool) {
+			const treasury = cryptography.address.getAddressFromKlayr32Address(config.feeProtocolPool, config.feeProtocolPool.substring(0, 3));
 			await this.tokenMethod!.initializeUserAccount(ctx.context, treasury, tokenA);
 			await this.tokenMethod!.initializeUserAccount(ctx.context, treasury, tokenB);
 
@@ -151,8 +156,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 		const positionNameAndSymbol = `${tokenASymbol}/${tokenBSymbol}/${NFTDescriptor.feeToPercentString(fee)}`;
 		await positionManagerStore.set(ctx.context, positionManagerStore.getKey(key), {
 			poolAddress: key,
-			name: `${this.config!.nftPositionMetadata.dex.name} Positions NFT - ${positionNameAndSymbol}`,
-			symbol: `${this.config!.nftPositionMetadata.dex.symbol.toUpperCase()}POS-${positionNameAndSymbol}`,
+			name: `${config.nftPositionMetadata.dex.name} Positions NFT - ${positionNameAndSymbol}`,
+			symbol: `${config.nftPositionMetadata.dex.symbol.toUpperCase()}POS-${positionNameAndSymbol}`,
 		});
 
 		const events = this.events.get(PoolCreatedEvent);
@@ -160,7 +165,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			ctx.context,
 			{
 				...orderedTokenKey,
-				tickSpacing,
+				tickSpacing: feeAmountTickSpacing.tickSpacing,
 				poolAddress: key,
 			},
 			[key],
@@ -170,7 +175,9 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 	}
 
 	public async releaseTokenToProtocolTreasury(context: MutableContext, params: TreasurifyParams) {
-		if (this.config!.feeProtocolPool) {
+		const config = await this.config!.getConfig(context);
+
+		if (config.feeProtocolPool) {
 			if (params.address.compare(ROUTER_ADDRESS) !== 0 && !(await this.has(context, params.address))) {
 				throw new Error('pool doesnt exists, and address is not a router');
 			}
@@ -187,7 +194,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 			tokenToBeTransferred = await this.tokenMethod!.getAvailableBalance(context, params.address, params.token);
 
 			if (tokenToBeTransferred > BigInt(0) || tokenToBeUnlocked > BigInt(0)) {
-				const treasury = cryptography.address.getAddressFromKlayr32Address(this.config!.feeProtocolPool, this.config!.feeProtocolPool.substring(0, 3));
+				const treasury = cryptography.address.getAddressFromKlayr32Address(config.feeProtocolPool, config.feeProtocolPool.substring(0, 3));
 
 				let amount = tokenToBeTransferred;
 
@@ -226,8 +233,7 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 	private readonly moduleName: string;
 
 	private tokenMethod: TokenMethod | undefined;
-	private config: DexModuleConfig | undefined;
-	private feeAmountTickSpacing: Map<string, string> = new Map();
+	private config: DexGovernableConfig | undefined;
 
 	private dependencyReady = false;
 }

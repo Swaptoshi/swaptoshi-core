@@ -19,14 +19,25 @@ import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/store
 import { NFTMethod } from '../../../../../../src/app/modules/nft';
 import { MockedFeeConversionMethod } from './fee_conversion';
 import { FeeConversionMethod } from '../../../../../../src/app/modules/fee_conversion';
+import { MockedGovernanceMethod } from './governance';
+import { GovernanceMethod } from '../../../../../../src/app/modules/governance';
 
 export const chainID = Buffer.from('00000001', 'hex');
 export const tokenID = Buffer.concat([chainID, Buffer.alloc(4, 0)]);
 export const moduleConfig: DexModuleConfig = {
 	feeAmountTickSpacing: [
-		['500', '10'],
-		['3000', '60'],
-		['10000', '200'],
+		{
+			fee: '500',
+			tickSpacing: '10',
+		},
+		{
+			fee: '3000',
+			tickSpacing: '60',
+		},
+		{
+			fee: '10000',
+			tickSpacing: '200',
+		},
 	],
 	feeProtocol: 0,
 	feeProtocolPool: cryptography.address.getKlayr32AddressFromAddress(DEFAULT_TREASURY_ADDRESS),
@@ -82,10 +93,11 @@ export async function storeFixture() {
 	const nftMethod = new MockedNFTMethod() as NFTMethod;
 	const feeMethod = new MockedFeeMethod() as FeeMethod;
 	const feeConversionMethod = new MockedFeeConversionMethod() as FeeConversionMethod;
+	const governanceMethod = new MockedGovernanceMethod() as GovernanceMethod;
 	const interoperabilityMethod = {} as SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 
-	module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
+	module.addDependencies({ tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod, governanceMethod });
 	await module.init({ moduleConfig: moduleConfig as any, genesisConfig: { chainID } as any });
 
 	const observationStore = module.stores.get(ObservationStore);
@@ -111,6 +123,7 @@ export async function storeFixture() {
 		nftMethod,
 		feeMethod,
 		feeConversionMethod,
+		governanceMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,
@@ -200,6 +213,7 @@ export async function hookContextFixture() {
 		tickInfoStore,
 		tokenSymbolStore,
 		poolStore,
+		governanceMethod,
 		positionManagerStore,
 	} = await storeFixture();
 
@@ -224,6 +238,7 @@ export async function hookContextFixture() {
 		nftMethod,
 		feeMethod,
 		feeConversionMethod,
+		governanceMethod,
 		interoperabilityMethod,
 		stateStore,
 		observationStore,

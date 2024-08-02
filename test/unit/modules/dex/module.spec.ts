@@ -38,6 +38,7 @@ import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_s
 import { fallbackTokenSymbol } from './utils/token';
 import { NFTMethod } from '../../../../src/app/modules/nft';
 import { FeeConversionMethod } from '../../../../src/app/modules/fee_conversion';
+import { GovernanceMethod } from '../../../../src/app/modules/governance';
 
 const baseTransaction = {
 	module: '',
@@ -61,6 +62,7 @@ describe('DexModule', () => {
 	let tokenMethod: TokenMethod;
 	let nftMethod: NFTMethod;
 	let feeMethod: FeeMethod;
+	let governanceMethod: GovernanceMethod;
 	let feeConversionMethod: FeeConversionMethod;
 	let interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	let verifyContext: TransactionVerifyContext;
@@ -76,7 +78,8 @@ describe('DexModule', () => {
 		const nativeTokenIns = new Token();
 		TokenRegistry.createToken(NATIVE_TOKEN_ID, nativeTokenIns);
 
-		({ module, createTransactionVerifyContext, createTransactionExecuteContext, poolStore, positionManagerStore, tokenMethod, nftMethod, feeMethod, feeConversionMethod } = await hookContextFixture());
+		({ module, createTransactionVerifyContext, createTransactionExecuteContext, poolStore, positionManagerStore, tokenMethod, nftMethod, feeMethod, feeConversionMethod, governanceMethod } =
+			await hookContextFixture());
 	});
 
 	afterEach(() => {
@@ -154,7 +157,7 @@ describe('DexModule', () => {
 			expect(moduleMetadata.endpoints).toHaveLength(12);
 			expect(moduleMetadata.events).toHaveLength(16);
 			expect(moduleMetadata.assets).toHaveLength(0);
-			expect(moduleMetadata.stores).toHaveLength(8);
+			expect(moduleMetadata.stores).toHaveLength(9);
 		});
 	});
 
@@ -200,12 +203,12 @@ describe('DexModule', () => {
 
 		describe('addDependencies', () => {
 			it('should add poolStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
+				module.addDependencies({ tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod, governanceMethod });
 				expect(mockPoolStore.addDependencies).toHaveBeenCalledWith(tokenMethod);
 			});
 
 			it('should add positionManagerStore dependencies', () => {
-				module.addDependencies(tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod);
+				module.addDependencies({ tokenMethod, nftMethod, feeMethod, interoperabilityMethod, feeConversionMethod, governanceMethod });
 				expect(mockPositionManagerStore.addDependencies).toHaveBeenCalledWith(tokenMethod, nftMethod);
 			});
 		});
@@ -224,18 +227,18 @@ describe('DexModule', () => {
 
 					beforeEach(async () => {
 						await mintNativeFee();
-						module._config = defaultConfig;
+						module._config.default = defaultConfig;
 						transaction.module = module.name;
 					});
 
 					it('should pass if fee is higher than config', async () => {
-						module._config = { ...defaultConfig, feeConversionEnabled: false };
+						module._config.default = { ...defaultConfig, feeConversionEnabled: false };
 						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
 						await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
 					});
 
 					it('should fail if fee is lower than config', async () => {
-						module._config = {
+						module._config.default = {
 							...defaultConfig,
 							feeConversionEnabled: false,
 							minTransactionFee: {
@@ -318,19 +321,19 @@ describe('DexModule', () => {
 					};
 
 					beforeEach(async () => {
-						module._config = defaultConfig;
+						module._config.default = defaultConfig;
 						transaction.module = module.name;
 						await mintNativeFee();
 					});
 
 					it('should pass if fee is higher than config', async () => {
-						module._config = { ...defaultConfig, feeConversionEnabled: false };
+						module._config.default = { ...defaultConfig, feeConversionEnabled: false };
 						executeContext = createTransactionExecuteContext(new Transaction(transaction));
 						await expect((async () => module.beforeCommandExecute(executeContext))()).resolves.not.toThrow();
 					});
 
 					it('should fail if fee is lower than config', async () => {
-						module._config = {
+						module._config.default = {
 							...defaultConfig,
 							feeConversionEnabled: false,
 							minTransactionFee: {

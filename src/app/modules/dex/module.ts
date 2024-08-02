@@ -6,16 +6,13 @@ import {
 	BaseInteroperableModule,
 	BlockExecuteContext,
 	FeeMethod,
-	MainchainInteroperabilityMethod,
 	ModuleInitArgs,
 	ModuleMetadata,
-	SidechainInteroperabilityMethod,
 	TokenMethod,
 	TransactionExecuteContext,
 	TransactionVerifyContext,
 	VerificationResult,
 	VerifyStatus,
-	utils,
 } from 'klayr-sdk';
 import { BurnCommand } from './commands/burn_command';
 import { CollectCommand } from './commands/collect_command';
@@ -77,25 +74,24 @@ import { PositionManagerStore } from './stores/position_manager';
 import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
-import { DexModuleConfig } from './types';
+import { DexModuleDependencies } from './types';
 import { verifyMinimumFee, verifySwapByTransfer, executeSwapByTransfer, verifyValidTransfer, verifyBaseFee, executeBaseFee } from './hooks';
-import { defaultConfig } from './constants';
 import { TreasurifyEvent } from './events/treasurify';
 import { TokenRegisteredEvent } from './events/token_registered';
 import { SupportedTokenStore } from './stores/supported_token';
 import { DexInteroperableMethod } from './cc_method';
 import { TokenFactoryMethod } from '../token_factory/method';
-import { NFTMethod } from '../nft';
 import { FeeConversionMethod } from '../fee_conversion';
-import { DexSwapFeeConversionMethod, DexTransferFeeConversionMethod } from './fc_method';
-import { verifyModuleConfig } from './utils';
+import { DexGovernableConfig } from './config';
+import { GovernanceMethod } from '../governance';
 
 export class DexModule extends BaseInteroperableModule {
-	public _config: DexModuleConfig | undefined;
+	public _config: DexGovernableConfig = new DexGovernableConfig(this.name, 8);
 	public _feeMethod: FeeMethod | undefined;
 	public _feeConversionMethod: FeeConversionMethod | undefined;
 	public _tokenMethod: TokenMethod | undefined;
 	public _tokenFactoryMethod: TokenFactoryMethod | undefined;
+	public _governanceMethod: GovernanceMethod | undefined;
 	public _dexInteroperableMethod = new DexInteroperableMethod(this.stores, this.events);
 
 	public crossChainCommand = [];
@@ -129,6 +125,7 @@ export class DexModule extends BaseInteroperableModule {
 		this.stores.register(TickInfoStore, new TickInfoStore(this.name, 5));
 		this.stores.register(TokenSymbolStore, new TokenSymbolStore(this.name, 6, this.events));
 		this.stores.register(SupportedTokenStore, new SupportedTokenStore(this.name, 7));
+		this.stores.register(DexGovernableConfig, this._config); // index number is 8
 
 		this.events.register(BurnEvent, new BurnEvent(this.name));
 		this.events.register(CollectPositionEvent, new CollectPositionEvent(this.name));
@@ -148,28 +145,24 @@ export class DexModule extends BaseInteroperableModule {
 		this.events.register(TokenRegisteredEvent, new TokenRegisteredEvent(this.name));
 	}
 
-	public addDependencies(
-		tokenMethod: TokenMethod,
-		nftMethod: NFTMethod,
-		feeMethod: FeeMethod,
-		interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod,
-		feeConversionMethod?: FeeConversionMethod,
-	) {
+	public addDependencies(dependencies: DexModuleDependencies) {
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportManagerStore = this.stores.get(SupportedTokenStore);
 
-		poolStore.addDependencies(tokenMethod);
-		positionManagerStore.addDependencies(tokenMethod, nftMethod);
-		supportManagerStore.addDependencies(tokenMethod);
+		poolStore.addDependencies(dependencies.tokenMethod);
+		positionManagerStore.addDependencies(dependencies.tokenMethod, dependencies.nftMethod);
+		supportManagerStore.addDependencies(dependencies.tokenMethod);
 
-		this._feeMethod = feeMethod;
-		this._tokenMethod = tokenMethod;
-		this._dexInteroperableMethod.addDependencies(interoperabilityMethod, tokenMethod, nftMethod);
+		this._feeMethod = dependencies.feeMethod;
+		this._tokenMethod = dependencies.tokenMethod;
+		this._governanceMethod = dependencies.governanceMethod;
+		this._dexInteroperableMethod.addDependencies(dependencies.interoperabilityMethod, dependencies.tokenMethod, dependencies.nftMethod);
+		this._config.addDependencies(this.stores, dependencies.feeConversionMethod);
 
-		if (feeConversionMethod) {
-			this._feeConversionMethod = feeConversionMethod;
-			this._feeConversionMethod.addDependencies(tokenMethod, feeMethod);
+		if (dependencies.feeConversionMethod) {
+			this._feeConversionMethod = dependencies.feeConversionMethod;
+			this._feeConversionMethod.addDependencies(dependencies.tokenMethod, dependencies.feeMethod);
 		}
 	}
 
@@ -244,9 +237,6 @@ export class DexModule extends BaseInteroperableModule {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(_args: ModuleInitArgs): Promise<void> {
-		this._config = utils.objects.mergeDeep({}, defaultConfig, _args.moduleConfig) as DexModuleConfig;
-		await verifyModuleConfig(this._config);
-
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportedTokenStore = this.stores.get(SupportedTokenStore);
@@ -257,20 +247,14 @@ export class DexModule extends BaseInteroperableModule {
 		supportedTokenStore.init(this._config);
 		tokenSymbolStore.init(_args.genesisConfig, this._config);
 
-		this.method.init(this._config);
-		this.endpoint.init(this._config);
-
-		if (this._config.feeConversionEnabled && !this._feeConversionMethod) {
-			throw new Error('feeConversionMethod dependencies is not configured, make sure to add FeeConversionModule.method to DexModule.addDependencies()');
+		if (this._governanceMethod) {
+			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
+		} else {
+			this._config.init(_args);
 		}
 
 		if (!this._tokenMethod || !this._feeMethod) {
 			throw new Error('dex module dependencies is not configured, make sure DexModule.addDependencies() is called before module registration');
-		}
-
-		if (this._feeConversionMethod && this._config.feeConversionEnabled) {
-			this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
-			this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
 		}
 	}
 

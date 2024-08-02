@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable import/no-cycle */
 import { BaseStore, GenesisConfig, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
-import { DexModuleConfig, ImmutableSwapContext, MutableSwapContext, PositionManager } from '../types';
+import { ImmutableSwapContext, MutableSwapContext, PositionManager } from '../types';
 import { positionManagerStoreSchema } from '../schema';
 import { createImmutablePositionManagerinstance, createMutablePositionManagerinstance } from './factory';
 import { NFTMethod } from '../../nft';
+import { DexGovernableConfig } from '../config';
 
 export class PositionManagerStore extends BaseStore<PositionManager> {
 	public constructor(moduleName: string, index: number, stores: NamedRegistry, events: NamedRegistry) {
@@ -20,7 +21,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 		if (this.genesisConfig !== undefined && this.dexConfig !== undefined) this.dependencyReady = true;
 	}
 
-	public init(genesisConfig: GenesisConfig, dexConfig: DexModuleConfig) {
+	public init(genesisConfig: GenesisConfig, dexConfig: DexGovernableConfig) {
 		this.genesisConfig = genesisConfig;
 		this.dexConfig = dexConfig;
 		if (this.tokenMethod !== undefined && this.nftMethod !== undefined) this.dependencyReady = true;
@@ -40,7 +41,8 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
 		const positionManager = await subStore.getWithSchema<PositionManager>(this.getKey(poolAddress), this.schema);
-		return createImmutablePositionManagerinstance(positionManager, ctx, this.stores, this.events, this.tokenMethod!, this.nftMethod!, this.genesisConfig!, this.dexConfig!, this.moduleName);
+		const config = await this.dexConfig!.getConfig(ctx.context);
+		return createImmutablePositionManagerinstance(positionManager, ctx, this.stores, this.events, this.tokenMethod!, this.nftMethod!, this.genesisConfig!, config, this.moduleName);
 	}
 
 	public async getMutablePositionManager(ctx: MutableSwapContext, poolAddress: Buffer) {
@@ -52,7 +54,8 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 
 		const subStore = ctx.context.getStore(this.storePrefix, this.subStorePrefix);
 		const positionManager = await subStore.getWithSchema<PositionManager>(this.getKey(poolAddress), this.schema);
-		return createMutablePositionManagerinstance(positionManager, ctx, this.stores, this.events, this.tokenMethod!, this.nftMethod!, this.genesisConfig!, this.dexConfig!, this.moduleName);
+		const config = await this.dexConfig!.getConfig(ctx.context);
+		return createMutablePositionManagerinstance(positionManager, ctx, this.stores, this.events, this.tokenMethod!, this.nftMethod!, this.genesisConfig!, config, this.moduleName);
 	}
 
 	private _checkDependencies() {
@@ -68,7 +71,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 	private readonly moduleName: string;
 
 	private genesisConfig: GenesisConfig | undefined = undefined;
-	private dexConfig: DexModuleConfig | undefined = undefined;
+	private dexConfig: DexGovernableConfig | undefined = undefined;
 	private tokenMethod: TokenMethod | undefined;
 	private nftMethod: NFTMethod | undefined;
 

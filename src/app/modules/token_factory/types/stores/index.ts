@@ -5,4 +5,3 @@ export * from './next_available_token_id';
 export * from './vesting_unlock';
 export * from './context';
 export * from './instance';
-export * from './module';

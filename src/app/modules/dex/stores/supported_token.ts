@@ -1,10 +1,12 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, MethodContext, StoreGetter, TokenMethod } from 'klayr-sdk';
-import { DexModuleConfig, MutableContext, SupportedTokenManager } from '../types';
+import { MutableContext, SupportedTokenManager } from '../types';
 import { supportedTokenStoreSchema } from '../schema';
+import { DexGovernableConfig } from '../config';
 
 export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
-	public init(config: DexModuleConfig) {
+	public init(config: DexGovernableConfig) {
 		this.config = config;
 		if (this.tokenMethod !== undefined) this.dependencyReady = true;
 	}
@@ -17,15 +19,17 @@ export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 	public async apply(context: StoreGetter): Promise<void> {
 		this._checkDependencies();
 
+		const config = await this.config!.getConfig(context);
+
 		if (await this.has(context, Buffer.alloc(0))) {
 			const supportManager = await this.get(context, Buffer.alloc(0));
-			if (supportManager.supportAll !== this.config!.supportAllTokens) {
+			if (supportManager.supportAll !== config.supportAllTokens) {
 				await this._applyConfig(context);
 			}
 		} else {
 			await this._applyConfig(context);
 			const supportManager: SupportedTokenManager = {
-				supportAll: this.config!.supportAllTokens,
+				supportAll: config.supportAllTokens,
 				supported: [],
 			};
 			await this.set(context, Buffer.alloc(0), supportManager);
@@ -45,7 +49,9 @@ export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 	}
 
 	private async _applyConfig(context: StoreGetter): Promise<void> {
-		if (this.config?.supportAllTokens) {
+		const config = await this.config!.getConfig(context);
+
+		if (config.supportAllTokens) {
 			await this.tokenMethod?.supportAllTokens(context as MethodContext);
 		} else {
 			await this.tokenMethod?.removeAllTokensSupport(context as MethodContext);
@@ -65,6 +71,6 @@ export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 	public schema = supportedTokenStoreSchema;
 
 	private tokenMethod: TokenMethod | undefined;
-	private config: DexModuleConfig | undefined;
+	private config: DexGovernableConfig | undefined;
 	private dependencyReady = false;
 }

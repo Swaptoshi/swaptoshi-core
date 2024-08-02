@@ -1,9 +1,11 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseStore, GenesisConfig, NamedRegistry } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, TokenSymbol } from '../types';
 import { tokenSymbolStoreSchema } from '../schema';
 import { TokenRegisteredEvent } from '../events/token_registered';
 import { getDEXToken, getMainchainToken } from '../utils';
+import { DexGovernableConfig } from '../config';
 
 export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 	public constructor(moduleName: string, index: number, events: NamedRegistry) {
@@ -11,7 +13,7 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		this.events = events;
 	}
 
-	public init(genesisConfig: GenesisConfig, dexConfig: DexModuleConfig) {
+	public init(genesisConfig: GenesisConfig, dexConfig: DexGovernableConfig) {
 		this.genesisConfig = genesisConfig;
 		this.dexConfig = dexConfig;
 		this.dependencyReady = true;
@@ -28,12 +30,14 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		let _symbol = symbol;
 		let _decimal = decimal;
 
-		if (this._isInvalidMainchainToken(tokenId, symbol, decimal)) throw new Error('invalid mainchain token parameter');
+		const config = await this.dexConfig!.getConfig(ctx);
 
-		if (this._isInvalidDEXToken(tokenId, symbol, decimal)) throw new Error('invalid dex token parameter');
+		if (this._isInvalidMainchainToken(tokenId, symbol, decimal, config)) throw new Error('invalid mainchain token parameter');
 
-		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
-		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
+		if (this._isInvalidDEXToken(tokenId, symbol, decimal, config)) throw new Error('invalid dex token parameter');
+
+		const mainchain = getMainchainToken(this.genesisConfig!, config);
+		const dex = getDEXToken(this.genesisConfig!, config);
 
 		if (this.getKey(tokenId).compare(mainchain.tokenId) === 0) {
 			_symbol = mainchain.symbol;
@@ -57,15 +61,15 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 		);
 	}
 
-	private _isInvalidMainchainToken(tokenId: Buffer, symbol: string, decimal: number) {
-		const mainchain = getMainchainToken(this.genesisConfig!, this.dexConfig!);
+	private _isInvalidMainchainToken(tokenId: Buffer, symbol: string, decimal: number, config: DexModuleConfig) {
+		const mainchain = getMainchainToken(this.genesisConfig!, config);
 		const isMainchainToken = this.getKey(tokenId).compare(mainchain.tokenId) === 0;
 
 		return (isMainchainToken && (symbol !== mainchain.symbol || decimal !== mainchain.decimal)) || (symbol === mainchain.symbol && (!isMainchainToken || decimal !== mainchain.decimal));
 	}
 
-	private _isInvalidDEXToken(tokenId: Buffer, symbol: string, decimal: number) {
-		const dex = getDEXToken(this.genesisConfig!, this.dexConfig!);
+	private _isInvalidDEXToken(tokenId: Buffer, symbol: string, decimal: number, config: DexModuleConfig) {
+		const dex = getDEXToken(this.genesisConfig!, config);
 		const isDEXToken = this.getKey(tokenId).compare(dex.tokenId) === 0;
 
 		return (isDEXToken && (symbol !== dex.symbol || decimal !== dex.decimal)) || (symbol === dex.symbol && (!isDEXToken || decimal !== dex.decimal));
@@ -81,7 +85,7 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 
 	private readonly events: NamedRegistry;
 
-	private dexConfig: DexModuleConfig | undefined = undefined;
+	private dexConfig: DexGovernableConfig | undefined = undefined;
 	private genesisConfig: GenesisConfig | undefined = undefined;
 
 	private dependencyReady = false;

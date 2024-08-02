@@ -204,10 +204,11 @@ describe('CreatePoolCommand', () => {
 		});
 
 		it('should lock leftover balance if treasury is not configured', async () => {
-			poolStore.init({
+			module._config.default = {
 				...defaultConfig,
 				feeProtocolPool: '',
-			});
+			};
+			poolStore.init(module._config);
 
 			const context = createCommandExecuteContext(validParam);
 

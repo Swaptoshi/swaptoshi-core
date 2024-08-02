@@ -1,22 +1,11 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { BigIntAble, Uint } from '../../../../../../src/app/modules/dex/stores/library/int';
-import {
-	NonfungiblePositionManager,
-	SwapRouter,
-	DEXPool,
-} from '../../../../../../src/app/modules/dex/stores/factory';
+import { NonfungiblePositionManager, SwapRouter, DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { completeFixture } from '../shared/pool';
 import { methodContextFixture } from '../shared/module';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import { PositionManagerStore } from '../../../../../../src/app/modules/dex/stores/position_manager';
-import {
-	FeeAmount,
-	TICK_SPACINGS,
-	encodePriceSqrt,
-	expandTo18Decimals,
-	getMaxTick,
-	getMinTick,
-} from '../shared/utilities';
+import { FeeAmount, TICK_SPACINGS, encodePriceSqrt, expandTo18Decimals, getMaxTick, getMinTick } from '../shared/utilities';
 import { encodePath } from '../shared/path';
 import { NFTRegistry } from '../shared/nft/nft_registry';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
@@ -41,40 +30,16 @@ describe('PositionValue', () => {
 		nft: NonfungiblePositionManager;
 		router: SwapRouter;
 	}> = async (_sender: Buffer) => {
-		const {
-			module,
-			createMethodContext,
-			poolStore: _poolStore,
-			tokenMethod,
-		} = await methodContextFixture();
+		const { module, createMethodContext, poolStore: _poolStore, tokenMethod } = await methodContextFixture();
 		poolStore = _poolStore;
 		const context = methodSwapContext(createMethodContext(), _sender, 0);
-		const {
-			token0,
-			token1,
-			token2,
-			token3,
-			token0Decimal,
-			token0Symbol,
-			token1Decimal,
-			token1Symbol,
-			token2Decimal,
-			token2Symbol,
-			token3Decimal,
-			token3Symbol,
-		} = await completeFixture(context, module);
-		const router = poolStore.getMutableRouter(context);
-
-		const _pool = await poolStore.createPool(
+		const { token0, token1, token2, token3, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol, token3Decimal, token3Symbol } = await completeFixture(
 			context,
-			token0,
-			token0Symbol,
-			parseInt(token0Decimal, 10),
-			token1,
-			token1Symbol,
-			parseInt(token1Decimal, 10),
-			FeeAmount.MEDIUM,
+			module,
 		);
+		const router = await poolStore.getMutableRouter(context);
+
+		const _pool = await poolStore.createPool(context, token0, token0Symbol, parseInt(token0Decimal, 10), token1, token1Symbol, parseInt(token1Decimal, 10), FeeAmount.MEDIUM);
 		await _pool.initialize(encodePriceSqrt(1, 1).toString());
 		const positionManagerStore = module.stores.get(PositionManagerStore);
 		const nft = await positionManagerStore.getMutablePositionManager(context, _pool.address);
@@ -86,17 +51,10 @@ describe('PositionValue', () => {
 			{ address: token3, symbol: () => token3Symbol, decimals: () => token3Decimal },
 		];
 
-		_tokens.sort((a, b) =>
-			a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-		);
+		_tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 		for (const token of _tokens) {
-			await tokenMethod.mint(
-				createMethodContext(),
-				_sender,
-				token.address,
-				expandTo18Decimals(1_000_000).toBigInt(),
-			);
+			await tokenMethod.mint(createMethodContext(), _sender, token.address, expandTo18Decimals(1_000_000).toBigInt());
 		}
 
 		return {
@@ -168,12 +126,7 @@ describe('PositionValue', () => {
 				amountOutMinimum: '0',
 			});
 
-			pool = await poolStore.getMutablePool(
-				context,
-				tokens[0].address,
-				tokens[1].address,
-				FeeAmount.MEDIUM,
-			);
+			pool = await poolStore.getMutablePool(context, tokens[0].address, tokens[1].address, FeeAmount.MEDIUM);
 
 			sqrtRatioX96 = pool.slot0.sqrtPriceX96;
 		});
