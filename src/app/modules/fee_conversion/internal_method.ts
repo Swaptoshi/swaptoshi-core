@@ -124,6 +124,17 @@ export class InternalFeeConversionMethod extends BaseMethod {
 					const { fee } = feeTickSpaingMap;
 
 					if (await this._dexMethod!.poolExists(context, handlerPayload.tokenId, tokenOut, fee)) {
+						const path = Buffer.concat([
+							tokenOut,
+							Buffer.from(
+								parseInt(fee, 10)
+									.toString(16)
+									.padStart(2 * FEE_SIZE, '0'),
+								'hex',
+							),
+							handlerPayload.tokenId,
+						]);
+
 						try {
 							const { amountIn } = await dexQuoter.quoteExactOutputSingle({
 								tokenIn: handlerPayload.tokenId.toString('hex'),
@@ -134,38 +145,31 @@ export class InternalFeeConversionMethod extends BaseMethod {
 							});
 							if (!nativeConversionCheck || BigInt(amountIn) < BigInt(nativeConversionCheck.amountIn)) {
 								nativeConversionCheck = {
-									path: Buffer.concat([
-										tokenOut,
-										Buffer.from(
-											parseInt(fee, 10)
-												.toString(16)
-												.padStart(2 * FEE_SIZE, '0'),
-											'hex',
-										),
-										handlerPayload.tokenId,
-									]),
+									path,
 									amountIn,
 								};
 							}
-						} catch {
-							/* empty */
+						} catch (err) {
+							console.warn(`Error while quoting fee conversion with native pool: ${(err as { message: string }).message}`);
+							console.warn(`Skipping path: ${path.toString('hex')}`);
 						}
 					}
 
 					for (const conversionPath of config.conversionPath) {
 						const pathTokenIn = Buffer.from(conversionPath.substring(conversionPath.length - TOKEN_ID_LENGTH * 2, conversionPath.length), 'hex');
 						if ((await this._dexMethod!.poolExists(context, handlerPayload.tokenId, pathTokenIn, fee)) && (await this._verifyPath(context, conversionPath))) {
+							const path = Buffer.concat([
+								Buffer.from(conversionPath, 'hex'),
+								Buffer.from(
+									parseInt(fee, 10)
+										.toString(16)
+										.padStart(2 * FEE_SIZE, '0'),
+									'hex',
+								),
+								handlerPayload.tokenId,
+							]);
+
 							try {
-								const path = Buffer.concat([
-									Buffer.from(conversionPath, 'hex'),
-									Buffer.from(
-										parseInt(fee, 10)
-											.toString(16)
-											.padStart(2 * FEE_SIZE, '0'),
-										'hex',
-									),
-									handlerPayload.tokenId,
-								]);
 								const { amountIn } = await dexQuoter.quoteExactOutput(path, amount.toString());
 								if (!customConversionCheck || BigInt(amountIn) < BigInt(customConversionCheck.amountIn)) {
 									customConversionCheck = {
@@ -173,8 +177,9 @@ export class InternalFeeConversionMethod extends BaseMethod {
 										amountIn,
 									};
 								}
-							} catch {
-								/* empty */
+							} catch (err) {
+								console.warn(`Error while quoting fee conversion with custom pool: ${(err as { message: string }).message}`);
+								console.warn(`Skipping path: ${path.toString('hex')}`);
 							}
 						}
 					}
