@@ -5,7 +5,6 @@ export const configSchema: TypedSchema<GovernanceModuleConfig> = {
 	type: 'object',
 	required: [
 		'proposalCreationMinBalance',
-		'proposalCreationFee',
 		'proposalCreationDeposit',
 		'maxProposalActions',
 		'votingDelayDuration',
@@ -21,75 +20,73 @@ export const configSchema: TypedSchema<GovernanceModuleConfig> = {
 		'boostFactor',
 		'treasuryAddress',
 		'treasuryReward',
+		'minTransactionFee',
+		'baseFee',
 	],
 	properties: {
 		proposalCreationMinBalance: {
 			dataType: 'string',
 			fieldNumber: 1,
 		},
-		proposalCreationFee: {
+		proposalCreationDeposit: {
 			dataType: 'string',
 			fieldNumber: 2,
 		},
-		proposalCreationDeposit: {
-			dataType: 'string',
-			fieldNumber: 3,
-		},
 		maxProposalActions: {
 			dataType: 'sint32',
-			fieldNumber: 4,
+			fieldNumber: 3,
 		},
 		votingDelayDuration: {
 			dataType: 'uint32',
-			fieldNumber: 5,
+			fieldNumber: 4,
 		},
 		voteDuration: {
 			dataType: 'uint32',
-			fieldNumber: 6,
+			fieldNumber: 5,
 		},
 		quorumDuration: {
 			dataType: 'uint32',
-			fieldNumber: 7,
+			fieldNumber: 6,
 		},
 		executionDuration: {
 			dataType: 'uint32',
-			fieldNumber: 8,
+			fieldNumber: 7,
 		},
 		quorumPercentage: {
 			dataType: 'uint32',
-			fieldNumber: 9,
+			fieldNumber: 8,
 		},
 		quorumMode: {
 			dataType: 'uint32',
-			fieldNumber: 10,
+			fieldNumber: 9,
 		},
 		depositPoolAddress: {
 			dataType: 'string',
-			fieldNumber: 11,
+			fieldNumber: 10,
 		},
 		enableTurnoutBias: {
 			dataType: 'boolean',
-			fieldNumber: 12,
+			fieldNumber: 11,
 		},
 		enableBoosting: {
 			dataType: 'boolean',
-			fieldNumber: 13,
+			fieldNumber: 12,
 		},
 		maxBoostDuration: {
 			dataType: 'uint32',
-			fieldNumber: 14,
+			fieldNumber: 13,
 		},
 		boostFactor: {
 			dataType: 'uint32',
-			fieldNumber: 15,
+			fieldNumber: 14,
 		},
 		treasuryAddress: {
 			dataType: 'string',
-			fieldNumber: 16,
+			fieldNumber: 15,
 		},
 		treasuryReward: {
 			type: 'object',
-			fieldNumber: 17,
+			fieldNumber: 16,
 			required: ['tokenID', 'offset', 'distance', 'mintBracket', 'blockRewardTaxBracket'],
 			properties: {
 				tokenID: {
@@ -122,6 +119,68 @@ export const configSchema: TypedSchema<GovernanceModuleConfig> = {
 					items: {
 						dataType: 'string',
 					},
+				},
+			},
+		},
+		minTransactionFee: {
+			type: 'object',
+			fieldNumber: 17,
+			required: ['createProposal', 'vote', 'boostVote', 'delegateVote', 'revokeDelegatedVote', 'setProposalAttributes'],
+			properties: {
+				createProposal: {
+					dataType: 'string',
+					fieldNumber: 1,
+				},
+				vote: {
+					dataType: 'string',
+					fieldNumber: 2,
+				},
+				boostVote: {
+					dataType: 'string',
+					fieldNumber: 3,
+				},
+				delegateVote: {
+					dataType: 'string',
+					fieldNumber: 4,
+				},
+				revokeDelegatedVote: {
+					dataType: 'string',
+					fieldNumber: 5,
+				},
+				setProposalAttributes: {
+					dataType: 'string',
+					fieldNumber: 6,
+				},
+			},
+		},
+		baseFee: {
+			type: 'object',
+			fieldNumber: 18,
+			required: ['createProposal', 'vote', 'boostVote', 'delegateVote', 'revokeDelegatedVote', 'setProposalAttributes'],
+			properties: {
+				createProposal: {
+					dataType: 'string',
+					fieldNumber: 1,
+				},
+				vote: {
+					dataType: 'string',
+					fieldNumber: 2,
+				},
+				boostVote: {
+					dataType: 'string',
+					fieldNumber: 3,
+				},
+				delegateVote: {
+					dataType: 'string',
+					fieldNumber: 4,
+				},
+				revokeDelegatedVote: {
+					dataType: 'string',
+					fieldNumber: 5,
+				},
+				setProposalAttributes: {
+					dataType: 'string',
+					fieldNumber: 6,
 				},
 			},
 		},

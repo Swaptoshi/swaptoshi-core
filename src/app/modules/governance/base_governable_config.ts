@@ -148,7 +148,11 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	public init(args: ModuleInitArgs): void {
 		this.beforeConfigInit(args.genesisConfig);
 		this.default = utils.objects.mergeDeep({}, this.default, args.moduleConfig) as T;
+
+		// verify all properties on assigned config is defined on the schema
 		validator.validator.validate(this.schema, this.default);
+		getUpdatedProperties({}, this.default, this.schema);
+
 		this.initialized = true;
 	}
 

@@ -5,6 +5,7 @@ import { BaseGovernableConfig } from './base_governable_config';
 import { DEFAULT_MAX_BOOST_DURATION_DAY, DEFAULT_VOTE_DURATION_DAY, defaultConfig } from './constants';
 import { configSchema } from './schema';
 import { GovernableConfigVerifyContext, GovernanceModuleConfig } from './types';
+import { verifyNumberString, verifyPositiveNumber } from './utils';
 
 export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceModuleConfig> {
 	public schema = configSchema;
@@ -35,6 +36,17 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 
 	private _verifyConfig(config: GovernanceModuleConfig) {
 		cryptography.address.validateKlayr32Address(config.treasuryAddress);
+		cryptography.address.validateKlayr32Address(config.depositPoolAddress);
+
+		for (const commands of Object.keys(config.minTransactionFee)) {
+			verifyNumberString(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof GovernanceModuleConfig['minTransactionFee']]);
+			verifyPositiveNumber(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof GovernanceModuleConfig['minTransactionFee']]);
+		}
+
+		for (const commands of Object.keys(config.baseFee)) {
+			verifyNumberString(`config.baseFee.${commands}`, config.baseFee[commands as keyof GovernanceModuleConfig['baseFee']]);
+			verifyPositiveNumber(`config.baseFee.${commands}`, config.baseFee[commands as keyof GovernanceModuleConfig['baseFee']]);
+		}
 
 		for (const mintBracket of config.treasuryReward.mintBracket) {
 			if (!this._isValidNonNegativeIntegerOrPercentage(mintBracket)) throw new Error(`Invalid mintBracket: ${mintBracket}`);

@@ -12,7 +12,6 @@ const TREASURY_ADDRESS = cryptography.address.getKlayr32AddressFromAddress(DEFAU
 
 export const defaultConfig: GovernanceModuleConfig = {
 	proposalCreationMinBalance: (10000 * 10 ** 8).toString(),
-	proposalCreationFee: (10 * 10 ** 8).toString(),
 	proposalCreationDeposit: (1000 * 10 ** 8).toString(),
 	maxProposalActions: -1,
 	votingDelayDuration: 0,
@@ -33,5 +32,21 @@ export const defaultConfig: GovernanceModuleConfig = {
 		distance: 1,
 		blockRewardTaxBracket: [],
 		mintBracket: [],
+	},
+	minTransactionFee: {
+		createProposal: '0',
+		vote: '0',
+		boostVote: '0',
+		delegateVote: '0',
+		revokeDelegatedVote: '0',
+		setProposalAttributes: '0',
+	},
+	baseFee: {
+		createProposal: (10 * 10 ** 8).toString(),
+		vote: '0',
+		boostVote: '0',
+		delegateVote: '0',
+		revokeDelegatedVote: '0',
+		setProposalAttributes: '0',
 	},
 };

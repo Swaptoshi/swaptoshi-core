@@ -1,7 +1,7 @@
 export type TypedSchema<T> = { $id: string } & ObjectSchema<T>;
 
 type ObjectSchema<T> = {
-	type: string;
+	type: 'object';
 	required: (keyof T extends string ? keyof T : never)[];
 	properties: SchemaProperties<T>;
 };

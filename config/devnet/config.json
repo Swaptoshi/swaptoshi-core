@@ -170,7 +170,6 @@
 		},
 		"governance": {
 			"proposalCreationMinBalance": "1000000000000",
-			"proposalCreationFee": "1000000000",
 			"proposalCreationDeposit": "100000000000",
 			"maxProposalActions": -1,
 			"votingDelayDuration": 0,
@@ -191,6 +190,22 @@
 				"distance": 1,
 				"blockRewardTaxBracket": ["10%"],
 				"mintBracket": []
+			},
+			"minTransactionFee": {
+				"createProposal": "0",
+				"vote": "0",
+				"boostVote": "0",
+				"delegateVote": "0",
+				"revokeDelegatedVote": "0",
+				"setProposalAttributes": "0"
+			},
+			"baseFee": {
+				"createProposal": "1000000000",
+				"vote": "0",
+				"boostVote": "0",
+				"delegateVote": "0",
+				"revokeDelegatedVote": "0",
+				"setProposalAttributes": "0"
 			}
 		},
 		"dynamicReward": {

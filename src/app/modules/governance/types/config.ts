@@ -1,6 +1,5 @@
 export interface GovernanceModuleConfig {
 	proposalCreationMinBalance: string;
-	proposalCreationFee: string;
 	proposalCreationDeposit: string;
 	maxProposalActions: number;
 	votingDelayDuration: number;
@@ -21,5 +20,21 @@ export interface GovernanceModuleConfig {
 		distance: number;
 		mintBracket: string[];
 		blockRewardTaxBracket: string[];
+	};
+	minTransactionFee: {
+		createProposal: string;
+		vote: string;
+		boostVote: string;
+		delegateVote: string;
+		revokeDelegatedVote: string;
+		setProposalAttributes: string;
+	};
+	baseFee: {
+		createProposal: string;
+		vote: string;
+		boostVote: string;
+		delegateVote: string;
+		revokeDelegatedVote: string;
+		setProposalAttributes: string;
 	};
 }
