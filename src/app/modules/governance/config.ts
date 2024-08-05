@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { GenesisConfig, VerificationResult, VerifyStatus, cryptography, utils } from 'klayr-sdk';
 import { BaseGovernableConfig } from './base_governable_config';
-import { defaultConfig } from './constants';
+import { DEFAULT_MAX_BOOST_DURATION_DAY, DEFAULT_VOTE_DURATION_DAY, defaultConfig } from './constants';
 import { configSchema } from './schema';
 import { GovernableConfigVerifyContext, GovernanceModuleConfig } from './types';
 
@@ -10,8 +10,14 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 	public schema = configSchema;
 	public default = defaultConfig;
 
-	public beforeConfigInit(_genesisConfig: GenesisConfig): void {
-		this.default = utils.objects.mergeDeep({}, this.default, { treasuryReward: { tokenID: `${_genesisConfig.chainID}00000000` } }) as GovernanceModuleConfig;
+	public beforeConfigInit(genesisConfig: GenesisConfig): void {
+		this.default = utils.objects.mergeDeep({}, this.default, {
+			voteDuration: (DEFAULT_VOTE_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
+			quorumDuration: (DEFAULT_VOTE_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
+			executionDuration: (DEFAULT_VOTE_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
+			maxBoostDuration: (DEFAULT_MAX_BOOST_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
+			treasuryReward: { tokenID: `${genesisConfig.chainID}00000000` },
+		}) as GovernanceModuleConfig;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await

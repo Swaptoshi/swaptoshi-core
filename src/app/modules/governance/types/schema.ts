@@ -10,7 +10,7 @@ type SchemaProperties<T> = {
 	[K in keyof T]: K extends keyof T ? TypeScriptTypeToSchemaType<T[K]> & SchemaPropertiesFields : never;
 };
 
-type SchemaPropertiesFields = { fieldNumber: number; format?: string; minLength?: number; maxLength?: number; minimum?: number };
+type SchemaPropertiesFields = { fieldNumber: number; governable?: boolean; format?: string; minLength?: number; maxLength?: number; minimum?: number };
 
 type TypeScriptTypeToSchemaType<T> = T extends string
 	? { dataType: 'string' }

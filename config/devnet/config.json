@@ -169,6 +169,21 @@
 			"useInvalidBLSKey": false
 		},
 		"governance": {
+			"proposalCreationMinBalance": "1000000000000",
+			"proposalCreationFee": "1000000000",
+			"proposalCreationDeposit": "100000000000",
+			"maxProposalActions": -1,
+			"votingDelayDuration": 0,
+			"voteDuration": 806400,
+			"quorumDuration": 806400,
+			"executionDuration": 806400,
+			"quorumPercentage": 50000,
+			"quorumMode": 0,
+			"depositPoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"enableTurnoutBias": false,
+			"enableBoosting": false,
+			"maxBoostDuration": 20736000,
+			"boostFactor": 2,
 			"treasuryAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"treasuryReward": {
 				"tokenID": "0455555500000000",
