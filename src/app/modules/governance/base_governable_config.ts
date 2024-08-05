@@ -239,23 +239,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async dryRunSetConfig(context: MethodContext, value: T): Promise<UpdatedProperty[]> {
-		await this._setConfigHandler(context, value, false, true);
-		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
-		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
-
-		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
-		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
-		validator.validator.validate<T>(removeProperty(this.schema, 'governable') as Schema, value);
-
-		if (this.registered) {
-			let oldConfig: object = {};
-			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
-
-			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
-			return updatedPaths;
-		}
-
-		return [];
+		return this._setConfigHandler(context, value, false, true);
 	}
 
 	/**
