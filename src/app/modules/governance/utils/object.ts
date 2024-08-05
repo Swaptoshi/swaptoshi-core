@@ -6,6 +6,32 @@ type iSchema = Schema & { dataType: string; items: Schema & { dataType: string; 
 type Primitive = string | number | bigint | boolean | null | undefined | object;
 
 /**
+ * Recursively removes a specified property from an object and its nested objects.
+ *
+ * @param {object} obj - The object from which the property will be removed.
+ * @param {string} propToRemove - The name of the property to remove.
+ * @returns {object} - A new object with the specified property removed.
+ */
+
+export function removeProperty(obj: object, propToRemove: string): object {
+	if (typeof obj !== 'object' || obj === null) return obj;
+
+	// Create a copy of the object to avoid mutating the original
+	const newObj: object = Array.isArray(obj) ? [] : {};
+
+	for (const [key, value] of Object.entries(obj)) {
+		if (key === propToRemove) {
+			continue; // Skip the property we want to remove
+		}
+
+		// Recursively apply the removal for nested objects
+		newObj[key] = removeProperty(value as object, propToRemove);
+	}
+
+	return newObj;
+}
+
+/**
  * Retrieves the schema definition for a given path.
  * @param schema - The root schema to start from.
  * @param path - The path to traverse in the schema.

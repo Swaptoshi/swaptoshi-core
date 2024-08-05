@@ -23,7 +23,7 @@ import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
 import { ConfigPathKeys, ConfigPathType, GovernableConfigSetContext, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
 import { governableConfigSchema } from './schema';
-import { getUpdatedProperties, getValueFromPath, pathExists, updateValueFromPath } from './utils';
+import { getSchemaByPath, getUpdatedProperties, getValueFromPath, pathExists, removeProperty, updateValueFromPath } from './utils';
 import { ConfigUpdatedEvent } from './events/config_updated';
 import { GovernanceMethod } from './method';
 
@@ -150,7 +150,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		this.default = utils.objects.mergeDeep({}, this.default, args.moduleConfig) as T;
 
 		// verify all properties on assigned config is defined on the schema
-		validator.validator.validate(this.schema, this.default);
+		validator.validator.validate(removeProperty(this.schema, 'governable') as Schema, this.default);
 		getUpdatedProperties({}, this.default, this.schema);
 
 		this.initialized = true;
@@ -167,7 +167,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		if (Object.keys(this.schema.properties).length === 0) throw new Error(`schema for ${this.name} is not configured`);
 
-		await this.setConfig(context.getMethodContext(), this.default);
+		await this._setConfigHandler(context.getMethodContext(), this.default, true, false);
 	}
 
 	/**
@@ -182,7 +182,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		if (this.registered) {
 			const configStore = await this.get(context, this.storeKey);
-			return codec.decode<T>(this.schema, configStore.data);
+			return codec.decode<T>(removeProperty(this.schema, 'governable') as Schema, configStore.data);
 		}
 		return this.default;
 	}
@@ -194,42 +194,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async setConfig(context: MethodContext, value: T): Promise<void> {
-		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
-		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
-
-		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
-		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
-		validator.validator.validate<T>(this.schema, value);
-
-		if (this.registered) {
-			let oldConfig: T = {} as T;
-			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
-
-			await this.beforeSetConfig({ ...context, config: oldConfig });
-
-			await this.set(context, this.storeKey, { data: codec.encode(this.schema, value) });
-
-			const events = this.events.get(ConfigUpdatedEvent);
-			const updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
-
-			updatedPaths.forEach(updated => {
-				events.add(
-					context,
-					{
-						module: this.module,
-						path: updated.path,
-						old: updated.old,
-						new: updated.new,
-						type: updated.type,
-					},
-					[this.storePrefix],
-				);
-			});
-		} else {
-			this.default = value;
-		}
-
-		await this.afterSetConfig({ ...context, config: value });
+		await this._setConfigHandler(context, value, true, true);
 	}
 
 	/**
@@ -274,12 +239,13 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The new configuration value.
 	 */
 	public async dryRunSetConfig(context: MethodContext, value: T): Promise<UpdatedProperty[]> {
+		await this._setConfigHandler(context, value, false, true);
 		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
-		validator.validator.validate<T>(this.schema, value);
+		validator.validator.validate<T>(removeProperty(this.schema, 'governable') as Schema, value);
 
 		if (this.registered) {
 			let oldConfig: object = {};
@@ -307,6 +273,67 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		}
 		const updatedConfig = updateValueFromPath(config, path, value);
 		return this.dryRunSetConfig(context, updatedConfig);
+	}
+
+	/**
+	 * Handler of setConfig function
+	 *
+	 * @param context - The context for setting the store.
+	 * @param value - The new config
+	 * @param mutateState - Whether blockchain state will be mutated, or just dryRunning
+	 * @param verifyGovernability - Whether governable props will be strictly checked
+	 * @throws Will throw an error if: instance is not configured, verify failed, invalid schema, or non-governable props found (in case verifyGovernability is true).
+	 */
+	private async _setConfigHandler(context: MethodContext, value: T, mutateState: boolean, verifyGovernability: boolean) {
+		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
+		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
+
+		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
+		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
+		validator.validator.validate<T>(removeProperty(this.schema, 'governable') as Schema, value);
+
+		let updatedPaths: UpdatedProperty[] = [];
+
+		if (this.registered) {
+			let oldConfig: T = {} as T;
+			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
+
+			updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
+
+			if (verifyGovernability) {
+				for (const updatedPath of updatedPaths) {
+					if ((getSchemaByPath(this.schema, updatedPath.path) as Schema & { governable?: boolean }).governable === false) {
+						throw new Error(`attempt to modify non-governable config: ${updatedPath.path}`);
+					}
+				}
+			}
+
+			if (mutateState) {
+				await this.beforeSetConfig({ ...context, config: oldConfig });
+
+				await this.set(context, this.storeKey, { data: codec.encode(removeProperty(this.schema, 'governable') as Schema, value) });
+
+				const events = this.events.get(ConfigUpdatedEvent);
+
+				updatedPaths.forEach(updated => {
+					events.add(
+						context,
+						{
+							module: this.module,
+							path: updated.path,
+							old: updated.old,
+							new: updated.new,
+							type: updated.type,
+						},
+						[this.storePrefix],
+					);
+				});
+			}
+		} else if (mutateState) this.default = value;
+
+		if (mutateState) await this.afterSetConfig({ ...context, config: value });
+
+		return updatedPaths;
 	}
 
 	// Below this are Klayr SDK BaseStore overriden implementation

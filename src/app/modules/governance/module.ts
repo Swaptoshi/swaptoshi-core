@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
@@ -17,9 +16,9 @@ export class GovernanceModule extends BaseModule {
 	public method = new GovernanceMethod(this.stores, this.events);
 	public commands = [];
 
-	private _config = new GovernanceGovernableConfig(this.name, 0);
-	private _governableConfig = new GovernableConfigRegistry();
-	private _internalMethod = new GovernanceInternalMethod(this.stores, this.events);
+	private readonly _config = new GovernanceGovernableConfig(this.name, 0);
+	private readonly _governableConfig = new GovernableConfigRegistry();
+	private readonly _internalMethod = new GovernanceInternalMethod(this.stores, this.events);
 
 	public constructor() {
 		super();
@@ -40,6 +39,7 @@ export class GovernanceModule extends BaseModule {
 		};
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(args: ModuleInitArgs): Promise<void> {
 		this.method.registerGovernableConfig(args, this.name, this._config);
 	}
