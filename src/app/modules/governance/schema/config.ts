@@ -27,6 +27,7 @@ export const configSchema: TypedSchema<GovernanceModuleConfig> = {
 	properties: {
 		governGovernanceConfig: {
 			dataType: 'boolean',
+			governable: false,
 			fieldNumber: 1,
 		},
 		proposalCreationMinBalance: {
