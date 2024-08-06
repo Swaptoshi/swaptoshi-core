@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod } from 'klayr-sdk';
+import { BaseModule, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, utils } from 'klayr-sdk';
 import { GovernanceEndpoint } from './endpoint';
 import { GovernanceMethod } from './method';
 import { GovernanceInternalMethod } from './internal_method';
@@ -18,6 +18,8 @@ import { ProposalSetAttributesEvent } from './events/proposal_set_attributes';
 import { ProposalVotedEvent } from './events/proposal_voted';
 import { VoteBoostedEvent } from './events/vote_boosted';
 import { VoteDelegatedEvent } from './events/vote_delegated';
+import { GovernanceModuleConfig } from './types';
+import { defaultConfig } from './constants';
 
 export class GovernanceModule extends BaseModule {
 	public endpoint = new GovernanceEndpoint(this.stores, this.offchainStores);
@@ -57,7 +59,12 @@ export class GovernanceModule extends BaseModule {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async init(args: ModuleInitArgs): Promise<void> {
-		this.method.registerGovernableConfig(args, this.name, this._config);
+		const config = utils.objects.mergeDeep({}, defaultConfig, args.moduleConfig) as GovernanceModuleConfig;
+		if (config.governGovernanceConfig) {
+			this.method.registerGovernableConfig(args, this.name, this._config);
+		} else {
+			this._config.init(args);
+		}
 	}
 
 	public addDependencies(token: TokenMethod) {

@@ -1,4 +1,5 @@
 export interface GovernanceModuleConfig {
+	governGovernanceConfig: boolean;
 	proposalCreationMinBalance: string;
 	proposalCreationDeposit: string;
 	maxProposalActions: number;

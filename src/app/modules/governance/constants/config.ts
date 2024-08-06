@@ -11,6 +11,7 @@ const MAX_BOOST_DURATION = (DEFAULT_MAX_BOOST_DURATION_DAY * 24 * 3600) / BLOCK_
 const TREASURY_ADDRESS = cryptography.address.getKlayr32AddressFromAddress(DEFAULT_TREASURY_ADDRESS);
 
 export const defaultConfig: GovernanceModuleConfig = {
+	governGovernanceConfig: true,
 	proposalCreationMinBalance: (10000 * 10 ** 8).toString(),
 	proposalCreationDeposit: (1000 * 10 ** 8).toString(),
 	maxProposalActions: -1,

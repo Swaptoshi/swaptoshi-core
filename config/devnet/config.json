@@ -169,6 +169,7 @@
 			"useInvalidBLSKey": false
 		},
 		"governance": {
+			"governGovernanceConfig": true,
 			"proposalCreationMinBalance": "1000000000000",
 			"proposalCreationDeposit": "100000000000",
 			"maxProposalActions": -1,
