@@ -278,10 +278,12 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		let updatedPaths: UpdatedProperty[] = [];
 
-		if (this.registered) {
-			let oldConfig: T = {} as T;
-			if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
+		let oldConfig: T = {} as T;
+		if (await this.has(context, this.storeKey)) oldConfig = (await this.getConfig(context)) as T;
 
+		if (mutateState) await this.beforeSetConfig({ ...context, oldConfig, newConfig: value });
+
+		if (this.registered) {
 			updatedPaths = getUpdatedProperties(oldConfig, value, this.schema);
 
 			if (verifyGovernability) {
@@ -293,8 +295,6 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 			}
 
 			if (mutateState) {
-				await this.beforeSetConfig({ ...context, config: oldConfig });
-
 				await this.set(context, this.storeKey, { data: codec.encode(removeProperty(this.schema, ['governable']) as Schema, value) });
 
 				const events = this.governanceEvent.get(ConfigUpdatedEvent);
@@ -315,7 +315,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 			}
 		} else if (mutateState) this.default = value;
 
-		if (mutateState) await this.afterSetConfig({ ...context, config: value });
+		if (mutateState) await this.afterSetConfig({ ...context, oldConfig, newConfig: value });
 
 		return updatedPaths;
 	}

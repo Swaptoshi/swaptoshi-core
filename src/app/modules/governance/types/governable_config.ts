@@ -11,5 +11,6 @@ export interface GovernableConfigVerifyContext<T extends object> {
 }
 
 export interface GovernableConfigSetContext<T> extends MethodContext {
-	config: T;
+	oldConfig: T;
+	newConfig: T;
 }

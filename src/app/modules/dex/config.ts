@@ -24,7 +24,7 @@ export class DexGovernableConfig extends BaseGovernableConfig<DexModuleConfig> {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	public async afterSetConfig(_context: GovernableConfigSetContext<DexModuleConfig>): Promise<void> {
 		if (this._feeConversionMethod) {
-			if (_context.config.feeConversionEnabled) {
+			if (_context.newConfig.feeConversionEnabled) {
 				this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.governanceEvent));
 				this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.governanceEvent));
 			} else {
