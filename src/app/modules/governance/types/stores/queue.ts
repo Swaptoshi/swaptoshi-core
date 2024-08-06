@@ -1,4 +1,5 @@
 export interface ProposalQueueStoreData {
-	ends: Buffer[];
-	execute: Buffer[];
+	quorum: number[];
+	ends: number[];
+	execute: number[];
 }
