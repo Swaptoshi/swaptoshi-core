@@ -32,7 +32,7 @@ import { GovernanceMethod } from './method';
  */
 export abstract class BaseGovernableConfig<T extends object> extends BaseStore<GovernableConfigStoreData> {
 	protected storeKey = Buffer.alloc(0);
-	protected events: NamedRegistry = new NamedRegistry();
+	protected governanceEvent: NamedRegistry = new NamedRegistry();
 	protected module: string = '';
 	protected method: GovernanceMethod | undefined;
 
@@ -85,7 +85,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param treasuryAddress - The treasury address, as configured on governance module.
 	 */
 	public register(events: NamedRegistry, governanceMethod: GovernanceMethod, args: ModuleInitArgs) {
-		this.events = events;
+		this.governanceEvent = events;
 		this.method = governanceMethod;
 		this.genesisConfig = args.genesisConfig;
 		this.init(args);
@@ -297,7 +297,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 				await this.set(context, this.storeKey, { data: codec.encode(removeProperty(this.schema, ['governable']) as Schema, value) });
 
-				const events = this.events.get(ConfigUpdatedEvent);
+				const events = this.governanceEvent.get(ConfigUpdatedEvent);
 
 				updatedPaths.forEach(updated => {
 					events.add(

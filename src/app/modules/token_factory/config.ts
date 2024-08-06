@@ -28,18 +28,18 @@ export class TokenFactoryGovernableConfig extends BaseGovernableConfig<TokenFact
 	public async afterSetConfig(_context: GovernableConfigSetContext<TokenFactoryModuleConfig>): Promise<void> {
 		if (this._feeConversionMethod) {
 			if (_context.config.icoFeeConversionEnabled) {
-				this._feeConversionMethod.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
+				this._feeConversionMethod.register('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.governanceEvent));
 				this._feeConversionMethod.register(
 					this.name,
 					['icoExactInput', 'icoExactInputSingle', 'icoExactOutput', 'icoExactOutputSingle'],
-					new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.events),
+					new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.governanceEvent),
 				);
 			} else {
-				this._feeConversionMethod.unregister('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.events));
+				this._feeConversionMethod.unregister('token', ['transfer'], new TokenFactoryTransferFeeConversionMethod(this.stores, this.governanceEvent));
 				this._feeConversionMethod.unregister(
 					this.name,
 					['icoExactInput', 'icoExactInputSingle', 'icoExactOutput', 'icoExactOutputSingle'],
-					new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.events),
+					new TokenFactoryICOPurchaseFeeConversionMethod(this.stores, this.governanceEvent),
 				);
 			}
 		}

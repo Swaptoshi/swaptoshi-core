@@ -25,11 +25,11 @@ export class DexGovernableConfig extends BaseGovernableConfig<DexModuleConfig> {
 	public async afterSetConfig(_context: GovernableConfigSetContext<DexModuleConfig>): Promise<void> {
 		if (this._feeConversionMethod) {
 			if (_context.config.feeConversionEnabled) {
-				this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
-				this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
+				this._feeConversionMethod.register('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.governanceEvent));
+				this._feeConversionMethod.register(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.governanceEvent));
 			} else {
-				this._feeConversionMethod.unregister('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.events));
-				this._feeConversionMethod.unregister(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.events));
+				this._feeConversionMethod.unregister('token', ['transfer'], new DexTransferFeeConversionMethod(this.stores, this.governanceEvent));
+				this._feeConversionMethod.unregister(this.name, ['exactInput', 'exactInputSingle', 'exactOutput', 'exactOutputSingle'], new DexSwapFeeConversionMethod(this.stores, this.governanceEvent));
 			}
 		}
 	}
