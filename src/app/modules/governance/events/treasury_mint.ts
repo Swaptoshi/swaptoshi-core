@@ -1,9 +1,6 @@
 import { BaseEvent } from 'klayr-sdk';
 import { treasuryMintEventSchema } from '../schema';
-
-export interface TreasuryMintEventData {
-	amount: bigint;
-}
+import { TreasuryMintEventData } from '../types';
 
 export class TreasuryMintEvent extends BaseEvent<TreasuryMintEventData> {
 	public schema = treasuryMintEventSchema;

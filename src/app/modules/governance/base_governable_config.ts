@@ -150,7 +150,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 		this.default = utils.objects.mergeDeep({}, this.default, args.moduleConfig) as T;
 
 		// verify all properties on assigned config is defined on the schema
-		validator.validator.validate(removeProperty(this.schema, 'governable') as Schema, this.default);
+		validator.validator.validate(removeProperty(this.schema, ['governable']) as Schema, this.default);
 		getUpdatedProperties({}, this.default, this.schema);
 
 		this.initialized = true;
@@ -182,7 +182,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		if (this.registered) {
 			const configStore = await this.get(context, this.storeKey);
-			return codec.decode<T>(removeProperty(this.schema, 'governable') as Schema, configStore.data);
+			return codec.decode<T>(removeProperty(this.schema, ['governable']) as Schema, configStore.data);
 		}
 		return this.default;
 	}
@@ -274,7 +274,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
 		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
-		validator.validator.validate<T>(removeProperty(this.schema, 'governable') as Schema, value);
+		validator.validator.validate<T>(removeProperty(this.schema, ['governable']) as Schema, value);
 
 		let updatedPaths: UpdatedProperty[] = [];
 
@@ -295,7 +295,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 			if (mutateState) {
 				await this.beforeSetConfig({ ...context, config: oldConfig });
 
-				await this.set(context, this.storeKey, { data: codec.encode(removeProperty(this.schema, 'governable') as Schema, value) });
+				await this.set(context, this.storeKey, { data: codec.encode(removeProperty(this.schema, ['governable']) as Schema, value) });
 
 				const events = this.events.get(ConfigUpdatedEvent);
 

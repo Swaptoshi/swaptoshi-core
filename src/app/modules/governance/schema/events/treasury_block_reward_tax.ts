@@ -1,4 +1,6 @@
-export const treasuryBlockRewardTaxEventSchema = {
+import { TreasuryBlockRewardTaxEventData, TypedSchema } from '../../types';
+
+export const treasuryBlockRewardTaxEventSchema: TypedSchema<TreasuryBlockRewardTaxEventData> = {
 	$id: '/governance/events/treasury_block_reward_tax',
 	type: 'object',
 	required: ['amount', 'generatorAddress'],

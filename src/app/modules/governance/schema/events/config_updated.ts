@@ -1,4 +1,6 @@
-export const configUpdatedEventSchema = {
+import { ConfigUpdatedEventData, TypedSchema } from '../../types';
+
+export const configUpdatedEventSchema: TypedSchema<ConfigUpdatedEventData> = {
 	$id: '/governance/events/config_updated',
 	type: 'object',
 	required: ['module', 'path', 'old', 'new', 'type'],

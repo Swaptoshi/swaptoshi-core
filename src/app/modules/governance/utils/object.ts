@@ -13,19 +13,19 @@ type Primitive = string | number | bigint | boolean | null | undefined | object;
  * @returns {object} - A new object with the specified property removed.
  */
 
-export function removeProperty(obj: object, propToRemove: string): object {
+export function removeProperty(obj: object, propsToRemove: string[]): object {
 	if (typeof obj !== 'object' || obj === null) return obj;
 
 	// Create a copy of the object to avoid mutating the original
 	const newObj: object = Array.isArray(obj) ? [] : {};
 
 	for (const [key, value] of Object.entries(obj)) {
-		if (key === propToRemove) {
+		if (propsToRemove.includes(key)) {
 			continue; // Skip the property we want to remove
 		}
 
 		// Recursively apply the removal for nested objects
-		newObj[key] = removeProperty(value as object, propToRemove);
+		newObj[key] = removeProperty(value as object, propsToRemove);
 	}
 
 	return newObj;

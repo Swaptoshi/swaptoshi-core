@@ -3,7 +3,7 @@
 import { BaseMethod, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ImmutableStoreGetter, TokenMethod, VerifyStatus, cryptography } from 'klayr-sdk';
 import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD } from './constants';
 import { TreasuryMintEvent } from './events/treasury_mint';
-import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tex';
+import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tax';
 import { GovernanceGovernableConfig } from './config';
 import { GovernableConfigRegistry } from './registry';
 
