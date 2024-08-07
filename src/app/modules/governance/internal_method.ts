@@ -66,7 +66,8 @@ export class GovernanceInternalMethod extends BaseMethod {
 		const taxedBlockRewardForTreasury = await this._getBlockRewardTaxBracket(context, dynamicReward, context.header.height);
 		if (taxedBlockRewardForTreasury > BigInt(0)) {
 			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
-			await this._tokenMethod.burn(context, context.header.generatorAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
+
+			this._setRewardContext(context, dynamicReward.blockReward - taxedBlockRewardForTreasury);
 
 			const events = this.events.get(TreasuryBlockRewardTaxEvent);
 			events.add(
@@ -112,6 +113,10 @@ export class GovernanceInternalMethod extends BaseMethod {
 			blockReward: blockReward === undefined ? BigInt(0) : blockReward,
 			reduction: reduction === undefined ? 0 : reduction,
 		};
+	}
+
+	private _setRewardContext(context: BlockAfterExecuteContext, updatedReward: bigint) {
+		context.contextStore.set(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD, updatedReward);
 	}
 
 	private async _getBracketLocation(context: BlockAfterExecuteContext, height: number): Promise<number> {

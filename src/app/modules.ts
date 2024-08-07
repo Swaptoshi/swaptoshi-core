@@ -59,13 +59,20 @@ export const registerModules = (app: Application, method: KlayrMethod): void => 
 		governanceMethod: governanceModule.method,
 	});
 
+	// governance module needs to executed before dynamicReward module for treasury blockRewardTax
 	app.registerModulePriority(governanceModule);
-	app.registerModulePriority(feeConversionModule); // the later the registerModulePriority, the higher the priority (unshift)
+
+	// feeConversion module needs to be executed before fee module for altering fee verification, and before all modules that implements fc_method
+	app.registerModulePriority(feeConversionModule);
 
 	app.registerModule(nftModule);
 	app.registerModule(tokenFactoryModule);
 	app.registerModule(dexModule);
 	app.registerModule(liquidPosModule);
+
+	// above registration order will result in following module array:
+	// [feeConversion, governance, ...klayrModules, nftModule, tokenFactoryModule, dexModule, liquidPosModule]
+	// the later the registerModulePriority, the higher the priority (unshift)
 
 	app.registerInteroperableModule(nftModule);
 	app.registerInteroperableModule(tokenFactoryModule);
