@@ -64,7 +64,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 
 		if (verifyResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && verifyResult.payload) {
 			const { path } = verifyResult.payload;
-			const dexRouter = await this._dexMethod!.getRouter(context, context.transaction.senderAddress, context.header.timestamp);
+			const dexRouter = await this._dexMethod!.getRouterInstance(context, context.transaction.senderAddress, context.header.timestamp);
 
 			await dexRouter.exactOutput({
 				path,
@@ -114,7 +114,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 
 				const amount = (feeDifference * BigInt(-1)).toString();
 
-				const dexQuoter = await this._dexMethod!.getQuoter(context, context.transaction.senderAddress, context.header.timestamp);
+				const dexQuoter = await this._dexMethod!.getQuoterInstance(context, context.transaction.senderAddress, context.header.timestamp);
 				const dexConfig = await this._dexMethod!.getConfig(context);
 
 				let nativeConversionCheck: ConversionCheck | undefined;

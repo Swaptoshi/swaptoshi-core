@@ -1,11 +1,14 @@
 /* eslint-disable */
 import { CollectTreasuryCommand } from '../../../../../src/app/modules/dex/commands/collect_treasury_command';
+import { DexModule } from '../../../../../src/app/modules/dex/module';
 
 describe('CollectTreasuryCommand', () => {
-  let command: CollectTreasuryCommand;
+	let module: DexModule;
+	let command: CollectTreasuryCommand;
 
 	beforeEach(() => {
-		command = new CollectTreasuryCommand();
+		module = new DexModule();
+		command = new CollectTreasuryCommand(module.stores, module.events);
 	});
 
 	describe('constructor', () => {
@@ -20,18 +23,18 @@ describe('CollectTreasuryCommand', () => {
 
 	describe('verify', () => {
 		describe('schema validation', () => {
-      it.todo('should throw errors for invalid schema');
-      it.todo('should be ok for valid schema');
-    });
+			it.todo('should throw errors for invalid schema');
+			it.todo('should be ok for valid schema');
+		});
 	});
 
 	describe('execute', () => {
-    describe('valid cases', () => {
-      it.todo('should update the state store');
-    });
+		describe('valid cases', () => {
+			it.todo('should update the state store');
+		});
 
-    describe('invalid cases', () => {
-      it.todo('should throw error');
-    });
+		describe('invalid cases', () => {
+			it.todo('should throw error');
+		});
 	});
 });

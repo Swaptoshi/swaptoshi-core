@@ -153,7 +153,7 @@ describe('DexModule', () => {
 			const moduleMetadata = module.metadata();
 			expect(typeof moduleMetadata).toBe('object');
 			expect(Object.keys(moduleMetadata)).toEqual(['commands', 'events', 'stores', 'endpoints', 'assets']);
-			expect(moduleMetadata.commands).toHaveLength(11);
+			expect(moduleMetadata.commands).toHaveLength(12);
 			expect(moduleMetadata.endpoints).toHaveLength(12);
 			expect(moduleMetadata.events).toHaveLength(16);
 			expect(moduleMetadata.assets).toHaveLength(0);

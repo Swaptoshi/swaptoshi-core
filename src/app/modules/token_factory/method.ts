@@ -74,37 +74,37 @@ export class TokenFactoryMethod extends BaseMethod {
 		});
 	}
 
-	public async getICOPool(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
+	public async getICOPoolInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getMutableICOPool(_context, tokenIn, tokenOut);
 	}
 
-	public async getICORouter(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICORouter>> {
+	public async getICORouterInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICORouter>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getMutableICORouter(_context);
 	}
 
-	public async getICOQuoter(context: ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICOQuoter>> {
+	public async getICOQuoterInstance(context: ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICOQuoter>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = immutableMethodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getImmutableICOQuoter(_context);
 	}
 
-	public async getAirdrop(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer, providerAddress: Buffer): Promise<StoreInstance<Airdrop>> {
+	public async getAirdropInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer, providerAddress: Buffer): Promise<StoreInstance<Airdrop>> {
 		const airdropStore = this.stores.get(AirdropStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return airdropStore.getMutableAirdrop(_context, tokenId, providerAddress);
 	}
 
-	public async getFactory(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer): Promise<StoreInstance<Factory>> {
+	public async getFactoryInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer): Promise<StoreInstance<Factory>> {
 		const factoryStore = this.stores.get(FactoryStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return factoryStore.getMutableFactory(_context, tokenId);
 	}
 
-	public async getVestingUnlock(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<VestingUnlock>> {
+	public async getVestingUnlockInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<VestingUnlock>> {
 		const vestingUnlockStore = this.stores.get(VestingUnlockStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return vestingUnlockStore.getInstance(_context);

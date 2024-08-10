@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { MethodContext, ModuleInitArgs, NamedRegistry } from 'klayr-sdk';
 import { GovernableConfigRegistry } from '../../../../../../../src/app/modules/governance/registry';
-import { BaseGovernableConfig, ProposalStoreData } from '../../../../../../../src/app/modules/governance';
+import { BaseGovernableConfig, GovernanceMethod, ProposalStoreData } from '../../../../../../../src/app/modules/governance';
 
 // Existing mocks
 export const mock_governance_init = jest.fn();
@@ -23,7 +23,7 @@ export const mock_get_delegated_vote = jest.fn();
 export const mock_get_next_available_proposal_id = jest.fn();
 export const mock_get_config = jest.fn();
 
-export class MockedGovernanceMethod {
+export class MockedGovernanceMethod implements Omit<GovernanceMethod, '_governableConfig'> {
 	stores = new NamedRegistry();
 	events = new NamedRegistry();
 
@@ -70,19 +70,19 @@ export class MockedGovernanceMethod {
 		return mock_create_proposal(context, senderAddress, timestamp, height, title, summary, actions, attributes);
 	}
 
-	public async getProposal(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, proposalId: number) {
+	public async getProposalInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, proposalId: number) {
 		return mock_get_proposal(context, senderAddress, timestamp, height, proposalId);
 	}
 
-	public async getProposalQueue(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number) {
+	public async getProposalQueueInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number) {
 		return mock_get_proposal_queue(context, senderAddress, timestamp, height);
 	}
 
-	public async getBoostedAccount(context: MethodContext, address: Buffer, timestamp: number, height: number) {
+	public async getBoostedAccountInstance(context: MethodContext, address: Buffer, timestamp: number, height: number) {
 		return mock_get_boosted_account(context, address, timestamp, height);
 	}
 
-	public async getDelegatedVote(context: MethodContext, address: Buffer, timestamp: number, height: number) {
+	public async getDelegatedVoteInstance(context: MethodContext, address: Buffer, timestamp: number, height: number) {
 		return mock_get_delegated_vote(context, address, timestamp, height);
 	}
 

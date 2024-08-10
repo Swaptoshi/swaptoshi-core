@@ -73,7 +73,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 
 		await this._checkICOPathExists(params.path, params.tokenOut, true);
 
-		const quoter = await this.dexMethod.getQuoter(this.immutableContext!.context, this.immutableContext!.senderAddress, Number(this.immutableContext!.timestamp));
+		const quoter = await this.dexMethod.getQuoterInstance(this.immutableContext!.context, this.immutableContext!.senderAddress, Number(this.immutableContext!.timestamp));
 
 		const quoteResult = await quoter.quoteExactInput(params.path, params.amountIn.toString());
 
@@ -97,7 +97,7 @@ export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
 
 		await this._checkICOPathExists(params.path, params.tokenOut, true);
 
-		const quoter = await this.dexMethod.getQuoter(this.immutableContext!.context, this.immutableContext!.senderAddress, Number(this.immutableContext!.timestamp));
+		const quoter = await this.dexMethod.getQuoterInstance(this.immutableContext!.context, this.immutableContext!.senderAddress, Number(this.immutableContext!.timestamp));
 
 		const swapAmountOut = await this.quoteExactOutputSingle({
 			amountOut: BigInt(params.amountOut),

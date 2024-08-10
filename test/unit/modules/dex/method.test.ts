@@ -2,11 +2,7 @@
 import { BaseMethod, MethodContext } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { methodFixture } from './utils/fixtures';
-import {
-	NonfungiblePositionManager,
-	SwapRouter,
-	DEXPool,
-} from '../../../../src/app/modules/dex/stores/factory';
+import { NonfungiblePositionManager, SwapRouter, DEXPool } from '../../../../src/app/modules/dex/stores/factory';
 import { DexMethod } from '../../../../src/app/modules/dex/method';
 import { poolAddress2, senderAddress } from './utils/account';
 import { FeeAmount } from './stores/shared/utilities';
@@ -45,76 +41,53 @@ describe('DexMethod', () => {
 		});
 
 		it("should expose 'getPool'", () => {
-			expect(typeof method.getPool).toBe('function');
+			expect(typeof method.getPoolInstance).toBe('function');
 		});
 
 		it("should expose 'getPositionManager'", () => {
-			expect(typeof method.getPositionManager).toBe('function');
+			expect(typeof method.getPositionManagerInstance).toBe('function');
 		});
 
 		it("should expose 'getRouter'", () => {
-			expect(typeof method.getRouter).toBe('function');
+			expect(typeof method.getRouterInstance).toBe('function');
 		});
 
 		it("should expose 'getQuoter'", () => {
-			expect(typeof method.getQuoter).toBe('function');
+			expect(typeof method.getQuoterInstance).toBe('function');
 		});
 	});
 
 	describe('createPool', () => {
 		it('should create new pool', async () => {
-			await method.createPool(
-				context,
-				senderAddress,
-				Date.now(),
-				token0,
-				'TKNA',
-				8,
-				token1,
-				'TKNB',
-				8,
-				FeeAmount.MEDIUM,
-			);
+			await method.createPool(context, senderAddress, Date.now(), token0, 'TKNA', 8, token1, 'TKNB', 8, FeeAmount.MEDIUM);
 			eventResultHaveMinimumLength(context.eventQueue, PoolCreatedEvent, module.name, 1);
 		});
 	});
 
 	describe('getPool', () => {
 		it('should get pool with correct instance', async () => {
-			const pool = await method.getPool(
-				context,
-				senderAddress,
-				Date.now(),
-				token1,
-				token2,
-				FeeAmount.MEDIUM,
-			);
+			const pool = await method.getPoolInstance(context, senderAddress, Date.now(), token1, token2, FeeAmount.MEDIUM);
 			expect(pool).toBeInstanceOf(DEXPool);
 		});
 	});
 
 	describe('getPositionManager', () => {
 		it('should get positionManager with correct instance', async () => {
-			const positionManager = await method.getPositionManager(
-				context,
-				senderAddress,
-				Date.now(),
-				poolAddress2,
-			);
+			const positionManager = await method.getPositionManagerInstance(context, senderAddress, Date.now(), poolAddress2);
 			expect(positionManager).toBeInstanceOf(NonfungiblePositionManager);
 		});
 	});
 
 	describe('getRouter', () => {
 		it('should get router with correct instance', async () => {
-			const router = await method.getRouter(context, senderAddress, Date.now());
+			const router = await method.getRouterInstance(context, senderAddress, Date.now());
 			expect(router).toBeInstanceOf(SwapRouter);
 		});
 	});
 
 	describe('getQuoter', () => {
 		it('should get quoter with correct instance', async () => {
-			const quoter = await method.getQuoter(context, senderAddress, Date.now());
+			const quoter = await method.getQuoterInstance(context, senderAddress, Date.now());
 			expect(quoter).toBeInstanceOf(Quoter);
 		});
 	});

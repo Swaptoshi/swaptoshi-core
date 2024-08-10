@@ -65,7 +65,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 
 		if (verify) await this.verifyExactInput(params);
 
-		const swapRouter = await this.dexMethod!.getRouter(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
+		const swapRouter = await this.dexMethod!.getRouterInstance(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
 
 		let icoAmountIn = params.amountIn.toString();
 
@@ -135,7 +135,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 
 		if (verify) await this.verifyExactOutput(params);
 
-		const swapRouter = await this.dexMethod!.getRouter(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
+		const swapRouter = await this.dexMethod!.getRouterInstance(this.mutableContext!.context, this.mutableContext!.senderAddress, Number(this.mutableContext!.timestamp));
 
 		const tokenIn = params.path.subarray(0, TOKEN_ID_LENGTH);
 		await this._updateInstance(tokenIn, params.tokenOut);
