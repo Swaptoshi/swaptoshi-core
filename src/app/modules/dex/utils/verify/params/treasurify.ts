@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { TreasurifyParams } from '../../../types';
 import { verifyAddress, verifyToken } from '../base';
 

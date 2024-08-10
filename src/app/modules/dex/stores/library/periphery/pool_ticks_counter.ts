@@ -1,16 +1,7 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { TickBitmapStore } from '../../tick_bitmap';
-import {
-	Int24String,
-	Uint32,
-	Int16,
-	Uint8,
-	Int24,
-	Uint256,
-	Uint256String,
-	Uint16String,
-	Uint16,
-} from '../int';
+import { Int24String, Uint32, Int16, Uint8, Int24, Uint256, Uint256String, Uint16String, Uint16 } from '../int';
 import { ImmutableContext, DEXPoolData } from '../../../types';
 
 export async function countInitializedTicksCrossed(
@@ -35,30 +26,12 @@ export async function countInitializedTicksCrossed(
 	const bitPosAfter = Uint8.from(Int24.from(tickAfter).div(self.tickSpacing).mod(256));
 
 	tickAfterInitialized =
-		Uint256.from(
-			Uint256.from(
-				(
-					await tickBitmapStore.getOrDefault(
-						context,
-						tickBitmapStore.getKey(self.address, wordPosAfter.toString()),
-					)
-				).bitmap,
-			).and(Uint256.from(1).shl(bitPosAfter)),
-		).gt(0) &&
+		Uint256.from(Uint256.from((await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(self.address, wordPosAfter.toString()))).bitmap).and(Uint256.from(1).shl(bitPosAfter))).gt(0) &&
 		Uint256.from(Int24.from(tickAfter).mod(self.tickSpacing)).eq(0) &&
 		Int24.from(tickBefore).gt(tickAfter);
 
 	tickBeforeInitialized =
-		Uint256.from(
-			Uint256.from(
-				(
-					await tickBitmapStore.getOrDefault(
-						context,
-						tickBitmapStore.getKey(self.address, wordPos.toString()),
-					)
-				).bitmap,
-			).and(Uint256.from(1).shl(bitPos)),
-		).gt(0) &&
+		Uint256.from(Uint256.from((await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(self.address, wordPos.toString()))).bitmap).and(Uint256.from(1).shl(bitPos))).gt(0) &&
 		Uint256.from(Int24.from(tickBefore).mod(self.tickSpacing)).eq(0) &&
 		Int24.from(tickBefore).lt(tickAfter);
 
@@ -80,14 +53,7 @@ export async function countInitializedTicksCrossed(
 			mask = mask.and(Uint256.from(Uint256.MAX).shr(Uint8.from(255).sub(bitPosHigher)));
 		}
 
-		const masked = Uint256.from(
-			(
-				await tickBitmapStore.getOrDefault(
-					context,
-					tickBitmapStore.getKey(self.address, wordPosLower.toString()),
-				)
-			).bitmap,
-		).and(mask);
+		const masked = Uint256.from((await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(self.address, wordPosLower.toString()))).bitmap).and(mask);
 		initializedTicksCrossed = initializedTicksCrossed.add(countOneBits(masked.toString()));
 		wordPosLower = wordPosLower.add(1);
 		mask = Uint256.from(Uint256.MAX);

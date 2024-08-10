@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { MintParams } from '../../../types';
 import { verifyAddress, verifyNumberString, verifyToken } from '../base';
 

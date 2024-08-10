@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { ObserveParams } from '../../../types';
 import { verifyAddress, verifyNumberString } from '../base';
 

@@ -1,8 +1,8 @@
+/* eslint-disable import/no-cycle */
 import { GenesisConfig, getMainchainID } from 'klayr-sdk';
 import { DexModuleConfig } from '../types';
 
-export const getMainchainTokenId = (chainId: Buffer) =>
-	Buffer.concat([getMainchainID(chainId), Buffer.alloc(4, 0)]);
+export const getMainchainTokenId = (chainId: Buffer) => Buffer.concat([getMainchainID(chainId), Buffer.alloc(4, 0)]);
 
 export const getDexTokenId = (chainId: Buffer) => Buffer.concat([chainId, Buffer.alloc(4, 0)]);
 

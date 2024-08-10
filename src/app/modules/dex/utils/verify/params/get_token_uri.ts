@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { GetTokenURIParams } from '../../../types';
 import { verifyAddress, verifyNumberString } from '../base';
 

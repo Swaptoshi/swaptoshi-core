@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { CollectParams } from '../../../types';
 import { verifyAddress, verifyNumberString } from '../base';
 

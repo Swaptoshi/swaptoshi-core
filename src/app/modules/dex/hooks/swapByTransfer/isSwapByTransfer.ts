@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { ImmutableMethodContext, NamedRegistry, Transaction, codec } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { tokenTransferParamsSchema } from '../../schema';

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { QuoteExactInputParams } from '../../../types';
 import { verifyNumberString, verifyString } from '../base';
 

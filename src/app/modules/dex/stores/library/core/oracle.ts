@@ -1,26 +1,11 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-param-reassign */
 import { ImmutableContext, MutableContext, Observation } from '../../../types';
 import { ObservationStore, defaultObservation } from '../../observation';
-import {
-	Uint32String,
-	Int24String,
-	Uint128String,
-	Uint32,
-	Int56,
-	Uint160,
-	Uint128,
-	Uint16String,
-	Uint16,
-	Uint256,
-} from '../int';
+import { Uint32String, Int24String, Uint128String, Uint32, Int56, Uint160, Uint128, Uint16String, Uint16, Uint256 } from '../int';
 
-export function transform(
-	last: Observation,
-	blockTimestamp: Uint32String,
-	tick: Int24String,
-	liquidity: Uint128String,
-): Observation {
+export function transform(last: Observation, blockTimestamp: Uint32String, tick: Int24String, liquidity: Uint128String): Observation {
 	const delta: Uint32 = Uint32.from(blockTimestamp).sub(last.blockTimestamp);
 	return {
 		blockTimestamp,
@@ -73,17 +58,11 @@ export async function write(
 	let indexUpdated = '';
 	let cardinalityUpdated = '';
 
-	const last = await observationStore.getOrDefault(
-		context,
-		observationStore.getKey(poolAddress, index),
-	);
+	const last = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, index));
 
 	if (last.blockTimestamp === blockTimestamp) return [index, cardinality];
 
-	if (
-		Uint16.from(cardinalityNext).gt(cardinality) &&
-		Uint16.from(index).eq(Uint16.from(cardinality).sub(1))
-	) {
+	if (Uint16.from(cardinalityNext).gt(cardinality) && Uint16.from(index).eq(Uint16.from(cardinality).sub(1))) {
 		cardinalityUpdated = cardinalityNext;
 	} else {
 		cardinalityUpdated = cardinality;
@@ -92,30 +71,17 @@ export async function write(
 	indexUpdated = Uint16.from(index).add(1).mod(cardinalityUpdated).toString();
 
 	if (!simulation) {
-		await observationStore.set(
-			context,
-			observationStore.getKey(poolAddress, indexUpdated),
-			transform(last, blockTimestamp, tick, liquidity),
-		);
+		await observationStore.set(context, observationStore.getKey(poolAddress, indexUpdated), transform(last, blockTimestamp, tick, liquidity));
 	}
 
 	return [indexUpdated, cardinalityUpdated];
 }
 
-export async function grow(
-	observationStore: ObservationStore,
-	context: MutableContext,
-	poolAddress: Buffer,
-	current: Uint16String,
-	next: Uint16String,
-	simulation = false,
-): Promise<string> {
+export async function grow(observationStore: ObservationStore, context: MutableContext, poolAddress: Buffer, current: Uint16String, next: Uint16String, simulation = false): Promise<string> {
 	if (Uint16.from(current).lte(0)) throw new Error('I');
 	if (Uint16.from(next).lte(current)) return current;
 	for (let i = Uint16.from(current); i.lt(next); i = i.add(1)) {
-		if (
-			!(await observationStore.has(context, observationStore.getKey(poolAddress, i.toString())))
-		) {
+		if (!(await observationStore.has(context, observationStore.getKey(poolAddress, i.toString())))) {
 			if (!simulation) {
 				await observationStore.set(context, observationStore.getKey(poolAddress, i.toString()), {
 					...defaultObservation,
@@ -123,10 +89,7 @@ export async function grow(
 				});
 			}
 		} else {
-			const observation = await observationStore.get(
-				context,
-				observationStore.getKey(poolAddress, i.toString()),
-			);
+			const observation = await observationStore.get(context, observationStore.getKey(poolAddress, i.toString()));
 			if (!simulation) {
 				await observationStore.set(context, observationStore.getKey(poolAddress, i.toString()), {
 					...observation,
@@ -141,12 +104,8 @@ export async function grow(
 export function lte(time: Uint32String, a: Uint32String, b: Uint32String): boolean {
 	if (Uint32.from(a).lte(time) && Uint32.from(b).lte(time)) return Uint32.from(a).lte(b);
 
-	const aAdjusted: Uint256 = Uint256.from(
-		Uint32.from(a).gt(time) ? a : Uint256.from(2).pow(32).add(a).toString(),
-	);
-	const bAdjusted: Uint256 = Uint256.from(
-		Uint32.from(b).gt(time) ? b : Uint256.from(2).pow(32).add(b).toString(),
-	);
+	const aAdjusted: Uint256 = Uint256.from(Uint32.from(a).gt(time) ? a : Uint256.from(2).pow(32).add(a).toString());
+	const bAdjusted: Uint256 = Uint256.from(Uint32.from(b).gt(time) ? b : Uint256.from(2).pow(32).add(b).toString());
 
 	return aAdjusted.lte(bAdjusted);
 }
@@ -169,19 +128,13 @@ export async function binarySearch(
 
 	while (true) {
 		i = l.add(r).div(2);
-		beforeOrAt = await observationStore.getOrDefault(
-			context,
-			observationStore.getKey(poolAddress, i.mod(cardinality).toString()),
-		);
+		beforeOrAt = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, i.mod(cardinality).toString()));
 		if (!beforeOrAt.initialized) {
 			l = i.add(1);
 			continue;
 		}
 
-		atOrAfter = await observationStore.getOrDefault(
-			context,
-			observationStore.getKey(poolAddress, i.add(1).mod(cardinality).toString()),
-		);
+		atOrAfter = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, i.add(1).mod(cardinality).toString()));
 
 		const targetAtOrAfter = lte(time, beforeOrAt.blockTimestamp, target);
 		if (targetAtOrAfter && lte(time, target, atOrAfter.blockTimestamp)) break;
@@ -206,10 +159,7 @@ export async function getSurroundingObservations(
 	let beforeOrAt: Observation;
 	let atOrAfter: Observation;
 
-	beforeOrAt = await observationStore.getOrDefault(
-		context,
-		observationStore.getKey(poolAddress, index),
-	);
+	beforeOrAt = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, index));
 
 	if (lte(time, beforeOrAt.blockTimestamp, target)) {
 		if (beforeOrAt.blockTimestamp === target) {
@@ -220,15 +170,8 @@ export async function getSurroundingObservations(
 		return [beforeOrAt, transform(beforeOrAt, target, tick, liquidity)];
 	}
 
-	beforeOrAt = await observationStore.getOrDefault(
-		context,
-		observationStore.getKey(poolAddress, Uint16.from(index).add(1).mod(cardinality).toString()),
-	);
-	if (!beforeOrAt.initialized)
-		beforeOrAt = await observationStore.getOrDefault(
-			context,
-			observationStore.getKey(poolAddress, '0'),
-		);
+	beforeOrAt = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, Uint16.from(index).add(1).mod(cardinality).toString()));
+	if (!beforeOrAt.initialized) beforeOrAt = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, '0'));
 
 	if (!lte(time, beforeOrAt.blockTimestamp, target)) throw new Error('OLD');
 
@@ -247,27 +190,14 @@ export async function observeSingle(
 	cardinality: Uint16String,
 ): Promise<[tickCumulative: string, secondsPerLiquidityCumulativeX128: string]> {
 	if (Uint32.from(secondsAgo).eq(0)) {
-		let last = await observationStore.getOrDefault(
-			context,
-			observationStore.getKey(poolAddress, index),
-		);
+		let last = await observationStore.getOrDefault(context, observationStore.getKey(poolAddress, index));
 		if (last.blockTimestamp !== time) last = transform(last, time, tick, liquidity);
 		return [last.tickCumulative, last.secondsPerLiquidityCumulativeX128];
 	}
 
 	const target: Uint32 = Uint32.from(time).sub(secondsAgo);
 
-	const [beforeOrAt, atOrAfter] = await getSurroundingObservations(
-		observationStore,
-		context,
-		poolAddress,
-		time,
-		target.toString(),
-		tick,
-		index,
-		liquidity,
-		cardinality,
-	);
+	const [beforeOrAt, atOrAfter] = await getSurroundingObservations(observationStore, context, poolAddress, time, target.toString(), tick, index, liquidity, cardinality);
 
 	if (target.eq(beforeOrAt.blockTimestamp)) {
 		return [beforeOrAt.tickCumulative, beforeOrAt.secondsPerLiquidityCumulativeX128];
@@ -275,22 +205,12 @@ export async function observeSingle(
 	if (target.eq(atOrAfter.blockTimestamp)) {
 		return [atOrAfter.tickCumulative, atOrAfter.secondsPerLiquidityCumulativeX128];
 	}
-	const observationTimeDelta: Uint32 = Uint32.from(atOrAfter.blockTimestamp).sub(
-		beforeOrAt.blockTimestamp,
-	);
+	const observationTimeDelta: Uint32 = Uint32.from(atOrAfter.blockTimestamp).sub(beforeOrAt.blockTimestamp);
 	const targetDelta: Uint32 = target.sub(beforeOrAt.blockTimestamp);
 
-	const tickCumulative = Int56.from(atOrAfter.tickCumulative)
-		.sub(beforeOrAt.tickCumulative)
-		.div(observationTimeDelta)
-		.mul(targetDelta)
-		.add(beforeOrAt.tickCumulative);
+	const tickCumulative = Int56.from(atOrAfter.tickCumulative).sub(beforeOrAt.tickCumulative).div(observationTimeDelta).mul(targetDelta).add(beforeOrAt.tickCumulative);
 	const secondsPerLiquidityCumulativeX128 = Uint160.from(0)
-		.add(
-			Uint256.from(atOrAfter.secondsPerLiquidityCumulativeX128)
-				.sub(beforeOrAt.secondsPerLiquidityCumulativeX128)
-				.toString(),
-		)
+		.add(Uint256.from(atOrAfter.secondsPerLiquidityCumulativeX128).sub(beforeOrAt.secondsPerLiquidityCumulativeX128).toString())
 		.mul(targetDelta)
 		.div(observationTimeDelta)
 		.add(beforeOrAt.secondsPerLiquidityCumulativeX128);
@@ -314,17 +234,7 @@ export async function observe(
 	const secondsPerLiquidityCumulativeX128s: string[] = [];
 
 	for (let i = Uint256.from(0); i.lt(secondsAgo.length); i = i.add(1)) {
-		const [tickCumulative, secondsPerLiquidityCumulativeX128] = await observeSingle(
-			observationStore,
-			context,
-			poolAddress,
-			time,
-			secondsAgo[i.toNumber()],
-			tick,
-			index,
-			liquidity,
-			cardinality,
-		);
+		const [tickCumulative, secondsPerLiquidityCumulativeX128] = await observeSingle(observationStore, context, poolAddress, time, secondsAgo[i.toNumber()], tick, index, liquidity, cardinality);
 		tickCumulatives.push(tickCumulative);
 		secondsPerLiquidityCumulativeX128s.push(secondsPerLiquidityCumulativeX128);
 	}

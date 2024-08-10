@@ -1,22 +1,6 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import {
-	Uint128String,
-	Int128String,
-	Uint256String,
-	Int56String,
-	Uint160String,
-	Uint32String,
-	Int24String,
-	Int24,
-	Uint24,
-	Uint128,
-	Uint256,
-	Int128,
-	Int256,
-	Uint160,
-	Int56,
-	Uint32,
-} from '../int';
+import { Uint128String, Int128String, Uint256String, Int56String, Uint160String, Uint32String, Int24String, Int24, Uint24, Uint128, Uint256, Int128, Int256, Uint160, Int56, Uint32 } from '../int';
 import { TickInfoStore } from '../../tick_info';
 
 import * as TickMath from './tick_math';
@@ -40,14 +24,8 @@ export async function getFeeGrowthInside(
 	feeGrowthGlobal0X128: Uint256String,
 	feeGrowthGlobal1X128: Uint256String,
 ): Promise<[feeGrowthInside0X128: Uint256String, feeGrowthInside1X128: Uint256String]> {
-	const lower = await tickInfoStore.getOrDefault(
-		context,
-		tickInfoStore.getKey(poolAddress, tickLower),
-	);
-	const upper = await tickInfoStore.getOrDefault(
-		context,
-		tickInfoStore.getKey(poolAddress, tickUpper),
-	);
+	const lower = await tickInfoStore.getOrDefault(context, tickInfoStore.getKey(poolAddress, tickLower));
+	const upper = await tickInfoStore.getOrDefault(context, tickInfoStore.getKey(poolAddress, tickUpper));
 
 	let feeGrowthBelow0X128: Uint256;
 	let feeGrowthBelow1X128: Uint256;
@@ -71,14 +49,8 @@ export async function getFeeGrowthInside(
 		feeGrowthAbove1X128 = Uint256.from(feeGrowthGlobal1X128).sub(upper.feeGrowthOutside1X128);
 	}
 
-	const feeGrowthInside0X128 = Uint256.from(feeGrowthGlobal0X128)
-		.sub(feeGrowthBelow0X128)
-		.sub(feeGrowthAbove0X128)
-		.toString();
-	const feeGrowthInside1X128 = Uint256.from(feeGrowthGlobal1X128)
-		.sub(feeGrowthBelow1X128)
-		.sub(feeGrowthAbove1X128)
-		.toString();
+	const feeGrowthInside0X128 = Uint256.from(feeGrowthGlobal0X128).sub(feeGrowthBelow0X128).sub(feeGrowthAbove0X128).toString();
+	const feeGrowthInside1X128 = Uint256.from(feeGrowthGlobal1X128).sub(feeGrowthBelow1X128).sub(feeGrowthAbove1X128).toString();
 
 	return [feeGrowthInside0X128, feeGrowthInside1X128];
 }
@@ -102,9 +74,7 @@ export async function update(
 	const info = await tickInfoStore.getOrDefault(context, tickInfoStore.getKey(poolAddress, tick));
 
 	const liquidityGrossBefore: Uint128 = Uint128.from(info.liquidityGross);
-	const liquidityGrossAfter: Uint128 = Uint128.from(
-		LiquidityMath.addDelta(liquidityGrossBefore.toString(), liquidityDelta),
-	);
+	const liquidityGrossAfter: Uint128 = Uint128.from(LiquidityMath.addDelta(liquidityGrossBefore.toString(), liquidityDelta));
 
 	if (liquidityGrossAfter.gt(maxLiquidity)) throw new Error('LO');
 
@@ -122,9 +92,7 @@ export async function update(
 	}
 
 	info.liquidityGross = liquidityGrossAfter.toString();
-	info.liquidityNet = upper
-		? Int128.from(Int256.from(info.liquidityNet).sub(liquidityDelta)).toString()
-		: Int128.from(Int256.from(info.liquidityNet).add(liquidityDelta)).toString();
+	info.liquidityNet = upper ? Int128.from(Int256.from(info.liquidityNet).sub(liquidityDelta)).toString() : Int128.from(Int256.from(info.liquidityNet).add(liquidityDelta)).toString();
 
 	if (!simulation) {
 		await tickInfoStore.set(context, tickInfoStore.getKey(poolAddress, tick), info);
@@ -133,13 +101,7 @@ export async function update(
 	return [flipped, info];
 }
 
-export async function clear(
-	tickInfoStore: TickInfoStore,
-	context: MutableContext,
-	poolAddress: Buffer,
-	tick: Int24String,
-	simulation = false,
-) {
+export async function clear(tickInfoStore: TickInfoStore, context: MutableContext, poolAddress: Buffer, tick: Int24String, simulation = false) {
 	if (!simulation) {
 		await tickInfoStore.del(context, tickInfoStore.getKey(poolAddress, tick));
 	}
@@ -159,18 +121,10 @@ export async function cross(
 ): Promise<Int128String> {
 	const info = await tickInfoStore.getOrDefault(context, tickInfoStore.getKey(poolAddress, tick));
 
-	info.feeGrowthOutside0X128 = Uint256.from(feeGrowthGlobal0X128)
-		.sub(info.feeGrowthOutside0X128)
-		.toString();
-	info.feeGrowthOutside1X128 = Uint256.from(feeGrowthGlobal1X128)
-		.sub(info.feeGrowthOutside1X128)
-		.toString();
-	info.secondsPerLiquidityOutsideX128 = Uint160.from(secondsPerLiquidityCumulativeX128)
-		.sub(info.secondsPerLiquidityOutsideX128)
-		.toString();
-	info.tickCumulativeOutside = Int56.from(tickCumulative)
-		.sub(info.tickCumulativeOutside)
-		.toString();
+	info.feeGrowthOutside0X128 = Uint256.from(feeGrowthGlobal0X128).sub(info.feeGrowthOutside0X128).toString();
+	info.feeGrowthOutside1X128 = Uint256.from(feeGrowthGlobal1X128).sub(info.feeGrowthOutside1X128).toString();
+	info.secondsPerLiquidityOutsideX128 = Uint160.from(secondsPerLiquidityCumulativeX128).sub(info.secondsPerLiquidityOutsideX128).toString();
+	info.tickCumulativeOutside = Int56.from(tickCumulative).sub(info.tickCumulativeOutside).toString();
 	info.secondsOutside = Uint32.from(time).sub(info.secondsOutside).toString();
 
 	if (!simulation) {

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { IncreaseLiquidityParams } from '../../../types';
 import { verifyAddress, verifyNumberString } from '../base';
 

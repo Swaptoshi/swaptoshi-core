@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { QuotePriceParams } from '../../../types';
 import { verifyString } from '../base';
 

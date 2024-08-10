@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';

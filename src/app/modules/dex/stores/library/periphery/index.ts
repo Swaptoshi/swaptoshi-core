@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 export * as AddressStringUtil from './address_string_util';
 export * as BytesLib from './bytes_lib';
 export * as HexStrings from './hex_strings';

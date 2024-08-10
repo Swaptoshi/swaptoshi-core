@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { BaseEvent } from 'klayr-sdk';
 import { increaseObservationCardinalityNextEventSchema } from '../schema';
 

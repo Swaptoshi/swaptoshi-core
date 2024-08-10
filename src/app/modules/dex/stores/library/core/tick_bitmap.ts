@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { TickBitmapStore } from '../../tick_bitmap';
 import { Int24String, Int16String, Uint8String, Int16, Int24, Uint8, Uint256 } from '../int';
 
@@ -11,22 +12,12 @@ export function position(tick: Int24String): [wordPos: Int16String, bitPos: Uint
 	return [wordPos, bitPos];
 }
 
-export async function flipTick(
-	tickBitmapStore: TickBitmapStore,
-	context: MutableContext,
-	poolAddress: Buffer,
-	tick: Int24String,
-	tickSpacing: Int24String,
-	simulation = false,
-) {
+export async function flipTick(tickBitmapStore: TickBitmapStore, context: MutableContext, poolAddress: Buffer, tick: Int24String, tickSpacing: Int24String, simulation = false) {
 	if (!Int24.from(tick).mod(tickSpacing).eq(0)) throw new Error('invalid tickSpacing');
 	const [wordPos, bitPos] = position(Int24.from(tick).div(tickSpacing).toString());
 	const mask = Uint256.from(1).shl(bitPos);
 
-	const tickData = await tickBitmapStore.getOrDefault(
-		context,
-		tickBitmapStore.getKey(poolAddress, wordPos),
-	);
+	const tickData = await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(poolAddress, wordPos));
 	if (!simulation) {
 		await tickBitmapStore.set(context, tickBitmapStore.getKey(poolAddress, wordPos), {
 			bitmap: Uint256.from(tickData.bitmap).xor(mask).toString(),
@@ -46,17 +37,13 @@ export async function nextInitializedTickWithinOneWord(
 	let initialized: boolean;
 
 	let compressed: Int24 = Int24.from(tick).div(tickSpacing);
-	if (Int24.from(tick).lt(0) && !Int24.from(tick).mod(tickSpacing).eq(0))
-		compressed = compressed.sub(1);
+	if (Int24.from(tick).lt(0) && !Int24.from(tick).mod(tickSpacing).eq(0)) compressed = compressed.sub(1);
 
 	if (lte) {
 		const [wordPos, bitPos] = position(compressed.toString());
 		const mask = Uint256.from(1).shl(bitPos).sub(1).add(Uint256.from(1).shl(bitPos));
 
-		const tickData = await tickBitmapStore.getOrDefault(
-			context,
-			tickBitmapStore.getKey(poolAddress, wordPos),
-		);
+		const tickData = await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(poolAddress, wordPos));
 		const masked = Uint256.from(tickData.bitmap).and(mask);
 
 		initialized = !masked.eq(0);
@@ -69,10 +56,7 @@ export async function nextInitializedTickWithinOneWord(
 		const [wordPos, bitPos] = position(compressed.add(1).toString());
 		const mask = Uint256.from(1).shl(bitPos).sub(1).not();
 
-		const tickData = await tickBitmapStore.getOrDefault(
-			context,
-			tickBitmapStore.getKey(poolAddress, wordPos),
-		);
+		const tickData = await tickBitmapStore.getOrDefault(context, tickBitmapStore.getKey(poolAddress, wordPos));
 		const masked = Uint256.from(tickData.bitmap).and(mask);
 
 		initialized = !masked.eq(0);

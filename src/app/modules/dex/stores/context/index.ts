@@ -1,18 +1,9 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-	CommandExecuteContext,
-	CrossChainMessageContext,
-	ImmutableMethodContext,
-	MethodContext,
-	ModuleEndpointContext,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-} from 'klayr-sdk';
+import { CommandExecuteContext, CrossChainMessageContext, ImmutableMethodContext, MethodContext, ModuleEndpointContext, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
 import { ImmutableSwapContext, MutableSwapContext } from '../../types';
 
-export function commandSwapContext(
-	context: CommandExecuteContext<any>,
-): MutableSwapContext<typeof context> {
+export function commandSwapContext(context: CommandExecuteContext<any>): MutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -20,9 +11,7 @@ export function commandSwapContext(
 	};
 }
 
-export function mutableHookSwapContext(
-	context: TransactionExecuteContext,
-): MutableSwapContext<typeof context> {
+export function mutableHookSwapContext(context: TransactionExecuteContext): MutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -30,9 +19,7 @@ export function mutableHookSwapContext(
 	};
 }
 
-export function immutableHookSwapContext(
-	context: TransactionVerifyContext,
-): ImmutableSwapContext<typeof context> {
+export function immutableHookSwapContext(context: TransactionVerifyContext): ImmutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -40,11 +27,7 @@ export function immutableHookSwapContext(
 	};
 }
 
-export function methodSwapContext(
-	context: MethodContext,
-	senderAddress: Buffer,
-	timestamp: number,
-): MutableSwapContext<typeof context> {
+export function methodSwapContext(context: MethodContext, senderAddress: Buffer, timestamp: number): MutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -52,11 +35,7 @@ export function methodSwapContext(
 	};
 }
 
-export function immutableMethodSwapContext(
-	context: ImmutableMethodContext,
-	senderAddress: Buffer,
-	timestamp: number,
-): ImmutableSwapContext<typeof context> {
+export function immutableMethodSwapContext(context: ImmutableMethodContext, senderAddress: Buffer, timestamp: number): ImmutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -64,9 +43,7 @@ export function immutableMethodSwapContext(
 	};
 }
 
-export function endpointSwapContext(
-	context: ModuleEndpointContext,
-): ImmutableSwapContext<typeof context> {
+export function endpointSwapContext(context: ModuleEndpointContext): ImmutableSwapContext<typeof context> {
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
@@ -74,10 +51,7 @@ export function endpointSwapContext(
 	};
 }
 
-export function crossChainMethodSwapContext(
-	context: CrossChainMessageContext,
-	senderAddress: Buffer,
-): MutableSwapContext<MethodContext> {
+export function crossChainMethodSwapContext(context: CrossChainMessageContext, senderAddress: Buffer): MutableSwapContext<MethodContext> {
 	return {
 		context: context.getMethodContext(),
 		senderAddress,

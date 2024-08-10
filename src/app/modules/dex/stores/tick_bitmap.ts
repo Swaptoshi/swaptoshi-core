@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { TickBitmap } from '../types';
 import { Int16String } from './library/int';

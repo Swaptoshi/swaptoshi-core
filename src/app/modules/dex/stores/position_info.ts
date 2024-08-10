@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
 import { PositionInfo } from '../types';
 import { positionInfoStoreSchema } from '../schema';

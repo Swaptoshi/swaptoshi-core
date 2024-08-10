@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { GetPoolParams } from '../../../types';
 import { verifyNumberString, verifyToken } from '../base';
 

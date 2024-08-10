@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { GetMetadataParams } from '../../../types';
 import { verifyAddress, verifyNumberString } from '../base';
 
