@@ -14,8 +14,13 @@ import {
 	VerificationResult,
 	VerifyStatus,
 } from 'klayr-sdk';
+import { FeeConversionMethod } from '../fee_conversion';
+import { GovernanceMethod } from '../governance';
+import { TokenFactoryMethod } from '../token_factory/method';
+import { DexInteroperableMethod } from './cc_method';
 import { BurnCommand } from './commands/burn_command';
 import { CollectCommand } from './commands/collect_command';
+import { CollectTreasuryCommand } from './commands/collect_treasury_command';
 import { CreatePoolCommand } from './commands/create_pool_command';
 import { DecreaseLiquidityCommand } from './commands/decrease_liquidity_command';
 import { ExactInputCommand } from './commands/exact_input_command';
@@ -25,6 +30,7 @@ import { ExactOutputSingleCommand } from './commands/exact_output_single_command
 import { IncreaseLiquidityCommand } from './commands/increase_liquidity_command';
 import { MintCommand } from './commands/mint_command';
 import { TreasurifyCommand } from './commands/treasurify_command';
+import { DexGovernableConfig } from './config';
 import { DexEndpoint } from './endpoint';
 import { BurnEvent } from './events/burn';
 import { CollectEvent } from './events/collect';
@@ -40,8 +46,17 @@ import { PoolInitializedEvent } from './events/pool_initialized';
 import { SwapEvent } from './events/swap';
 import { TokenURICreatedEvent } from './events/tokenuri_created';
 import { TokenURIDestroyedEvent } from './events/tokenuri_destroyed';
+import { TokenRegisteredEvent } from './events/token_registered';
+import { TreasurifyEvent } from './events/treasurify';
+import { executeBaseFee, executeSwapByTransfer, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
 import { DexMethod } from './method';
 import {
+	getConfigEndpointRequestSchema,
+	getConfigEndpointResponseSchema,
+	getMetadataEndpointRequestSchema,
+	getMetadataEndpointResponseSchema,
+	getPoolAddressFromCollectionIdEndpointRequestSchema,
+	getPoolAddressFromCollectionIdEndpointResponseSchema,
 	getPoolEndpointRequestSchema,
 	getPoolEndpointResponseSchema,
 	getPositionEndpointRequestSchema,
@@ -58,32 +73,18 @@ import {
 	quoteExactOutputEndpointResponseSchema,
 	quoteExactOutputSingleEndpointRequestSchema,
 	quoteExactOutputSingleEndpointResponseSchema,
-	getMetadataEndpointRequestSchema,
-	getMetadataEndpointResponseSchema,
-	getPoolAddressFromCollectionIdEndpointRequestSchema,
-	getPoolAddressFromCollectionIdEndpointResponseSchema,
 	quotePriceEndpointRequestSchema,
 	quotePriceEndpointResponseSchema,
-	getConfigEndpointRequestSchema,
-	getConfigEndpointResponseSchema,
 } from './schema';
 import { ObservationStore } from './stores/observation';
 import { PoolStore } from './stores/pool';
 import { PositionInfoStore } from './stores/position_info';
 import { PositionManagerStore } from './stores/position_manager';
+import { SupportedTokenStore } from './stores/supported_token';
 import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
 import { DexModuleDependencies } from './types';
-import { verifyMinimumFee, verifySwapByTransfer, executeSwapByTransfer, verifyValidTransfer, verifyBaseFee, executeBaseFee } from './hooks';
-import { TreasurifyEvent } from './events/treasurify';
-import { TokenRegisteredEvent } from './events/token_registered';
-import { SupportedTokenStore } from './stores/supported_token';
-import { DexInteroperableMethod } from './cc_method';
-import { TokenFactoryMethod } from '../token_factory/method';
-import { FeeConversionMethod } from '../fee_conversion';
-import { DexGovernableConfig } from './config';
-import { GovernanceMethod } from '../governance';
 
 export class DexModule extends BaseInteroperableModule {
 	public _config: DexGovernableConfig = new DexGovernableConfig(this.name, 8);
@@ -111,6 +112,7 @@ export class DexModule extends BaseInteroperableModule {
 		new ExactOutputCommand(this.stores, this.events),
 		new ExactOutputSingleCommand(this.stores, this.events),
 		new TreasurifyCommand(this.stores, this.events),
+		new CollectTreasuryCommand(this.stores, this.events),
 	];
 
 	public constructor() {

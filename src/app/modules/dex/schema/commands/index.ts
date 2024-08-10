@@ -1,5 +1,6 @@
 export * from './burn_command';
 export * from './collect_command';
+export * from './collect_treasury_command';
 export * from './create_pool_command';
 export * from './decrease_liquidity_command';
 export * from './exact_input_command';

@@ -1,5 +1,6 @@
 export * from './burn';
 export * from './collect';
+export * from './collect_treasury';
 export * from './create_pool';
 export * from './decrease_liquidity';
 export * from './exact_input';
