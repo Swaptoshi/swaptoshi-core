@@ -93,7 +93,7 @@ export async function storeFixture() {
 	const nftMethod = new MockedNFTMethod() as NFTMethod;
 	const feeMethod = new MockedFeeMethod() as FeeMethod;
 	const feeConversionMethod = new MockedFeeConversionMethod() as FeeConversionMethod;
-	const governanceMethod = new MockedGovernanceMethod() as GovernanceMethod;
+	const governanceMethod = new MockedGovernanceMethod() as unknown as GovernanceMethod;
 	const interoperabilityMethod = {} as SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 	const stateStore = new PrefixedStateReadWriter(new testing.InMemoryPrefixedStateDB());
 

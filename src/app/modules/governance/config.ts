@@ -4,7 +4,7 @@ import { GenesisConfig, VerificationResult, VerifyStatus, cryptography, utils } 
 import { BaseGovernableConfig } from './base_governable_config';
 import { DEFAULT_MAX_BOOST_DURATION_DAY, DEFAULT_VOTE_DURATION_DAY, defaultConfig } from './constants';
 import { configSchema } from './schema';
-import { GovernableConfigVerifyContext, GovernanceModuleConfig } from './types';
+import { GovernableConfigVerifyContext, GovernanceModuleConfig, QuorumMode } from './types';
 import { verifyNumberString, verifyPositiveNumber } from './utils';
 
 export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceModuleConfig> {
@@ -37,6 +37,22 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 	private _verifyConfig(config: GovernanceModuleConfig) {
 		cryptography.address.validateKlayr32Address(config.treasuryAddress);
 		cryptography.address.validateKlayr32Address(config.depositPoolAddress);
+
+		if (config.executionDuration < config.voteDuration) {
+			throw new Error(`config.excutionDuration can't be lower than config.voteDuration`);
+		}
+
+		if (config.voteDuration < config.quorumDuration) {
+			throw new Error(`config.voteDuration can't be lower than config.quorumDuration`);
+		}
+
+		if (config.quorumDuration < config.votingDelayDuration) {
+			throw new Error(`config.quorumDuration can't be lower than config.votingDelayDuration`);
+		}
+
+		if (![QuorumMode.FOR, QuorumMode.FOR_AGAINST, QuorumMode.FOR_AGAINST_ABSTAIN].includes(config.quorumMode)) {
+			throw new Error(`unknown config.quorumMode`);
+		}
 
 		for (const commands of Object.keys(config.minTransactionFee)) {
 			verifyNumberString(`config.minTransactionFee.${commands}`, config.minTransactionFee[commands as keyof GovernanceModuleConfig['minTransactionFee']]);

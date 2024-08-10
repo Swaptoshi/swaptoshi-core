@@ -18,12 +18,12 @@ export class GovernableConfigRegistry {
 		return true;
 	}
 
-	public get(key: string): BaseGovernableConfig<Record<string, unknown>> {
+	public get<T extends Record<string, unknown>>(key: string): BaseGovernableConfig<T> {
 		const named = this._registry.get(key);
 		if (!named) {
 			throw new Error(`Governable config for module ${key} is not registered.`);
 		}
-		return named;
+		return named as BaseGovernableConfig<T>;
 	}
 
 	public keys() {
@@ -34,10 +34,10 @@ export class GovernableConfigRegistry {
 		return this._registry.has(key);
 	}
 
-	public values(): BaseGovernableConfig<Record<string, unknown>>[] {
-		const result: BaseGovernableConfig<Record<string, unknown>>[] = [];
+	public values<T extends Record<string, unknown>>(): BaseGovernableConfig<T>[] {
+		const result: BaseGovernableConfig<T>[] = [];
 		for (const klass of this._registry.values()) {
-			result.push(klass);
+			result.push(klass as BaseGovernableConfig<T>);
 		}
 		return result;
 	}

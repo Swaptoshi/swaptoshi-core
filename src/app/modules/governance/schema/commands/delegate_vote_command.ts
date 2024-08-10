@@ -7,6 +7,7 @@ export const delegateVoteCommandSchema: TypedSchema<DelegateVoteParams> = {
 	properties: {
 		delegateeAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 	},

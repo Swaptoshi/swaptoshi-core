@@ -6,3 +6,6 @@ export * from './utils';
 export * from './config';
 export * from './enum';
 export * from './governable_config';
+export * from './module';
+export * from './dependencies';
+export * from './endpoint';

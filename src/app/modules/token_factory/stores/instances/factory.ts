@@ -3,16 +3,27 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import { FactorySetAttributesParams, FactoryStoreData, FactoryTransferOwnershipParams, TokenBurnParams, TokenCreateParams, TokenFactoryAttributes, TokenMintParams } from '../../types';
+import {
+	FactorySetAttributesParams,
+	FactoryStoreData,
+	FactoryTransferOwnershipParams,
+	TokenBurnParams,
+	TokenCreateParams,
+	TokenFactoryAttributes,
+	TokenMintParams,
+	VestingUnlockStoreData,
+} from '../../types';
 import { FactoryStore } from '../factory';
 import { NextAvailableTokenIdStore } from '../next_available_token_id';
 import { FactoryCreatedEvent } from '../../events/factory_created';
 import { BaseInstance } from './base';
 import { VestingUnlockStore } from '../vesting_unlock';
-import { serializer, verifyAddress, verifyBuffer, verifyPositiveNumber, verifyString, verifyToken } from '../../utils';
+import { numberToBytes, serializer, verifyAddress, verifyBuffer, verifyPositiveNumber, verifyString, verifyToken } from '../../utils';
 import { FactoryOwnerChangedEvent } from '../../events/factory_owner_changed';
 import { FactorySetAttributesEvent } from '../../events/factory_set_attributes';
 import { TokenFactoryGovernableConfig } from '../../config';
+import { VESTING_MODULE_SUFFIX } from '../../constants';
+import { VestedTokenLockedEvent } from '../../events/vested_token_locked';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
 	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
@@ -21,6 +32,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 		Object.assign(this, utils.objects.cloneDeep(factory));
 
 		this.nextAvailableIdStore = stores.get(NextAvailableTokenIdStore);
+		this.vestingUnlockStore = stores.get(VestingUnlockStore);
 	}
 
 	public toJSON() {
@@ -244,10 +256,74 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 			await this.tokenMethod!.mint(this.mutableContext!.context, distribution.recipientAddress, params.tokenId, distribution.amount);
 		}
 
-		const vestingInstance = await this.stores.get(VestingUnlockStore).getInstance(this.mutableContext!);
-		await vestingInstance.lock(params);
+		await this._lock(params);
 
 		return totalAmountMinted;
+	}
+
+	private async _lock(params: TokenMintParams) {
+		this._checkMutableDependencies();
+
+		const toBeLockedByHeight: { [height: string]: VestingUnlockStoreData['toBeUnlocked'] } = {};
+
+		for (const distributionItem of params.distribution) {
+			for (const vesting of distributionItem.vesting) {
+				if (vesting.height > this.mutableContext!.height) {
+					const key = vesting.height.toString();
+					if (!toBeLockedByHeight[key]) toBeLockedByHeight[key] = [];
+
+					const index = toBeLockedByHeight[key].findIndex(t => Buffer.compare(t.address, distributionItem.recipientAddress) === 0 && Buffer.compare(t.tokenId, params.tokenId) === 0);
+
+					if (index >= 0) {
+						toBeLockedByHeight[key][index].amount += vesting.amount;
+					} else {
+						toBeLockedByHeight[key].push({
+							address: distributionItem.recipientAddress,
+							amount: vesting.amount,
+							tokenId: params.tokenId,
+						});
+					}
+
+					await this.tokenMethod!.lock(this.mutableContext!.context, distributionItem.recipientAddress, `${this.moduleName}_${VESTING_MODULE_SUFFIX}`, params.tokenId, vesting.amount);
+				}
+			}
+		}
+
+		for (const heightString of Object.keys(toBeLockedByHeight)) {
+			const height = Number(heightString);
+			const unlockSchedule = await this._getUnlockScheduleAtHeight(height);
+
+			for (const toBeLocked of toBeLockedByHeight[heightString]) {
+				const index = unlockSchedule.toBeUnlocked.findIndex(t => Buffer.compare(t.address, toBeLocked.address) === 0 && Buffer.compare(t.tokenId, toBeLocked.tokenId) === 0);
+				if (index >= 0) {
+					unlockSchedule.toBeUnlocked[index].amount += toBeLocked.amount;
+				} else {
+					unlockSchedule.toBeUnlocked.push(toBeLocked);
+				}
+
+				const events = this.events.get(VestedTokenLockedEvent);
+				events.add(
+					this.mutableContext!.context,
+					{
+						amount: toBeLocked.amount,
+						height,
+						recipientAddress: toBeLocked.address,
+						tokenId: toBeLocked.tokenId,
+					},
+					[toBeLocked.address],
+				);
+			}
+
+			await this._setUnlockScheduleAtHeight(height, unlockSchedule);
+		}
+	}
+
+	private async _getUnlockScheduleAtHeight(height: number) {
+		return this.vestingUnlockStore.getOrDefault(this.mutableContext!.context, numberToBytes(height));
+	}
+
+	private async _setUnlockScheduleAtHeight(height: number, vestingUnlock: VestingUnlockStoreData) {
+		await this.vestingUnlockStore.set(this.mutableContext!.context, numberToBytes(height), vestingUnlock);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -330,5 +406,6 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 	public owner: Buffer = Buffer.alloc(0);
 	public attributesArray: TokenFactoryAttributes[] = [];
 
+	private readonly vestingUnlockStore: VestingUnlockStore;
 	private readonly nextAvailableIdStore: NextAvailableTokenIdStore;
 }

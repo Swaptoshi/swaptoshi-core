@@ -183,7 +183,7 @@
 			"enableTurnoutBias": false,
 			"enableBoosting": false,
 			"maxBoostDuration": 20736000,
-			"boostFactor": 2,
+			"boostFactor": 200,
 			"treasuryAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"treasuryReward": {
 				"tokenID": "0455555500000000",

@@ -11,9 +11,11 @@ export enum Votes {
 }
 
 export enum ProposalStatus {
-	ACTIVE = 0,
-	ACCEPTED = 1,
-	ACCEPTED_WITH_ERROR = 2,
+	CREATED = 0,
+	ACTIVE = 1,
+	ACCEPTED = 2,
 	REJECTED = 3,
-	FAILED_QUORUM = 4,
+	EXECUTED = 4,
+	EXECUTED_WITH_ERROR = 5,
+	FAILED_QUORUM = 6,
 }

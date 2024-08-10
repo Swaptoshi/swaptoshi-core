@@ -11,6 +11,7 @@ export const fundingActionPayloadSchema: TypedSchema<FundingActionPayload> = {
 		},
 		receivingAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		fundingAmount: {

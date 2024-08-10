@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BoostVoteCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/governance/command/boost_vote",
+  "properties": {
+    "targetHeight": {
+      "dataType": "uint32",
+      "fieldNumber": 1,
+    },
+  },
+  "required": [
+    "targetHeight",
+  ],
+  "type": "object",
+}
+`;

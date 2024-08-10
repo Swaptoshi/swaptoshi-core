@@ -1,3 +1,1 @@
-export interface RevokeDelegatedVoteParams {
-	delegateeAddress: Buffer;
-}
+export type RevokeDelegatedVoteParams = Record<string, never>;

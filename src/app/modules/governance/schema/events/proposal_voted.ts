@@ -11,6 +11,7 @@ export const proposalVotedEventSchema: TypedSchema<ProposalVotedEventData> = {
 		},
 		voterAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 		decision: {

@@ -3,5 +3,4 @@ export interface ProposalOutcomeEventData {
 	status: number;
 	turnoutBiasEnabled: boolean;
 	boostingEnabled: boolean;
-	executionHeight: number;
 }

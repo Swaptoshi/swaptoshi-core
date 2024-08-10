@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetProposalAttributesCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/governance/command/set_proposal_attributes",
+  "properties": {
+    "data": {
+      "dataType": "bytes",
+      "fieldNumber": 3,
+    },
+    "key": {
+      "dataType": "string",
+      "fieldNumber": 2,
+    },
+    "proposalId": {
+      "dataType": "uint32",
+      "fieldNumber": 1,
+    },
+  },
+  "required": [
+    "proposalId",
+    "key",
+    "data",
+  ],
+  "type": "object",
+}
+`;

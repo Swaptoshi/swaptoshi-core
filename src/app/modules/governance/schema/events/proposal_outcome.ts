@@ -3,7 +3,7 @@ import { ProposalOutcomeEventData, TypedSchema } from '../../types';
 export const proposalOutcomeEventSchema: TypedSchema<ProposalOutcomeEventData> = {
 	$id: '/governance/events/proposal_outcome',
 	type: 'object',
-	required: ['proposalId', 'status', 'turnoutBiasEnabled', 'boostingEnabled', 'executionHeight'],
+	required: ['proposalId', 'status', 'turnoutBiasEnabled', 'boostingEnabled'],
 	properties: {
 		proposalId: {
 			dataType: 'uint32',
@@ -20,10 +20,6 @@ export const proposalOutcomeEventSchema: TypedSchema<ProposalOutcomeEventData> =
 		boostingEnabled: {
 			dataType: 'boolean',
 			fieldNumber: 4,
-		},
-		executionHeight: {
-			dataType: 'uint32',
-			fieldNumber: 5,
 		},
 	},
 };

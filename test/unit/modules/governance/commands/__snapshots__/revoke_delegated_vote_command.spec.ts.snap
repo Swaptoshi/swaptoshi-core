@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RevokeDelegatedVoteCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/governance/command/revoke_delegated_vote",
+  "properties": {},
+  "required": [],
+  "type": "object",
+}
+`;

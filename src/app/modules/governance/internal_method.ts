@@ -1,11 +1,33 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, BlockAfterExecuteContext, BlockExecuteContext, GenesisBlockExecuteContext, ImmutableStoreGetter, TokenMethod, VerifyStatus, cryptography } from 'klayr-sdk';
-import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD } from './constants';
+import {
+	BaseMethod,
+	BlockAfterExecuteContext,
+	BlockExecuteContext,
+	GenesisBlockExecuteContext,
+	ImmutableStoreGetter,
+	TokenMethod,
+	TransactionExecuteContext,
+	VerifyStatus,
+	codec,
+	cryptography,
+} from 'klayr-sdk';
+import Decimal from 'decimal.js';
+import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD, POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tax';
 import { GovernanceGovernableConfig } from './config';
 import { GovernableConfigRegistry } from './registry';
+import { methodGovernanceContext, mutableBlockHookGovernanceContext } from './stores/context';
+import { ProposalQueueStore } from './stores/queue';
+import { MutableContext, StakeTransactionParams } from './types';
+import { stakeCommandParamsSchema } from './schema';
+import { DelegatedVoteStore } from './stores/delegated_vote';
+import { CastedVoteStore } from './stores/casted_vote';
+import { ProposalStore } from './stores/proposal';
+import { VoteScoreStore } from './stores/vote_score';
+import { BoostedAccountStore } from './stores/boosted_account';
 
 interface BlockReward {
 	blockReward: bigint;
@@ -19,6 +41,62 @@ export class GovernanceInternalMethod extends BaseMethod {
 	public addDependencies(token: TokenMethod, governableConfig: GovernableConfigRegistry) {
 		this._tokenMethod = token;
 		this._governableConfig = governableConfig;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/require-await
+	public async updateVoteScoreAfterStake(context: TransactionExecuteContext) {
+		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
+			let totalAddedStake = BigInt(0);
+			let totalSubtractedStake = BigInt(0);
+
+			const stakeParams = codec.decode<StakeTransactionParams>(stakeCommandParamsSchema, context.transaction.params);
+			for (const stakes of stakeParams.stakes)
+				if (stakes.amount > BigInt(0)) totalAddedStake += stakes.amount;
+				else totalSubtractedStake += stakes.amount * BigInt(-1);
+
+			await this.updateProposalVoteSummaryByVoter(context, context.transaction.senderAddress, totalAddedStake, totalSubtractedStake);
+
+			await this.stores.get(VoteScoreStore).addVoteScore(context, context.transaction.senderAddress, totalAddedStake - totalSubtractedStake);
+		}
+	}
+
+	public async updateProposalVoteSummaryByVoter(context: MutableContext, voter: Buffer, addedVote = BigInt(0), subtractedVote = BigInt(0)) {
+		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
+		const boostedAccountStore = this.stores.get(BoostedAccountStore);
+		const castedVoteStore = this.stores.get(CastedVoteStore);
+		const proposalStore = this.stores.get(ProposalStore);
+		const ctx = methodGovernanceContext(context, Buffer.alloc(0), 0, 0);
+
+		let voterAddress = voter;
+		let delegated = false;
+
+		const voterBoostingState = await boostedAccountStore.getOrDefault(context, voter);
+		const voterBoostingHeight = voterBoostingState.targetHeight;
+
+		const delegatedVote = await delegatedVoteStore.getOrDefault(context, voter);
+		if (!delegatedVote.outgoingDelegation.equals(Buffer.alloc(0))) {
+			voterAddress = delegatedVote.outgoingDelegation;
+			delegated = true;
+		}
+
+		const castedVote = await castedVoteStore.getOrDefault(context, voterAddress);
+
+		for (const vote of castedVote.activeVote) {
+			const boostingHeight = delegated ? vote.boostingHeight : voterBoostingHeight;
+			if (addedVote > BigInt(0)) {
+				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVote, vote.decision, boostingHeight);
+			}
+			if (subtractedVote > BigInt(0)) {
+				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVote, vote.decision, boostingHeight);
+			}
+		}
+	}
+
+	public async executeQueuedProposal(context: BlockExecuteContext) {
+		const proposalQueueStore = this.stores.get(ProposalQueueStore);
+		const ctx = mutableBlockHookGovernanceContext(context);
+		const queue = await proposalQueueStore.getInstance(ctx);
+		await queue.executeQueue();
 	}
 
 	public async initializeGovernableConfig(context: BlockExecuteContext) {
@@ -88,7 +166,12 @@ export class GovernanceInternalMethod extends BaseMethod {
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
 		if (bracket.endsWith('%')) {
-			return (BigInt(reward.blockReward) * BigInt(bracket.slice(0, bracket.length - 1))) / BigInt(100);
+			return BigInt(
+				new Decimal(reward.blockReward.toString())
+					.mul(bracket.slice(0, bracket.length - 1))
+					.div(100)
+					.toFixed(0),
+			);
 		}
 		return BigInt(bracket);
 	}
@@ -100,7 +183,12 @@ export class GovernanceInternalMethod extends BaseMethod {
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
 		if (bracket.endsWith('%')) {
-			return (BigInt(reward.blockReward) * BigInt(bracket.slice(0, bracket.length - 1))) / BigInt(100);
+			return BigInt(
+				new Decimal(reward.blockReward.toString())
+					.mul(bracket.slice(0, bracket.length - 1))
+					.div(100)
+					.toFixed(0),
+			);
 		}
 		return BigInt(bracket);
 	}

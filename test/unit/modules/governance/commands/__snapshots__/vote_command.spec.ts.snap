@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VoteCommand constructor should have valid schema 1`] = `
+{
+  "$id": "/governance/command/vote",
+  "properties": {
+    "decision": {
+      "dataType": "uint32",
+      "fieldNumber": 2,
+    },
+    "proposalId": {
+      "dataType": "uint32",
+      "fieldNumber": 1,
+    },
+  },
+  "required": [
+    "proposalId",
+    "decision",
+  ],
+  "type": "object",
+}
+`;

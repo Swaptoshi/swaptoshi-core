@@ -7,10 +7,12 @@ export const delegatedVoteRevokedEventSchema: TypedSchema<DelegatedVoteRevokedEv
 	properties: {
 		delegateeAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		delegatorAddress: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 	},

@@ -18,6 +18,7 @@ import {
 	VerificationResult,
 	VerifyStatus,
 	BlockExecuteContext,
+	ImmutableMethodContext,
 } from 'klayr-sdk';
 import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
@@ -238,8 +239,8 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param context - The context for setting the store.
 	 * @param value - The new configuration value.
 	 */
-	public async dryRunSetConfig(context: MethodContext, value: T): Promise<UpdatedProperty[]> {
-		return this._setConfigHandler(context, value, false, true);
+	public async dryRunSetConfig(context: ImmutableMethodContext, value: T): Promise<UpdatedProperty[]> {
+		return this._setConfigHandler(context as MethodContext, value, false, true);
 	}
 
 	/**
@@ -250,7 +251,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The value to set at the specified path.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(context: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
+	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(context: ImmutableMethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
 		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);

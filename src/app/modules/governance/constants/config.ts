@@ -25,7 +25,7 @@ export const defaultConfig: GovernanceModuleConfig = {
 	enableTurnoutBias: false,
 	enableBoosting: false,
 	maxBoostDuration: MAX_BOOST_DURATION,
-	boostFactor: 2,
+	boostFactor: 200,
 	treasuryAddress: TREASURY_ADDRESS,
 	treasuryReward: {
 		tokenID: '',

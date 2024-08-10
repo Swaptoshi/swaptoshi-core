@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -24,14 +25,9 @@ const setPluginConfig = (config: ApplicationConfig, flags: Flags): void => {
 		config.plugins[MonitorPlugin.name] = config.plugins[MonitorPlugin.name] ?? {};
 		config.plugins[MonitorPlugin.name].port = flags['monitor-plugin-port'];
 	}
-	if (
-		flags['monitor-plugin-whitelist'] !== undefined &&
-		typeof flags['monitor-plugin-whitelist'] === 'string'
-	) {
+	if (flags['monitor-plugin-whitelist'] !== undefined && typeof flags['monitor-plugin-whitelist'] === 'string') {
 		config.plugins[MonitorPlugin.name] = config.plugins[MonitorPlugin.name] ?? {};
-		config.plugins[MonitorPlugin.name].whiteList = flags['monitor-plugin-whitelist']
-			.split(',')
-			.filter(Boolean);
+		config.plugins[MonitorPlugin.name].whiteList = flags['monitor-plugin-whitelist'].split(',').filter(Boolean);
 	}
 	if (flags['faucet-plugin-port'] !== undefined) {
 		config.plugins[FaucetPlugin.name] = config.plugins[FaucetPlugin.name] ?? {};
@@ -50,62 +46,52 @@ export class StartCommand extends BaseStartCommand {
 	static flags: StartFlags = {
 		...BaseStartCommand.flags,
 		'enable-generator-plugin': flagParser.boolean({
-			description:
-				'Enable Forger Plugin. Environment variable "KLAYR_ENABLE_FORGER_PLUGIN" can also be used.',
+			description: 'Enable Forger Plugin. Environment variable "KLAYR_ENABLE_FORGER_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_FORGER_PLUGIN',
 			default: false,
 		}),
 		'enable-monitor-plugin': flagParser.boolean({
-			description:
-				'Enable Monitor Plugin. Environment variable "KLAYR_ENABLE_MONITOR_PLUGIN" can also be used.',
+			description: 'Enable Monitor Plugin. Environment variable "KLAYR_ENABLE_MONITOR_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_MONITOR_PLUGIN',
 			default: false,
 		}),
 		'monitor-plugin-port': flagParser.integer({
-			description:
-				'Port to be used for Monitor Plugin. Environment variable "KLAYR_MONITOR_PLUGIN_PORT" can also be used.',
+			description: 'Port to be used for Monitor Plugin. Environment variable "KLAYR_MONITOR_PLUGIN_PORT" can also be used.',
 			env: 'KLAYR_MONITOR_PLUGIN_PORT',
 			dependsOn: ['enable-monitor-plugin'],
 		}),
 		'monitor-plugin-whitelist': flagParser.string({
-			description:
-				'List of IPs in comma separated value to allow the connection. Environment variable "KLAYR_MONITOR_PLUGIN_WHITELIST" can also be used.',
+			description: 'List of IPs in comma separated value to allow the connection. Environment variable "KLAYR_MONITOR_PLUGIN_WHITELIST" can also be used.',
 			env: 'KLAYR_MONITOR_PLUGIN_WHITELIST',
 			dependsOn: ['enable-monitor-plugin'],
 		}),
 		'enable-report-misbehavior-plugin': flagParser.boolean({
-			description:
-				'Enable ReportMisbehavior Plugin. Environment variable "KLAYR_ENABLE_REPORT_MISBEHAVIOR_PLUGIN" can also be used.',
+			description: 'Enable ReportMisbehavior Plugin. Environment variable "KLAYR_ENABLE_REPORT_MISBEHAVIOR_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_MISBEHAVIOR_PLUGIN',
 			default: false,
 		}),
 		'enable-faucet-plugin': flagParser.boolean({
-			description:
-				'Enable Faucet Plugin. Environment variable "KLAYR_ENABLE_FAUCET_PLUGIN" can also be used.',
+			description: 'Enable Faucet Plugin. Environment variable "KLAYR_ENABLE_FAUCET_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_FAUCET_PLUGIN',
 			default: false,
 		}),
 		'faucet-plugin-port': flagParser.integer({
-			description:
-				'Port to be used for Faucet Plugin. Environment variable "KLAYR_FAUCET_PLUGIN_PORT" can also be used.',
+			description: 'Port to be used for Faucet Plugin. Environment variable "KLAYR_FAUCET_PLUGIN_PORT" can also be used.',
 			env: 'KLAYR_FAUCET_PLUGIN_PORT',
 			dependsOn: ['enable-faucet-plugin'],
 		}),
 		'enable-dashboard-plugin': flagParser.boolean({
-			description:
-				'Enable Dashboard Plugin. Environment variable "KLAYR_ENABLE_DASHBOARD_PLUGIN" can also be used.',
+			description: 'Enable Dashboard Plugin. Environment variable "KLAYR_ENABLE_DASHBOARD_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_DASHBOARD_PLUGIN',
 			default: false,
 		}),
 		'dashboard-plugin-port': flagParser.integer({
-			description:
-				'Port to be used for Dashboard Plugin. Environment variable "KLAYR_DASHBOARD_PLUGIN_PORT" can also be used.',
+			description: 'Port to be used for Dashboard Plugin. Environment variable "KLAYR_DASHBOARD_PLUGIN_PORT" can also be used.',
 			env: 'KLAYR_DASHBOARD_PLUGIN_PORT',
 			dependsOn: ['enable-dashboard-plugin'],
 		}),
 		'enable-chain-connector-plugin': flagParser.boolean({
-			description:
-				'Enable ChainConnector Plugin. Environment variable "KLAYR_ENABLE_CHAIN_CONNECTOR_PLUGIN" can also be used.',
+			description: 'Enable ChainConnector Plugin. Environment variable "KLAYR_ENABLE_CHAIN_CONNECTOR_PLUGIN" can also be used.',
 			env: 'KLAYR_ENABLE_CONNECTOR_PLUGIN',
 			default: false,
 		}),
