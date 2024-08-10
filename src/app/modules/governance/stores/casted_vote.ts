@@ -27,8 +27,10 @@ export class CastedVoteStore extends BaseStore<CastedVoteStoreData> {
 		const castedVote = await this.getOrDefault(context, address);
 
 		const indexToRemove = castedVote.activeVote.findIndex(vote => vote.proposalId === proposalId);
-		if (indexToRemove !== -1) castedVote.activeVote.splice(indexToRemove, 1);
-		await this.set(context, address, castedVote);
+		if (indexToRemove !== -1) {
+			castedVote.activeVote.splice(indexToRemove, 1);
+			await this.set(context, address, castedVote);
+		}
 	}
 
 	public async setAllCastedVoteBoostingHeight(context: StoreGetter, address: Buffer, boostingHeight: number) {
