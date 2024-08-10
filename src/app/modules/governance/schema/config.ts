@@ -12,7 +12,7 @@ export const configSchema: GovernableConfigSchema<GovernanceModuleConfig> = {
 		'voteDuration',
 		'quorumDuration',
 		'executionDuration',
-		'quorumPercentage',
+		'quorumTreshold',
 		'quorumMode',
 		'depositPoolAddress',
 		'enableTurnoutBias',
@@ -58,8 +58,8 @@ export const configSchema: GovernableConfigSchema<GovernanceModuleConfig> = {
 			dataType: 'uint32',
 			fieldNumber: 8,
 		},
-		quorumPercentage: {
-			dataType: 'uint32',
+		quorumTreshold: {
+			dataType: 'string',
 			fieldNumber: 9,
 		},
 		quorumMode: {

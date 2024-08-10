@@ -7,7 +7,7 @@ export interface GovernanceModuleConfig {
 	voteDuration: number;
 	quorumDuration: number;
 	executionDuration: number;
-	quorumPercentage: number;
+	quorumTreshold: string;
 	quorumMode: number;
 	depositPoolAddress: string;
 	enableTurnoutBias: boolean;

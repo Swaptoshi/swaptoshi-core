@@ -21,7 +21,7 @@ export interface ProposalStoreData {
 		enableBoosting: boolean;
 		enableTurnoutBias: boolean;
 		quorumMode: QuorumMode;
-		quorumPercentage: number;
+		quorumTreshold: string;
 	};
 	voteSummary: {
 		for: bigint;

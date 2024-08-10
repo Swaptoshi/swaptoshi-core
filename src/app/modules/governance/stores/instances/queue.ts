@@ -3,12 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { codec, cryptography, GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
-import Decimal from 'decimal.js';
 import { ConfigActionPayload, FundingActionPayload, ProposalQueueStoreData, ProposalStatus, QuorumMode } from '../../types';
 import { ProposalQueueStore } from '../queue';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
-import { getSchemaByPath, isSatisfyTurnoutBias, numberToBytes, serializer } from '../../utils';
+import { getSchemaByPath, isSatisfyTurnoutBias, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalStore } from '../proposal';
 import { GovernableConfigRegistry } from '../../registry';
 import { ProposalActiveEvent } from '../../events/proposal_active';
@@ -104,7 +103,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		const config = await this.config.getConfig(this.mutableContext!.context);
 		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.mutableContext!.context);
 		const index = totalSupplyStore.totalSupply.findIndex(supply => supply.tokenID.equals(stakingTokenId));
-		const treshold = BigInt(new Decimal(totalSupplyStore.totalSupply[index].totalSupply.toString()).mul(proposal.parameters.quorumPercentage).div(1_000_000).toFixed(0));
+		const treshold = parseBigintOrPercentage(proposal.parameters.quorumTreshold, totalSupplyStore.totalSupply[index].totalSupply);
 
 		let participant = BigInt(0);
 		let status = ProposalStatus.ACTIVE;

@@ -55,7 +55,7 @@ export const getProposalEndpointResponseSchema: TypedSchema<JSONObject<ProposalS
 				'enableBoosting',
 				'enableTurnoutBias',
 				'quorumMode',
-				'quorumPercentage',
+				'quorumTreshold',
 			],
 			properties: {
 				createdHeight: {
@@ -98,8 +98,8 @@ export const getProposalEndpointResponseSchema: TypedSchema<JSONObject<ProposalS
 					dataType: 'uint32',
 					fieldNumber: 10,
 				},
-				quorumPercentage: {
-					dataType: 'uint32',
+				quorumTreshold: {
+					dataType: 'string',
 					fieldNumber: 11,
 				},
 			},

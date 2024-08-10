@@ -50,6 +50,14 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 			throw new Error(`config.quorumDuration can't be lower than config.votingDelayDuration`);
 		}
 
+		if (!this._isValidNonNegativeIntegerOrPercentage(config.quorumTreshold)) {
+			throw new Error(`Invalid quorumTreshold: ${config.quorumTreshold}`);
+		}
+
+		if (!this._isValidNonNegativeIntegerOrPercentage(config.proposalCreationMinBalance)) {
+			throw new Error(`Invalid proposalCreationMinBalance: ${config.proposalCreationMinBalance}`);
+		}
+
 		if (![QuorumMode.FOR, QuorumMode.FOR_AGAINST, QuorumMode.FOR_AGAINST_ABSTAIN].includes(config.quorumMode)) {
 			throw new Error(`unknown config.quorumMode`);
 		}

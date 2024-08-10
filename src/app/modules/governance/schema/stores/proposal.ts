@@ -54,7 +54,7 @@ export const proposalStoreSchema: TypedSchema<ProposalStoreData> = {
 				'enableBoosting',
 				'enableTurnoutBias',
 				'quorumMode',
-				'quorumPercentage',
+				'quorumTreshold',
 			],
 			properties: {
 				createdHeight: {
@@ -97,8 +97,8 @@ export const proposalStoreSchema: TypedSchema<ProposalStoreData> = {
 					dataType: 'uint32',
 					fieldNumber: 10,
 				},
-				quorumPercentage: {
-					dataType: 'uint32',
+				quorumTreshold: {
+					dataType: 'string',
 					fieldNumber: 11,
 				},
 			},

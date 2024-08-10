@@ -177,7 +177,7 @@
 			"voteDuration": 806400,
 			"quorumDuration": 806400,
 			"executionDuration": 806400,
-			"quorumPercentage": 50000,
+			"quorumTreshold": "5%",
 			"quorumMode": 0,
 			"depositPoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
 			"enableTurnoutBias": false,

@@ -13,7 +13,6 @@ import {
 	codec,
 	cryptography,
 } from 'klayr-sdk';
-import Decimal from 'decimal.js';
 import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD, POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tax';
@@ -28,6 +27,7 @@ import { CastedVoteStore } from './stores/casted_vote';
 import { ProposalStore } from './stores/proposal';
 import { VoteScoreStore } from './stores/vote_score';
 import { BoostedAccountStore } from './stores/boosted_account';
+import { parseBigintOrPercentage } from './utils';
 
 interface BlockReward {
 	blockReward: bigint;
@@ -165,15 +165,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
-		if (bracket.endsWith('%')) {
-			return BigInt(
-				new Decimal(reward.blockReward.toString())
-					.mul(bracket.slice(0, bracket.length - 1))
-					.div(100)
-					.toFixed(0),
-			);
-		}
-		return BigInt(bracket);
+		return parseBigintOrPercentage(bracket, reward.blockReward);
 	}
 
 	private async _getBlockRewardTaxBracket(context: BlockAfterExecuteContext, reward: BlockReward, height: number) {
@@ -182,15 +174,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 
 		if (bracket === '0' || bracket === '0%') return BigInt(0);
 
-		if (bracket.endsWith('%')) {
-			return BigInt(
-				new Decimal(reward.blockReward.toString())
-					.mul(bracket.slice(0, bracket.length - 1))
-					.div(100)
-					.toFixed(0),
-			);
-		}
-		return BigInt(bracket);
+		return parseBigintOrPercentage(bracket, reward.blockReward);
 	}
 
 	private _getRewardDeduction(context: BlockAfterExecuteContext): BlockReward {

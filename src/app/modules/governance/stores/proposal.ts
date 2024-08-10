@@ -87,7 +87,7 @@ export class ProposalStore extends BaseStoreWithInstance<ProposalStoreData> {
 			enableBoosting: false,
 			enableTurnoutBias: false,
 			quorumMode: QuorumMode.FOR_AGAINST_ABSTAIN,
-			quorumPercentage: 0,
+			quorumTreshold: '0',
 		},
 		voteSummary: { for: BigInt(0), against: BigInt(0), abstain: BigInt(0) },
 		status: ProposalStatus.EXECUTED_WITH_ERROR,

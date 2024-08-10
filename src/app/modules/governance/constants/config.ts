@@ -19,7 +19,7 @@ export const defaultConfig: GovernanceModuleConfig = {
 	voteDuration: DEFAULT_VOTE_DURATION,
 	quorumDuration: DEFAULT_VOTE_DURATION,
 	executionDuration: DEFAULT_VOTE_DURATION,
-	quorumPercentage: 50000, // 5%
+	quorumTreshold: '5%',
 	quorumMode: QuorumMode.FOR_AGAINST_ABSTAIN,
 	depositPoolAddress: TREASURY_ADDRESS,
 	enableTurnoutBias: false,

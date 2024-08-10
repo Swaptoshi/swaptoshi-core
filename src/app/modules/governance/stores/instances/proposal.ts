@@ -7,7 +7,7 @@ import { ConfigActionPayload, CreateProposalParams, ProposalQueueStoreData, Prop
 import { ProposalStore } from '../proposal';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
-import { bytesToNumber, getBoostMultiplier, getSchemaByPath, numberToBytes, serializer } from '../../utils';
+import { bytesToNumber, getBoostMultiplier, getSchemaByPath, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalCreatedEvent } from '../../events/proposal_created';
 import { NextAvailableProposalIdStore } from '../next_available_proposal_id';
 import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, POS_MODULE_NAME } from '../../constants';
@@ -99,8 +99,12 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		const senderAvailableBalance = await this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId());
 		const senderLockedBalance = await this.tokenMethod!.getLockedAmount(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId(), POS_MODULE_NAME);
 
-		if (senderAvailableBalance + senderLockedBalance < BigInt(config.proposalCreationMinBalance)) {
-			throw new Error(`The sender's balance is below the required ${config.proposalCreationMinBalance.toString()} to create a proposal.`);
+		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.mutableContext!.context);
+		const index = totalSupplyStore.totalSupply.findIndex(supply => supply.tokenID.equals(this._getStakingTokenId()));
+
+		const proposalCreationMinBalance = parseBigintOrPercentage(config.proposalCreationMinBalance, totalSupplyStore.totalSupply[index].totalSupply);
+		if (senderAvailableBalance + senderLockedBalance < proposalCreationMinBalance) {
+			throw new Error(`The sender's balance is below the required min balance of ${proposalCreationMinBalance.toString()} to create a proposal.`);
 		}
 
 		if (senderAvailableBalance < BigInt(config.proposalCreationDeposit)) {
@@ -145,7 +149,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			enableBoosting: config.enableBoosting,
 			enableTurnoutBias: config.enableTurnoutBias,
 			quorumMode: config.quorumMode,
-			quorumPercentage: config.quorumPercentage,
+			quorumTreshold: config.quorumTreshold,
 		};
 		this.voteSummary = {
 			for: BigInt(0),
@@ -395,7 +399,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		enableBoosting: false,
 		enableTurnoutBias: false,
 		quorumMode: QuorumMode.FOR_AGAINST_ABSTAIN,
-		quorumPercentage: 0,
+		quorumTreshold: '0',
 	};
 	public voteSummary: ProposalStoreData['voteSummary'] = { for: BigInt(0), against: BigInt(0), abstain: BigInt(0) };
 	public status: ProposalStoreData['status'] = 0;
