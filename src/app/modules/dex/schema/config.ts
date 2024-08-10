@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
-import { TypedSchema } from '../../governance';
+import { GovernableConfigSchema } from '../../governance';
 import { DexModuleConfig } from '../types';
 
-export const configSchema: TypedSchema<DexModuleConfig> = {
+export const configSchema: GovernableConfigSchema<DexModuleConfig> = {
 	$id: '/dex/config',
 	type: 'object',
 	required: ['feeAmountTickSpacing', 'feeProtocol', 'feeProtocolPool', 'feeConversionEnabled', 'supportAllTokens', 'minTransactionFee', 'baseFee', 'nftPositionMetadata', 'nftPositionColorRange'],

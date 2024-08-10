@@ -1,6 +1,6 @@
-import { GovernanceModuleConfig, TypedSchema } from '../types';
+import { GovernableConfigSchema, GovernanceModuleConfig } from '../types';
 
-export const configSchema: TypedSchema<GovernanceModuleConfig> = {
+export const configSchema: GovernableConfigSchema<GovernanceModuleConfig> = {
 	$id: '/governance/config',
 	type: 'object',
 	required: [

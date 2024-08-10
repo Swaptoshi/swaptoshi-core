@@ -1,7 +1,7 @@
-import { TypedSchema } from '../../governance';
+import { GovernableConfigSchema } from '../../governance';
 import { TokenFactoryModuleConfig } from '../types';
 
-export const configSchema: TypedSchema<TokenFactoryModuleConfig> = {
+export const configSchema: GovernableConfigSchema<TokenFactoryModuleConfig> = {
 	$id: '/tokenFactory/config',
 	type: 'object',
 	required: ['skippedTokenID', 'icoLeftOverAddress', 'icoFeeConversionEnabled', 'icoDexPathEnabled', 'minTransactionFee', 'baseFee'],

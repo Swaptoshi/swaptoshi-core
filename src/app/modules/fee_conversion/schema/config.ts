@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
-import { TypedSchema } from '../../governance';
+import { GovernableConfigSchema } from '../../governance';
 import { FeeConversionModuleConfig } from '../types';
 
-export const configSchema: TypedSchema<FeeConversionModuleConfig> = {
+export const configSchema: GovernableConfigSchema<FeeConversionModuleConfig> = {
 	$id: '/fee_conversion/config',
 	type: 'object',
 	required: ['conversionPath'],

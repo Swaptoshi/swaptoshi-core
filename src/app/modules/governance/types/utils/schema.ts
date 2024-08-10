@@ -1,16 +1,28 @@
 export type TypedSchema<T> = { $id: string } & ObjectSchema<T>;
 
+export type GovernableConfigSchema<T> = { $id: string } & ObjectSchemaWithGovernableProps<T>;
+
 type ObjectSchema<T> = {
 	type: 'object';
 	required: (keyof T extends string ? keyof T : never)[];
 	properties: SchemaProperties<T>;
 };
 
+type ObjectSchemaWithGovernableProps<T> = {
+	type: 'object';
+	required: (keyof T extends string ? keyof T : never)[];
+	properties: SchemaPropertiesWithGovernableProps<T>;
+};
+
 type SchemaProperties<T> = {
 	[K in keyof T]: K extends keyof T ? TypeScriptTypeToSchemaType<T[K]> & SchemaPropertiesFields : never;
 };
 
-type SchemaPropertiesFields = { fieldNumber: number; governable?: boolean; format?: string; minLength?: number; maxLength?: number; minimum?: number; maximum?: number };
+type SchemaPropertiesWithGovernableProps<T> = {
+	[K in keyof T]: K extends keyof T ? TypeScriptTypeToSchemaType<T[K]> & SchemaPropertiesFields & { governable?: boolean } : never;
+};
+
+type SchemaPropertiesFields = { fieldNumber: number; format?: string; minLength?: number; maxLength?: number; minimum?: number; maximum?: number };
 
 type TypeScriptTypeToSchemaType<T> = T extends string
 	? { dataType: 'string' }

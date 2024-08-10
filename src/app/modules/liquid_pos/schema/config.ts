@@ -1,7 +1,7 @@
-import { TypedSchema } from '../../governance';
+import { GovernableConfigSchema } from '../../governance';
 import { LiquidPosModuleConfig } from '../types';
 
-export const configSchema: TypedSchema<LiquidPosModuleConfig> = {
+export const configSchema: GovernableConfigSchema<LiquidPosModuleConfig> = {
 	$id: '/liquid_pos/config',
 	type: 'object',
 	required: ['tokenID', 'ratio'],
