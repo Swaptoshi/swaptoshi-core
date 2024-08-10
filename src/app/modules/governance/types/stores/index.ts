@@ -7,3 +7,4 @@ export * from './context';
 export * from './instance';
 export * from './casted_vote';
 export * from './vote_score';
+export * from './proposal_voter';

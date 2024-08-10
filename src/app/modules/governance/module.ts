@@ -71,6 +71,7 @@ import {
 	getNextAvailableProposalIdEndpointResponseSchema,
 	getNextAvailableProposalIdEndpointRequestSchema,
 } from './schema';
+import { ProposalVoterStore } from './stores/proposal_voter';
 
 export class GovernanceModule extends BaseModule {
 	public _config = new GovernanceGovernableConfig(this.name, 0);
@@ -100,6 +101,7 @@ export class GovernanceModule extends BaseModule {
 		this.stores.register(NextAvailableProposalIdStore, new NextAvailableProposalIdStore(this.name, 5));
 		this.stores.register(CastedVoteStore, new CastedVoteStore(this.name, 6));
 		this.stores.register(VoteScoreStore, new VoteScoreStore(this.name, 7));
+		this.stores.register(ProposalVoterStore, new ProposalVoterStore(this.name, 8));
 
 		this.events.register(ConfigUpdatedEvent, new ConfigUpdatedEvent(this.name));
 		this.events.register(DelegatedVoteRevokedEvent, new DelegatedVoteRevokedEvent(this.name));

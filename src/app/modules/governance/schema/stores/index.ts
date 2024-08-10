@@ -5,3 +5,4 @@ export * from './proposal';
 export * from './queue';
 export * from './casted_vote';
 export * from './vote_score';
+export * from './proposal_voter';

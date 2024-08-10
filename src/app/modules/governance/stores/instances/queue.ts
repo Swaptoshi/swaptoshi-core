@@ -16,6 +16,8 @@ import { ProposalQuorumCheckedEvent } from '../../events/proposal_quorum_checked
 import { ProposalOutcomeEvent } from '../../events/proposal_outcome';
 import { configActionPayloadSchema, fundingActionPayloadSchema } from '../../schema';
 import { ProposalExecutedEvent } from '../../events/proposal_executed';
+import { ProposalVoterStore } from '../proposal_voter';
+import { CastedVoteStore } from '../casted_vote';
 
 export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, ProposalQueueStore> implements ProposalQueueStoreData {
 	public constructor(
@@ -33,6 +35,9 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		Object.assign(this, utils.objects.cloneDeep(queue));
 
 		this.proposalStore = this.stores.get(ProposalStore);
+		this.proposalVoterStore = this.stores.get(ProposalVoterStore);
+		this.castedVoteStore = this.stores.get(CastedVoteStore);
+
 		this.governableConfigRegistry = governableConfigRegistry;
 	}
 
@@ -121,6 +126,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		if (participant < treshold) {
 			status = ProposalStatus.FAILED_QUORUM;
 			await this.tokenMethod!.unlock(this.mutableContext!.context, proposal.author, this.moduleName, stakingTokenId, proposal.deposited);
+			await this._removeProposalVoterCastedVote(proposalId);
 
 			if (config.depositPoolAddress) {
 				await this.tokenMethod!.transfer(
@@ -174,6 +180,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		}
 
 		await proposal.setStatus(status);
+		await this._removeProposalVoterCastedVote(proposalId);
 
 		const events = this.events.get(ProposalOutcomeEvent);
 		events.add(
@@ -245,6 +252,14 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		await targetConfig.setConfigWithPath(this.mutableContext!.context, payload.paramPath, decodedValue);
 	}
 
+	private async _removeProposalVoterCastedVote(proposalId: number) {
+		this._checkMutableDependencies();
+		const proposalVoters = await this.proposalVoterStore.getOrDefault(this.mutableContext!.context, proposalId);
+		for (const voter of proposalVoters.voters) {
+			await this.castedVoteStore.removeCastedVoteByProposalId(this.mutableContext!.context, voter, proposalId);
+		}
+	}
+
 	private _getStakingTokenId() {
 		return Buffer.concat([Buffer.from(this.genesisConfig.chainID, 'hex'), Buffer.from('00000000', 'hex')]);
 	}
@@ -254,6 +269,8 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 	public ends: ProposalQueueStoreData['ends'] = [];
 	public execute: ProposalQueueStoreData['execute'] = [];
 
+	private readonly castedVoteStore: CastedVoteStore;
 	private readonly proposalStore: ProposalStore;
 	private readonly governableConfigRegistry: GovernableConfigRegistry;
+	private readonly proposalVoterStore: ProposalVoterStore;
 }

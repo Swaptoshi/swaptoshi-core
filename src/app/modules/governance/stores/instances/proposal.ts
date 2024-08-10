@@ -21,6 +21,7 @@ import { VoteChangedEvent } from '../../events/vote_changed';
 import { CastedVoteStore } from '../casted_vote';
 import { BoostedAccountStore } from '../boosted_account';
 import { VoteScoreStore } from '../vote_score';
+import { ProposalVoterStore } from '../proposal_voter';
 
 export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> implements ProposalStoreData {
 	public constructor(
@@ -43,6 +44,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		this.castedVoteStore = stores.get(CastedVoteStore);
 		this.boostedAccountStore = stores.get(BoostedAccountStore);
 		this.voteScoreStore = stores.get(VoteScoreStore);
+		this.proposalVoterStore = stores.get(ProposalVoterStore);
 		this.governableConfigRegistry = governableConfigRegistry;
 	}
 
@@ -240,6 +242,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		}
 
 		await this._saveStore();
+		await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
 		await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
 	}
 
@@ -295,6 +298,8 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 	}
 
 	public async addVote(score: bigint, decision: Votes, boostingHeight: number) {
+		if (this.status !== ProposalStatus.ACTIVE) return;
+
 		const decisionString = this._numberToDecisionString(decision);
 		this.voteSummary[decisionString] += this._calculateVoteScore(score, boostingHeight);
 		this.turnout[decisionString] += score;
@@ -302,6 +307,8 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 	}
 
 	public async subtractVote(score: bigint, decision: Votes, boostingHeight: number) {
+		if (this.status !== ProposalStatus.ACTIVE) return;
+
 		const decisionString = this._numberToDecisionString(decision);
 		this.voteSummary[decisionString] -= this._calculateVoteScore(score, boostingHeight);
 		this.turnout[decisionString] -= score;
@@ -402,4 +409,5 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 	private readonly castedVoteStore: CastedVoteStore;
 	private readonly boostedAccountStore: BoostedAccountStore;
 	private readonly voteScoreStore: VoteScoreStore;
+	private readonly proposalVoterStore: ProposalVoterStore;
 }
