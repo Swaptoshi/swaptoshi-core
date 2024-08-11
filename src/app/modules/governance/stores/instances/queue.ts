@@ -202,11 +202,23 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 
 		const events = this.events.get(ProposalExecutedEvent);
 
+		// because funding proposal will be very likely to have execution error
+		// (because lack of treasury funds, for example)
+		// then, funding action will be executed first
+
+		const actions = proposal.actions.sort((a, b) => {
+			if (a.type === 'funding' && b.type !== 'funding') return -1;
+			if (a.type !== 'funding' && b.type === 'funding') return 1;
+			return 0;
+		});
+
 		try {
-			for (const action of proposal.actions) {
+			for (const action of actions) {
 				if (action.type === 'funding') await this._executeFundingAction(action.payload);
 				if (action.type === 'config') await this._executeConfigAction(action.payload);
 			}
+
+			await proposal.setStatus(ProposalStatus.EXECUTED);
 
 			events.add(
 				this.mutableContext!.context,
@@ -217,6 +229,8 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 				[proposal.author],
 			);
 		} catch {
+			await proposal.setStatus(ProposalStatus.EXECUTED_WITH_ERROR);
+
 			events.add(
 				this.mutableContext!.context,
 				{
