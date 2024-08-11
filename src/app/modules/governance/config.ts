@@ -36,7 +36,7 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 
 	private _verifyConfig(config: GovernanceModuleConfig) {
 		cryptography.address.validateKlayr32Address(config.treasuryAddress);
-		cryptography.address.validateKlayr32Address(config.depositPoolAddress);
+		if (config.depositPoolAddress) cryptography.address.validateKlayr32Address(config.depositPoolAddress);
 
 		if (config.executionDuration < config.voteDuration) {
 			throw new Error(`config.excutionDuration can't be lower than config.voteDuration`);
