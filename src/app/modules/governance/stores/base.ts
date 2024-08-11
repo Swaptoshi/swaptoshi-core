@@ -5,7 +5,7 @@ import { GovernableConfigRegistry } from '../registry';
 import { GovernanceInternalMethod } from '../internal_method';
 
 interface AddDependenciesParam {
-	tokenMethod?: TokenMethod;
+	tokenMethod: TokenMethod;
 	governableConfigRegistry?: GovernableConfigRegistry;
 	internalMethod?: GovernanceInternalMethod;
 }
@@ -55,7 +55,7 @@ export class BaseStoreWithInstance<T> extends BaseStore<T> {
 	public init(genesisConfig: GenesisConfig, governableConfig: GovernanceGovernableConfig) {
 		this.genesisConfig = genesisConfig;
 		this.config = governableConfig;
-		if (this.tokenMethod !== undefined && this.governableConfigRegistry !== undefined) this.dependencyReady = true;
+		if (this.tokenMethod !== undefined) this.dependencyReady = true;
 	}
 
 	protected _checkDependencies() {
