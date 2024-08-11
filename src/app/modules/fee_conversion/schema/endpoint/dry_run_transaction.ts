@@ -44,6 +44,7 @@ export const dryRunTransactionEndpointRequestSchema = {
 	properties: {
 		transaction: {
 			fieldNumber: 1,
+			format: 'hex',
 			dataType: 'string',
 		},
 	},
