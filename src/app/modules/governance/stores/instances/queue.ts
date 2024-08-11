@@ -206,7 +206,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 		// (because lack of treasury funds, for example)
 		// then, funding action will be executed first
 
-		const actions = proposal.actions.sort((a, b) => {
+		const actions = [...proposal.actions].sort((a, b) => {
 			if (a.type === 'funding' && b.type !== 'funding') return -1;
 			if (a.type !== 'funding' && b.type === 'funding') return 1;
 			return 0;
