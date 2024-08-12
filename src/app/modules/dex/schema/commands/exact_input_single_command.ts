@@ -4,10 +4,12 @@ export const exactInputSingleCommandSchema = {
 	properties: {
 		tokenIn: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		tokenOut: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		fee: {

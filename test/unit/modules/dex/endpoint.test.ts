@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext, testing } from 'klayr-sdk';
+import { BaseEndpoint, cryptography, ModuleEndpointContext, testing } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
 import { PrefixedStateReadWriter } from '../../../../node_modules/klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
@@ -378,9 +378,8 @@ describe('DexEndpoint', () => {
 			expect(res).toStrictEqual(
 				serializer({
 					...pool.toJSON(),
-					address: pool.address,
+					address: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 					collectionId: pool.collectionId,
-					klayr32: pool.klayr32,
 				}),
 			);
 		});
@@ -437,7 +436,7 @@ describe('DexEndpoint', () => {
 	describe('getPosition', () => {
 		it('should get position', async () => {
 			const param: GetPositionParams = {
-				poolAddress: pool.address.toString('hex'),
+				poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 				tokenId: '0',
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
@@ -481,7 +480,7 @@ describe('DexEndpoint', () => {
 		it('should throw an error if param.tokenId is not a number string', async () => {
 			const func = async () => {
 				const param: GetPositionParams = {
-					poolAddress: pool.address.toString('hex'),
+					poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 					tokenId: 'notANumber',
 				};
 				context = testing.createTransientModuleEndpointContext({
@@ -497,7 +496,7 @@ describe('DexEndpoint', () => {
 	describe('getTokenURI', () => {
 		it('should get token uri', async () => {
 			const param: GetTokenURIParams = {
-				poolAddress: pool.address.toString('hex'),
+				poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 				tokenId: '0',
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
@@ -526,7 +525,7 @@ describe('DexEndpoint', () => {
 		it('should throw an error if param.tokenId is not a number string', async () => {
 			const func = async () => {
 				const param: GetTokenURIParams = {
-					poolAddress: pool.address.toString('hex'),
+					poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 					tokenId: 'notANumber',
 				};
 				context = testing.createTransientModuleEndpointContext({
@@ -542,7 +541,7 @@ describe('DexEndpoint', () => {
 	describe('getMetadata', () => {
 		it('should get token metadata', async () => {
 			const param: GetMetadataParams = {
-				poolAddress: pool.address.toString('hex'),
+				poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 				tokenId: '0',
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
@@ -569,7 +568,7 @@ describe('DexEndpoint', () => {
 		it('should throw an error if param.tokenId is not a number string', async () => {
 			const func = async () => {
 				const param: GetMetadataParams = {
-					poolAddress: pool.address.toString('hex'),
+					poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 					tokenId: 'notANumber',
 				};
 				context = testing.createTransientModuleEndpointContext({
@@ -585,7 +584,7 @@ describe('DexEndpoint', () => {
 	describe('observe', () => {
 		it('should observe correctly', async () => {
 			const param: ObserveParams = {
-				poolAddress: pool.address.toString('hex'),
+				poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 				secondsAgos: ['0'],
 			};
 			context = testing.createTransientModuleEndpointContext({ stateStore, params: param as any });
@@ -612,7 +611,7 @@ describe('DexEndpoint', () => {
 		it('should throw an error if param.secondsAgos items is not a number string', async () => {
 			const func = async () => {
 				const param: ObserveParams = {
-					poolAddress: pool.address.toString('hex'),
+					poolAddress: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 					secondsAgos: ['notANumber'],
 				};
 				context = testing.createTransientModuleEndpointContext({

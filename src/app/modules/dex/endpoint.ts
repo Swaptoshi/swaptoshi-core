@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
+import { BaseEndpoint, cryptography, ModuleEndpointContext } from 'klayr-sdk';
 import { endpointSwapContext } from './stores/context';
 import { Quoter } from './stores/library/lens';
 import {
@@ -104,8 +104,7 @@ export class DexEndpoint extends BaseEndpoint {
 		const pool = await poolStore.getImmutablePool(_context, Buffer.from(param.tokenA, 'hex'), Buffer.from(param.tokenB, 'hex'), param.fee);
 		return serializer({
 			...pool.toJSON(),
-			klayr32: pool.klayr32,
-			address: pool.address,
+			address: cryptography.address.getKlayr32AddressFromAddress(pool.address),
 			collectionId: pool.collectionId,
 		} as unknown as Record<string, unknown>);
 	}
@@ -116,9 +115,9 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, cryptography.address.getAddressFromKlayr32Address(param.poolAddress));
 		const poolStore = this.stores.get(PoolStore);
-		const { token0, token1, fee } = PoolAddress.decodePoolAddress(Buffer.from(param.poolAddress, 'hex'));
+		const { token0, token1, fee } = PoolAddress.decodePoolAddress(cryptography.address.getAddressFromKlayr32Address(param.poolAddress));
 		const pool = await poolStore.getImmutablePool(_context, token0, token1, fee);
 		const position = await positionManager.getPositions(param.tokenId);
 		const [principal0, principal1] = await positionManager.principal(param.tokenId, pool.slot0.sqrtPriceX96);
@@ -140,7 +139,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, cryptography.address.getAddressFromKlayr32Address(param.poolAddress));
 		return serializer({ tokenURI: await positionManager.tokenURI(param.tokenId) });
 	}
 
@@ -150,7 +149,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
-		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, Buffer.from(param.poolAddress, 'hex'));
+		const positionManager = await positionManagerStore.getImmutablePositionManager(_context, cryptography.address.getAddressFromKlayr32Address(param.poolAddress));
 		return serializer(await positionManager.getMetadata(param.tokenId));
 	}
 
@@ -160,7 +159,7 @@ export class DexEndpoint extends BaseEndpoint {
 
 		const _context = endpointSwapContext(context);
 		const poolStore = this.stores.get(PoolStore);
-		const key = PoolAddress.decodePoolAddress(Buffer.from(param.poolAddress, 'hex'));
+		const key = PoolAddress.decodePoolAddress(cryptography.address.getAddressFromKlayr32Address(param.poolAddress));
 		const pool = await poolStore.getImmutablePool(_context, key.token0, key.token1, key.fee);
 		return serializer(await pool.observe(param.secondsAgos));
 	}

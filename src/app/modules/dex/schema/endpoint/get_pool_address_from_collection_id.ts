@@ -5,6 +5,7 @@ export const getPoolAddressFromCollectionIdEndpointResponseSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 	},
@@ -17,6 +18,7 @@ export const getPoolAddressFromCollectionIdEndpointRequestSchema = {
 	properties: {
 		collectionId: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 	},

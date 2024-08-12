@@ -4,6 +4,7 @@ export const createPoolCommandSchema = {
 	properties: {
 		tokenA: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		tokenASymbol: {
@@ -16,6 +17,7 @@ export const createPoolCommandSchema = {
 		},
 		tokenB: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 4,
 		},
 		tokenBSymbol: {

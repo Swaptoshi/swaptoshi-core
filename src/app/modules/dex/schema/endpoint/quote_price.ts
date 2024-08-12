@@ -21,6 +21,7 @@ export const quotePriceEndpointRequestSchema = {
 	properties: {
 		path: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 	},

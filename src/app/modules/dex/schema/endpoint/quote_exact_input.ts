@@ -31,6 +31,7 @@ export const quoteExactInputEndpointRequestSchema = {
 	properties: {
 		path: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		amountIn: {

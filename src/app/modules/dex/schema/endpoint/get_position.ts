@@ -1,26 +1,16 @@
 export const getPositionEndpointResponseSchema = {
 	$id: '/dex/endpoint/response/get_position',
 	type: 'object',
-	required: [
-		'token0',
-		'token1',
-		'fee',
-		'tickLower',
-		'tickUpper',
-		'liquidity',
-		'feeGrowthInside0LastX128',
-		'feeGrowthInside1LastX128',
-		'tokensOwed0',
-		'tokensOwed1',
-		'value',
-	],
+	required: ['token0', 'token1', 'fee', 'tickLower', 'tickUpper', 'liquidity', 'feeGrowthInside0LastX128', 'feeGrowthInside1LastX128', 'tokensOwed0', 'tokensOwed1', 'value'],
 	properties: {
 		token0: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		token1: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		fee: {
@@ -87,6 +77,7 @@ export const getPositionEndpointRequestSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {

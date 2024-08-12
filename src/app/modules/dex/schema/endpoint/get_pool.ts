@@ -20,10 +20,12 @@ export const getPoolEndpointResponseSchema = {
 	properties: {
 		token0: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		token1: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		fee: {
@@ -61,13 +63,7 @@ export const getPoolEndpointResponseSchema = {
 		slot0: {
 			type: 'object',
 			fieldNumber: 11,
-			required: [
-				'sqrtPriceX96',
-				'tick',
-				'observationIndex',
-				'observationCardinality',
-				'observationCardinalityNext',
-			],
+			required: ['sqrtPriceX96', 'tick', 'observationIndex', 'observationCardinality', 'observationCardinalityNext'],
 			properties: {
 				sqrtPriceX96: {
 					dataType: 'string',
@@ -93,15 +89,13 @@ export const getPoolEndpointResponseSchema = {
 		},
 		address: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 12,
-		},
-		klayr32: {
-			dataType: 'string',
-			fieldNumber: 13,
 		},
 		collectionId: {
 			dataType: 'string',
-			fieldNumber: 14,
+			format: 'hex',
+			fieldNumber: 13,
 		},
 	},
 };
@@ -113,10 +107,12 @@ export const getPoolEndpointRequestSchema = {
 	properties: {
 		tokenA: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		tokenB: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		fee: {

@@ -12,6 +12,7 @@ export const getTokenURIEndpointRequestSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		tokenId: {

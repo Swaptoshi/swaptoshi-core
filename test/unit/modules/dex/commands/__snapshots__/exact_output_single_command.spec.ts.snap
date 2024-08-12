@@ -32,10 +32,12 @@ exports[`ExactOutputSingleCommand constructor should have valid schema 1`] = `
     "tokenIn": {
       "dataType": "bytes",
       "fieldNumber": 1,
+      "format": "hex",
     },
     "tokenOut": {
       "dataType": "bytes",
       "fieldNumber": 2,
+      "format": "hex",
     },
   },
   "type": "object",

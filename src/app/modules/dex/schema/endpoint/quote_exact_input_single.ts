@@ -25,10 +25,12 @@ export const quoteExactInputSingleEndpointRequestSchema = {
 	properties: {
 		tokenIn: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		tokenOut: {
 			dataType: 'string',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		amountIn: {

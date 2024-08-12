@@ -27,6 +27,7 @@ export const observeEndpointRequestSchema = {
 	properties: {
 		poolAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		secondsAgos: {

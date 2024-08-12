@@ -9,6 +9,7 @@ export const treasurifyCommandSchema = {
 		},
 		token: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 	},

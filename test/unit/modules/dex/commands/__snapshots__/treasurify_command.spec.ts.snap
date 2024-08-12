@@ -12,6 +12,7 @@ exports[`TreasurifyCommand constructor should have valid schema 1`] = `
     "token": {
       "dataType": "bytes",
       "fieldNumber": 2,
+      "format": "hex",
     },
   },
   "type": "object",

@@ -4,6 +4,7 @@ export const exactInputCommandSchema = {
 	properties: {
 		path: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		recipient: {

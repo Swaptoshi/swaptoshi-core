@@ -4,10 +4,12 @@ export const mintCommandSchema = {
 	properties: {
 		token0: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 1,
 		},
 		token1: {
 			dataType: 'bytes',
+			format: 'hex',
 			fieldNumber: 2,
 		},
 		fee: {

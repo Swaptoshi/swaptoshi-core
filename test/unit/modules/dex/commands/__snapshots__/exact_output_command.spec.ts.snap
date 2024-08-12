@@ -19,6 +19,7 @@ exports[`ExactOutputCommand constructor should have valid schema 1`] = `
     "path": {
       "dataType": "bytes",
       "fieldNumber": 1,
+      "format": "hex",
     },
     "recipient": {
       "dataType": "bytes",

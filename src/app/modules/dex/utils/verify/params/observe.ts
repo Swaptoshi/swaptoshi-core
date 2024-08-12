@@ -1,9 +1,9 @@
 /* eslint-disable import/no-cycle */
 import { ObserveParams } from '../../../types';
-import { verifyAddress, verifyNumberString } from '../base';
+import { verifyKlayer32Address, verifyNumberString } from '../base';
 
 export function verifyObserveParam(params: ObserveParams) {
-	verifyAddress('poolAddress', Buffer.from(params.poolAddress, 'hex'));
+	verifyKlayer32Address('poolAddress', params.poolAddress);
 	params.secondsAgos.forEach(secondsAgos => {
 		verifyNumberString('secondsAgos', secondsAgos);
 	});
