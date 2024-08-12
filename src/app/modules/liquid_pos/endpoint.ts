@@ -3,6 +3,7 @@ import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
 import { InternalLiquidPosMethod } from './internal_method';
 import { serializer } from './utils';
 import { LiquidPosGovernableConfig } from './config';
+import { getConfigEndpointResponseSchema, getLSTTokenIDEndpointResponseSchema } from './schema';
 
 export class LiquidPosEndpoint extends BaseEndpoint {
 	private _internalMethod: InternalLiquidPosMethod | undefined;
@@ -14,7 +15,7 @@ export class LiquidPosEndpoint extends BaseEndpoint {
 	public async getConfig(_context: ModuleEndpointContext) {
 		const configStore = this.stores.get(LiquidPosGovernableConfig);
 		const config = await configStore.getConfig(_context);
-		return serializer(config);
+		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
 	public getLSTTokenID(_context: ModuleEndpointContext) {
@@ -23,6 +24,6 @@ export class LiquidPosEndpoint extends BaseEndpoint {
 
 		if (lstTokenId === undefined) throw new Error('retrieve undefined lst token id');
 
-		return serializer({ tokenID: lstTokenId });
+		return serializer({ tokenID: lstTokenId }, getLSTTokenIDEndpointResponseSchema);
 	}
 }

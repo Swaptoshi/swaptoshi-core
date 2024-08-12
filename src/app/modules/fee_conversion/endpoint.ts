@@ -6,6 +6,7 @@ import { serializer } from './utils';
 import { InternalFeeConversionMethod } from './internal_method';
 import { TOKEN_ID_LENGTH } from './constants';
 import { FeeConversionGovernableConfig } from './config';
+import { dryRunTransactionEndpointResponseSchema, getConfigEndpointResponseSchema, getRegisteredHandlersEndpointResponseSchema } from './schema';
 
 export class FeeConversionEndpoint extends BaseEndpoint {
 	protected _handler: FeeConversionMethodRegistry | undefined;
@@ -22,7 +23,7 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 	public async getConfig(_context: ModuleEndpointContext) {
 		const configStore = this.stores.get(FeeConversionGovernableConfig);
 		const config = await configStore.getConfig(_context);
-		return serializer(config);
+		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
 	public getRegisteredHandlers(_context: ModuleEndpointContext): RegisteredMethodResponse {
@@ -34,7 +35,7 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 			handlers.push({ module: key, method: this._handler.get(key).map(t => t.name) });
 		}
 
-		return serializer({ handlers });
+		return serializer({ handlers }, getRegisteredHandlersEndpointResponseSchema);
 	}
 
 	public async dryRunTransaction(_context: ModuleEndpointContext): Promise<DryRunTransactionResponse> {
@@ -67,6 +68,6 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 			result.errorMessage = (err as { message: string }).message;
 		}
 
-		return serializer(result);
+		return serializer(result, dryRunTransactionEndpointResponseSchema);
 	}
 }

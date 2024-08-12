@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext, cryptography } from 'klayr-sdk';
+import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
 import {
 	GetAirdropParams,
 	GetFactoryParams,
@@ -18,12 +18,24 @@ import { FactoryStore } from './stores/factory';
 import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { VestingUnlockStore } from './stores/vesting_unlock';
 import { TokenFactoryGovernableConfig } from './config';
+import {
+	getAirdropEndpointResponseSchema,
+	getConfigEndpointResponseSchema,
+	getFactoryEndpointResponseSchema,
+	getICOPoolEndpointResponseSchema,
+	getNextAvailableTokenIdEndpointResponseSchema,
+	getVestingUnlockEndpointResponseSchema,
+	quoteICOExactInputEndpointResponseSchema,
+	quoteICOExactInputSingleEndpointResponseSchema,
+	quoteICOExactOutputEndpointResponseSchema,
+	quoteICOExactOutputSingleEndpointResponseSchema,
+} from './schema';
 
 export class TokenFactoryEndpoint extends BaseEndpoint {
 	public async getConfig(_context: ModuleEndpointContext) {
 		const configStore = this.stores.get(TokenFactoryGovernableConfig);
 		const config = await configStore.getConfig(_context);
-		return serializer(config);
+		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
 	public async getICOPool(context: ModuleEndpointContext) {
@@ -40,11 +52,13 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 			tokenOut: Buffer.from(param.tokenOut, 'hex'),
 		});
 
-		return serializer({
-			...icoPool.toJSON(),
-			poolAddress,
-			klayr32: cryptography.address.getKlayr32AddressFromAddress(poolAddress),
-		});
+		return serializer(
+			{
+				...icoPool.toJSON(),
+				poolAddress,
+			},
+			getICOPoolEndpointResponseSchema,
+		);
 	}
 
 	public async quoteICOExactInput(context: ModuleEndpointContext) {
@@ -63,7 +77,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 			tokenOut: Buffer.from(param.tokenOut, 'hex'),
 		});
 
-		return serializer({ amountOut });
+		return serializer({ amountOut }, quoteICOExactInputEndpointResponseSchema);
 	}
 
 	public async quoteICOExactInputSingle(context: ModuleEndpointContext) {
@@ -82,7 +96,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 			tokenOut: Buffer.from(param.tokenOut, 'hex'),
 		});
 
-		return serializer({ amountOut });
+		return serializer({ amountOut }, quoteICOExactInputSingleEndpointResponseSchema);
 	}
 
 	public async quoteICOExactOutput(context: ModuleEndpointContext) {
@@ -101,7 +115,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 			tokenOut: Buffer.from(param.tokenOut, 'hex'),
 		});
 
-		return serializer({ amountIn });
+		return serializer({ amountIn }, quoteICOExactOutputEndpointResponseSchema);
 	}
 
 	public async quoteICOExactOutputSingle(context: ModuleEndpointContext) {
@@ -120,7 +134,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 			tokenOut: Buffer.from(param.tokenOut, 'hex'),
 		});
 
-		return serializer({ amountIn });
+		return serializer({ amountIn }, quoteICOExactOutputSingleEndpointResponseSchema);
 	}
 
 	public async getAirdrop(context: ModuleEndpointContext) {
@@ -131,7 +145,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 
 		const _context = endpointFactoryContext(context);
 		const airdrop = await this.stores.get(AirdropStore).getImmutableAirdrop(_context, Buffer.from(param.tokenId, 'hex'), Buffer.from(param.providerAddress, 'hex'));
-		return airdrop.toJSON();
+		return serializer(airdrop.toJSON(), getAirdropEndpointResponseSchema);
 	}
 
 	public async getFactory(context: ModuleEndpointContext) {
@@ -141,13 +155,13 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 
 		const _context = endpointFactoryContext(context);
 		const factory = await this.stores.get(FactoryStore).getImmutableFactory(_context, Buffer.from(param.tokenId, 'hex'));
-		return factory.toJSON();
+		return serializer(factory.toJSON(), getFactoryEndpointResponseSchema);
 	}
 
 	public async getNextAvailableTokenId(context: ModuleEndpointContext) {
 		const nextAvailableTokenIdStore = this.stores.get(NextAvailableTokenIdStore);
 		const nextAvailableTokenId = await nextAvailableTokenIdStore.getOrDefault(context);
-		return serializer(nextAvailableTokenId);
+		return serializer(nextAvailableTokenId, getNextAvailableTokenIdEndpointResponseSchema);
 	}
 
 	public async getVestingUnlock(context: ModuleEndpointContext) {
@@ -158,6 +172,6 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		const vestingStore = this.stores.get(VestingUnlockStore);
 		const vesting = await vestingStore.getOrDefault(context, numberToBytes(param.height));
 
-		return serializer(vesting);
+		return serializer(vesting, getVestingUnlockEndpointResponseSchema);
 	}
 }

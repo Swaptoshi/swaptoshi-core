@@ -5,6 +5,7 @@ export const getICOPoolEndpointResponseSchema = {
 	properties: {
 		providerAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		price: {
@@ -13,11 +14,8 @@ export const getICOPoolEndpointResponseSchema = {
 		},
 		poolAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 3,
-		},
-		klayr32: {
-			dataType: 'string',
-			fieldNumber: 4,
 		},
 	},
 };
