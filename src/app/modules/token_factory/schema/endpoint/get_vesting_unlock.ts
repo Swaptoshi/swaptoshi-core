@@ -15,6 +15,7 @@ export const getVestingUnlockEndpointResponseSchema = {
 					},
 					address: {
 						dataType: 'string',
+						format: 'klayr32',
 						fieldNumber: 2,
 					},
 					amount: {

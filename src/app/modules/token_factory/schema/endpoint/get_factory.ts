@@ -5,6 +5,7 @@ export const getFactoryEndpointResponseSchema = {
 	properties: {
 		owner: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		attributesArray: {

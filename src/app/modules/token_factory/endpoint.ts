@@ -1,4 +1,4 @@
-import { BaseEndpoint, ModuleEndpointContext } from 'klayr-sdk';
+import { BaseEndpoint, cryptography, ModuleEndpointContext } from 'klayr-sdk';
 import {
 	GetAirdropParams,
 	GetFactoryParams,
@@ -9,7 +9,7 @@ import {
 	QuoteICOExactOutputParams,
 	QuoteICOExactOutputSingleParams,
 } from './types';
-import { numberToBytes, serializer, verifyAddress, verifyPositiveNumber, verifyString, verifyToken } from './utils';
+import { numberToBytes, serializer, verifyKlayer32Address, verifyPositiveNumber, verifyString, verifyToken } from './utils';
 import { endpointFactoryContext } from './stores/context';
 import { ICOStore } from './stores/ico';
 import { AirdropStore } from './stores/airdrop';
@@ -141,10 +141,10 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		const param = context.params as unknown as GetAirdropParams;
 
 		verifyToken('tokenId', Buffer.from(param.tokenId, 'hex'));
-		verifyAddress('providerAddress', Buffer.from(param.providerAddress, 'hex'));
+		verifyKlayer32Address('providerAddress', param.providerAddress);
 
 		const _context = endpointFactoryContext(context);
-		const airdrop = await this.stores.get(AirdropStore).getImmutableAirdrop(_context, Buffer.from(param.tokenId, 'hex'), Buffer.from(param.providerAddress, 'hex'));
+		const airdrop = await this.stores.get(AirdropStore).getImmutableAirdrop(_context, Buffer.from(param.tokenId, 'hex'), cryptography.address.getAddressFromKlayr32Address(param.providerAddress));
 		return serializer(airdrop.toJSON(), getAirdropEndpointResponseSchema);
 	}
 

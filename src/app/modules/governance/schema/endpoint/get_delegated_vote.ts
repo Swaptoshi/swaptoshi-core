@@ -8,6 +8,7 @@ export const getDelegatedVoteEndpointResponseSchema: TypedSchema<JSONObject<Dele
 	properties: {
 		outgoingDelegation: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		incomingDelegation: {
@@ -15,6 +16,7 @@ export const getDelegatedVoteEndpointResponseSchema: TypedSchema<JSONObject<Dele
 			fieldNumber: 2,
 			items: {
 				dataType: 'string',
+				format: 'klayr32',
 			},
 		},
 	},

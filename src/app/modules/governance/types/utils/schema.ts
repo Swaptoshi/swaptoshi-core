@@ -22,7 +22,7 @@ type SchemaPropertiesWithGovernableProps<T> = {
 	[K in keyof T]: K extends keyof T ? TypeScriptTypeToSchemaType<T[K]> & SchemaPropertiesFields & { governable?: boolean } : never;
 };
 
-type SchemaPropertiesFields = { fieldNumber: number; format?: string; minLength?: number; maxLength?: number; minimum?: number; maximum?: number };
+type SchemaPropertiesFields = { fieldNumber: number; format?: 'hex' | 'klayr32'; minLength?: number; maxLength?: number; minimum?: number; maximum?: number };
 
 type TypeScriptTypeToSchemaType<T> = T extends string
 	? { dataType: 'string' }
@@ -45,7 +45,7 @@ type ArraySchema<T> = {
 	items: ArraySchemaItems<T>;
 };
 
-type ArraySchemaItems<T> = TypescriptArrayToSchemaType<T>;
+type ArraySchemaItems<T> = TypescriptArrayToSchemaType<T> & { format?: 'hex' | 'klayr32' };
 
 type TypescriptArrayToSchemaType<T> = T extends string[]
 	? { dataType: 'string' }

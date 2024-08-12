@@ -20,6 +20,7 @@ export const getProposalEndpointResponseSchema: TypedSchema<JSONObject<ProposalS
 		},
 		author: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 4,
 		},
 		turnout: {

@@ -11,6 +11,7 @@ export const getAirdropEndpointResponseSchema = {
 				properties: {
 					address: {
 						dataType: 'string',
+						format: 'klayr32',
 						fieldNumber: 1,
 					},
 					amount: {
@@ -34,6 +35,7 @@ export const getAirdropEndpointRequestSchema = {
 		},
 		providerAddress: {
 			dataType: 'string',
+			format: 'klayr32',
 			fieldNumber: 2,
 		},
 	},
