@@ -50,6 +50,10 @@
 		"dex": {
 			"feeAmountTickSpacing": [
 				{
+					"fee": "100",
+					"tickSpacing": "1"
+				},
+				{
 					"fee": "500",
 					"tickSpacing": "10"
 				},

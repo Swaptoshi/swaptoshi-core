@@ -7,6 +7,10 @@ import { DEX_DEFAULT_NAME, DEX_DEFAULT_TOKEN_DECIMAL, DEX_DEFAULT_TOKEN_SYMBOL, 
 export const defaultConfig: DexModuleConfig = {
 	feeAmountTickSpacing: [
 		{
+			fee: '100',
+			tickSpacing: '1',
+		},
+		{
 			fee: '500',
 			tickSpacing: '10',
 		},
