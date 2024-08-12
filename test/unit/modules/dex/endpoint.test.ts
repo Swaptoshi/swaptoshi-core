@@ -18,6 +18,7 @@ import { encodePath } from './stores/shared/path';
 import { FeeAmount } from './stores/shared/utilities';
 import { DEXPool } from '../../../../src/app/modules/dex/stores/factory';
 import { serializer } from '../../../../src/app/modules/dex/utils';
+import { getPoolEndpointResponseSchema } from '../../../../src/app/modules/dex/schema';
 
 describe('DexEndpoint', () => {
 	let context: ModuleEndpointContext;
@@ -376,11 +377,14 @@ describe('DexEndpoint', () => {
 			const res = await endpoint.getPool(context);
 
 			expect(res).toStrictEqual(
-				serializer({
-					...pool.toJSON(),
-					address: cryptography.address.getKlayr32AddressFromAddress(pool.address),
-					collectionId: pool.collectionId,
-				}),
+				serializer(
+					{
+						...pool.toJSON(),
+						address: cryptography.address.getKlayr32AddressFromAddress(pool.address),
+						collectionId: pool.collectionId,
+					},
+					getPoolEndpointResponseSchema,
+				),
 			);
 		});
 

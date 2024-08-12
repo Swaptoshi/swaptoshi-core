@@ -19,18 +19,40 @@ export function serializer<T extends Record<any, any>>(data: T, schema?: any): T
 	);
 }
 
-function replacer(value: any, schema?: any, key?: string) {
+function replacer(value: any, schema?: any, key?: string, parentPath = ''): any {
+	const currentPath = parentPath && key ? `${parentPath}.${key}` : key;
+
 	if (typeof value === 'bigint') {
 		return value.toString();
 	}
-	if (value.type === 'Buffer') {
-		if (schema && key) {
-			const schemaForKey = getSchemaByPath(schema, key);
+
+	if (Buffer.isBuffer(value)) {
+		if (schema && currentPath) {
+			const schemaForKey = getSchemaByPath(schema, currentPath);
+			if (schemaForKey && (schemaForKey as { dataType?: string }).dataType === 'string' && (schemaForKey as { format?: string }).format === 'klayr32') {
+				return cryptography.address.getKlayr32AddressFromAddress(value);
+			}
+		}
+		return value.toString('hex');
+	}
+
+	if (Array.isArray(value)) {
+		return value.map((item, index) => replacer(item, schema, index.toString(), currentPath));
+	}
+
+	if (typeof value === 'object' && value !== null) {
+		return Object.fromEntries(Object.entries(value).map(([nestedKey, nestedValue]) => [nestedKey, replacer(nestedValue, schema, nestedKey, currentPath)]));
+	}
+
+	if (typeof value === 'string' && value.length === 40) {
+		if (schema && currentPath) {
+			const schemaForKey = getSchemaByPath(schema, currentPath);
 			if (schemaForKey && (schemaForKey as { dataType?: string }).dataType === 'string' && (schemaForKey as { format?: string }).format === 'klayr32') {
 				return cryptography.address.getKlayr32AddressFromAddress(Buffer.from(value, 'hex'));
 			}
 		}
-		return Buffer.from(value).toString('hex');
+		return value;
 	}
+
 	return value;
 }
