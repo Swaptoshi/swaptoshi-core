@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 
 import {
-	BaseModule,
+	BaseInteroperableModule,
 	BlockExecuteContext,
 	FeeMethod,
 	ModuleInitArgs,
@@ -82,7 +82,7 @@ import { TokenFactoryModuleDependencies } from './types';
 import { TokenFactoryGovernableConfig } from './config';
 import { GovernanceMethod } from '../governance';
 
-export class TokenFactoryModule extends BaseModule {
+export class TokenFactoryModule extends BaseInteroperableModule {
 	public _config: TokenFactoryGovernableConfig = new TokenFactoryGovernableConfig(this.name, 5);
 	public _feeMethod: FeeMethod | undefined;
 	public _feeConversionMethod: FeeConversionMethod | undefined;
