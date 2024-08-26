@@ -84,8 +84,8 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 	private _isValidNonNegativeIntegerOrPercentage(str: string) {
 		// Regular expression to match a valid non-negative integer
 		const integerRegex = /^\d+$/;
-		// Regular expression to match a valid non-negative integer percentage ending with %
-		const percentageRegex = /^\d+%$/;
+		// Regular expression to match a valid non-negative decimal or integer percentage ending with %
+		const percentageRegex = /^\d*\.?\d+%$/;
 
 		return integerRegex.test(str) || percentageRegex.test(str);
 	}
