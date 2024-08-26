@@ -12,6 +12,7 @@ export const configSchema: GovernableConfigSchema<LiquidPosModuleConfig> = {
 		},
 		ratio: {
 			dataType: 'uint32',
+			governable: false,
 			fieldNumber: 2,
 		},
 	},
