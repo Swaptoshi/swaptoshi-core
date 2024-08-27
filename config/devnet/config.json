@@ -253,7 +253,7 @@
 	"plugins": {
 		"chainConnector": {
 			"encryptedPrivateKey": "kdf=argon2id&cipher=aes-128-gcm&version=1&ciphertext=2a96e2ffa614e838389bf52a40b89a85570fd01a11462df7903f8073bd5302945cd32edbcfc8ee72fac61edc10e02b068f19ce3f0bf5af773d4657bad707c6b1f1d70e0b0bd1657530bf9b4eb24fea6ee49c645ae22d3cd92ca88342f334e02348ba19f1499f5dd99ccc7870a589e04660fe37f54d3ceba90b378dac5500910d&mac=436027a2906b585601fafa9be654207eee2ed4f9d1c8a1ccd0f0e737096bfc7f&salt=701158d498117e8a&iv=3e6f8c010cccce9c5135b24fd2a58c6e&tag=c3c8419ef3a7113d33790e3976f36870&iterations=1&parallelism=4&memorySize=2097023",
-			"ccuFrequency": 5,
+			"ccuFrequency": 300,
 			"receivingChainIPCPath": "~/.klayr/klayr-core",
 			"receivingChainID": "04000000"
 		},
