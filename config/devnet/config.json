@@ -45,7 +45,7 @@
 			"ratio": 1
 		},
 		"feeConversion": {
-			"conversionPath": ["04555555000000000001f40455555500000001"]
+			"conversionPath": ["04555555000000000000640455555500000001"]
 		},
 		"dex": {
 			"feeAmountTickSpacing": [
