@@ -20,7 +20,7 @@ export const voteChangedEventSchema: TypedSchema<VoteChangedEventData> = {
 		},
 		newDecision: {
 			dataType: 'uint32',
-			fieldNumber: 3,
+			fieldNumber: 4,
 		},
 	},
 };
