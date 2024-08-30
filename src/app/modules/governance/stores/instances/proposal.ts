@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, JSONObject, NamedRegistry, codec, utils } from 'klayr-sdk';
+import { GenesisConfig, JSONObject, MethodContext, NamedRegistry, codec, utils } from 'klayr-sdk';
 import Decimal from 'decimal.js';
 import { ConfigActionPayload, CreateProposalParams, ProposalQueueStoreData, ProposalStatus, ProposalStoreData, QuorumMode, SetProposalAttributesParams, VoteParams, Votes } from '../../types';
 import { ProposalStore } from '../proposal';
@@ -99,7 +99,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		const senderAvailableBalance = await this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId());
 		const senderLockedBalance = await this.tokenMethod!.getLockedAmount(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId(), POS_MODULE_NAME);
 
-		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.mutableContext!.context);
+		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.immutableContext!.context as MethodContext);
 		const index = totalSupplyStore.totalSupply.findIndex(supply => supply.tokenID.equals(this._getStakingTokenId()));
 
 		const proposalCreationMinBalance = parseBigintOrPercentage(config.proposalCreationMinBalance, totalSupplyStore.totalSupply[index].totalSupply);
