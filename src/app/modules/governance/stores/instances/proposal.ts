@@ -7,7 +7,7 @@ import { ConfigActionPayload, CreateProposalParams, ProposalQueueStoreData, Prop
 import { ProposalStore } from '../proposal';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
-import { bytesToNumber, getBoostMultiplier, getSchemaByPath, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
+import { bytesToNumber, getBoostMultiplier, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalCreatedEvent } from '../../events/proposal_created';
 import { NextAvailableProposalIdStore } from '../next_available_proposal_id';
 import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, POS_MODULE_NAME } from '../../constants';
@@ -22,6 +22,7 @@ import { CastedVoteStore } from '../casted_vote';
 import { BoostedAccountStore } from '../boosted_account';
 import { VoteScoreStore } from '../vote_score';
 import { ProposalVoterStore } from '../proposal_voter';
+import { decodeConfigProposalValue } from '../../utils/payload';
 
 export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> implements ProposalStoreData {
 	public constructor(
@@ -115,7 +116,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			if (actions.type === 'config') {
 				const payload = codec.decode<ConfigActionPayload>(configActionPayloadSchema, actions.payload);
 				const targetConfig = this.governableConfigRegistry.get(payload.moduleName);
-				const decodedValue = codec.decode(getSchemaByPath(targetConfig.schema, payload.paramPath), payload.value);
+				const decodedValue = decodeConfigProposalValue(targetConfig.schema, payload);
 				await targetConfig.dryRunSetConfigWithPath(this.immutableContext!.context, payload.paramPath, decodedValue);
 			}
 		}

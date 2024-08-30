@@ -7,7 +7,7 @@ import { ConfigActionPayload, FundingActionPayload, ProposalQueueStoreData, Prop
 import { ProposalQueueStore } from '../queue';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
-import { getSchemaByPath, isSatisfyTurnoutBias, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
+import { isSatisfyTurnoutBias, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalStore } from '../proposal';
 import { GovernableConfigRegistry } from '../../registry';
 import { ProposalActiveEvent } from '../../events/proposal_active';
@@ -17,6 +17,7 @@ import { configActionPayloadSchema, fundingActionPayloadSchema } from '../../sch
 import { ProposalExecutedEvent } from '../../events/proposal_executed';
 import { ProposalVoterStore } from '../proposal_voter';
 import { CastedVoteStore } from '../casted_vote';
+import { decodeConfigProposalValue } from '../../utils/payload';
 
 export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, ProposalQueueStore> implements ProposalQueueStoreData {
 	public constructor(
@@ -261,7 +262,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 
 		const payload = codec.decode<ConfigActionPayload>(configActionPayloadSchema, encodedPayload);
 		const targetConfig = this.governableConfigRegistry.get(payload.moduleName);
-		const decodedValue = codec.decode(getSchemaByPath(targetConfig.schema, payload.paramPath), payload.value);
+		const decodedValue = decodeConfigProposalValue(targetConfig.schema, payload);
 		await targetConfig.setConfigWithPath(this.mutableContext!.context, payload.paramPath, decodedValue);
 	}
 
