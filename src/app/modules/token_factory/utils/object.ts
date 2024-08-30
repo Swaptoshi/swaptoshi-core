@@ -41,11 +41,16 @@ export function removeProperty(obj: object, propsToRemove: string[]): object {
  */
 export function getSchemaByPath(schema: Schema, path: string): Schema {
 	const pathParts = path.split('.').filter(Boolean); // Remove empty parts
-	let currentSchema: Schema = schema;
+	let currentSchema: Schema & { items?: unknown } = schema;
 
 	for (const part of pathParts) {
 		if (currentSchema?.properties && currentSchema.properties[part]) {
 			currentSchema = currentSchema.properties[part] as Schema;
+		} else if (currentSchema.type === 'array' && currentSchema?.items) {
+			// NOTE: for array schema, part can be anything, will dig into items
+			// e.g props.index, props.0, props.items
+
+			currentSchema = currentSchema.items as Schema;
 		} else {
 			throw new Error(`Schema not found for path: ${path}`);
 		}
