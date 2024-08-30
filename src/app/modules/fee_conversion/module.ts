@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, ModuleInitArgs, ModuleMetadata, TransactionExecuteContext, TransactionVerifyContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { BaseModule, FeeMethod, ModuleInitArgs, ModuleMetadata, TransactionExecuteContext, TransactionVerifyContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
 import { FeeConversionEndpoint } from './endpoint';
 import { FeeConversionMethod } from './method';
 import { FeeConversionMethodRegistry } from './registry';
@@ -19,6 +19,7 @@ import { InternalFeeConversionMethod } from './internal_method';
 import { FeeConversionGovernableConfig } from './config';
 import { GovernanceMethod } from '../governance';
 import { FeeConversionModuleDependencies } from './types';
+import { CONTEXT_STORE_KEY_AVAILABLE_FEE } from './constants';
 
 export class FeeConversionModule extends BaseModule {
 	public endpoint = new FeeConversionEndpoint(this.stores, this.offchainStores);
@@ -29,6 +30,7 @@ export class FeeConversionModule extends BaseModule {
 	private _handler = new FeeConversionMethodRegistry();
 	private _internalMethod = new InternalFeeConversionMethod(this.stores, this.events);
 	private _governanceMethod: GovernanceMethod | undefined;
+	private _feeMethod: FeeMethod | undefined;
 
 	public constructor() {
 		super();
@@ -76,6 +78,7 @@ export class FeeConversionModule extends BaseModule {
 	}
 
 	public addDependencies(dependencies: FeeConversionModuleDependencies) {
+		this._feeMethod = dependencies.feeMethod;
 		this._governanceMethod = dependencies.governanceMethod;
 		this._internalMethod.addDependencies(dependencies.feeMethod, dependencies.tokenMethod, dependencies.dexMethod);
 		this.endpoint.addDependencies(this._internalMethod);
@@ -94,6 +97,21 @@ export class FeeConversionModule extends BaseModule {
 	}
 
 	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+		const { transaction, header } = _context;
+
+		const minFee = this._getMinFee(header.height, transaction.getBytes().length);
+		const availableFee = transaction.fee - minFee;
+
+		_context.contextStore.set(CONTEXT_STORE_KEY_AVAILABLE_FEE, availableFee);
+
 		await this._internalMethod.execute(_context);
+	}
+
+	public _getMinFee(blockHeight: number, transactionByteLength: number): bigint {
+		const feeConfig = this._feeMethod!.getConfig();
+		if (blockHeight < feeConfig.maxBlockHeightZeroFeePerByte) {
+			return BigInt(0);
+		}
+		return BigInt(feeConfig.minFeePerByte) * BigInt(transactionByteLength);
 	}
 }

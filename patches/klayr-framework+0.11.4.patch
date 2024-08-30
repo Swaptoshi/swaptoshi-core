@@ -40,32 +40,62 @@ index 4aece0e..516380a 100644
      _initLogger() {
          var _a, _b;
          return (0, logger_1.createLogger)({
+diff --git a/node_modules/klayr-framework/dist-node/modules/fee/method.d.ts b/node_modules/klayr-framework/dist-node/modules/fee/method.d.ts
+index c127802..731cfaa 100644
+--- a/node_modules/klayr-framework/dist-node/modules/fee/method.d.ts
++++ b/node_modules/klayr-framework/dist-node/modules/fee/method.d.ts
+@@ -6,6 +6,7 @@ export declare class FeeMethod extends BaseMethod {
+     private _config;
+     init(config: ModuleConfig): void;
+     getFeeTokenID(): Buffer;
++    getConfig(): ModuleConfig;
+     payFee(methodContext: MethodContext, amount: bigint): void;
+     private _deductFeeFromKey;
+ }
+diff --git a/node_modules/klayr-framework/dist-node/modules/fee/method.js b/node_modules/klayr-framework/dist-node/modules/fee/method.js
+index 73d3e86..83215a4 100644
+--- a/node_modules/klayr-framework/dist-node/modules/fee/method.js
++++ b/node_modules/klayr-framework/dist-node/modules/fee/method.js
+@@ -13,6 +13,9 @@ class FeeMethod extends base_method_1.BaseMethod {
+     getFeeTokenID() {
+         return this._config.feeTokenID;
+     }
++    getConfig() {
++        return this._config;
++    }
+     payFee(methodContext, amount) {
+         const isCCMProcessing = (0, state_machine_1.getContextStoreBool)(methodContext.contextStore, constants_1.CONTEXT_STORE_KEY_CCM_PROCESSING);
+         if (isCCMProcessing) {
 diff --git a/node_modules/klayr-framework/dist-node/modules/fee/module.js b/node_modules/klayr-framework/dist-node/modules/fee/module.js
-index da24f74..53b884c 100644
+index da24f74..9452071 100644
 --- a/node_modules/klayr-framework/dist-node/modules/fee/module.js
 +++ b/node_modules/klayr-framework/dist-node/modules/fee/module.js
-@@ -45,8 +45,11 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+@@ -45,8 +45,14 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
          };
      }
      async init(args) {
 +        // NOTE: dangerouslySkipBalanceVerification config is default to false
 +        const dangerouslySkipBalanceVerification = false;
++
++        // NOTE: dangerouslySkipAvailableFeeInitialization config is default to false
++        const dangerouslySkipAvailableFeeInitialization = false;
 +        
          const defaultFeeTokenID = `${args.genesisConfig.chainID}${Buffer.alloc(4).toString('hex')}`;
 -        const config = utils_1.objects.mergeDeep({}, { ...constants_1.defaultConfig, feeTokenID: defaultFeeTokenID }, args.moduleConfig);
-+        const config = utils_1.objects.mergeDeep({}, { ...constants_1.defaultConfig, feeTokenID: defaultFeeTokenID, dangerouslySkipBalanceVerification }, args.moduleConfig);
++        const config = utils_1.objects.mergeDeep({}, { ...constants_1.defaultConfig, feeTokenID: defaultFeeTokenID, dangerouslySkipBalanceVerification, dangerouslySkipAvailableFeeInitialization }, args.moduleConfig);
          validator_1.validator.validate(schemas_1.configSchema, config);
          const moduleConfig = {
              ...config,
-@@ -62,6 +65,7 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+@@ -62,6 +68,8 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
          this._minFeePerByte = moduleConfig.minFeePerByte;
          this._maxBlockHeightZeroFeePerByte = moduleConfig.maxBlockHeightZeroFeePerByte;
          this._feePoolAddress = moduleConfig.feePoolAddress;
 +        this._skipBalanceVerification = moduleConfig.dangerouslySkipBalanceVerification;
++        this._skipAvailableFeeInitialization = moduleConfig.dangerouslySkipAvailableFeeInitialization;
      }
      async verifyTransaction(context) {
          const { getMethodContext, transaction, header } = context;
-@@ -69,10 +73,17 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+@@ -69,10 +77,17 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
          if (transaction.fee < minFee) {
              throw new Error(`Insufficient transaction fee. Minimum required fee is ${minFee}.`);
          }
@@ -84,6 +114,24 @@ index da24f74..53b884c 100644
          return { status: state_machine_1.VerifyStatus.OK };
      }
      async beforeCommandExecute(context) {
+@@ -84,7 +99,16 @@ class FeeModule extends base_interoperable_module_1.BaseInteroperableModule {
+         }
+         const methodContext = context.getMethodContext();
+         await this._tokenMethod.lock(methodContext, transaction.senderAddress, this.name, this._tokenID, transaction.fee);
+-        context.contextStore.set(constants_1.CONTEXT_STORE_KEY_AVAILABLE_FEE, availableFee);
++
++        /* NOTE: 
++         * dangerouslySkipAvailableFeeInitialization is needed if a priority module deduct a fee, and availableFee context is handled by other module
++         * for example governance module which is a priority module, is deducting a fee from their baseFee config
++         * while availableFee context is handled by fee_conversion module
++         * since the default is false, it will not interfere with other module implementations if it is not specified
++         */
++        if (!this._skipAvailableFeeInitialization) {
++            context.contextStore.set(constants_1.CONTEXT_STORE_KEY_AVAILABLE_FEE, availableFee);
++        }
+     }
+     async afterCommandExecute(context) {
+         const { header, transaction } = context;
 diff --git a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts b/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts
 index 1ee0809..51c1c41 100644
 --- a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts

@@ -160,7 +160,8 @@
 		"fee": {
 			"feeTokenID": "0455555500000000",
 			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
-			"dangerouslySkipBalanceVerification": true
+			"dangerouslySkipBalanceVerification": true,
+			"dangerouslySkipAvailableFeeInitialization": true
 		},
 		"pos": {
 			"minWeightStandby": "1000000000",
