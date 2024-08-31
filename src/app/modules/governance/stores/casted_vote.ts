@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, StoreGetter, db, utils } from 'klayr-sdk';
 import { CastedVoteStoreData } from '../types';
 import { castedVoteStoreSchema } from '../schema';
 
@@ -15,7 +15,8 @@ export class CastedVoteStore extends BaseStore<CastedVoteStoreData> {
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultVote };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultVote) as CastedVoteStoreData;
 		}
 	}
 

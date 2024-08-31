@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, StoreGetter, db, utils } from 'klayr-sdk';
 import { ProposalVoterStoreData } from '../types';
 import { proposalVoterStoreSchema } from '../schema';
 import { numberToBytes } from '../utils';
@@ -16,7 +16,8 @@ export class ProposalVoterStore extends BaseStore<ProposalVoterStoreData> {
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultProposalVoters };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultProposalVoters) as ProposalVoterStoreData;
 		}
 	}
 

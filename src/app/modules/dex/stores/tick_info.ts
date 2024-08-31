@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
 import { TickInfo } from '../types';
 import { Int24String } from './library/int';
 import { tickInfoStoreSchema } from '../schema';
@@ -31,7 +31,8 @@ export class TickInfoStore extends BaseStore<TickInfo> {
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultTickInfo };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultTickInfo) as TickInfo;
 		}
 	}
 

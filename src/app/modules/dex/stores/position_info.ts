@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
 import { PositionInfo } from '../types';
 import { positionInfoStoreSchema } from '../schema';
 
@@ -24,7 +24,8 @@ export class PositionInfoStore extends BaseStore<PositionInfo> {
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultPositionInfo };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultPositionInfo) as PositionInfo;
 		}
 	}
 

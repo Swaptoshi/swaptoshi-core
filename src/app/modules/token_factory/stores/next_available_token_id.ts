@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
 import { NextAvailableTokenIdStoreData } from '../types';
 import { nextAvailableTokenIdStoreSchema } from '../schema';
 
@@ -15,7 +15,8 @@ export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenIdSto
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultNextId };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultNextId) as NextAvailableTokenIdStoreData;
 		}
 	}
 

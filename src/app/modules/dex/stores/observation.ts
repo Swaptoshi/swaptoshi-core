@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db } from 'klayr-sdk';
+import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
 import { Observation } from '../types';
 import { Int16String } from './library/int';
 import { observationStoreSchema } from '../schema';
@@ -27,7 +27,8 @@ export class ObservationStore extends BaseStore<Observation> {
 			if (!(error instanceof db.NotFoundError)) {
 				throw error;
 			}
-			return { ...defaultObservation };
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			return utils.objects.cloneDeep(defaultObservation) as Observation;
 		}
 	}
 
