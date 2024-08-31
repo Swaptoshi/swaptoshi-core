@@ -13,6 +13,13 @@ export class MockedFeeMethod implements Omit<FeeMethod, ''> {
 	public init(_config: ModuleConfig): void {
 		mock_fee_init(_config);
 	}
+	public getConfig(): ModuleConfig {
+		return {
+			minFeePerByte: 1000,
+			maxBlockHeightZeroFeePerByte: 0,
+			feeTokenID: Buffer.from('0400000000000000'),
+		};
+	}
 	public getFeeTokenID(): Buffer {
 		mock_fee_getFeeTokenID();
 		return tokenID;
