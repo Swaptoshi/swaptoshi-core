@@ -45,7 +45,7 @@ import { NextAvailableProposalIdStore } from './stores/next_available_proposal_i
 import { ProposalStore } from './stores/proposal';
 import { ProposalQueueStore } from './stores/queue';
 import { GovernanceModuleConfig, GovernanceModuleDependencies } from './types';
-import { mutableTransactionHookGovernanceContext } from './stores/context';
+import { immutableTransactionHookGovernanceContext } from './stores/context';
 import { ProposalExecutedEvent } from './events/proposal_executed';
 import { VoteChangedEvent } from './events/vote_changed';
 import { CastedVoteStore } from './stores/casted_vote';
@@ -215,6 +215,10 @@ export class GovernanceModule extends BaseModule {
 
 	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
 		try {
+			const ctx = immutableTransactionHookGovernanceContext(_context);
+			const boostedAccount = await this.stores.get(BoostedAccountStore).getImmutableBoostedAccount(ctx);
+			await boostedAccount.isValidUnstake();
+
 			await verifyMinimumFee.bind(this)(_context);
 			await verifyBaseFee.bind(this)(_context);
 		} catch (error: unknown) {
@@ -227,9 +231,8 @@ export class GovernanceModule extends BaseModule {
 	}
 
 	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
-		const ctx = mutableTransactionHookGovernanceContext(_context);
-
-		const boostedAccount = await this.stores.get(BoostedAccountStore).getMutableBoostedAccount(ctx);
+		const ctx = immutableTransactionHookGovernanceContext(_context);
+		const boostedAccount = await this.stores.get(BoostedAccountStore).getImmutableBoostedAccount(ctx);
 		await boostedAccount.isValidUnstake();
 
 		await verifyMinimumFee.bind(this)(_context);

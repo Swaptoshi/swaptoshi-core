@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, JSONObject, NamedRegistry, TransactionExecuteContext, codec, utils } from 'klayr-sdk';
+import { GenesisConfig, JSONObject, NamedRegistry, TransactionVerifyContext, codec, utils } from 'klayr-sdk';
 import { BoostVoteParams, BoostedAccountStoreData, StakeTransactionParams } from '../../types';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
@@ -95,12 +95,12 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 	}
 
 	public async isValidUnstake() {
-		this._checkMutableDependencies();
+		this._checkImmutableDependencies();
 
-		const config = await this.getConfig(this.mutableContext!.context);
+		const config = await this.getConfig(this.immutableContext!.context);
 		if (!config.enableBoosting) return;
 
-		const { context } = this.mutableContext! as { context: TransactionExecuteContext };
+		const { context } = this.immutableContext! as { context: TransactionVerifyContext };
 
 		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
 			let isDownStaking = false;
