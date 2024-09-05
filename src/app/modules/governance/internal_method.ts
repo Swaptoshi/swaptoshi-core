@@ -20,7 +20,7 @@ import { GovernanceGovernableConfig } from './config';
 import { GovernableConfigRegistry } from './registry';
 import { methodGovernanceContext, mutableBlockHookGovernanceContext } from './stores/context';
 import { ProposalQueueStore } from './stores/queue';
-import { MutableContext, StakeTransactionParams } from './types';
+import { MutableContext, StakeTransactionParams, VoteScoreArray } from './types';
 import { stakeCommandParamsSchema } from './schema';
 import { DelegatedVoteStore } from './stores/delegated_vote';
 import { CastedVoteStore } from './stores/casted_vote';
@@ -28,6 +28,8 @@ import { ProposalStore } from './stores/proposal';
 import { VoteScoreStore } from './stores/vote_score';
 import { BoostedAccountStore } from './stores/boosted_account';
 import { parseBigintOrPercentage } from './utils';
+
+type VoteScoreOrArray = bigint | VoteScoreArray;
 
 interface BlockReward {
 	blockReward: bigint;
@@ -60,7 +62,13 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	public async updateProposalVoteSummaryByVoter(context: MutableContext, voter: Buffer, addedVote = BigInt(0), subtractedVote = BigInt(0), boostingHeight?: number) {
+	public async updateProposalVoteSummaryByVoter(
+		context: MutableContext,
+		voter: Buffer,
+		addedVote: VoteScoreOrArray = BigInt(0),
+		subtractedVote: VoteScoreOrArray = BigInt(0),
+		boostingHeight?: number,
+	) {
 		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
 		const boostedAccountStore = this.stores.get(BoostedAccountStore);
 
@@ -80,11 +88,24 @@ export class GovernanceInternalMethod extends BaseMethod {
 		const castedVote = await castedVoteStore.getOrDefault(context, voter);
 
 		for (const vote of castedVote.activeVote) {
-			if (addedVote > BigInt(0)) {
+			if (typeof addedVote === 'bigint' && addedVote > BigInt(0)) {
 				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVote, vote.decision, boostingHeight ?? voterBoostingHeight);
 			}
-			if (subtractedVote > BigInt(0)) {
+
+			if (Array.isArray(addedVote)) {
+				for (const addedVoteItem of addedVote) {
+					await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVoteItem.voteScore, vote.decision, addedVoteItem.boostingHeight);
+				}
+			}
+
+			if (typeof subtractedVote === 'bigint' && subtractedVote > BigInt(0)) {
 				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVote, vote.decision, boostingHeight ?? voterBoostingHeight);
+			}
+
+			if (Array.isArray(subtractedVote)) {
+				for (const subtractedVoteItem of subtractedVote) {
+					await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVoteItem.voteScore, vote.decision, subtractedVoteItem.boostingHeight);
+				}
 			}
 		}
 	}

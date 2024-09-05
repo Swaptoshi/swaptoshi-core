@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'klayr-sdk';
-import { DelegateVoteParams, DelegatedVoteStoreData, RevokeDelegatedVoteParams } from '../../types';
+import { DelegateVoteParams, DelegatedVoteStoreData, RevokeDelegatedVoteParams, VoteScoreArray } from '../../types';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
 import { serializer, verifyAddress } from '../../utils';
@@ -11,6 +11,7 @@ import { VoteDelegatedEvent } from '../../events/vote_delegated';
 import { DelegatedVoteRevokedEvent } from '../../events/delegated_vote_revoked';
 import { VoteScoreStore } from '../vote_score';
 import { CastedVoteStore } from '../casted_vote';
+import { BoostedAccountStore } from '../boosted_account';
 
 export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, DelegatedVoteStore> implements DelegatedVoteStoreData {
 	public constructor(
@@ -27,6 +28,7 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		Object.assign(this, utils.objects.cloneDeep(delegatedVote));
 
 		this.castedVoteStore = stores.get(CastedVoteStore);
+		this.boostedAccountStore = stores.get(BoostedAccountStore);
 		this.voteScoreStore = stores.get(VoteScoreStore);
 	}
 
@@ -61,14 +63,9 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 			throw new Error(`sender already exists on ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)} incoming delegation`);
 		}
 
-		const senderAccount = await this.instanceStore.getOrDefault(this.immutableContext!.context, this.immutableContext!.senderAddress);
-		const senderIndex = senderAccount.incomingDelegation.findIndex(buf => buf.equals(params.delegateeAddress));
-		if (senderIndex !== -1) {
-			throw new Error(
-				`circular delegation detected: ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)} => ${cryptography.address.getKlayr32AddressFromAddress(
-					this.immutableContext!.senderAddress,
-				)} => ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)}`,
-			);
+		const circularDelegationPath = await this._isCircularDelegation(params.delegateeAddress);
+		if (circularDelegationPath.length > 0) {
+			throw new Error(`circular delegation detected: ${circularDelegationPath.map(addr => cryptography.address.getKlayr32AddressFromAddress(addr)).join(' => ')}`);
 		}
 	}
 
@@ -136,28 +133,78 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		await this._saveStore();
 	}
 
-	public async getIncomingDelegationVoteScore() {
+	public async getIncomingDelegationVoteScore(): Promise<VoteScoreArray> {
 		return this._getIncomingDelegationVoteScore(this.key);
 	}
 
-	private async _getIncomingDelegationVoteScore(address: Buffer): Promise<bigint> {
+	private async _getIncomingDelegationVoteScore(address: Buffer): Promise<VoteScoreArray> {
 		this._checkImmutableDependencies();
 
-		let totalVoteScore = BigInt(0);
+		const voteScoreArray: VoteScoreArray = [];
 
 		const delegatedVote = await this.instanceStore.getOrDefault(this.immutableContext!.context, address);
 
 		for (const incomingDelegation of delegatedVote.incomingDelegation) {
-			const voteScore = await this.voteScoreStore.getVoteScore(this.immutableContext!.context, incomingDelegation);
-			totalVoteScore += voteScore;
-
 			const incomingDelegationState = await this.instanceStore.getOrDefault(this.immutableContext!.context, incomingDelegation);
 			if (incomingDelegationState.incomingDelegation.length > 0) {
-				totalVoteScore += await this._getIncomingDelegationVoteScore(incomingDelegation);
+				voteScoreArray.push(...(await this._getIncomingDelegationVoteScore(incomingDelegation)));
+			} else {
+				const voteScore = await this.voteScoreStore.getVoteScore(this.immutableContext!.context, incomingDelegation);
+				const boostingHeight = await this.boostedAccountStore.getOrDefault(this.immutableContext!.context, incomingDelegation);
+				voteScoreArray.push({ voteScore, boostingHeight: boostingHeight.targetHeight });
 			}
 		}
 
-		return totalVoteScore;
+		return voteScoreArray;
+	}
+
+	private async _isCircularDelegation(delegateeAddress: Buffer): Promise<Buffer[]> {
+		this._checkImmutableDependencies();
+
+		const visited = new Set<string>();
+		const path: Buffer[] = [];
+
+		visited.add(delegateeAddress.toString('hex'));
+		path.push(delegateeAddress);
+
+		return this._checkForCycles(this.immutableContext!.senderAddress, visited, path);
+	}
+
+	private async _checkForCycles(address: Buffer, visited: Set<string>, path: Buffer[]): Promise<Buffer[]> {
+		const addressHex = address.toString('hex');
+
+		if (visited.has(addressHex)) {
+			path.push(address);
+
+			const cycleStartIndex = path.findIndex(addr => addr.equals(address));
+			if (cycleStartIndex !== -1) {
+				return path.slice(cycleStartIndex);
+			}
+			return [];
+		}
+
+		visited.add(addressHex);
+		path.push(address);
+
+		const delegatedVote = await this.instanceStore.getOrDefault(this.immutableContext!.context, address);
+
+		if (delegatedVote.incomingDelegation.length === 0) {
+			path.pop();
+			visited.delete(addressHex);
+			return [];
+		}
+
+		for (const incomingDelegation of delegatedVote.incomingDelegation) {
+			const circularRoute = await this._checkForCycles(incomingDelegation, visited, path);
+			if (circularRoute.length > 0) {
+				return circularRoute;
+			}
+		}
+
+		path.pop();
+		visited.delete(addressHex);
+
+		return [];
 	}
 
 	private async _removeSenderVoteAndDelegatedVoteFromProposal() {
@@ -165,9 +212,10 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
-		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), voteScore);
 
-		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), voteScore + incomingDelegationVoteScore);
+		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), incomingDelegationVoteScore);
 
 		await this.castedVoteStore.removeAllCastedVote(this.mutableContext!.context, this.mutableContext!.senderAddress);
 	}
@@ -177,14 +225,16 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
-		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, voteScore, BigInt(0));
 
-		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, voteScore + incomingDelegationVoteScore, BigInt(0));
+		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, incomingDelegationVoteScore, BigInt(0));
 	}
 
 	public outgoingDelegation: DelegatedVoteStoreData['outgoingDelegation'] = Buffer.alloc(0);
 	public incomingDelegation: DelegatedVoteStoreData['incomingDelegation'] = [];
 
 	private readonly castedVoteStore: CastedVoteStore;
+	private readonly boostedAccountStore: BoostedAccountStore;
 	private readonly voteScoreStore: VoteScoreStore;
 }

@@ -4,3 +4,5 @@ export interface GovernanceModuleDependencies {
 	tokenMethod: TokenMethod;
 	feeMethod: FeeMethod;
 }
+
+export type VoteScoreArray = { voteScore: bigint; boostingHeight: number }[];
