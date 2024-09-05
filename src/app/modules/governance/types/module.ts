@@ -6,3 +6,5 @@ export interface GovernanceModuleDependencies {
 }
 
 export type VoteScoreArray = { voteScore: bigint; boostingHeight: number }[];
+
+export type VoteScoreOrArray = bigint | VoteScoreArray;

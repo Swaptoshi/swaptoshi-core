@@ -20,7 +20,7 @@ import { GovernanceGovernableConfig } from './config';
 import { GovernableConfigRegistry } from './registry';
 import { methodGovernanceContext, mutableBlockHookGovernanceContext } from './stores/context';
 import { ProposalQueueStore } from './stores/queue';
-import { MutableContext, StakeTransactionParams, VoteScoreArray } from './types';
+import { MutableContext, StakeTransactionParams, VoteScoreOrArray } from './types';
 import { stakeCommandParamsSchema } from './schema';
 import { DelegatedVoteStore } from './stores/delegated_vote';
 import { CastedVoteStore } from './stores/casted_vote';
@@ -28,8 +28,6 @@ import { ProposalStore } from './stores/proposal';
 import { VoteScoreStore } from './stores/vote_score';
 import { BoostedAccountStore } from './stores/boosted_account';
 import { parseBigintOrPercentage } from './utils';
-
-type VoteScoreOrArray = bigint | VoteScoreArray;
 
 interface BlockReward {
 	blockReward: bigint;
@@ -94,7 +92,9 @@ export class GovernanceInternalMethod extends BaseMethod {
 
 			if (Array.isArray(addedVote)) {
 				for (const addedVoteItem of addedVote) {
-					await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVoteItem.voteScore, vote.decision, addedVoteItem.boostingHeight);
+					if (addedVoteItem.voteScore > BigInt(0)) {
+						await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVoteItem.voteScore, vote.decision, addedVoteItem.boostingHeight);
+					}
 				}
 			}
 
@@ -104,7 +104,9 @@ export class GovernanceInternalMethod extends BaseMethod {
 
 			if (Array.isArray(subtractedVote)) {
 				for (const subtractedVoteItem of subtractedVote) {
-					await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVoteItem.voteScore, vote.decision, subtractedVoteItem.boostingHeight);
+					if (subtractedVoteItem.voteScore > BigInt(0)) {
+						await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVoteItem.voteScore, vote.decision, subtractedVoteItem.boostingHeight);
+					}
 				}
 			}
 		}
