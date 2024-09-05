@@ -212,8 +212,6 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
 
 		if (proposalIndex !== -1) {
-			await this._removeSenderDelegatedVoteFromProposal();
-
 			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
 			await this.subtractVote(baseScore, castedVote.activeVote[proposalIndex].decision, boostedState.targetHeight);
 			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
@@ -229,6 +227,8 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 				},
 				[this.mutableContext!.senderAddress],
 			);
+
+			await this._removeSenderDelegatedVoteFromProposal();
 
 			castedVote.activeVote[proposalIndex].decision = params.decision;
 		} else {
@@ -249,7 +249,6 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			);
 		}
 
-		await this._saveStore();
 		await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
 		await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
 
