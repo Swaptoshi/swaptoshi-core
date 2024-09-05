@@ -55,8 +55,8 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 			throw new Error(`sender already delegate their vote, revoke it first!`);
 		}
 
-		const delegateeAccount = await this.instanceStore.getOrDefault(this.mutableContext!.context, params.delegateeAddress);
-		const index = delegateeAccount.incomingDelegation.findIndex(buf => buf.equals(this.mutableContext!.senderAddress));
+		const delegateeAccount = await this.instanceStore.getOrDefault(this.immutableContext!.context, params.delegateeAddress);
+		const index = delegateeAccount.incomingDelegation.findIndex(buf => buf.equals(this.immutableContext!.senderAddress));
 		if (index !== -1) {
 			throw new Error(`sender already exists on ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)} incoming delegation`);
 		}
