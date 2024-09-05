@@ -203,8 +203,8 @@ export class GovernanceModule extends BaseModule {
 		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
 		const boostedAccountStore = this.stores.get(BoostedAccountStore);
 
-		proposalStore.addDependencies({ ...dependencies, governableConfigRegistry: this._governableConfig });
 		proposalQueueStore.addDependencies({ ...dependencies, governableConfigRegistry: this._governableConfig });
+		proposalStore.addDependencies({ ...dependencies, governableConfigRegistry: this._governableConfig, internalMethod: this._internalMethod });
 		delegatedVoteStore.addDependencies({ ...dependencies, internalMethod: this._internalMethod });
 		boostedAccountStore.addDependencies({ ...dependencies, internalMethod: this._internalMethod });
 

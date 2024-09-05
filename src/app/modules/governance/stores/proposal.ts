@@ -15,6 +15,7 @@ export class ProposalStore extends BaseStoreWithInstance<ProposalStoreData> {
 		proposal.addImmutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
+			internalMethod: this.internalMethod,
 		});
 
 		await proposal.verifyCreate(params);
@@ -28,6 +29,7 @@ export class ProposalStore extends BaseStoreWithInstance<ProposalStoreData> {
 		proposal.addMutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
+			internalMethod: this.internalMethod,
 		});
 
 		await proposal.create(params, verify);
@@ -44,6 +46,7 @@ export class ProposalStore extends BaseStoreWithInstance<ProposalStoreData> {
 		proposal.addMutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
+			internalMethod: this.internalMethod,
 		});
 
 		return proposal;
@@ -60,6 +63,7 @@ export class ProposalStore extends BaseStoreWithInstance<ProposalStoreData> {
 		proposal.addImmutableDependencies({
 			context: ctx,
 			tokenMethod: this.tokenMethod!,
+			internalMethod: this.internalMethod,
 		});
 
 		return proposal;

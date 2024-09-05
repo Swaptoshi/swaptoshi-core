@@ -207,12 +207,14 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 
 		if (verify) await this.verifyVote(params);
 
-		const castedVote = await this.castedVoteStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // delegated
+		const castedVote = await this.castedVoteStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
 		const proposalIndex = castedVote.activeVote.findIndex(vote => vote.proposalId === params.proposalId);
-		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress); // delegated
+		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
 
 		if (proposalIndex !== -1) {
-			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // ???
+			await this._removeSenderDelegatedVoteFromProposal();
+
+			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
 			await this.subtractVote(baseScore, castedVote.activeVote[proposalIndex].decision, boostedState.targetHeight);
 			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
 
@@ -229,14 +231,8 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			);
 
 			castedVote.activeVote[proposalIndex].decision = params.decision;
-
-			await this._saveStore();
-			await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
-			await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
-
-			await this._changeProposalVoteSummaryByDelegatee();
 		} else {
-			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // ???
+			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
 			castedVote.activeVote.push({ proposalId: params.proposalId, decision: params.decision });
 
 			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
@@ -251,13 +247,13 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 				},
 				[this.mutableContext!.senderAddress],
 			);
-
-			await this._saveStore();
-			await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
-			await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
-
-			await this._addProposalVoteSummaryByDelegatee();
 		}
+
+		await this._saveStore();
+		await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
+		await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
+
+		await this._addSenderDelegatedVoteFromProposal();
 	}
 
 	public async verifySetAttributes(params: SetProposalAttributesParams) {
@@ -335,14 +331,24 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		await this._saveStore();
 	}
 
-	private async _changeProposalVoteSummaryByDelegatee() {
-		// TODO: implement
-		// if sender is a delegate, and have incoming delegation, update vote summary accordingly
+	private async _removeSenderDelegatedVoteFromProposal() {
+		this._checkMutableDependencies();
+		if (!this.internalMethod) throw new Error(`proposal instance is created without internalMethod dependencies`);
+
+		const delegatedVote = await this.delegatedVoteStore.getMutableDelegatedVote(this.mutableContext!);
+
+		const incomingDelegationVoteScore = await delegatedVote.getIncomingDelegationVoteScore();
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), incomingDelegationVoteScore);
 	}
 
-	private async _addProposalVoteSummaryByDelegatee() {
-		// TODO: implement
-		// if sender is a delegate, and have incoming delegation, update vote summary accordingly
+	private async _addSenderDelegatedVoteFromProposal() {
+		this._checkMutableDependencies();
+		if (!this.internalMethod) throw new Error(`proposal instance is created without internalMethod dependencies`);
+
+		const delegatedVote = await this.delegatedVoteStore.getMutableDelegatedVote(this.mutableContext!);
+
+		const incomingDelegationVoteScore = await delegatedVote.getIncomingDelegationVoteScore();
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, incomingDelegationVoteScore, BigInt(0));
 	}
 
 	private _calculateVoteScore(score: bigint, boostingHeight: number) {
