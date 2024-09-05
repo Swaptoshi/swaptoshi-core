@@ -59,7 +59,6 @@ export class GovernanceMethod extends BaseMethod {
 	public async createProposal(
 		context: MethodContext,
 		senderAddress: Buffer,
-		timestamp: number,
 		height: number,
 		title: string,
 		summary: string,
@@ -67,31 +66,31 @@ export class GovernanceMethod extends BaseMethod {
 		attributes: ProposalStoreData['attributes'],
 	) {
 		const proposalStore = this.stores.get(ProposalStore);
-		const _context = methodGovernanceContext(context, senderAddress, timestamp, height);
+		const _context = methodGovernanceContext(context, senderAddress, height);
 		await proposalStore.createProposal(_context, { title, summary, actions, attributes });
 	}
 
-	public async getProposalInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, proposalId: number): Promise<StoreInstance<Proposal>> {
+	public async getProposalInstance(context: MethodContext, senderAddress: Buffer, height: number, proposalId: number): Promise<StoreInstance<Proposal>> {
 		const proposalStore = this.stores.get(ProposalStore);
-		const _context = methodGovernanceContext(context, senderAddress, timestamp, height);
+		const _context = methodGovernanceContext(context, senderAddress, height);
 		return proposalStore.getMutableProposal(_context, proposalId);
 	}
 
-	public async getProposalQueueInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ProposalQueue>> {
+	public async getProposalQueueInstance(context: MethodContext, senderAddress: Buffer, height: number): Promise<StoreInstance<ProposalQueue>> {
 		const proposalQueueStore = this.stores.get(ProposalQueueStore);
-		const _context = methodGovernanceContext(context, senderAddress, timestamp, height);
+		const _context = methodGovernanceContext(context, senderAddress, height);
 		return proposalQueueStore.getInstance(_context);
 	}
 
-	public async getBoostedAccountInstance(context: MethodContext, address: Buffer, timestamp: number, height: number): Promise<StoreInstance<BoostedAccount>> {
+	public async getBoostedAccountInstance(context: MethodContext, address: Buffer, height: number): Promise<StoreInstance<BoostedAccount>> {
 		const boostedAccountStore = this.stores.get(BoostedAccountStore);
-		const _context = methodGovernanceContext(context, address, timestamp, height);
+		const _context = methodGovernanceContext(context, address, height);
 		return boostedAccountStore.getMutableBoostedAccount(_context);
 	}
 
-	public async getDelegatedVoteInstance(context: MethodContext, address: Buffer, timestamp: number, height: number): Promise<StoreInstance<DelegatedVote>> {
+	public async getDelegatedVoteInstance(context: MethodContext, address: Buffer, height: number): Promise<StoreInstance<DelegatedVote>> {
 		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
-		const _context = methodGovernanceContext(context, address, timestamp, height);
+		const _context = methodGovernanceContext(context, address, height);
 		return delegatedVoteStore.getMutableDelegatedVote(_context);
 	}
 

@@ -3,14 +3,12 @@ import { CommandExecuteContext, ImmutableMethodContext, MethodContext, ModuleEnd
 export interface ImmutableGovernanceContext<T = unknown> {
 	context: ImmutableContext & T;
 	senderAddress: Buffer;
-	timestamp: string;
 	height: number;
 }
 
 export interface MutableGovernanceContext<T = unknown> {
 	context: MutableContext & T;
 	senderAddress: Buffer;
-	timestamp: string;
 	height: number;
 }
 

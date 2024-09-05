@@ -6,7 +6,6 @@ export function commandGovernanceContext(context: CommandExecuteContext<any>): M
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
-		timestamp: context.header.timestamp.toString(),
 		height: context.header.height,
 	};
 }
@@ -15,7 +14,6 @@ export function mutableTransactionHookGovernanceContext(context: TransactionExec
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
-		timestamp: context.header.timestamp.toString(),
 		height: context.header.height,
 	};
 }
@@ -24,7 +22,6 @@ export function mutableBlockHookGovernanceContext(context: BlockExecuteContext):
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
-		timestamp: context.header.timestamp.toString(),
 		height: context.header.height,
 	};
 }
@@ -33,25 +30,22 @@ export function immutableTransactionHookGovernanceContext(context: TransactionVe
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
-		timestamp: context.header.timestamp.toString(),
 		height: context.header.height,
 	};
 }
 
-export function methodGovernanceContext(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): MutableGovernanceContext<typeof context> {
+export function methodGovernanceContext(context: MethodContext, senderAddress: Buffer, height: number): MutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress,
-		timestamp: timestamp.toString(),
 		height,
 	};
 }
 
-export function immutableMethodGovernanceContext(context: ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): ImmutableGovernanceContext<typeof context> {
+export function immutableMethodGovernanceContext(context: ImmutableMethodContext, senderAddress: Buffer, height: number): ImmutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress,
-		timestamp: timestamp.toString(),
 		height,
 	};
 }
@@ -60,7 +54,6 @@ export function endpointGovernanceContext(context: ModuleEndpointContext): Immut
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
-		timestamp: context.header.timestamp.toString(),
 		height: context.header.height,
 	};
 }

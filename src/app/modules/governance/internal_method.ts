@@ -65,7 +65,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		const boostedAccountStore = this.stores.get(BoostedAccountStore);
 		const castedVoteStore = this.stores.get(CastedVoteStore);
 		const proposalStore = this.stores.get(ProposalStore);
-		const ctx = methodGovernanceContext(context, Buffer.alloc(0), 0, 0);
+		const ctx = methodGovernanceContext(context, Buffer.alloc(0), 0);
 
 		let voterAddress = voter;
 		let delegated = false;
