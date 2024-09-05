@@ -165,7 +165,9 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
-		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), voteScore);
+		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), voteScore + incomingDelegationVoteScore);
 
 		await this.castedVoteStore.removeAllCastedVote(this.mutableContext!.context, this.mutableContext!.senderAddress);
 	}
@@ -175,7 +177,9 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
-		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, voteScore, BigInt(0));
+		const incomingDelegationVoteScore = await this._getIncomingDelegationVoteScore(this.mutableContext!.senderAddress);
+
+		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, voteScore + incomingDelegationVoteScore, BigInt(0));
 	}
 
 	public outgoingDelegation: DelegatedVoteStoreData['outgoingDelegation'] = Buffer.alloc(0);
