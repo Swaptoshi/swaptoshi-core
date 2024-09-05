@@ -34,15 +34,5 @@ export class CastedVoteStore extends BaseStore<CastedVoteStoreData> {
 		}
 	}
 
-	public async setAllCastedVoteBoostingHeight(context: StoreGetter, address: Buffer, boostingHeight: number) {
-		const castedVote = await this.getOrDefault(context, address);
-
-		for (const vote of castedVote.activeVote) {
-			vote.boostingHeight = boostingHeight;
-		}
-
-		await this.set(context, address, castedVote);
-	}
-
 	public schema = castedVoteStoreSchema;
 }

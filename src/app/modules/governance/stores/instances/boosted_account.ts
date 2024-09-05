@@ -10,7 +10,6 @@ import { BoostedAccountStore } from '../boosted_account';
 import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from '../../constants';
 import { stakeCommandParamsSchema } from '../../schema';
 import { VoteBoostedEvent } from '../../events/vote_boosted';
-import { CastedVoteStore } from '../casted_vote';
 import { VoteScoreStore } from '../vote_score';
 
 export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, BoostedAccountStore> implements BoostedAccountStoreData {
@@ -27,7 +26,6 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 
 		Object.assign(this, utils.objects.cloneDeep(boostedAccount));
 
-		this.castedVoteStore = stores.get(CastedVoteStore);
 		this.voteScoreStore = stores.get(VoteScoreStore);
 	}
 
@@ -79,8 +77,6 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 
 		await this._saveStore();
 
-		await this.castedVoteStore.setAllCastedVoteBoostingHeight(this.mutableContext!.context, this.mutableContext!.senderAddress, params.targetHeight);
-
 		await this._addSenderVoteToProposal();
 
 		const events = this.events.get(VoteBoostedEvent);
@@ -119,7 +115,7 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 
 	private async _removeSenderVoteFromProposal() {
 		this._checkMutableDependencies();
-		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
+		if (!this.internalMethod) throw new Error(`boostedAccount instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
 		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, BigInt(0), voteScore);
@@ -127,7 +123,7 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 
 	private async _addSenderVoteToProposal() {
 		this._checkMutableDependencies();
-		if (!this.internalMethod) throw new Error(`delegatedVote instance is created without internalMethod dependencies`);
+		if (!this.internalMethod) throw new Error(`boostedAccount instance is created without internalMethod dependencies`);
 
 		const voteScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
 		await this.internalMethod.updateProposalVoteSummaryByVoter(this.mutableContext!.context, this.mutableContext!.senderAddress, voteScore, BigInt(0));
@@ -135,6 +131,5 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 
 	public targetHeight: BoostedAccountStoreData['targetHeight'] = 0;
 
-	private readonly castedVoteStore: CastedVoteStore;
 	private readonly voteScoreStore: VoteScoreStore;
 }

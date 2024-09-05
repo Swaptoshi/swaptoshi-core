@@ -207,13 +207,14 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 
 		if (verify) await this.verifyVote(params);
 
-		const castedVote = await this.castedVoteStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
+		const castedVote = await this.castedVoteStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // delegated
 		const proposalIndex = castedVote.activeVote.findIndex(vote => vote.proposalId === params.proposalId);
-		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress);
+		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, this.mutableContext!.senderAddress); // delegated
 
 		if (proposalIndex !== -1) {
-			await this.subtractVote(baseScore, castedVote.activeVote[proposalIndex].decision, castedVote.activeVote[proposalIndex].boostingHeight);
-			await this.addVote(baseScore, params.decision, castedVote.activeVote[proposalIndex].boostingHeight);
+			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // ???
+			await this.subtractVote(baseScore, castedVote.activeVote[proposalIndex].decision, boostedState.targetHeight);
+			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
 
 			const events = this.events.get(VoteChangedEvent);
 			events.add(
@@ -228,9 +229,15 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			);
 
 			castedVote.activeVote[proposalIndex].decision = params.decision;
+
+			await this._saveStore();
+			await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
+			await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
+
+			await this._changeProposalVoteSummaryByDelegatee();
 		} else {
-			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
-			castedVote.activeVote.push({ proposalId: params.proposalId, boostingHeight: boostedState.targetHeight, decision: params.decision });
+			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress); // ???
+			castedVote.activeVote.push({ proposalId: params.proposalId, decision: params.decision });
 
 			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
 
@@ -244,11 +251,13 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 				},
 				[this.mutableContext!.senderAddress],
 			);
-		}
 
-		await this._saveStore();
-		await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
-		await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
+			await this._saveStore();
+			await this.proposalVoterStore.addVoter(this.mutableContext!.context, params.proposalId, this.mutableContext!.senderAddress);
+			await this.castedVoteStore.set(this.mutableContext!.context, this.mutableContext!.senderAddress, castedVote);
+
+			await this._addProposalVoteSummaryByDelegatee();
+		}
 	}
 
 	public async verifySetAttributes(params: SetProposalAttributesParams) {
@@ -297,9 +306,10 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		const proposalIndex = castedVote.activeVote.findIndex(vote => vote.proposalId === bytesToNumber(this.key));
 		if (proposalIndex === -1) return BigInt(0);
 
+		const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
 		const baseScore = await this.voteScoreStore.getVoteScore(this.mutableContext!.context, address);
 
-		return this._calculateVoteScore(baseScore, castedVote.activeVote[proposalIndex].boostingHeight);
+		return this._calculateVoteScore(baseScore, boostedState.targetHeight);
 	}
 
 	public async addVote(score: bigint, decision: Votes, boostingHeight: number) {
@@ -323,6 +333,16 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 	public async setStatus(status: ProposalStatus) {
 		this.status = status;
 		await this._saveStore();
+	}
+
+	private async _changeProposalVoteSummaryByDelegatee() {
+		// TODO: implement
+		// if sender is a delegate, and have incoming delegation, update vote summary accordingly
+	}
+
+	private async _addProposalVoteSummaryByDelegatee() {
+		// TODO: implement
+		// if sender is a delegate, and have incoming delegation, update vote summary accordingly
 	}
 
 	private _calculateVoteScore(score: bigint, boostingHeight: number) {

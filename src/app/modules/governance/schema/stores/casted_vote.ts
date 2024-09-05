@@ -10,15 +10,11 @@ export const castedVoteStoreSchema: TypedSchema<CastedVoteStoreData> = {
 			fieldNumber: 1,
 			items: {
 				type: 'object',
-				required: ['proposalId', 'boostingHeight', 'decision'],
+				required: ['proposalId', 'decision'],
 				properties: {
 					proposalId: {
 						dataType: 'uint32',
 						fieldNumber: 1,
-					},
-					boostingHeight: {
-						dataType: 'uint32',
-						fieldNumber: 2,
 					},
 					decision: {
 						dataType: 'uint32',

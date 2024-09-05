@@ -60,6 +60,16 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 		if (index !== -1) {
 			throw new Error(`sender already exists on ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)} incoming delegation`);
 		}
+
+		const senderAccount = await this.instanceStore.getOrDefault(this.immutableContext!.context, this.immutableContext!.senderAddress);
+		const senderIndex = senderAccount.incomingDelegation.findIndex(buf => buf.equals(params.delegateeAddress));
+		if (senderIndex !== -1) {
+			throw new Error(
+				`circular delegation detected: ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)} => ${cryptography.address.getKlayr32AddressFromAddress(
+					this.immutableContext!.senderAddress,
+				)} => ${cryptography.address.getKlayr32AddressFromAddress(params.delegateeAddress)}`,
+			);
+		}
 	}
 
 	public async delegateVote(params: DelegateVoteParams, verify = true) {
@@ -124,6 +134,30 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 
 		this.outgoingDelegation = Buffer.alloc(0);
 		await this._saveStore();
+	}
+
+	public async getIncomingDelegationVoteScore() {
+		return this._getIncomingDelegationVoteScore(this.key);
+	}
+
+	private async _getIncomingDelegationVoteScore(address: Buffer): Promise<bigint> {
+		this._checkImmutableDependencies();
+
+		let totalVoteScore = BigInt(0);
+
+		const delegatedVote = await this.instanceStore.getOrDefault(this.immutableContext!.context, address);
+
+		for (const incomingDelegation of delegatedVote.incomingDelegation) {
+			const voteScore = await this.voteScoreStore.getVoteScore(this.immutableContext!.context, incomingDelegation);
+			totalVoteScore += voteScore;
+
+			const incomingDelegationState = await this.instanceStore.getOrDefault(this.immutableContext!.context, incomingDelegation);
+			if (incomingDelegationState.incomingDelegation.length > 0) {
+				totalVoteScore += await this._getIncomingDelegationVoteScore(incomingDelegation);
+			}
+		}
+
+		return totalVoteScore;
 	}
 
 	private async _removeSenderVoteAndDelegatedVoteFromProposal() {

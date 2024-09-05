@@ -60,34 +60,31 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	public async updateProposalVoteSummaryByVoter(context: MutableContext, voter: Buffer, addedVote = BigInt(0), subtractedVote = BigInt(0)) {
+	public async updateProposalVoteSummaryByVoter(context: MutableContext, voter: Buffer, addedVote = BigInt(0), subtractedVote = BigInt(0), boostingHeight?: number) {
 		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
 		const boostedAccountStore = this.stores.get(BoostedAccountStore);
-		const castedVoteStore = this.stores.get(CastedVoteStore);
-		const proposalStore = this.stores.get(ProposalStore);
-		const ctx = methodGovernanceContext(context, Buffer.alloc(0), 0);
-
-		let voterAddress = voter;
-		let delegated = false;
 
 		const voterBoostingState = await boostedAccountStore.getOrDefault(context, voter);
 		const voterBoostingHeight = voterBoostingState.targetHeight;
 
 		const delegatedVote = await delegatedVoteStore.getOrDefault(context, voter);
 		if (!delegatedVote.outgoingDelegation.equals(Buffer.alloc(0))) {
-			voterAddress = delegatedVote.outgoingDelegation;
-			delegated = true;
+			await this.updateProposalVoteSummaryByVoter(context, delegatedVote.outgoingDelegation, addedVote, subtractedVote, boostingHeight ?? voterBoostingHeight);
+			return;
 		}
 
-		const castedVote = await castedVoteStore.getOrDefault(context, voterAddress);
+		const castedVoteStore = this.stores.get(CastedVoteStore);
+		const proposalStore = this.stores.get(ProposalStore);
+		const ctx = methodGovernanceContext(context, Buffer.alloc(0), 0);
+
+		const castedVote = await castedVoteStore.getOrDefault(context, voter);
 
 		for (const vote of castedVote.activeVote) {
-			const boostingHeight = delegated ? vote.boostingHeight : voterBoostingHeight;
 			if (addedVote > BigInt(0)) {
-				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVote, vote.decision, boostingHeight);
+				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).addVote(addedVote, vote.decision, boostingHeight ?? voterBoostingHeight);
 			}
 			if (subtractedVote > BigInt(0)) {
-				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVote, vote.decision, boostingHeight);
+				await (await proposalStore.getMutableProposal(ctx, vote.proposalId)).subtractVote(subtractedVote, vote.decision, boostingHeight ?? voterBoostingHeight);
 			}
 		}
 	}
