@@ -145,7 +145,7 @@
 					{
 						"address": "kly99zp9zbh4cd2vqcxu6qd7eujsaegysfkyd2zz9",
 						"tokenID": "0455555500000000",
-						"availableBalance": "100000000000000",
+						"availableBalance": "100000000000000000",
 						"lockedBalances": []
 					},
 					{
@@ -332,7 +332,7 @@
 				"supplySubstore": [
 					{
 						"tokenID": "0455555500000000",
-						"totalSupply": "5300119364000000"
+						"totalSupply": "105200119364000000"
 					}
 				],
 				"escrowSubstore": [],
