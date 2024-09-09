@@ -8,7 +8,7 @@
 	},
 	"rpc": {
 		"modes": ["ipc", "ws"],
-		"allowedMethods": [],
+		"allowedMethods": ["system", "random", "pos", "generator"],
 		"port": 7887,
 		"host": "0.0.0.0"
 	},
