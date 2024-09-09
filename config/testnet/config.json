@@ -1,0 +1,113 @@
+{
+	"system": {
+		"dataPath": "~/.klayr/swaptoshi-core",
+		"logLevel": "info",
+		"keepEventsForHeights": 300,
+		"keepInclusionProofsForHeights": 300,
+		"inclusionProofKeys": []
+	},
+	"rpc": {
+		"modes": ["ipc", "ws"],
+		"allowedMethods": [],
+		"port": 7887,
+		"host": "0.0.0.0"
+	},
+	"network": {
+		"version": "1.0",
+		"seedPeers": [
+			{
+				"ip": "testnet-seed-01.swaptoshi.com",
+				"port": 80
+			},
+			{
+				"ip": "testnet-seed-02.swaptoshi.com",
+				"port": 80
+			},
+			{
+				"ip": "testnet-seed-03.swaptoshi.com",
+				"port": 80
+			}
+		],
+		"port": 8778
+	},
+	"transactionPool": {
+		"maxTransactions": 1024,
+		"maxTransactionsPerAccount": 16,
+		"transactionExpiryTime": 10800000,
+		"minEntranceFeePriority": "0",
+		"minReplacementFeeDifference": "10"
+	},
+	"genesis": {
+		"block": {
+			"fromFile": "./config/genesis_block.blob"
+		},
+		"blockTime": 3,
+		"maxTransactionsSize": 15360,
+		"minimumCertifyHeight": 1,
+		"chainID": "01555555"
+	},
+	"modules": {
+		"tokenFactory": {
+			"skippedTokenID": ["0155555500000001"],
+			"icoFeeConversionEnabled": true,
+			"icoDexPathEnabled": true
+		},
+		"governance": {
+			"enableTurnoutBias": true,
+			"enableBoosting": true
+		},
+		"fee": {
+			"feeTokenID": "0155555500000000",
+			"feePoolAddress": "klyr49epb3jdyqmnfyrz7jdc5ws3rmyuqzje4c4jb",
+			"dangerouslySkipBalanceVerification": true,
+			"dangerouslySkipAvailableFeeInitialization": true
+		},
+		"pos": {
+			"minWeightStandby": "1000000000",
+			"failSafeInactiveWindow": 403200,
+			"punishmentWindowStaking": 806400,
+			"punishmentWindowSelfStaking": 2419200,
+			"lockingPeriodStaking": 86400,
+			"lockingPeriodSelfStaking": 806400,
+			"maxBFTWeightCap": 1000,
+			"useInvalidBLSKey": false
+		},
+		"dynamicReward": {
+			"offset": 201559,
+			"distance": 42000000,
+			"brackets": [
+				"25000000",
+				"12500000",
+				"6250000",
+				"3124000",
+				"1562000",
+				"781000",
+				"390000",
+				"195000",
+				"97500",
+				"48800",
+				"24400",
+				"12200",
+				"6100",
+				"3050",
+				"1600",
+				"760",
+				"380",
+				"190",
+				"95",
+				"45",
+				"20",
+				"10",
+				"5",
+				"2",
+				"1",
+				"0"
+			]
+		},
+		"token": {
+			"userAccountInitializationFee": "0",
+			"escrowAccountInitializationFee": "0"
+		}
+	},
+	"plugins": {}
+}
