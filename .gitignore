@@ -43,3 +43,7 @@ config.local.json
 
 # Build Directory
 dist
+
+# config files
+config/**/dev-validators.json
+config/**/passphrase.json
