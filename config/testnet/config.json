@@ -7,7 +7,7 @@
 		"inclusionProofKeys": []
 	},
 	"rpc": {
-		"modes": ["ipc", "ws"],
+		"modes": ["ipc"],
 		"allowedMethods": ["system", "random", "pos", "generator"],
 		"port": 7887,
 		"host": "0.0.0.0"
