@@ -47,6 +47,12 @@
 						"lockedBalances": []
 					},
 					{
+						"address": "kly532j7aty24fx87f75htv7trkk5kv57eg74gtwu",
+						"tokenID": "0155555500000000",
+						"availableBalance": "1050000000",
+						"lockedBalances": []
+					},
+					{
 						"address": "kly5h5wwzh2bxh4mhtdpg8pkwpv93rdp7e6amf3nh",
 						"tokenID": "0155555500000000",
 						"availableBalance": "1050000000",
@@ -67,7 +73,7 @@
 					{
 						"address": "klyof58j7a5fvs55utdnv6xmkv3b6swjmjaotbt85",
 						"tokenID": "0155555500000000",
-						"availableBalance": "86814000000",
+						"availableBalance": "84714000000",
 						"lockedBalances": []
 					},
 					{
@@ -108,6 +114,12 @@
 					},
 					{
 						"address": "klyy6ajs6xjdp9z2c6ouyzjdw4e73stjm8och8q2v",
+						"tokenID": "0155555500000000",
+						"availableBalance": "1050000000",
+						"lockedBalances": []
+					},
+					{
+						"address": "klyy5ttkmhswxw88kxp6wsh4j5xjf7hkbqq4cmwt7",
 						"tokenID": "0155555500000000",
 						"availableBalance": "1050000000",
 						"lockedBalances": []
