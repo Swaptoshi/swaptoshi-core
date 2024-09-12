@@ -17,15 +17,15 @@
 		"seedPeers": [
 			{
 				"ip": "testnet-seed-01.swaptoshi.com",
-				"port": 80
+				"port": 8778
 			},
 			{
 				"ip": "testnet-seed-02.swaptoshi.com",
-				"port": 80
+				"port": 8778
 			},
 			{
 				"ip": "testnet-seed-03.swaptoshi.com",
-				"port": 80
+				"port": 8778
 			}
 		],
 		"port": 8778
