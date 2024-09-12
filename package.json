@@ -11,8 +11,14 @@
 		"javascript",
 		"typescript"
 	],
-	"homepage": "",
-	"repository": {},
+	"homepage": "https://swaptoshi.com",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Swaptoshi/swaptoshi-core.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Swaptoshi/swaptoshi-core/issues"
+	},
 	"engines": {
 		"node": ">=18.12.0 <=18",
 		"npm": ">=8.1.0"
