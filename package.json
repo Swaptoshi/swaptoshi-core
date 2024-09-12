@@ -107,7 +107,8 @@
 		"/config",
 		"/docs",
 		"/patches",
-		"/package.json"
+		"/package.json",
+		"README.md"
 	],
 	"husky": {
 		"hooks": {

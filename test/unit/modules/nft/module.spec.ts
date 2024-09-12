@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /*
  * Copyright © 2023 Lisk Foundation
  *
@@ -15,23 +16,11 @@
 import { utils } from '@klayr/cryptography';
 import { codec } from '@klayr/codec';
 import { BlockAssets } from '@klayr/chain';
-import { NFTModule } from '../../../../src/app/modules/nft/module';
 import { createGenesisBlockContext } from 'klayr-framework/dist-node/testing';
-import {
-	invalidSchemaNFTSubstoreGenesisAssets,
-	invalidSchemaSupportedNFTsSubstoreGenesisAssets,
-	validData,
-} from './init_genesis_state_fixtures';
+import { NFTModule } from '../../../../src/app/modules/nft/module';
+import { invalidSchemaNFTSubstoreGenesisAssets, invalidSchemaSupportedNFTsSubstoreGenesisAssets, validData } from './init_genesis_state_fixtures';
 import { genesisNFTStoreSchema } from '../../../../src/app/modules/nft/schemas';
-import {
-	ALL_SUPPORTED_NFTS_KEY,
-	LENGTH_ADDRESS,
-	LENGTH_CHAIN_ID,
-	LENGTH_COLLECTION_ID,
-	LENGTH_NFT_ID,
-	MODULE_NAME_NFT,
-	NFT_NOT_LOCKED,
-} from '../../../../src/app/modules/nft/constants';
+import { ALL_SUPPORTED_NFTS_KEY, LENGTH_ADDRESS, LENGTH_CHAIN_ID, LENGTH_COLLECTION_ID, LENGTH_NFT_ID, MODULE_NAME_NFT, NFT_NOT_LOCKED } from '../../../../src/app/modules/nft/constants';
 import { NFTStore } from '../../../../src/app/modules/nft/stores/nft';
 import { SupportedNFTsStore } from '../../../../src/app/modules/nft/stores/supported_nfts';
 import { UserStore } from '../../../../src/app/modules/nft/stores/user';
@@ -108,9 +97,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				`nftID ${nftID.toString('hex')} has invalid owner`,
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow(`nftID ${nftID.toString('hex')} has invalid owner`);
 		});
 
 		it('should throw if owner of the NFT is not a valid chain', async () => {
@@ -129,9 +116,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				`nftID ${nftID.toString('hex')} has invalid owner`,
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow(`nftID ${nftID.toString('hex')} has invalid owner`);
 		});
 
 		it('should throw if nftID is duplicated', async () => {
@@ -155,9 +140,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				`nftID ${nftID.toString('hex')} duplicated`,
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow(`nftID ${nftID.toString('hex')} duplicated`);
 		});
 
 		it('should throw if NFT has duplicate attribute for a module', async () => {
@@ -186,9 +169,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				`nftID ${nftID.toString('hex')} has a duplicate attribute for pos module`,
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow(`nftID ${nftID.toString('hex')} has a duplicate attribute for pos module`);
 		});
 
 		it('should throw if all NFTs are supported and SupportedNFTsSubstore contains more than one entry', async () => {
@@ -208,9 +189,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				'SupportedNFTsSubstore should contain only one entry if all NFTs are supported',
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow('SupportedNFTsSubstore should contain only one entry if all NFTs are supported');
 		});
 
 		it('should throw if all NFTs are supported and supportedCollectionIDArray is not empty', async () => {
@@ -230,9 +209,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				'supportedCollectionIDArray must be empty if all NFTs are supported',
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow('supportedCollectionIDArray must be empty if all NFTs are supported');
 		});
 
 		it('should throw if supported chain is duplicated', async () => {
@@ -254,9 +231,7 @@ describe('nft module', () => {
 
 			const context = createGenesisBlockContextFromGenesisAssets(genesisAssets);
 
-			await expect(module.initGenesisState(context)).rejects.toThrow(
-				`chainID ${chainID.toString('hex')} duplicated`,
-			);
+			await expect(module.initGenesisState(context)).rejects.toThrow(`chainID ${chainID.toString('hex')} duplicated`);
 		});
 
 		it('should create NFTs, their corresponding user or escrow entries and supported chains', async () => {
@@ -273,13 +248,9 @@ describe('nft module', () => {
 				});
 
 				if (owner.length === LENGTH_CHAIN_ID) {
-					await expect(
-						escrowStore.get(context.getMethodContext(), escrowStore.getKey(owner, nftID)),
-					).resolves.toEqual({});
+					await expect(escrowStore.get(context.getMethodContext(), escrowStore.getKey(owner, nftID))).resolves.toEqual({});
 				} else {
-					await expect(
-						userStore.get(context.getMethodContext(), userStore.getKey(owner, nftID)),
-					).resolves.toEqual({
+					await expect(userStore.get(context.getMethodContext(), userStore.getKey(owner, nftID))).resolves.toEqual({
 						lockingModule: NFT_NOT_LOCKED,
 					});
 				}
@@ -288,9 +259,7 @@ describe('nft module', () => {
 			for (const supportedChain of validData.supportedNFTsSubstore) {
 				const { chainID, supportedCollectionIDArray } = supportedChain;
 
-				await expect(
-					supportedNFTsSubstore.get(context.getMethodContext(), chainID),
-				).resolves.toEqual({ supportedCollectionIDArray });
+				await expect(supportedNFTsSubstore.get(context.getMethodContext(), chainID)).resolves.toEqual({ supportedCollectionIDArray });
 			}
 		});
 
@@ -403,10 +372,7 @@ describe('nft module', () => {
 
 			await expect(module.initGenesisState(context)).resolves.toBeUndefined();
 
-			const supportedNFTs = await supportedNFTsSubstore.get(
-				context.getMethodContext(),
-				ALL_SUPPORTED_NFTS_KEY,
-			);
+			const supportedNFTs = await supportedNFTsSubstore.get(context.getMethodContext(), ALL_SUPPORTED_NFTS_KEY);
 
 			expect(supportedNFTs.supportedCollectionIDArray).toHaveLength(0);
 		});

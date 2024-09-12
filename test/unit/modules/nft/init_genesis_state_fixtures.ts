@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /*
  * Copyright © 2023 Lisk Foundation
  *
@@ -14,12 +15,7 @@
 
 import { utils } from '@klayr/cryptography';
 import { GenesisNFTStore } from '../../../../src/app/modules/nft/types';
-import {
-	LENGTH_ADDRESS,
-	LENGTH_CHAIN_ID,
-	LENGTH_COLLECTION_ID,
-	LENGTH_NFT_ID,
-} from '../../../../src/app/modules/nft/constants';
+import { LENGTH_ADDRESS, LENGTH_CHAIN_ID, LENGTH_COLLECTION_ID, LENGTH_NFT_ID } from '../../../../src/app/modules/nft/constants';
 
 const nftID1 = utils.getRandomBytes(LENGTH_NFT_ID);
 const nftID2 = utils.getRandomBytes(LENGTH_NFT_ID);

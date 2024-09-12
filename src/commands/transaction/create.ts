@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import { TransactionCreateCommand } from 'klayr-commander';

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /*
  * Copyright © 2023 Lisk Foundation
  *

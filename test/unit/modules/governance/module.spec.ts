@@ -17,10 +17,4 @@ describe('GovernanceModule', () => {
 	describe('afterCommandExecute', () => {
 		it.todo('should execute after transaction execute');
 	});
-	describe('beforeTransactionsExecute', () => {
-		it.todo('should execute after genesis execute');
-	});
-	describe('afterTransactionsExecute', () => {
-		it.todo('should execute after genesis execute');
-	});
 });

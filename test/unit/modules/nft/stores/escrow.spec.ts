@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /*
  * Copyright © 2023 Lisk Foundation
  *
@@ -28,9 +29,7 @@ describe('EscrowStore', () => {
 			const receivingChainID = utils.getRandomBytes(LENGTH_CHAIN_ID);
 			const nftID = utils.getRandomBytes(LENGTH_NFT_ID);
 
-			expect(store.getKey(receivingChainID, nftID)).toEqual(
-				Buffer.concat([receivingChainID, nftID]),
-			);
+			expect(store.getKey(receivingChainID, nftID)).toEqual(Buffer.concat([receivingChainID, nftID]));
 		});
 	});
 });

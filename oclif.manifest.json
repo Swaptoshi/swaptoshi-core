@@ -1,0 +1,1050 @@
+{
+	"version": "1.0.0-alpha.0",
+	"commands": {
+		"console": {
+			"id": "console",
+			"description": "Klayr interactive REPL session to run commands.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["console", "console --api-ws=ws://localhost:8080", "console --api-ipc=/path/to/server"],
+			"flags": {
+				"api-ipc": { "name": "api-ipc", "type": "option", "description": "Enable api-client with IPC communication.", "multiple": false, "exclusive": ["api-ws"] },
+				"api-ws": { "name": "api-ws", "type": "option", "description": "Enable api-client with Websocket communication.", "multiple": false, "exclusive": ["api-ipc"] }
+			},
+			"args": []
+		},
+		"hash-onion": {
+			"id": "hash-onion",
+			"description": "Create hash onions to be used by the forger.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["hash-onion --count=1000000 --distance=2000 --pretty", "hash-onion --count=1000000 --distance=2000 --output ~/my_onion.json"],
+			"flags": {
+				"output": { "name": "output", "type": "option", "char": "o", "description": "Output file path", "multiple": false },
+				"count": { "name": "count", "type": "option", "char": "c", "description": "Total number of hashes to produce", "multiple": false, "default": 1000000 },
+				"distance": { "name": "distance", "type": "option", "char": "d", "description": "Distance between each hash", "multiple": false, "default": 1000 },
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": []
+		},
+		"start": {
+			"id": "start",
+			"description": "Start Blockchain Node.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"start",
+				"start --network devnet --data-path /path/to/data-dir --log debug",
+				"start --network devnet --api-ws",
+				"start --network devnet --api-ws --api-port 8888",
+				"start --network devnet --port 9000",
+				"start --network devnet --port 9002 --seed-peers 127.0.0.1:9001,127.0.0.1:9000",
+				"start --network testnet --overwrite-config",
+				"start --network testnet --config ~/my_custom_config.json"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"network": {
+					"name": "network",
+					"type": "option",
+					"char": "n",
+					"description": "Default network config to use. Environment variable \"KLAYR_NETWORK\" can also be used.",
+					"multiple": false,
+					"default": "default"
+				},
+				"config": { "name": "config", "type": "option", "char": "c", "description": "File path to a custom config. Environment variable \"KLAYR_CONFIG_FILE\" can also be used.", "multiple": false },
+				"overwrite-config": { "name": "overwrite-config", "type": "boolean", "description": "Overwrite network configs if they exist already", "allowNo": false },
+				"port": {
+					"name": "port",
+					"type": "option",
+					"char": "p",
+					"description": "Open port for the peer to peer incoming connections. Environment variable \"KLAYR_PORT\" can also be used.",
+					"multiple": false
+				},
+				"api-ipc": {
+					"name": "api-ipc",
+					"type": "boolean",
+					"description": "Enable IPC communication. This will load plugins as a child process and communicate over IPC. Environment variable \"KLAYR_API_IPC\" can also be used.",
+					"allowNo": false
+				},
+				"api-ws": { "name": "api-ws", "type": "boolean", "description": "Enable websocket communication for api-client. Environment variable \"KLAYR_API_WS\" can also be used.", "allowNo": false },
+				"api-http": { "name": "api-http", "type": "boolean", "description": "Enable HTTP communication for api-client. Environment variable \"KLAYR_API_HTTP\" can also be used.", "allowNo": false },
+				"api-port": { "name": "api-port", "type": "option", "description": "Port to be used for api-client. Environment variable \"KLAYR_API_PORT\" can also be used.", "multiple": false },
+				"api-host": { "name": "api-host", "type": "option", "description": "Host to be used for api-client. Environment variable \"KLAYR_API_HOST\" can also be used.", "multiple": false },
+				"log": {
+					"name": "log",
+					"type": "option",
+					"char": "l",
+					"description": "Log level. Environment variable \"KLAYR_LOG_LEVEL\" can also be used.",
+					"multiple": false,
+					"options": ["trace", "debug", "info", "warn", "error", "fatal"]
+				},
+				"seed-peers": {
+					"name": "seed-peers",
+					"type": "option",
+					"description": "Seed peers to initially connect to in format of comma separated \"ip:port\". IP can be DNS name or IPV4 format. Environment variable \"KLAYR_SEED_PEERS\" can also be used.",
+					"multiple": false
+				},
+				"enable-generator-plugin": {
+					"name": "enable-generator-plugin",
+					"type": "boolean",
+					"description": "Enable Forger Plugin. Environment variable \"KLAYR_ENABLE_FORGER_PLUGIN\" can also be used.",
+					"allowNo": false
+				},
+				"enable-monitor-plugin": {
+					"name": "enable-monitor-plugin",
+					"type": "boolean",
+					"description": "Enable Monitor Plugin. Environment variable \"KLAYR_ENABLE_MONITOR_PLUGIN\" can also be used.",
+					"allowNo": false
+				},
+				"monitor-plugin-port": {
+					"name": "monitor-plugin-port",
+					"type": "option",
+					"description": "Port to be used for Monitor Plugin. Environment variable \"KLAYR_MONITOR_PLUGIN_PORT\" can also be used.",
+					"multiple": false,
+					"dependsOn": ["enable-monitor-plugin"]
+				},
+				"monitor-plugin-whitelist": {
+					"name": "monitor-plugin-whitelist",
+					"type": "option",
+					"description": "List of IPs in comma separated value to allow the connection. Environment variable \"KLAYR_MONITOR_PLUGIN_WHITELIST\" can also be used.",
+					"multiple": false,
+					"dependsOn": ["enable-monitor-plugin"]
+				},
+				"enable-report-misbehavior-plugin": {
+					"name": "enable-report-misbehavior-plugin",
+					"type": "boolean",
+					"description": "Enable ReportMisbehavior Plugin. Environment variable \"KLAYR_ENABLE_REPORT_MISBEHAVIOR_PLUGIN\" can also be used.",
+					"allowNo": false
+				},
+				"enable-faucet-plugin": {
+					"name": "enable-faucet-plugin",
+					"type": "boolean",
+					"description": "Enable Faucet Plugin. Environment variable \"KLAYR_ENABLE_FAUCET_PLUGIN\" can also be used.",
+					"allowNo": false
+				},
+				"faucet-plugin-port": {
+					"name": "faucet-plugin-port",
+					"type": "option",
+					"description": "Port to be used for Faucet Plugin. Environment variable \"KLAYR_FAUCET_PLUGIN_PORT\" can also be used.",
+					"multiple": false,
+					"dependsOn": ["enable-faucet-plugin"]
+				},
+				"enable-dashboard-plugin": {
+					"name": "enable-dashboard-plugin",
+					"type": "boolean",
+					"description": "Enable Dashboard Plugin. Environment variable \"KLAYR_ENABLE_DASHBOARD_PLUGIN\" can also be used.",
+					"allowNo": false
+				},
+				"dashboard-plugin-port": {
+					"name": "dashboard-plugin-port",
+					"type": "option",
+					"description": "Port to be used for Dashboard Plugin. Environment variable \"KLAYR_DASHBOARD_PLUGIN_PORT\" can also be used.",
+					"multiple": false,
+					"dependsOn": ["enable-dashboard-plugin"]
+				},
+				"enable-chain-connector-plugin": {
+					"name": "enable-chain-connector-plugin",
+					"type": "boolean",
+					"description": "Enable ChainConnector Plugin. Environment variable \"KLAYR_ENABLE_CHAIN_CONNECTOR_PLUGIN\" can also be used.",
+					"allowNo": false
+				}
+			},
+			"args": []
+		},
+		"block:get": {
+			"id": "block:get",
+			"description": "Get block information for a given id or height.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["block:get e082e79d01016632c451c9df9276e486cb7f460dc793ff5b10d8f71eecec28b4", "block:get 2"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": [{ "name": "input", "description": "Height in number or block id in hex format.", "required": true }]
+		},
+		"blockchain:export": {
+			"id": "blockchain:export",
+			"description": "Export to <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["blockchain:export", "blockchain:export --data-path ./data --output ./my/path/"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false }
+			},
+			"args": []
+		},
+		"blockchain:hash": {
+			"id": "blockchain:hash",
+			"description": "Generate SHA256 hash from <PATH>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["blockchain:hash", "blockchain:hash --data-path ./data"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				}
+			},
+			"args": []
+		},
+		"blockchain:import": {
+			"id": "blockchain:import",
+			"description": "Import from <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"blockchain:import ./path/to/blockchain.tar.gz",
+				"blockchain:import ./path/to/blockchain.tar.gz --data-path ./klayr/",
+				"blockchain:import ./path/to/blockchain.tar.gz --data-path ./klayr/ --force"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"force": { "name": "force", "type": "boolean", "char": "f", "description": "Delete and overwrite existing blockchain data", "allowNo": false }
+			},
+			"args": [{ "name": "filepath", "description": "Path to the gzipped blockchain data.", "required": true }]
+		},
+		"blockchain:reset": {
+			"id": "blockchain:reset",
+			"description": "Reset the blockchain data.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["blockchain:reset", "blockchain:reset --data-path ./klayr", "blockchain:reset --yes"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"yes": { "name": "yes", "type": "boolean", "char": "y", "description": "Skip confirmation prompt.", "allowNo": false }
+			},
+			"args": []
+		},
+		"config:create": {
+			"id": "config:create",
+			"description": "Creates network configuration file.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["config:create --output mydir", "config:create --output mydir --label beta-sdk-app", "config:create --output mydir --label beta-sdk-app --community-identifier sdk"],
+			"flags": {
+				"output": {
+					"name": "output",
+					"type": "option",
+					"char": "o",
+					"description": "Directory where the config file is saved",
+					"multiple": false,
+					"default": "/Users/aldhosutra/Documents/Swaptoshi/swaptoshi-core"
+				},
+				"label": { "name": "label", "type": "option", "char": "l", "description": "App Label", "multiple": false, "default": "beta-sdk-app" },
+				"chain-id": { "name": "chain-id", "type": "option", "char": "i", "description": "ChainID in hex format. For example, Klayr mainnet mainchain is 00000000", "required": true, "multiple": false }
+			},
+			"args": []
+		},
+		"config:show": {
+			"id": "config:show",
+			"description": "Show application config.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["config:show", "config:show --pretty", "config:show --config ./custom-config.json --data-path ./data"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"config": { "name": "config", "type": "option", "char": "c", "description": "File path to a custom config. Environment variable \"KLAYR_CONFIG_FILE\" can also be used.", "multiple": false },
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": []
+		},
+		"endpoint:invoke": {
+			"id": "endpoint:invoke",
+			"description": "Invokes the provided endpoint.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"endpoint:invoke {endpoint} {parameters}",
+				"endpoint:invoke --data-path --file",
+				"endpoint:invoke generator_getAllKeys",
+				"endpoint:invoke consensus_getBFTParameters '{\"height\": 2}' -d ~/.klayr/pos-mainchain --pretty",
+				"endpoint:invoke consensus_getBFTParameters -f ./input.json"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"file": { "name": "file", "type": "option", "char": "f", "description": "Input file.", "multiple": false }
+			},
+			"args": [
+				{ "name": "endpoint", "description": "Endpoint to invoke", "required": true },
+				{ "name": "params", "description": "Endpoint parameters (Optional)", "required": false }
+			]
+		},
+		"generator:disable": {
+			"id": "generator:disable",
+			"description": "Disable block generation for given validator address.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz",
+				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data",
+				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data --password your_password"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				}
+			},
+			"args": [{ "name": "address", "description": "Address of an account in a klayr32 format.", "required": true }]
+		},
+		"generator:enable": {
+			"id": "generator:enable",
+			"description": "Enable block generation for given validator address.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --use-status-value",
+				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10",
+				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data",
+				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data --password your_password"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"height": { "name": "height", "type": "option", "description": "Last generated block height.", "multiple": false, "exclusive": ["use-status-value"] },
+				"max-height-generated": {
+					"name": "max-height-generated",
+					"type": "option",
+					"description": "Validator's largest previously generated height.",
+					"multiple": false,
+					"exclusive": ["use-status-value"]
+				},
+				"max-height-prevoted": {
+					"name": "max-height-prevoted",
+					"type": "option",
+					"description": "Validator's largest prevoted height for a block.",
+					"multiple": false,
+					"exclusive": ["use-status-value"]
+				},
+				"use-status-value": {
+					"name": "use-status-value",
+					"type": "boolean",
+					"description": "Use status value from the connected node",
+					"allowNo": false,
+					"exclusive": ["height", "max-height-generated", "max-height-prevoted"]
+				}
+			},
+			"args": [{ "name": "address", "description": "Address of an account in a klayr32 format.", "required": true }]
+		},
+		"generator:export": {
+			"id": "generator:export",
+			"description": "Export to <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["generator:export", "generator:export --output /mypath/generator_info.json", "generator:export --output /mypath/generator_info.json --data-path ./data "],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false }
+			},
+			"args": []
+		},
+		"generator:import": {
+			"id": "generator:import",
+			"description": "Import from <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["generator:import --file-path ./my/path/genInfo.json", "generator:import --file-path ./my/path/genInfo.json --data-path ./data "],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"file-path": { "name": "file-path", "type": "option", "char": "f", "description": "Path of the file to import from", "required": true, "multiple": false }
+			},
+			"args": []
+		},
+		"generator:status": {
+			"id": "generator:status",
+			"description": "Get forging information for the locally running node.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["generator:status", "generator:status --data-path ./sample --pretty"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": []
+		},
+		"genesis-block:create": {
+			"id": "genesis-block:create",
+			"description": "Creates genesis block file.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"genesis-block:create --output mydir",
+				"genesis-block:create --output mydir --assets-file ./assets.json",
+				"genesis-block:create --output mydir --assets-file ./assets.json --height 2 --timestamp 1592924699 --previous-block-id 085d7c9b7bddc8052be9eefe185f407682a495f1b4498677df1480026b74f2e9"
+			],
+			"flags": {
+				"network": {
+					"name": "network",
+					"type": "option",
+					"char": "n",
+					"description": "Default network config to use. Environment variable \"KLAYR_NETWORK\" can also be used.",
+					"multiple": false,
+					"default": "default"
+				},
+				"config": { "name": "config", "type": "option", "char": "c", "description": "File path to a custom config. Environment variable \"KLAYR_CONFIG_FILE\" can also be used.", "multiple": false },
+				"output": { "name": "output", "type": "option", "char": "o", "description": "Output folder path of the generated genesis block", "multiple": false, "default": "config" },
+				"assets-file": { "name": "assets-file", "type": "option", "char": "f", "description": "Path to file which contains genesis block asset in JSON format", "required": true, "multiple": false },
+				"export-json": { "name": "export-json", "type": "boolean", "description": "Export genesis block as JSON format along with blob", "allowNo": false },
+				"height": { "name": "height", "type": "option", "char": "h", "description": "Genesis block height", "required": false, "multiple": false },
+				"timestamp": { "name": "timestamp", "type": "option", "char": "t", "description": "Timestamp", "required": false, "multiple": false },
+				"previous-block-id": { "name": "previous-block-id", "type": "option", "char": "p", "description": "Previous block id", "required": false, "multiple": false }
+			},
+			"args": []
+		},
+		"keys:create": {
+			"id": "keys:create",
+			"description": "Return keys corresponding to the given passphrase.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"keys:create",
+				"keys:create --passphrase your-passphrase",
+				"keys:create --passphrase your-passphrase --no-encrypt",
+				"keys:create --passphrase your-passphrase --password your-password",
+				"keys:create --passphrase your-passphrase --password your-password --count 2",
+				"keys:create --passphrase your-passphrase --no-encrypt --count 2 --offset 1",
+				"keys:create --passphrase your-passphrase --no-encrypt --count 2 --offset 1 --chainid 1",
+				"keys:create --passphrase your-passphrase --password your-password --count 2 --offset 1 --chainid 1 --output /mypath/keys.json"
+			],
+			"flags": {
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false },
+				"passphrase": {
+					"name": "passphrase",
+					"type": "option",
+					"char": "p",
+					"description": "Specifies a source for your secret passphrase. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --passphrase='my secret passphrase' (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"no-encrypt": { "name": "no-encrypt", "type": "boolean", "char": "n", "description": "No encrypted message object to be created", "allowNo": false },
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"count": { "name": "count", "type": "option", "char": "c", "description": "Number of keys to create", "multiple": false, "default": 1 },
+				"offset": { "name": "offset", "type": "option", "char": "f", "description": "Offset for the key derivation path", "multiple": false, "default": 0 },
+				"chainid": { "name": "chainid", "type": "option", "char": "i", "description": "Chain id", "multiple": false, "default": 0 },
+				"add-legacy": { "name": "add-legacy", "type": "boolean", "description": "Add legacy key derivation path to the result", "allowNo": false }
+			},
+			"args": []
+		},
+		"keys:encrypt": {
+			"id": "keys:encrypt",
+			"description": "Encrypt keys from a file and overwrite the file",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["keys:encrypt --file-path ./my/path/keys.json", "keys:encrypt --file-path ./my/path/keys.json --password mypass"],
+			"flags": {
+				"file-path": { "name": "file-path", "type": "option", "char": "f", "description": "Path of the file to encrypt from", "required": true, "multiple": false },
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				}
+			},
+			"args": []
+		},
+		"keys:export": {
+			"id": "keys:export",
+			"description": "Export to <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["keys:export --output /mypath/keys.json", "keys:export --output /mypath/keys.json --data-path ./data "],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "required": true, "multiple": false }
+			},
+			"args": []
+		},
+		"keys:import": {
+			"id": "keys:import",
+			"description": "Import from <FILE>.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["keys:import --file-path ./my/path/keys.json", "keys:import --file-path ./my/path/keys.json --data-path ./data "],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"file-path": { "name": "file-path", "type": "option", "char": "f", "description": "Path of the file to import from", "required": true, "multiple": false }
+			},
+			"args": []
+		},
+		"message:decrypt": {
+			"id": "message:decrypt",
+			"description": "\n\tDecrypts a previously encrypted message using your the password used to encrypt.\n\t",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["message:decrypt "],
+			"flags": {
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"message": {
+					"name": "message",
+					"type": "option",
+					"char": "m",
+					"description": "Specifies a source for providing a message to the command. If a string is provided directly as an argument, this option will be ignored. The message must be provided via an argument or via this option. Sources must be one of `file` or `stdin`. In the case of `file`, a corresponding identifier must also be provided.\n\tNote: if both secret passphrase and message are passed via stdin, the passphrase must be the first line.\n\tExamples:\n\t- --message=file:/path/to/my/message.txt\n\t- --message=\"hello world\"\n",
+					"multiple": false
+				}
+			},
+			"args": [{ "name": "message", "description": "Encrypted message." }]
+		},
+		"message:encrypt": {
+			"id": "message:encrypt",
+			"description": "\n\tEncrypts a message with a password provided.\n\t",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["message:encrypt \"Hello world\""],
+			"flags": {
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"message": {
+					"name": "message",
+					"type": "option",
+					"char": "m",
+					"description": "Specifies a source for providing a message to the command. If a string is provided directly as an argument, this option will be ignored. The message must be provided via an argument or via this option. Sources must be one of `file` or `stdin`. In the case of `file`, a corresponding identifier must also be provided.\n\tNote: if both secret passphrase and message are passed via stdin, the passphrase must be the first line.\n\tExamples:\n\t- --message=file:/path/to/my/message.txt\n\t- --message=\"hello world\"\n",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"stringify": { "name": "stringify", "type": "boolean", "char": "s", "description": "Display encrypted message in stringified format", "allowNo": false }
+			},
+			"args": [{ "name": "message", "description": "Message to encrypt." }]
+		},
+		"message:sign": {
+			"id": "message:sign",
+			"description": "\n\tSigns a message using your secret passphrase.\n\t",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["message:sign \"Hello world\""],
+			"flags": {
+				"json": { "name": "json", "type": "boolean", "char": "j", "description": "Prints output in JSON format. You can change the default behavior in your config.json file.", "allowNo": true },
+				"pretty": {
+					"name": "pretty",
+					"type": "boolean",
+					"description": "Prints JSON in pretty format rather than condensed. Has no effect if the output is set to table. You can change the default behavior in your config.json file.",
+					"allowNo": true
+				},
+				"passphrase": {
+					"name": "passphrase",
+					"type": "option",
+					"char": "p",
+					"description": "Specifies a source for your secret passphrase. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --passphrase='my secret passphrase' (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"message": {
+					"name": "message",
+					"type": "option",
+					"char": "m",
+					"description": "Specifies a source for providing a message to the command. If a string is provided directly as an argument, this option will be ignored. The message must be provided via an argument or via this option. Sources must be one of `file` or `stdin`. In the case of `file`, a corresponding identifier must also be provided.\n\tNote: if both secret passphrase and message are passed via stdin, the passphrase must be the first line.\n\tExamples:\n\t- --message=file:/path/to/my/message.txt\n\t- --message=\"hello world\"\n",
+					"multiple": false
+				}
+			},
+			"args": [{ "name": "message", "description": "Message to sign." }]
+		},
+		"message:verify": {
+			"id": "message:verify",
+			"description": "\n\tVerifies a signature for a message using the signer’s public key.\n\t",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"message:verify 647aac1e2df8a5c870499d7ddc82236b1e10936977537a3844a6b05ea33f9ef6 2a3ca127efcf7b2bf62ac8c3b1f5acf6997cab62ba9fde3567d188edcbacbc5dc8177fb88d03a8691ce03348f569b121bca9e7a3c43bf5c056382f35ff843c09 \"Hello world\""
+			],
+			"flags": {
+				"json": { "name": "json", "type": "boolean", "char": "j", "description": "Prints output in JSON format. You can change the default behavior in your config.json file.", "allowNo": true },
+				"pretty": {
+					"name": "pretty",
+					"type": "boolean",
+					"description": "Prints JSON in pretty format rather than condensed. Has no effect if the output is set to table. You can change the default behavior in your config.json file.",
+					"allowNo": true
+				},
+				"message": {
+					"name": "message",
+					"type": "option",
+					"char": "m",
+					"description": "Specifies a source for providing a message to the command. If a string is provided directly as an argument, this option will be ignored. The message must be provided via an argument or via this option. Sources must be one of `file` or `stdin`. In the case of `file`, a corresponding identifier must also be provided.\n\tNote: if both secret passphrase and message are passed via stdin, the passphrase must be the first line.\n\tExamples:\n\t- --message=file:/path/to/my/message.txt\n\t- --message=\"hello world\"\n",
+					"multiple": false
+				}
+			},
+			"args": [
+				{ "name": "publicKey", "description": "Public key of the signer of the message.", "required": true },
+				{ "name": "signature", "description": "Signature to verify.", "required": true },
+				{ "name": "message", "description": "Message to verify." }
+			]
+		},
+		"node:info": {
+			"id": "node:info",
+			"description": "Get node information from a running application.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["system:node-info", "system:node-info --data-path ./klayr"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": []
+		},
+		"node:metadata": {
+			"id": "node:metadata",
+			"description": "Get node metadata from a running application.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["system:metadata", "system:metadata --data-path ./klayr"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": []
+		},
+		"passphrase:create": {
+			"id": "passphrase:create",
+			"description": "Returns a randomly generated 24 words mnemonic passphrase.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["passphrase:create", "passphrase:create --output /mypath/passphrase.json"],
+			"flags": { "output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false } },
+			"args": []
+		},
+		"passphrase:decrypt": {
+			"id": "passphrase:decrypt",
+			"description": "Decrypt secret passphrase using the password provided at the time of encryption.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["passphrase:decrypt --file-path ./my/path/output.json", "passphrase:decrypt --file-path ./my/path/output.json --password your-password"],
+			"flags": {
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"file-path": { "name": "file-path", "type": "option", "char": "f", "description": "Path of the file to import from", "required": true, "multiple": false }
+			},
+			"args": []
+		},
+		"passphrase:encrypt": {
+			"id": "passphrase:encrypt",
+			"description": "Encrypt secret passphrase using password.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"passphrase:encrypt",
+				"passphrase:encrypt --passphrase your-passphrase --output /mypath/keys.json",
+				"passphrase:encrypt --password your-password",
+				"passphrase:encrypt --password your-password --passphrase your-passphrase --output /mypath/keys.json",
+				"passphrase:encrypt --output-public-key --output /mypath/keys.json"
+			],
+			"flags": {
+				"password": {
+					"name": "password",
+					"type": "option",
+					"char": "w",
+					"description": "Specifies a source for your secret password. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --password=pass:password123 (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"passphrase": {
+					"name": "passphrase",
+					"type": "option",
+					"char": "p",
+					"description": "Specifies a source for your secret passphrase. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --passphrase='my secret passphrase' (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"output-public-key": {
+					"name": "output-public-key",
+					"type": "boolean",
+					"description": "Includes the public key in the output. This option is provided for the convenience of node operators.",
+					"allowNo": false
+				},
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false }
+			},
+			"args": []
+		},
+		"transaction:create": {
+			"id": "transaction:create",
+			"description": "Create transaction which can be broadcasted to the network. Note: fee and amount should be in Beddows!!",
+			"strict": false,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"transaction:create token transfer 100000000 --params='{\"amount\":100000000,\"tokenID\":\"0400000000000000\",\"recipientAddress\":\"klyycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz\",\"data\":\"send token\"}'",
+				"transaction:create token transfer 100000000 --params='{\"amount\":100000000,\"tokenID\":\"0400000000000000\",\"recipientAddress\":\"klyycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz\",\"data\":\"send token\"}' --json",
+				"transaction:create token transfer 100000000 --offline --network mainnet --chain-id 10000000 --nonce 1 --params='{\"amount\":100000000,\"tokenID\":\"0400000000000000\",\"recipientAddress\":\"klyycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz\",\"data\":\"send token\"}'",
+				"transaction:create token transfer 100000000 --file=/txn_params.json",
+				"transaction:create token transfer 100000000 --file=/txn_params.json --json"
+			],
+			"flags": {
+				"passphrase": {
+					"name": "passphrase",
+					"type": "option",
+					"char": "p",
+					"description": "Specifies a source for your secret passphrase. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --passphrase='my secret passphrase' (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"params": { "name": "params", "type": "option", "char": "a", "description": "Creates transaction with specific params information", "multiple": false },
+				"json": { "name": "json", "type": "boolean", "char": "j", "description": "Print the transaction in JSON format.", "allowNo": false },
+				"offline": {
+					"name": "offline",
+					"type": "boolean",
+					"description": "Specify whether to connect to a local node or not.",
+					"allowNo": false,
+					"dependsOn": ["chain-id", "nonce"],
+					"exclusive": ["data-path"]
+				},
+				"send": { "name": "send", "type": "boolean", "description": "Create and immediately send transaction to a node", "allowNo": false, "exclusive": ["offline"] },
+				"no-signature": {
+					"name": "no-signature",
+					"type": "boolean",
+					"description": "Creates the transaction without a signature. Your passphrase will therefore not be required",
+					"allowNo": false,
+					"dependsOn": ["sender-public-key"]
+				},
+				"chain-id": { "name": "chain-id", "type": "option", "multiple": false },
+				"nonce": { "name": "nonce", "type": "option", "description": "Nonce of the transaction.", "multiple": false },
+				"sender-public-key": {
+					"name": "sender-public-key",
+					"type": "option",
+					"char": "s",
+					"description": "Set a custom senderPublicKey property for the transaction, to be used when account address does not correspond to signer's private key",
+					"multiple": false
+				},
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"key-derivation-path": {
+					"name": "key-derivation-path",
+					"type": "option",
+					"char": "k",
+					"description": "Key derivation path to use to derive keypair from passphrase",
+					"multiple": false,
+					"default": "m/44'/134'/0'"
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
+				"file": { "name": "file", "type": "option", "char": "f", "description": "The file to upload.\n\tExample:\n\t\t--file=./myfile.json\n", "multiple": false }
+			},
+			"args": [
+				{ "name": "module", "description": "Registered transaction module.", "required": true },
+				{ "name": "command", "description": "Registered transaction command.", "required": true },
+				{ "name": "fee", "description": "Transaction fee in Beddows.", "required": true }
+			]
+		},
+		"transaction:get": {
+			"id": "transaction:get",
+			"description": "Get transaction from local node by ID.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["transaction:get eab06c6a22e88bca7150e0347a7d976acd070cb9284423e6eabecd657acc1263"],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": [{ "name": "id", "description": "Transaction ID in hex format.", "required": true }]
+		},
+		"transaction:send": {
+			"id": "transaction:send",
+			"description": "Send transaction to the local node.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": [
+				"transaction:send 080810011880cab5ee012220fd061b9146691f3c56504be051175d5b76d1b1d0179c5c4370e18534c58821222a2408641214ab0041a7d3f7b2c290b5b834d46bdc7b7eb858151a0a73656e6420746f6b656e324028edd3601cdc35a41bb23415a0d9f3c3e9cf188d9971adf18742cea39d58aa84809aa87bcfe6feaac46211c80472ad9297fd87727709f5d7e7b4134caf106b02"
+			],
+			"flags": {
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": [{ "name": "transaction", "description": "A transaction to be sent to the node encoded as hex string", "required": true }]
+		},
+		"transaction:sign": {
+			"id": "transaction:sign",
+			"description": "Sign encoded transaction.",
+			"strict": true,
+			"pluginName": "swaptoshi-core",
+			"pluginAlias": "swaptoshi-core",
+			"pluginType": "core",
+			"aliases": [],
+			"examples": ["transaction:sign <hex-encoded-binary-transaction>", "transaction:sign <hex-encoded-binary-transaction> --network testnet"],
+			"flags": {
+				"passphrase": {
+					"name": "passphrase",
+					"type": "option",
+					"char": "p",
+					"description": "Specifies a source for your secret passphrase. Command will prompt you for input if this option is not set.\n\tExamples:\n\t- --passphrase='my secret passphrase' (should only be used where security is not important)\n",
+					"multiple": false
+				},
+				"json": { "name": "json", "type": "boolean", "char": "j", "description": "Print the transaction in JSON format.", "allowNo": false },
+				"offline": {
+					"name": "offline",
+					"type": "boolean",
+					"description": "Specify whether to connect to a local node or not.",
+					"allowNo": false,
+					"dependsOn": ["chain-id"],
+					"exclusive": ["data-path"]
+				},
+				"mandatory-keys": { "name": "mandatory-keys", "type": "option", "description": "Mandatory publicKey string in hex format.", "multiple": true },
+				"optional-keys": { "name": "optional-keys", "type": "option", "description": "Optional publicKey string in hex format.", "multiple": true },
+				"chain-id": { "name": "chain-id", "type": "option", "multiple": false },
+				"data-path": {
+					"name": "data-path",
+					"type": "option",
+					"char": "d",
+					"description": "Directory path to specify where node data is stored. Environment variable \"KLAYR_DATA_PATH\" can also be used.",
+					"multiple": false
+				},
+				"key-derivation-path": {
+					"name": "key-derivation-path",
+					"type": "option",
+					"char": "k",
+					"description": "Key derivation path to use to derive keypair from passphrase",
+					"multiple": false,
+					"default": "m/44'/134'/0'"
+				},
+				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false }
+			},
+			"args": [{ "name": "transaction", "description": "The transaction to be signed encoded as hex string", "required": true }]
+		}
+	}
+}
