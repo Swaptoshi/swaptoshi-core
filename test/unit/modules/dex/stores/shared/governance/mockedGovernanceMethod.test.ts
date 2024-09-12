@@ -94,16 +94,15 @@ describe('MockedGovernanceMethod', () => {
 		it('should call mock_create_proposal', async () => {
 			const context = {} as MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
-			const timestamp = Date.now();
 			const height = 100;
 			const title = 'Proposal Title';
 			const summary = 'Proposal Summary';
 			const actions = [];
 			const attributes = [];
 
-			await governanceMethod.createProposal(context, senderAddress, timestamp, height, title, summary, actions, attributes);
+			await governanceMethod.createProposal(context, senderAddress, height, title, summary, actions, attributes);
 
-			expect(mock_create_proposal).toHaveBeenCalledWith(context, senderAddress, timestamp, height, title, summary, actions, attributes);
+			expect(mock_create_proposal).toHaveBeenCalledWith(context, senderAddress, height, title, summary, actions, attributes);
 		});
 	});
 
@@ -111,12 +110,11 @@ describe('MockedGovernanceMethod', () => {
 		it('should call mock_get_proposal', async () => {
 			const context = {} as MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
-			const timestamp = Date.now();
 			const height = 100;
 			const proposalId = 1;
 
-			await governanceMethod.getProposalInstance(context, senderAddress, timestamp, height, proposalId);
-			expect(mock_get_proposal).toHaveBeenCalledWith(context, senderAddress, timestamp, height, proposalId);
+			await governanceMethod.getProposalInstance(context, senderAddress, height, proposalId);
+			expect(mock_get_proposal).toHaveBeenCalledWith(context, senderAddress, height, proposalId);
 		});
 	});
 
@@ -124,11 +122,10 @@ describe('MockedGovernanceMethod', () => {
 		it('should call mock_get_proposal_queue', async () => {
 			const context = {} as MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
-			const timestamp = Date.now();
 			const height = 100;
 
-			await governanceMethod.getProposalQueueInstance(context, senderAddress, timestamp, height);
-			expect(mock_get_proposal_queue).toHaveBeenCalledWith(context, senderAddress, timestamp, height);
+			await governanceMethod.getProposalQueueInstance(context, senderAddress, height);
+			expect(mock_get_proposal_queue).toHaveBeenCalledWith(context, senderAddress, height);
 		});
 	});
 
@@ -136,11 +133,10 @@ describe('MockedGovernanceMethod', () => {
 		it('should call mock_get_boosted_account', async () => {
 			const context = {} as MethodContext;
 			const address = Buffer.from('address');
-			const timestamp = Date.now();
 			const height = 100;
 
-			await governanceMethod.getBoostedAccountInstance(context, address, timestamp, height);
-			expect(mock_get_boosted_account).toHaveBeenCalledWith(context, address, timestamp, height);
+			await governanceMethod.getBoostedAccountInstance(context, address, height);
+			expect(mock_get_boosted_account).toHaveBeenCalledWith(context, address, height);
 		});
 	});
 
@@ -148,11 +144,10 @@ describe('MockedGovernanceMethod', () => {
 		it('should call mock_get_delegated_vote', async () => {
 			const context = {} as MethodContext;
 			const address = Buffer.from('address');
-			const timestamp = Date.now();
 			const height = 100;
 
-			await governanceMethod.getDelegatedVoteInstance(context, address, timestamp, height);
-			expect(mock_get_delegated_vote).toHaveBeenCalledWith(context, address, timestamp, height);
+			await governanceMethod.getDelegatedVoteInstance(context, address, height);
+			expect(mock_get_delegated_vote).toHaveBeenCalledWith(context, address, height);
 		});
 	});
 

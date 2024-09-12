@@ -60,30 +60,29 @@ export class MockedGovernanceMethod implements Omit<GovernanceMethod, '_governab
 	public async createProposal(
 		context: MethodContext,
 		senderAddress: Buffer,
-		timestamp: number,
 		height: number,
 		title: string,
 		summary: string,
 		actions: ProposalStoreData['actions'],
 		attributes: ProposalStoreData['attributes'],
 	) {
-		return mock_create_proposal(context, senderAddress, timestamp, height, title, summary, actions, attributes);
+		return mock_create_proposal(context, senderAddress, height, title, summary, actions, attributes);
 	}
 
-	public async getProposalInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, proposalId: number) {
-		return mock_get_proposal(context, senderAddress, timestamp, height, proposalId);
+	public async getProposalInstance(context: MethodContext, senderAddress: Buffer, height: number, proposalId: number) {
+		return mock_get_proposal(context, senderAddress, height, proposalId);
 	}
 
-	public async getProposalQueueInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number) {
-		return mock_get_proposal_queue(context, senderAddress, timestamp, height);
+	public async getProposalQueueInstance(context: MethodContext, senderAddress: Buffer, height: number) {
+		return mock_get_proposal_queue(context, senderAddress, height);
 	}
 
-	public async getBoostedAccountInstance(context: MethodContext, address: Buffer, timestamp: number, height: number) {
-		return mock_get_boosted_account(context, address, timestamp, height);
+	public async getBoostedAccountInstance(context: MethodContext, address: Buffer, height: number) {
+		return mock_get_boosted_account(context, address, height);
 	}
 
-	public async getDelegatedVoteInstance(context: MethodContext, address: Buffer, timestamp: number, height: number) {
-		return mock_get_delegated_vote(context, address, timestamp, height);
+	public async getDelegatedVoteInstance(context: MethodContext, address: Buffer, height: number) {
+		return mock_get_delegated_vote(context, address, height);
 	}
 
 	public async getNextAvailableProposalId(context: MethodContext) {
