@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable camelcase */
 /* eslint-disable import/no-extraneous-dependencies */
-import { TokenMethod, FeeMethod } from 'klayr-sdk';
+import { FeeMethod, TokenMethod } from '../../../../../../../src/app/modules/dex/types';
 import { BaseFeeConversionMethod, FeeConversionMethod } from '../../../../../../../src/app/modules/fee_conversion';
 import { FeeConversionMethodRegistry } from '../../../../../../../src/app/modules/fee_conversion/registry';
 

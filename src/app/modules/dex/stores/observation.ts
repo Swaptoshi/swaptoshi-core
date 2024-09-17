@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { Observation } from '../types';
 import { Int16String } from './library/int';
 import { observationStoreSchema } from '../schema';
@@ -12,14 +12,14 @@ export const defaultObservation: Observation = Object.freeze({
 	initialized: false,
 });
 
-export class ObservationStore extends BaseStore<Observation> {
+export class ObservationStore extends Modules.BaseStore<Observation> {
 	public getKey(poolAddress: Buffer, index: Int16String) {
 		const indexBuf = Buffer.allocUnsafe(2);
 		indexBuf.writeUIntBE(this.hof(index, 16), 0, 2);
 		return Buffer.concat([poolAddress, indexBuf]);
 	}
 
-	public async getOrDefault(context: ImmutableStoreGetter, key: Buffer): Promise<Observation> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter, key: Buffer): Promise<Observation> {
 		try {
 			const observation = await this.get(context, key);
 			return observation;

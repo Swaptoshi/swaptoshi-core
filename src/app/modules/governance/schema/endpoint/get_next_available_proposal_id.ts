@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { NextAvailableProposalIdStoreData, TypedSchema } from '../../types';
 
-export const getNextAvailableProposalIdEndpointResponseSchema: TypedSchema<JSONObject<NextAvailableProposalIdStoreData>> = {
+export const getNextAvailableProposalIdEndpointResponseSchema: TypedSchema<Types.JSONObject<NextAvailableProposalIdStoreData>> = {
 	$id: '/governance/endpoint/response/getNextAvailableProposalId',
 	type: 'object',
 	required: ['nextProposalId'],

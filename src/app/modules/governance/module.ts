@@ -1,20 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import {
-	BaseModule,
-	BlockAfterExecuteContext,
-	BlockExecuteContext,
-	FeeMethod,
-	GenesisBlockExecuteContext,
-	ModuleInitArgs,
-	ModuleMetadata,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-	utils,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
+import { Modules, StateMachine, utils } from 'klayr-sdk';
 import { BoostVoteCommand } from './commands/boost_vote_command';
 import { CreateProposalCommand } from './commands/create_proposal_command';
 import { DelegateVoteCommand } from './commands/delegate_vote_command';
@@ -44,7 +31,7 @@ import { DelegatedVoteStore } from './stores/delegated_vote';
 import { NextAvailableProposalIdStore } from './stores/next_available_proposal_id';
 import { ProposalStore } from './stores/proposal';
 import { ProposalQueueStore } from './stores/queue';
-import { GovernanceModuleConfig, GovernanceModuleDependencies } from './types';
+import { FeeMethod, GovernanceModuleConfig, GovernanceModuleDependencies } from './types';
 import { immutableTransactionHookGovernanceContext } from './stores/context';
 import { ProposalExecutedEvent } from './events/proposal_executed';
 import { VoteChangedEvent } from './events/vote_changed';
@@ -73,7 +60,7 @@ import {
 } from './schema';
 import { ProposalVoterStore } from './stores/proposal_voter';
 
-export class GovernanceModule extends BaseModule {
+export class GovernanceModule extends Modules.BaseModule {
 	public _config = new GovernanceGovernableConfig(this.name, 0);
 	public _feeMethod: FeeMethod | undefined;
 
@@ -122,7 +109,7 @@ export class GovernanceModule extends BaseModule {
 		this.endpoint.init(this._governableConfig);
 	}
 
-	public metadata(): ModuleMetadata {
+	public metadata(): Modules.ModuleMetadata {
 		return {
 			...this.baseMetadata(),
 			endpoints: [
@@ -177,7 +164,7 @@ export class GovernanceModule extends BaseModule {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async init(args: ModuleInitArgs): Promise<void> {
+	public async init(args: Modules.ModuleInitArgs): Promise<void> {
 		const config = utils.objects.mergeDeep({}, defaultConfig, args.moduleConfig) as GovernanceModuleConfig;
 
 		if (config.governGovernanceConfig) {
@@ -213,7 +200,7 @@ export class GovernanceModule extends BaseModule {
 		this._internalMethod.addDependencies(dependencies.tokenMethod, this._governableConfig);
 	}
 
-	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
+	public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
 		try {
 			const ctx = immutableTransactionHookGovernanceContext(_context);
 			const boostedAccount = await this.stores.get(BoostedAccountStore).getImmutableBoostedAccount(ctx);
@@ -223,14 +210,14 @@ export class GovernanceModule extends BaseModule {
 			await verifyBaseFee.bind(this)(_context);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async beforeCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		const ctx = immutableTransactionHookGovernanceContext(_context);
 		const boostedAccount = await this.stores.get(BoostedAccountStore).getImmutableBoostedAccount(ctx);
 		await boostedAccount.isValidUnstake();
@@ -240,20 +227,20 @@ export class GovernanceModule extends BaseModule {
 		await executeBaseFee.bind(this)(_context);
 	}
 
-	public async afterCommandExecute(context: TransactionExecuteContext): Promise<void> {
+	public async afterCommandExecute(context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await this._internalMethod.updateVoteScoreAfterStake(context);
 	}
 
-	public async afterTransactionsExecute(context: BlockAfterExecuteContext): Promise<void> {
+	public async afterTransactionsExecute(context: StateMachine.BlockAfterExecuteContext): Promise<void> {
 		await this._internalMethod.addTreasuryReward(context);
 		await this._internalMethod.executeQueuedProposal(context);
 	}
 
-	public async beforeTransactionsExecute(context: BlockExecuteContext): Promise<void> {
+	public async beforeTransactionsExecute(context: StateMachine.BlockExecuteContext): Promise<void> {
 		await this._internalMethod.initializeGovernableConfig(context);
 	}
 
-	public async initGenesisState(context: GenesisBlockExecuteContext): Promise<void> {
+	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
 		await this._internalMethod.verifyGovernableConfig(context);
 	}
 }

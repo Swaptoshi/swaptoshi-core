@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'klayr-sdk';
+import { Modules, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';
 import { crossChainNFTTransferMessageParamsSchema, crossChainTokenTransferMessageParams } from '../../schema';
@@ -23,7 +23,7 @@ interface TransferNFTParams {
 
 const INVALID_TRANSFER_RECIPIENTS = [POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS];
 
-export async function verifyValidCrossTransfer(this: DexInteroperableMethod, context: CrossChainMessageContext) {
+export async function verifyValidCrossTransfer(this: DexInteroperableMethod, context: Modules.Interoperability.CrossChainMessageContext) {
 	if (context.ccm.module === 'token' && context.ccm.crossChainCommand === 'transferCrossChain') {
 		const params = codec.decode<CrossChainTransferTokenParams>(crossChainTokenTransferMessageParams, context.ccm.params);
 

@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { airdropDistributedEventSchema } from '../schema';
 import { AirdropDistributedEventData } from '../types';
 
-export class AirdropDistributedEvent extends BaseEvent<AirdropDistributedEventData> {
+export class AirdropDistributedEvent extends Modules.BaseEvent<AirdropDistributedEventData> {
 	public schema = airdropDistributedEventSchema;
 }

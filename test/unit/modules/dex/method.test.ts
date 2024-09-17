@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { BaseMethod, MethodContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { methodFixture } from './utils/fixtures';
 import { NonfungiblePositionManager, SwapRouter, DEXPool } from '../../../../src/app/modules/dex/stores/factory';
@@ -13,8 +13,8 @@ import { Quoter } from '../../../../src/app/modules/dex/stores/library/lens';
 describe('DexMethod', () => {
 	let module: DexModule;
 	let method: DexMethod;
-	let createMethodContext: () => MethodContext;
-	let context: MethodContext;
+	let createMethodContext: () => StateMachine.MethodContext;
+	let context: StateMachine.MethodContext;
 	let token0: Buffer;
 	let token1: Buffer;
 	let token2: Buffer;
@@ -28,7 +28,7 @@ describe('DexMethod', () => {
 	});
 
 	it('should inherit from BaseMethod', () => {
-		expect(DexMethod.prototype).toBeInstanceOf(BaseMethod);
+		expect(DexMethod.prototype).toBeInstanceOf(Modules.BaseMethod);
 	});
 
 	describe('constructor', () => {

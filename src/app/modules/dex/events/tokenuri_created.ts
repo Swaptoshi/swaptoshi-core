@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { tokenUriCreatedEventSchema } from '../schema';
 
 export interface TokenURICreatedEventData {
@@ -7,6 +7,6 @@ export interface TokenURICreatedEventData {
 	tokenId: Buffer;
 }
 
-export class TokenURICreatedEvent extends BaseEvent<TokenURICreatedEventData> {
+export class TokenURICreatedEvent extends Modules.BaseEvent<TokenURICreatedEventData> {
 	public schema = tokenUriCreatedEventSchema;
 }

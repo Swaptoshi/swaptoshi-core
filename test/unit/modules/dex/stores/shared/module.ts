@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable import/no-extraneous-dependencies */
-import { FeeMethod, MainchainInteroperabilityMethod, Schema, SidechainInteroperabilityMethod, TokenMethod, Transaction, codec, cryptography, testing } from 'klayr-sdk';
+import { Schema, Transaction, codec, cryptography, testing } from 'klayr-sdk';
 import { PrefixedStateReadWriter } from 'klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { ObservationStore } from '../../../../../../src/app/modules/dex/stores/observation';
@@ -12,11 +12,10 @@ import { TickInfoStore } from '../../../../../../src/app/modules/dex/stores/tick
 import { TokenSymbolStore } from '../../../../../../src/app/modules/dex/stores/token_symbol';
 import { MockedTokenMethod } from './token';
 import { MockedNFTMethod } from './nft/index';
-import { DexModuleConfig } from '../../../../../../src/app/modules/dex/types';
+import { DexModuleConfig, FeeMethod, MainchainInteroperabilityMethod, NFTMethod, SidechainInteroperabilityMethod, TokenMethod } from '../../../../../../src/app/modules/dex/types';
 import { DEFAULT_TREASURY_ADDRESS } from '../../../../../../src/app/modules/dex/constants';
 import { MockedFeeMethod } from './fee';
 import { SupportedTokenStore } from '../../../../../../src/app/modules/dex/stores/supported_token';
-import { NFTMethod } from '../../../../../../src/app/modules/nft';
 import { MockedFeeConversionMethod } from './fee_conversion';
 import { FeeConversionMethod } from '../../../../../../src/app/modules/fee_conversion';
 import { MockedGovernanceMethod } from './governance';

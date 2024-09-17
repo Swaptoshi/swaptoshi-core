@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TransactionVerifyContext } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { TokenFactoryGovernableConfig } from '../../config';
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -9,7 +9,7 @@ export async function verifyMinimumFee(
 		name: string;
 		_config: TokenFactoryGovernableConfig;
 	},
-	context: TransactionVerifyContext,
+	context: StateMachine.TransactionVerifyContext,
 ) {
 	if (context.transaction.module === this.name) {
 		const config = await this._config.getConfig(context);

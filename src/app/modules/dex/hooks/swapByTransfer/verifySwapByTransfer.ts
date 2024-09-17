@@ -1,9 +1,9 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionVerifyContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { PoolAddress } from '../../stores/library/periphery';
 import { isSwapByTransfer } from './isSwapByTransfer';
 
-export async function verifySwapByTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, context: TransactionVerifyContext) {
+export async function verifySwapByTransfer(this: { stores: Modules.NamedRegistry; events: Modules.NamedRegistry }, context: StateMachine.TransactionVerifyContext) {
 	const check = await isSwapByTransfer.bind(this)(context, context.transaction);
 	if (check.status && check.payload) {
 		const key = PoolAddress.decodePoolAddress(check.payload.recipientAddress);

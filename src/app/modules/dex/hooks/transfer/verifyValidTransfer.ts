@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionVerifyContext, TransferCommand, codec } from 'klayr-sdk';
+import { Modules, StateMachine, codec } from 'klayr-sdk';
 import { POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PoolStore } from '../../stores/pool';
 import { nftTransferParamsSchema } from '../../schema';
@@ -19,9 +19,9 @@ interface TransferNFTParams {
 
 const INVALID_TRANSFER_RECIPIENTS = [POSITION_MANAGER_ADDRESS, ROUTER_ADDRESS];
 
-export async function verifyValidTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, context: TransactionVerifyContext) {
+export async function verifyValidTransfer(this: { stores: Modules.NamedRegistry; events: Modules.NamedRegistry }, context: StateMachine.TransactionVerifyContext) {
 	if (context.transaction.module === 'token' && context.transaction.command === 'transfer') {
-		const { schema } = new TransferCommand(this.stores, this.events);
+		const { schema } = new Modules.Token.TransferCommand(this.stores, this.events);
 		const params = codec.decode<TransferTokenParams>(schema, context.transaction.params);
 
 		if (INVALID_TRANSFER_RECIPIENTS.findIndex(t => t.equals(params.recipientAddress)) >= 0) {

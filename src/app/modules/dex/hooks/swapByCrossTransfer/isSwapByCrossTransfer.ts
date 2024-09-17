@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'klayr-sdk';
+import { Modules, codec } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { crossChainTokenTransferMessageParams } from '../../schema';
 import { DexInteroperableMethod } from '../../cc_method';
@@ -12,7 +12,7 @@ interface CrossChainTransferTokenParams {
 	data: string;
 }
 
-export async function isSwapByCrossTransfer(this: DexInteroperableMethod, ctx: CrossChainMessageContext) {
+export async function isSwapByCrossTransfer(this: DexInteroperableMethod, ctx: Modules.Interoperability.CrossChainMessageContext) {
 	if (ctx.ccm.module === 'token' && ctx.ccm.crossChainCommand === 'transferCrossChain' && ctx.ccm.status === 0) {
 		const params = codec.decode<CrossChainTransferTokenParams>(crossChainTokenTransferMessageParams, ctx.ccm.params);
 

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { poolCreatedEventSchema } from '../schema';
 
 export interface PoolCreatedEventData {
@@ -10,6 +10,6 @@ export interface PoolCreatedEventData {
 	poolAddress: Buffer;
 }
 
-export class PoolCreatedEvent extends BaseEvent<PoolCreatedEventData> {
+export class PoolCreatedEvent extends Modules.BaseEvent<PoolCreatedEventData> {
 	public schema = poolCreatedEventSchema;
 }

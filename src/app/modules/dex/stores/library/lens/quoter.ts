@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { NamedRegistry } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { Uint256String, Uint24String, Uint160String, Int24String, Int256String, Int256, Uint256, Uint160, Int128String, Uint128String, Int16String, Int24 } from '../int';
 import { ImmutableSwapContext, QuoteExactInputSingleParams, QuoteExactOutputSingleParams, DEXPoolData } from '../../../types';
 import { PoolStore } from '../../pool';
@@ -33,7 +33,7 @@ interface PopulatedTick {
 }
 
 export class Quoter {
-	public constructor(context: ImmutableSwapContext, stores: NamedRegistry) {
+	public constructor(context: ImmutableSwapContext, stores: Modules.NamedRegistry) {
 		this.immutableContext = context;
 		this.poolStore = stores.get(PoolStore);
 		this.tickBitmapStore = stores.get(TickBitmapStore);

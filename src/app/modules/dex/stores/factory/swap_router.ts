@@ -3,26 +3,10 @@
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { NamedRegistry, TokenMethod, cryptography, utils } from 'klayr-sdk';
-import {
-	Uint24String,
-	Uint256String,
-	Uint160String,
-	Uint256,
-	Int256String,
-	Int256,
-	Uint160,
-	Uint8,
-} from '../library/int';
+import { Modules, cryptography, utils } from 'klayr-sdk';
+import { Uint24String, Uint256String, Uint160String, Uint256, Int256String, Int256, Uint160, Uint8 } from '../library/int';
 import { PoolStore } from '../pool';
-import {
-	MutableSwapContext,
-	ExactInputParams,
-	ExactInputSingleParams,
-	ExactOutputParams,
-	ExactOutputSingleParams,
-	DexModuleConfig,
-} from '../../types';
+import { MutableSwapContext, ExactInputParams, ExactInputSingleParams, ExactOutputParams, ExactOutputSingleParams, DexModuleConfig, TokenMethod } from '../../types';
 import { DEXPool } from './pool';
 import { ROUTER_ADDRESS } from '../../constants';
 
@@ -35,7 +19,7 @@ interface SwapCallbackData {
 }
 
 export class SwapRouter {
-	public constructor(stores: NamedRegistry, config: DexModuleConfig, moduleName: string) {
+	public constructor(stores: Modules.NamedRegistry, config: DexModuleConfig, moduleName: string) {
 		this.moduleName = moduleName;
 		this._amountInCached = this._DEFAULT_AMOUNT_IN_CACHED;
 		this.poolStore = stores.get(PoolStore);
@@ -60,12 +44,7 @@ export class SwapRouter {
 	public setConfig(config: DexModuleConfig) {
 		this.feeProtocol = config.feeProtocol ?? 0;
 
-		this.feeProtocolPool = config.feeProtocolPool
-			? cryptography.address.getAddressFromKlayr32Address(
-					config.feeProtocolPool,
-					config.feeProtocolPool.substring(0, 3),
-			  )
-			: undefined;
+		this.feeProtocolPool = config.feeProtocolPool ? cryptography.address.getAddressFromKlayr32Address(config.feeProtocolPool, config.feeProtocolPool.substring(0, 3)) : undefined;
 
 		this._validateFeeProtocol();
 	}
@@ -74,31 +53,11 @@ export class SwapRouter {
 		this._checkDependencies();
 		this._checkDeadline(params.deadline);
 		const amountOut = Uint256.from(
-			await this._exactInputInternal(
-				params.amountIn,
-				params.recipient,
-				params.sqrtPriceLimitX96,
-				this._createPayload(
-					params.tokenIn,
-					params.tokenOut,
-					params.fee,
-					this.mutableContext!.senderAddress,
-				),
-			),
+			await this._exactInputInternal(params.amountIn, params.recipient, params.sqrtPriceLimitX96, this._createPayload(params.tokenIn, params.tokenOut, params.fee, this.mutableContext!.senderAddress)),
 		);
 
 		if (amountOut.lt(params.amountOutMinimum)) throw new Error('Too little received');
-		await this._checkRemainingBalance(
-			Buffer.from(
-				this._createPayload(
-					params.tokenIn,
-					params.tokenOut,
-					params.fee,
-					this.mutableContext!.senderAddress,
-				).path,
-				'hex',
-			),
-		);
+		await this._checkRemainingBalance(Buffer.from(this._createPayload(params.tokenIn, params.tokenOut, params.fee, this.mutableContext!.senderAddress).path, 'hex'));
 
 		return amountOut.toString();
 	}
@@ -114,15 +73,10 @@ export class SwapRouter {
 
 		while (true) {
 			const hasMultiplePools = Path.hasMultiplePools(params.path);
-			params.amountIn = await this._exactInputInternal(
-				params.amountIn,
-				hasMultiplePools ? this.address : params.recipient,
-				'0',
-				{
-					path: Path.getFirstPool(params.path).toString('hex'),
-					payer: payer.toString('hex'),
-				},
-			);
+			params.amountIn = await this._exactInputInternal(params.amountIn, hasMultiplePools ? this.address : params.recipient, '0', {
+				path: Path.getFirstPool(params.path).toString('hex'),
+				payer: payer.toString('hex'),
+			});
 
 			const [tokenIn, tokenOut] = Path.decodeFirstPool(params.path);
 			tokenList.add(tokenIn);
@@ -150,26 +104,11 @@ export class SwapRouter {
 			params.amountOut,
 			params.recipient,
 			params.sqrtPriceLimitX96,
-			this._createPayload(
-				params.tokenOut,
-				params.tokenIn,
-				params.fee,
-				this.mutableContext!.senderAddress,
-			),
+			this._createPayload(params.tokenOut, params.tokenIn, params.fee, this.mutableContext!.senderAddress),
 		);
 
 		if (Uint256.from(amountIn).gt(params.amountInMaximum)) throw new Error('Too much requested');
-		await this._checkRemainingBalance(
-			Buffer.from(
-				this._createPayload(
-					params.tokenOut,
-					params.tokenIn,
-					params.fee,
-					this.mutableContext!.senderAddress,
-				).path,
-				'hex',
-			),
-		);
+		await this._checkRemainingBalance(Buffer.from(this._createPayload(params.tokenOut, params.tokenIn, params.fee, this.mutableContext!.senderAddress).path, 'hex'));
 		this._amountInCached = this._DEFAULT_AMOUNT_IN_CACHED;
 
 		return amountIn;
@@ -199,26 +138,14 @@ export class SwapRouter {
 	}
 
 	private _checkDeadline(deadline: Uint256String) {
-		if (Uint256.from(this.mutableContext!.timestamp).gt(deadline))
-			throw new Error('Transaction too old');
+		if (Uint256.from(this.mutableContext!.timestamp).gt(deadline)) throw new Error('Transaction too old');
 	}
 
 	private async _pay(token: Buffer, payer: Buffer, recipient: Buffer, value: Uint256String) {
-		await this.tokenMethod!.transfer(
-			this.mutableContext!.context,
-			payer,
-			recipient,
-			token,
-			BigInt(value),
-		);
+		await this.tokenMethod!.transfer(this.mutableContext!.context, payer, recipient, token, BigInt(value));
 	}
 
-	private _createPayload(
-		tokenIn: Buffer,
-		tokenOut: Buffer,
-		fee: Uint24String,
-		payer: Buffer,
-	): SwapCallbackData {
+	private _createPayload(tokenIn: Buffer, tokenOut: Buffer, fee: Uint24String, payer: Buffer): SwapCallbackData {
 		const feeBuff = Buffer.allocUnsafe(3);
 		feeBuff.writeUIntBE(parseInt(fee, 10), 0, 3);
 		return {
@@ -231,13 +158,8 @@ export class SwapRouter {
 		return this.poolStore!.getMutablePool(this.mutableContext!, tokenA, tokenB, fee);
 	}
 
-	private async _swapCallback(
-		amount0Delta: Int256String,
-		amount1Delta: Int256String,
-		_data: string,
-	) {
-		if (Int256.from(amount0Delta).lte(0) && Int256.from(amount1Delta).lte(0))
-			throw new Error('invalid amount0Delta and/or amount1Delta');
+	private async _swapCallback(amount0Delta: Int256String, amount1Delta: Int256String, _data: string) {
+		if (Int256.from(amount0Delta).lte(0) && Int256.from(amount1Delta).lte(0)) throw new Error('invalid amount0Delta and/or amount1Delta');
 
 		const data = JSON.parse(_data) as SwapCallbackData;
 		const [tokenIn, tokenOut, fee] = Path.decodeFirstPool(Buffer.from(data.path, 'hex'));
@@ -249,12 +171,7 @@ export class SwapRouter {
 		const pool = await this._getPool(tokenIn, tokenOut, fee);
 
 		if (isExactInput) {
-			await this._pay(
-				tokenIn,
-				Buffer.from(data.payer, 'hex'),
-				pool.address,
-				amountToPay.toString(),
-			);
+			await this._pay(tokenIn, Buffer.from(data.payer, 'hex'), pool.address, amountToPay.toString());
 		} else {
 			// eslint-disable-next-line no-lonely-if
 			if (Path.hasMultiplePools(Buffer.from(data.path, 'hex'))) {
@@ -262,22 +179,12 @@ export class SwapRouter {
 				await this._exactOutputInternal(amountToPay.toString(), pool.address, '0', data);
 			} else {
 				this._amountInCached = amountToPay.toString();
-				await this._pay(
-					tokenOut,
-					Buffer.from(data.payer, 'hex'),
-					pool.address,
-					amountToPay.toString(),
-				);
+				await this._pay(tokenOut, Buffer.from(data.payer, 'hex'), pool.address, amountToPay.toString());
 			}
 		}
 	}
 
-	private async _exactInputInternal(
-		amountIn: Uint256String,
-		_recipient: Buffer,
-		sqrtPriceLimitX96: Uint160String,
-		data: SwapCallbackData,
-	): Promise<Uint256String> {
+	private async _exactInputInternal(amountIn: Uint256String, _recipient: Buffer, sqrtPriceLimitX96: Uint160String, data: SwapCallbackData): Promise<Uint256String> {
 		let recipient = _recipient;
 		if (recipient.compare(Buffer.alloc(20)) === 0) recipient = this.address;
 
@@ -289,11 +196,7 @@ export class SwapRouter {
 			recipient,
 			zeroForOne,
 			Int256.from(amountIn).toString(),
-			sqrtPriceLimitX96 === '0'
-				? zeroForOne
-					? Uint160.from(TickMath.MIN_SQRT_RATIO).add(1).toString()
-					: Uint160.from(TickMath.MAX_SQRT_RATIO).sub(1).toString()
-				: sqrtPriceLimitX96,
+			sqrtPriceLimitX96 === '0' ? (zeroForOne ? Uint160.from(TickMath.MIN_SQRT_RATIO).add(1).toString() : Uint160.from(TickMath.MAX_SQRT_RATIO).sub(1).toString()) : sqrtPriceLimitX96,
 			JSON.stringify(data),
 			this._swapCallback.bind(this),
 		);
@@ -303,12 +206,7 @@ export class SwapRouter {
 			.toString();
 	}
 
-	private async _exactOutputInternal(
-		amountOut: Uint256String,
-		_recipient: Buffer,
-		sqrtPriceLimitX96: Uint160String,
-		data: SwapCallbackData,
-	): Promise<Uint256String> {
+	private async _exactOutputInternal(amountOut: Uint256String, _recipient: Buffer, sqrtPriceLimitX96: Uint160String, data: SwapCallbackData): Promise<Uint256String> {
 		let recipient = _recipient;
 		if (recipient.compare(Buffer.alloc(20)) === 0) recipient = this.address;
 
@@ -320,11 +218,7 @@ export class SwapRouter {
 			recipient,
 			zeroForOne,
 			Int256.from(0).sub(amountOut).toString(),
-			sqrtPriceLimitX96 === '0'
-				? zeroForOne
-					? Uint160.from(TickMath.MIN_SQRT_RATIO).add(1).toString()
-					: Uint160.from(TickMath.MAX_SQRT_RATIO).sub(1).toString()
-				: sqrtPriceLimitX96,
+			sqrtPriceLimitX96 === '0' ? (zeroForOne ? Uint160.from(TickMath.MIN_SQRT_RATIO).add(1).toString() : Uint160.from(TickMath.MAX_SQRT_RATIO).sub(1).toString()) : sqrtPriceLimitX96,
 			JSON.stringify(data),
 			this._swapCallback.bind(this),
 		);
@@ -333,8 +227,7 @@ export class SwapRouter {
 			? [Uint256.from(amount0Delta).toString(), Uint256.from(0).sub(amount1Delta).toString()]
 			: [Uint256.from(amount1Delta).toString(), Uint256.from(0).sub(amount0Delta).toString()];
 
-		if (sqrtPriceLimitX96 === '0' && amountOutReceived !== amountOut)
-			throw new Error('sqrtPriceLimitX96 and amountOut error');
+		if (sqrtPriceLimitX96 === '0' && amountOutReceived !== amountOut) throw new Error('sqrtPriceLimitX96 and amountOut error');
 
 		return amountIn;
 	}
@@ -356,28 +249,12 @@ export class SwapRouter {
 		}
 
 		for (const token of tokenList) {
-			const balance = await this.tokenMethod!.getAvailableBalance(
-				this.mutableContext!.context,
-				this.address,
-				token,
-			);
+			const balance = await this.tokenMethod!.getAvailableBalance(this.mutableContext!.context, this.address, token);
 			if (balance > BigInt(0)) {
 				if (this._checkFeeProtocol()) {
-					await this.tokenMethod!.transfer(
-						this.mutableContext!.context,
-						this.address,
-						this.feeProtocolPool!,
-						token,
-						balance,
-					);
+					await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, this.feeProtocolPool!, token, balance);
 				} else {
-					await this.tokenMethod!.lock(
-						this.mutableContext!.context,
-						this.address,
-						this.moduleName,
-						token,
-						balance,
-					);
+					await this.tokenMethod!.lock(this.mutableContext!.context, this.address, this.moduleName, token, balance);
 				}
 			}
 		}
@@ -392,14 +269,8 @@ export class SwapRouter {
 			const feeProtocol0 = Uint8.from(this.feeProtocol).mod(16);
 			const feeProtocol1 = Uint8.from(this.feeProtocol).shr(4);
 			if (
-				!(
-					Uint8.from(feeProtocol0).eq(0) ||
-					(Uint8.from(feeProtocol0).gte(4) && Uint8.from(feeProtocol0).lte(10))
-				) ||
-				!(
-					Uint8.from(feeProtocol1).eq(0) ||
-					(Uint8.from(feeProtocol1).gte(4) && Uint8.from(feeProtocol1).lte(10))
-				)
+				!(Uint8.from(feeProtocol0).eq(0) || (Uint8.from(feeProtocol0).gte(4) && Uint8.from(feeProtocol0).lte(10))) ||
+				!(Uint8.from(feeProtocol1).eq(0) || (Uint8.from(feeProtocol1).gte(4) && Uint8.from(feeProtocol1).lte(10)))
 			) {
 				throw new Error('setFeeeProtocol failed');
 			}

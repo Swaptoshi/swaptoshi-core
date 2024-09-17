@@ -1,4 +1,4 @@
-import { BaseEndpoint, cryptography, ModuleEndpointContext, testing } from 'klayr-sdk';
+import { cryptography, Modules, testing, Types } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
 import { PrefixedStateReadWriter } from '../../../../node_modules/klayr-framework/dist-node/state_machine/prefixed_state_read_writer';
@@ -21,7 +21,7 @@ import { serializer } from '../../../../src/app/modules/dex/utils';
 import { getPoolEndpointResponseSchema } from '../../../../src/app/modules/dex/schema';
 
 describe('DexEndpoint', () => {
-	let context: ModuleEndpointContext;
+	let context: Types.ModuleEndpointContext;
 	let module: DexModule;
 	let endpoint: DexEndpoint;
 	let stateStore: PrefixedStateReadWriter;
@@ -34,7 +34,7 @@ describe('DexEndpoint', () => {
 	});
 
 	it('should inherit from BaseEndpoint', () => {
-		expect(DexEndpoint.prototype).toBeInstanceOf(BaseEndpoint);
+		expect(DexEndpoint.prototype).toBeInstanceOf(Modules.BaseEndpoint);
 	});
 
 	describe('constructor', () => {

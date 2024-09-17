@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { PositionInfo } from '../types';
 import { positionInfoStoreSchema } from '../schema';
 
@@ -11,12 +11,12 @@ export const defaultPositionInfo: PositionInfo = Object.freeze({
 	tokensOwed1: '0',
 });
 
-export class PositionInfoStore extends BaseStore<PositionInfo> {
+export class PositionInfoStore extends Modules.BaseStore<PositionInfo> {
 	public getKey(poolAddress: Buffer, key: Buffer) {
 		return Buffer.concat([poolAddress, key]);
 	}
 
-	public async getOrDefault(context: ImmutableStoreGetter, key: Buffer): Promise<PositionInfo> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter, key: Buffer): Promise<PositionInfo> {
 		try {
 			const positionInfo = await this.get(context, key);
 			return positionInfo;

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
+import { Modules, Types, utils } from 'klayr-sdk';
 import { VestingUnlockStoreData } from '../../types';
 import { BaseInstance } from './base';
 import { bytesToNumber, numberToBytes, serializer } from '../../utils';
@@ -13,10 +13,10 @@ import { TokenFactoryGovernableConfig } from '../../config';
 
 export class VestingUnlock extends BaseInstance<VestingUnlockStoreData, VestingUnlockStore> implements VestingUnlockStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: TokenFactoryGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		vestingUnlock: VestingUnlockStoreData,
 		height: number,
@@ -30,7 +30,7 @@ export class VestingUnlock extends BaseInstance<VestingUnlockStoreData, VestingU
 			serializer<VestingUnlockStoreData>({
 				toBeUnlocked: this.toBeUnlocked,
 			}),
-		) as JSONObject<VestingUnlockStoreData>;
+		) as Types.JSONObject<VestingUnlockStoreData>;
 	}
 
 	public toObject() {

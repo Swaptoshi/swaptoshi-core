@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, JSONObject, NamedRegistry, TransactionVerifyContext, codec, utils } from 'klayr-sdk';
+import { Modules, Types, StateMachine, codec, utils } from 'klayr-sdk';
 import { BoostVoteParams, BoostedAccountStoreData, StakeTransactionParams } from '../../types';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
@@ -14,10 +14,10 @@ import { VoteScoreStore } from '../vote_score';
 
 export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, BoostedAccountStore> implements BoostedAccountStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: GovernanceGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		boostedAccount: BoostedAccountStoreData,
 		address: Buffer,
@@ -34,7 +34,7 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 			serializer<BoostedAccountStoreData>({
 				targetHeight: this.targetHeight,
 			}),
-		) as JSONObject<BoostedAccountStoreData>;
+		) as Types.JSONObject<BoostedAccountStoreData>;
 	}
 
 	public toObject() {
@@ -96,7 +96,7 @@ export class BoostedAccount extends BaseInstance<BoostedAccountStoreData, Booste
 		const config = await this.getConfig(this.immutableContext!.context);
 		if (!config.enableBoosting) return;
 
-		const { context } = this.immutableContext! as { context: TransactionVerifyContext };
+		const { context } = this.immutableContext! as { context: StateMachine.TransactionVerifyContext };
 
 		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
 			let isDownStaking = false;

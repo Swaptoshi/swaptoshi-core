@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { NamedRegistry, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { BaseGovernableConfig, GovernableConfigSetContext, GovernableConfigVerifyContext } from '../governance';
 import { defaultConfig } from './constants';
 import { configSchema } from './schema';
@@ -13,10 +13,10 @@ export class DexGovernableConfig extends BaseGovernableConfig<DexModuleConfig> {
 	public schema = configSchema;
 	public default = defaultConfig;
 
-	private stores = new NamedRegistry();
+	private stores = new Modules.NamedRegistry();
 	private _feeConversionMethod: FeeConversionMethod | undefined;
 
-	public addDependencies(stores: NamedRegistry, feeConversionMethod?: FeeConversionMethod) {
+	public addDependencies(stores: Modules.NamedRegistry, feeConversionMethod?: FeeConversionMethod) {
 		this.stores = stores;
 		this._feeConversionMethod = feeConversionMethod;
 	}
@@ -34,7 +34,7 @@ export class DexGovernableConfig extends BaseGovernableConfig<DexModuleConfig> {
 		}
 	}
 
-	public async verify(_context: GovernableConfigVerifyContext<DexModuleConfig>): Promise<VerificationResult> {
+	public async verify(_context: GovernableConfigVerifyContext<DexModuleConfig>): Promise<StateMachine.VerificationResult> {
 		try {
 			await verifyModuleConfig(_context.config);
 
@@ -43,10 +43,10 @@ export class DexGovernableConfig extends BaseGovernableConfig<DexModuleConfig> {
 			}
 		} catch (error) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 }

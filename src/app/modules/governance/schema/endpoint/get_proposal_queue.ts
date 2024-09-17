@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { TypedSchema, ProposalQueueStoreData, GetProposalQueueParams } from '../../types';
 
-export const getProposalQueueEndpointResponseSchema: TypedSchema<JSONObject<ProposalQueueStoreData>> = {
+export const getProposalQueueEndpointResponseSchema: TypedSchema<Types.JSONObject<ProposalQueueStoreData>> = {
 	$id: '/governance/endpoint/response/getProposalQueue',
 	type: 'object',
 	required: ['start', 'quorum', 'ends', 'execute'],

@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { icoWithdrawEventSchema } from '../schema';
 import { ICOWithdrawEventData } from '../types';
 
-export class IcoWithdrawEvent extends BaseEvent<ICOWithdrawEventData> {
+export class IcoWithdrawEvent extends Modules.BaseEvent<ICOWithdrawEventData> {
 	public schema = icoWithdrawEventSchema;
 }

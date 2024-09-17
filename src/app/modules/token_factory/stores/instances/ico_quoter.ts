@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, NamedRegistry } from 'klayr-sdk';
+import { Modules, Types } from 'klayr-sdk';
 import Decimal from 'decimal.js';
 import { ICOStoreData } from '../../types';
 import { BaseInstance } from './base';
@@ -36,7 +36,7 @@ interface QuoteExactOutputSingleParams {
 }
 
 export class ICOQuoter extends BaseInstance<ICOStoreData, ICOStore> {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string) {
+	public constructor(stores: Modules.NamedRegistry, events: Modules.NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: Types.GenesisConfig, moduleName: string) {
 		super(ICOStore, stores, events, config, genesisConfig, moduleName, Buffer.alloc(0));
 	}
 

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, FeeMethod, GenesisConfig, JSONObject, NamedRegistry, TokenMethod } from 'klayr-sdk';
-import { Constructor, ImmutableContext, ImmutableFactoryContext, MutableFactoryContext } from '../../types';
+import { Modules, Types } from 'klayr-sdk';
+import { Constructor, FeeMethod, ImmutableContext, ImmutableFactoryContext, MutableFactoryContext, TokenMethod } from '../../types';
 import { DexMethod } from '../../../dex/method';
 import { TokenFactoryGovernableConfig } from '../../config';
 
@@ -12,8 +12,16 @@ export interface AddDependenciesParam<T extends ImmutableFactoryContext | Mutabl
 	dexMethod?: DexMethod;
 }
 
-export class BaseInstance<T, K extends BaseStore<T>> {
-	public constructor(storeKey: Constructor, stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, key?: Buffer) {
+export class BaseInstance<T, K extends Modules.BaseStore<T>> {
+	public constructor(
+		storeKey: Constructor,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
+		config: TokenFactoryGovernableConfig,
+		genesisConfig: Types.GenesisConfig,
+		moduleName: string,
+		key?: Buffer,
+	) {
 		this.stores = stores;
 		this.events = events;
 		this.moduleName = moduleName;
@@ -23,7 +31,7 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 		if (key) this.key = key;
 	}
 
-	public toJSON(): JSONObject<T> {
+	public toJSON(): Types.JSONObject<T> {
 		throw new Error('toJSON() method is not implemented');
 	}
 
@@ -99,9 +107,9 @@ export class BaseInstance<T, K extends BaseStore<T>> {
 	}
 
 	protected readonly instanceStore: K;
-	protected readonly stores: NamedRegistry;
-	protected readonly events: NamedRegistry;
-	protected readonly genesisConfig: GenesisConfig;
+	protected readonly stores: Modules.NamedRegistry;
+	protected readonly events: Modules.NamedRegistry;
+	protected readonly genesisConfig: Types.GenesisConfig;
 	protected readonly moduleName: string;
 	protected readonly config: TokenFactoryGovernableConfig;
 

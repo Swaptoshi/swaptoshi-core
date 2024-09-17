@@ -1,21 +1,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import {
-	BaseInteroperableModule,
-	BlockExecuteContext,
-	FeeMethod,
-	ModuleInitArgs,
-	ModuleMetadata,
-	TokenMethod,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { DexMethod } from '../dex/method';
 import { FeeConversionMethod } from '../fee_conversion';
-import { NFTMethod } from '../nft';
 import { TokenFactoryInteroperableMethod } from './cc_method';
 import { AirdropCreateCommand } from './commands/airdrop_create_command';
 import { AirdropDistributeCommand } from './commands/airdrop_distribute_command';
@@ -78,11 +66,11 @@ import { FactoryStore } from './stores/factory';
 import { ICOStore } from './stores/ico';
 import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { VestingUnlockStore } from './stores/vesting_unlock';
-import { TokenFactoryModuleDependencies } from './types';
+import { FeeMethod, NFTMethod, TokenFactoryModuleDependencies, TokenMethod } from './types';
 import { TokenFactoryGovernableConfig } from './config';
 import { GovernanceMethod } from '../governance';
 
-export class TokenFactoryModule extends BaseInteroperableModule {
+export class TokenFactoryModule extends Modules.Interoperability.BaseInteroperableModule {
 	public _config: TokenFactoryGovernableConfig = new TokenFactoryGovernableConfig(this.name, 5);
 	public _feeMethod: FeeMethod | undefined;
 	public _feeConversionMethod: FeeConversionMethod | undefined;
@@ -172,7 +160,7 @@ export class TokenFactoryModule extends BaseInteroperableModule {
 		}
 	}
 
-	public metadata(): ModuleMetadata {
+	public metadata(): Modules.ModuleMetadata {
 		return {
 			...this.baseMetadata(),
 			endpoints: [
@@ -232,7 +220,7 @@ export class TokenFactoryModule extends BaseInteroperableModule {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async init(_args: ModuleInitArgs): Promise<void> {
+	public async init(_args: Modules.ModuleInitArgs): Promise<void> {
 		const airdropStore = this.stores.get(AirdropStore);
 		const factoryStore = this.stores.get(FactoryStore);
 		const icoStore = this.stores.get(ICOStore);
@@ -255,7 +243,7 @@ export class TokenFactoryModule extends BaseInteroperableModule {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
+	public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
 		try {
 			await verifyMinimumFee.bind(this)(_context);
 			await verifyBaseFee.bind(this)(_context);
@@ -263,14 +251,14 @@ export class TokenFactoryModule extends BaseInteroperableModule {
 			await verifySwapByTransfer.bind(this)(_context);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async beforeCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await verifyMinimumFee.bind(this)(_context);
 		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
@@ -278,11 +266,11 @@ export class TokenFactoryModule extends BaseInteroperableModule {
 		await executeBaseFee.bind(this)(_context);
 	}
 
-	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async afterCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await executeSwapByTransfer.bind(this)(_context);
 	}
 
-	public async beforeTransactionsExecute(_context: BlockExecuteContext): Promise<void> {
+	public async beforeTransactionsExecute(_context: StateMachine.BlockExecuteContext): Promise<void> {
 		await executeVestingUnlock.bind(this)(_context);
 	}
 }

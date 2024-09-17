@@ -1,11 +1,11 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, MethodContext, StoreGetter, TokenMethod } from 'klayr-sdk';
-import { MutableContext, SupportedTokenManager } from '../types';
+import { Modules, StateMachine } from 'klayr-sdk';
+import { MutableContext, SupportedTokenManager, TokenMethod } from '../types';
 import { supportedTokenStoreSchema } from '../schema';
 import { DexGovernableConfig } from '../config';
 
-export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
+export class SupportedTokenStore extends Modules.BaseStore<SupportedTokenManager> {
 	public init(config: DexGovernableConfig) {
 		this.config = config;
 		if (this.tokenMethod !== undefined) this.dependencyReady = true;
@@ -16,7 +16,7 @@ export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 		if (this.config !== undefined) this.dependencyReady = true;
 	}
 
-	public async apply(context: StoreGetter): Promise<void> {
+	public async apply(context: Modules.StoreGetter): Promise<void> {
 		this._checkDependencies();
 
 		const config = await this.config!.getConfig(context);
@@ -48,16 +48,16 @@ export class SupportedTokenStore extends BaseStore<SupportedTokenManager> {
 		await this.set(context, Buffer.alloc(0), supportManager);
 	}
 
-	private async _applyConfig(context: StoreGetter): Promise<void> {
+	private async _applyConfig(context: Modules.StoreGetter): Promise<void> {
 		const config = await this.config!.getConfig(context);
 
 		if (config.supportAllTokens) {
-			await this.tokenMethod?.supportAllTokens(context as MethodContext);
+			await this.tokenMethod?.supportAllTokens(context as StateMachine.MethodContext);
 		} else {
-			await this.tokenMethod?.removeAllTokensSupport(context as MethodContext);
+			await this.tokenMethod?.removeAllTokensSupport(context as StateMachine.MethodContext);
 			const supportManager = await this.get(context, Buffer.alloc(0));
 			for (const supportedToken of supportManager.supported) {
-				await this.tokenMethod?.supportTokenID(context as MethodContext, supportedToken);
+				await this.tokenMethod?.supportTokenID(context as StateMachine.MethodContext, supportedToken);
 			}
 		}
 	}

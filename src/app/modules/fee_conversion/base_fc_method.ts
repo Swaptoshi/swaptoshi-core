@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { FeeMethod, NamedRegistry, TokenMethod, TransactionVerifyContext } from 'klayr-sdk';
-import { FeeConversionVerificationResult } from './types';
+import { Modules, StateMachine } from 'klayr-sdk';
+import { FeeConversionVerificationResult, FeeMethod, TokenMethod } from './types';
 
 /**
  * The `BaseFeeConversionMethod` outlines the implementation required to implement `FeeConversion` modules by providing a common interface, so that each module can implement its own fee conversion logic
  */
 export abstract class BaseFeeConversionMethod {
-	public stores: NamedRegistry;
-	public events: NamedRegistry;
+	public stores: Modules.NamedRegistry;
+	public events: Modules.NamedRegistry;
 	public tokenMethod!: TokenMethod;
 	public feeMethod!: FeeMethod;
 
-	public constructor(stores: NamedRegistry, events: NamedRegistry) {
+	public constructor(stores: Modules.NamedRegistry, events: Modules.NamedRegistry) {
 		this.stores = stores;
 		this.events = events;
 	}
@@ -47,7 +47,7 @@ export abstract class BaseFeeConversionMethod {
 	 * @param context Klayr SDK context with a `getStore` property.
 	 */
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verifyFeeConversion(_context: TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
+	public async verifyFeeConversion(_context: StateMachine.TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
 		throw new Error(`verifyFeeConversion for class ${this.constructor.name} is not implemented`);
 	}
 }

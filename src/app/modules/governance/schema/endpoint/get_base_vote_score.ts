@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { GetBaseVoteScoreParams, TypedSchema, VoteScoreStoreData } from '../../types';
 
-export const getBaseVoteScoreEndpointResponseSchema: TypedSchema<JSONObject<VoteScoreStoreData>> = {
+export const getBaseVoteScoreEndpointResponseSchema: TypedSchema<Types.JSONObject<VoteScoreStoreData>> = {
 	$id: '/governance/endpoint/response/getBaseVoteScore',
 	type: 'object',
 	required: ['score'],

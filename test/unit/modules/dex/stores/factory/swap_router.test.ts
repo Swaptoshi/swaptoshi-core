@@ -3,13 +3,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-param-reassign */
 /* eslint-disable jest/no-standalone-expect */
-import { TokenMethod } from 'klayr-sdk';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import { NonfungiblePositionManager, SwapRouter } from '../../../../../../src/app/modules/dex/stores/factory';
 import { Uint } from '../../../../../../src/app/modules/dex/stores/library/int';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
 import { PositionManagerStore } from '../../../../../../src/app/modules/dex/stores/position_manager';
-import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
+import { MutableSwapContext, TokenMethod } from '../../../../../../src/app/modules/dex/types';
 import { methodContextFixture } from '../shared/module';
 import { encodePath } from '../shared/path';
 import { NATIVE_TOKEN_ID, completeFixture } from '../shared/pool';

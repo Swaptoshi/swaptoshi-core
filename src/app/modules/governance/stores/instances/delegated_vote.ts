@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'klayr-sdk';
+import { Modules, Types, cryptography, utils } from 'klayr-sdk';
 import { DelegateVoteParams, DelegatedVoteStoreData, RevokeDelegatedVoteParams, VoteScoreArray } from '../../types';
 import { BaseInstance } from './base';
 import { GovernanceGovernableConfig } from '../../config';
@@ -15,10 +15,10 @@ import { BoostedAccountStore } from '../boosted_account';
 
 export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, DelegatedVoteStore> implements DelegatedVoteStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: GovernanceGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		delegatedVote: DelegatedVoteStoreData,
 		address: Buffer,
@@ -38,7 +38,7 @@ export class DelegatedVote extends BaseInstance<DelegatedVoteStoreData, Delegate
 				outgoingDelegation: this.outgoingDelegation,
 				incomingDelegation: this.incomingDelegation,
 			}),
-		) as JSONObject<DelegatedVoteStoreData>;
+		) as Types.JSONObject<DelegatedVoteStoreData>;
 	}
 
 	public toObject() {

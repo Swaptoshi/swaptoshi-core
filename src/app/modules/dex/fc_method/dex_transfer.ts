@@ -1,11 +1,11 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { TransactionVerifyContext } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { BaseFeeConversionMethod, FeeConversionVerificationResult, FeeConversionVerifyStatus } from '../../fee_conversion';
 import { isSwapByTransfer } from '../hooks';
 
 export class DexTransferFeeConversionMethod extends BaseFeeConversionMethod {
-	public async verifyFeeConversion(context: TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
+	public async verifyFeeConversion(context: StateMachine.TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
 		const swapTransferCheck = await isSwapByTransfer.bind(this)(context, context.transaction);
 
 		if (swapTransferCheck.status && swapTransferCheck.payload) {

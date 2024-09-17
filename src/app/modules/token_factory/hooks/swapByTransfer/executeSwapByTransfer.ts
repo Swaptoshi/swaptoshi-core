@@ -1,14 +1,11 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionExecuteContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { ICOStore } from '../../stores/ico';
 import { mutableTransactionHookFactoryContext } from '../../stores/context';
 import { isSwapByTransfer } from './isSwapByTransfer';
 import { decodeICOPoolAddress } from '../../stores/library';
 
-export async function executeSwapByTransfer(
-	this: { stores: NamedRegistry; events: NamedRegistry },
-	ctx: TransactionExecuteContext,
-) {
+export async function executeSwapByTransfer(this: { stores: Modules.NamedRegistry; events: Modules.NamedRegistry }, ctx: StateMachine.TransactionExecuteContext) {
 	const check = await isSwapByTransfer.bind(this)(ctx, ctx.transaction);
 	if (check.status && check.payload) {
 		const icoStore = this.stores.get(ICOStore);

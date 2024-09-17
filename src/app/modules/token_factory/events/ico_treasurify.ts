@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { ICOTreasurifyEventData } from '../types';
 import { icoTreasurifyEventSchema } from '../schema';
 
-export class IcoTreasurifyEvent extends BaseEvent<ICOTreasurifyEventData> {
+export class IcoTreasurifyEvent extends Modules.BaseEvent<ICOTreasurifyEventData> {
 	public schema = icoTreasurifyEventSchema;
 }

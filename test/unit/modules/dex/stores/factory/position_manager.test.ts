@@ -1,11 +1,10 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
-import { TokenMethod } from 'klayr-sdk';
 import { NonfungiblePositionManager, SwapRouter, DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import * as PoolAddress from '../../../../../../src/app/modules/dex/stores/library/periphery/pool_address';
 import { completeFixture } from '../shared/pool';
-import { MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
+import { MutableSwapContext, TokenMethod } from '../../../../../../src/app/modules/dex/types';
 import { PoolStore } from '../../../../../../src/app/modules/dex/stores/pool';
 import { FeeAmount, MaxUint128, TICK_SPACINGS, encodePriceSqrt, expandTo18Decimals, getMaxTick, getMinTick } from '../shared/utilities';
 import { PositionManagerStore } from '../../../../../../src/app/modules/dex/stores/position_manager';

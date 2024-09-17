@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { NFTMethod } from 'klayr-framework/dist-node/modules/nft/method';
 import {
 	MockedNFTMethod,
 	mock_nft_addDependencies,
@@ -27,7 +29,6 @@ import {
 import { NFTRegistry } from './nft_registry';
 import { NFT } from './nft';
 import { chainID } from '../module';
-import { NFTMethod } from '../../../../../../../src/app/modules/nft';
 
 const context = {} as any;
 const nftModule = 'module';
@@ -111,9 +112,7 @@ describe('MockedNFTMethod', () => {
 		});
 
 		it('should throw an error if executed not by owner', async () => {
-			await expect(
-				(async () => nftMethod.destroy(context, Buffer.from('not-owner'), nftId))(),
-			).rejects.toThrow();
+			await expect((async () => nftMethod.destroy(context, Buffer.from('not-owner'), nftId))()).rejects.toThrow();
 		});
 	});
 
@@ -178,25 +177,8 @@ describe('MockedNFTMethod', () => {
 
 	describe('transferCrossChain', () => {
 		it('should call mock method', async () => {
-			await nftMethod.transferCrossChain(
-				context,
-				sender,
-				recipient,
-				nftId,
-				receivingChainID,
-				BigInt(0),
-				'',
-				true,
-			);
-			expect(mock_nft_transferCrossChain).toHaveBeenCalledWith(
-				sender,
-				recipient,
-				nftId,
-				receivingChainID,
-				BigInt(0),
-				'',
-				true,
-			);
+			await nftMethod.transferCrossChain(context, sender, recipient, nftId, receivingChainID, BigInt(0), '', true);
+			expect(mock_nft_transferCrossChain).toHaveBeenCalledWith(sender, recipient, nftId, receivingChainID, BigInt(0), '', true);
 		});
 	});
 
@@ -231,38 +213,21 @@ describe('MockedNFTMethod', () => {
 	describe('supportAllNFTsFromCollection', () => {
 		it('should call mock method', async () => {
 			await nftMethod.supportAllNFTsFromCollection(context, receivingChainID, collectionId);
-			expect(mock_nft_supportAllNFTsFromCollection).toHaveBeenCalledWith(
-				receivingChainID,
-				collectionId,
-			);
+			expect(mock_nft_supportAllNFTsFromCollection).toHaveBeenCalledWith(receivingChainID, collectionId);
 		});
 	});
 
 	describe('removeSupportAllNFTsFromCollection', () => {
 		it('should call mock method', async () => {
 			await nftMethod.removeSupportAllNFTsFromCollection(context, receivingChainID, collectionId);
-			expect(mock_nft_removeSupportAllNFTsFromCollection).toHaveBeenCalledWith(
-				receivingChainID,
-				collectionId,
-			);
+			expect(mock_nft_removeSupportAllNFTsFromCollection).toHaveBeenCalledWith(receivingChainID, collectionId);
 		});
 	});
 
 	describe('recover', () => {
 		it('should call mock method', async () => {
-			await nftMethod.recover(
-				context,
-				receivingChainID,
-				Buffer.alloc(1),
-				Buffer.alloc(1),
-				Buffer.alloc(1),
-			);
-			expect(mock_nft_recover).toHaveBeenCalledWith(
-				receivingChainID,
-				Buffer.alloc(1),
-				Buffer.alloc(1),
-				Buffer.alloc(1),
-			);
+			await nftMethod.recover(context, receivingChainID, Buffer.alloc(1), Buffer.alloc(1), Buffer.alloc(1));
+			expect(mock_nft_recover).toHaveBeenCalledWith(receivingChainID, Buffer.alloc(1), Buffer.alloc(1), Buffer.alloc(1));
 		});
 	});
 
@@ -273,11 +238,7 @@ describe('MockedNFTMethod', () => {
 
 		it('should call mock method', async () => {
 			await nftMethod.setAttributes(context, nftModule, nftId, Buffer.from('new-attribute'));
-			expect(mock_nft_setAttributes).toHaveBeenCalledWith(
-				nftModule,
-				nftId,
-				Buffer.from('new-attribute'),
-			);
+			expect(mock_nft_setAttributes).toHaveBeenCalledWith(nftModule, nftId, Buffer.from('new-attribute'));
 		});
 
 		it('should change attributes array', async () => {

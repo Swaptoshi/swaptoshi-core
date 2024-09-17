@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
-import { FeeMethod, TransactionExecuteContext } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { DexGovernableConfig } from '../../config';
+import { FeeMethod } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function executeBaseFee(
@@ -9,7 +10,7 @@ export async function executeBaseFee(
 		_feeMethod: FeeMethod | undefined;
 		_config: DexGovernableConfig;
 	},
-	context: TransactionExecuteContext,
+	context: StateMachine.TransactionExecuteContext,
 ) {
 	if (!this._config || !this._feeMethod) return;
 

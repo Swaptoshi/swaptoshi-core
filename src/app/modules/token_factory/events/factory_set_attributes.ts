@@ -13,10 +13,10 @@
  * Removal or modification of this copyright notice is prohibited.
  */
 
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { FactorySetAttributesEventData } from '../types';
 import { factorySetAttributesEventSchema } from '../schema';
 
-export class FactorySetAttributesEvent extends BaseEvent<FactorySetAttributesEventData> {
+export class FactorySetAttributesEvent extends Modules.BaseEvent<FactorySetAttributesEventData> {
 	public schema = factorySetAttributesEventSchema;
 }

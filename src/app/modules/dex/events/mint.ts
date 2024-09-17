@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { mintEventSchema } from '../schema';
 
 export interface MintEventData {
@@ -13,6 +13,6 @@ export interface MintEventData {
 	upperLiquidityNet: string;
 }
 
-export class MintEvent extends BaseEvent<MintEventData> {
+export class MintEvent extends Modules.BaseEvent<MintEventData> {
 	public schema = mintEventSchema;
 }

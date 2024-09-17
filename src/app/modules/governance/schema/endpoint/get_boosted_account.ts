@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { GetBoostedAccountParams, TypedSchema, BoostedAccountStoreData } from '../../types';
 
-export const getBoostedAccountEndpointResponseSchema: TypedSchema<JSONObject<BoostedAccountStoreData>> = {
+export const getBoostedAccountEndpointResponseSchema: TypedSchema<Types.JSONObject<BoostedAccountStoreData>> = {
 	$id: '/governance/endpoint/response/getBoostedAccount',
 	type: 'object',
 	required: ['targetHeight'],

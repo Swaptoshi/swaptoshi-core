@@ -1,16 +1,6 @@
 /* eslint-disable camelcase */
-import { MethodContext } from 'klayr-sdk';
-import {
-	FeeAmount,
-	TICK_SPACINGS,
-	createPoolFunctions,
-	PoolFunctions,
-	createMultiPoolFunctions,
-	encodePriceSqrt,
-	getMinTick,
-	getMaxTick,
-	expandTo18Decimals,
-} from '../shared/utilities';
+import { StateMachine } from 'klayr-sdk';
+import { FeeAmount, TICK_SPACINGS, createPoolFunctions, PoolFunctions, createMultiPoolFunctions, encodePriceSqrt, getMinTick, getMaxTick, expandTo18Decimals } from '../shared/utilities';
 import { TEST_POOL_START_TIME, poolFixture } from '../shared/pool';
 import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { TestCallee } from '../shared/fixtures/TestCallee';
@@ -28,7 +18,7 @@ type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
 
 describe('DEX Pool', () => {
 	let module: DexModule;
-	let createMethodContext: () => MethodContext;
+	let createMethodContext: () => StateMachine.MethodContext;
 
 	let token0: Buffer;
 	let token1: Buffer;
@@ -49,22 +39,10 @@ describe('DEX Pool', () => {
 
 	beforeEach(async () => {
 		({ module, createMethodContext } = await methodContextFixture());
-		const swapContext = methodSwapContext(
-			createMethodContext(),
-			sender,
-			parseInt(TEST_POOL_START_TIME, 10),
-		);
-		({ token0, token1, token2, createPool, swapTargetCallee, swapTargetRouter } = await poolFixture(
-			swapContext,
-			module,
-		));
+		const swapContext = methodSwapContext(createMethodContext(), sender, parseInt(TEST_POOL_START_TIME, 10));
+		({ token0, token1, token2, createPool, swapTargetCallee, swapTargetRouter } = await poolFixture(swapContext, module));
 
-		const createPoolWrapped = async (
-			amount: number,
-			spacing: number,
-			firstToken: Buffer,
-			secondToken: Buffer,
-		): Promise<[DEXPool, any]> => {
+		const createPoolWrapped = async (amount: number, spacing: number, firstToken: Buffer, secondToken: Buffer): Promise<[DEXPool, any]> => {
 			const pool = await createPool(amount.toString(), spacing.toString(), firstToken, secondToken);
 			const poolFunctions = createPoolFunctions({
 				swapTarget: swapTargetCallee,
@@ -78,18 +56,8 @@ describe('DEX Pool', () => {
 		};
 
 		// default to the 30 bips pool
-		[pool0, pool0Functions] = await createPoolWrapped(
-			parseInt(feeAmount, 10),
-			parseInt(tickSpacing, 10),
-			token0,
-			token1,
-		);
-		[pool1, pool1Functions] = await createPoolWrapped(
-			parseInt(feeAmount, 10),
-			parseInt(tickSpacing, 10),
-			token1,
-			token2,
-		);
+		[pool0, pool0Functions] = await createPoolWrapped(parseInt(feeAmount, 10), parseInt(tickSpacing, 10), token0, token1);
+		[pool1, pool1Functions] = await createPoolWrapped(parseInt(feeAmount, 10), parseInt(tickSpacing, 10), token1, token2);
 	});
 
 	it('constructor initializes immutables', () => {
@@ -125,21 +93,9 @@ describe('DEX Pool', () => {
 
 			const method = ForExact0 ? swapForExact0Multi : swapForExact1Multi;
 			await method(100, sender);
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				pool1.address.toString('hex'),
-				sender.toString('hex'),
-				'100',
-			);
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				pool0.address.toString('hex'),
-				pool1.address.toString('hex'),
-				'102',
-			);
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				sender.toString('hex'),
-				pool0.address.toString('hex'),
-				'104',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(pool1.address.toString('hex'), sender.toString('hex'), '100');
+			expect(mock_token_transfer).toHaveBeenCalledWith(pool0.address.toString('hex'), pool1.address.toString('hex'), '102');
+			expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool0.address.toString('hex'), '104');
 		});
 	});
 });

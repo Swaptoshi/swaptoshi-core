@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext, codec } from 'klayr-sdk';
+import { Modules, codec } from 'klayr-sdk';
 import { crossChainNFTTransferMessageParamsSchema } from '../../schema';
 import { TokenFactoryInteroperableMethod } from '../../cc_method';
 import { ICOStore } from '../../stores/ico';
@@ -12,7 +12,7 @@ interface TransferNFTParams {
 	data: string;
 }
 
-export async function verifyValidCrossTransfer(this: TokenFactoryInteroperableMethod, context: CrossChainMessageContext) {
+export async function verifyValidCrossTransfer(this: TokenFactoryInteroperableMethod, context: Modules.Interoperability.CrossChainMessageContext) {
 	if (context.ccm.module === 'nft' && context.ccm.crossChainCommand === 'crossChainTransfer') {
 		const params = codec.decode<TransferNFTParams>(crossChainNFTTransferMessageParamsSchema, context.ccm.params);
 

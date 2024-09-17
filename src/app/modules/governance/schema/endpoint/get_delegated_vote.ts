@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { GetDelegatedVoteParams, TypedSchema, DelegatedVoteStoreData } from '../../types';
 
-export const getDelegatedVoteEndpointResponseSchema: TypedSchema<JSONObject<DelegatedVoteStoreData>> = {
+export const getDelegatedVoteEndpointResponseSchema: TypedSchema<Types.JSONObject<DelegatedVoteStoreData>> = {
 	$id: '/governance/endpoint/response/getDelegatedVote',
 	type: 'object',
 	required: ['outgoingDelegation', 'incomingDelegation'],

@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/no-cycle */
-import { FeeMethod, JSONObject, TokenMethod } from 'klayr-sdk';
+/* eslint-disable import/no-extraneous-dependencies */
+import { Types, Modules } from 'klayr-sdk';
+
 import { FeeConvertedEventData } from './events/fee_converted';
 import { DexMethod } from '../dex/method';
 import { GovernanceMethod } from '../governance';
+
+export type TokenMethod = Modules.Token.TokenMethod;
+export type FeeMethod = Modules.Fee.FeeMethod;
 
 export enum FeeConversionVerifyStatus {
 	WITH_CONVERSION = 1,
@@ -34,7 +39,7 @@ export interface RegisteredMethodResponse {
 
 export interface DryRunTransactionResponse {
 	status: FeeConversionVerifyStatus;
-	data: JSONObject<FeeConvertedEventData>;
+	data: Types.JSONObject<FeeConvertedEventData>;
 	errorMessage: string;
 }
 

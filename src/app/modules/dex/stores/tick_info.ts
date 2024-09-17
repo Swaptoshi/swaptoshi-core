@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { TickInfo } from '../types';
 import { Int24String } from './library/int';
 import { tickInfoStoreSchema } from '../schema';
@@ -16,14 +16,14 @@ export const defaultTickInfo: TickInfo = Object.freeze({
 	initialized: false,
 });
 
-export class TickInfoStore extends BaseStore<TickInfo> {
+export class TickInfoStore extends Modules.BaseStore<TickInfo> {
 	public getKey(poolAddress: Buffer, tick: Int24String) {
 		const tickBuf = Buffer.allocUnsafe(3);
 		tickBuf.writeUIntBE(this.hof(tick, 24), 0, 3);
 		return Buffer.concat([poolAddress, tickBuf]);
 	}
 
-	public async getOrDefault(context: ImmutableStoreGetter, key: Buffer): Promise<TickInfo> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter, key: Buffer): Promise<TickInfo> {
 		try {
 			const positionInfo = await this.get(context, key);
 			return positionInfo;

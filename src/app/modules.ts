@@ -1,36 +1,24 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import {
-	Application,
-	AuthMethod,
-	DynamicRewardMethod,
-	FeeMethod,
-	MainchainInteroperabilityMethod,
-	PoSMethod,
-	RandomMethod,
-	SidechainInteroperabilityMethod,
-	TokenMethod,
-	ValidatorsMethod,
-} from 'klayr-sdk';
+import { Application, Modules } from 'klayr-sdk';
 import { DexModule } from './modules/dex/module';
 import { FeeConversionModule } from './modules/fee_conversion';
 import { GovernanceModule } from './modules/governance/module';
 import { LiquidPosModule } from './modules/liquid_pos/module';
-import { NFTModule } from './modules/nft/module';
 import { TokenFactoryModule } from './modules/token_factory/module';
 
 interface KlayrMethod {
-	validator: ValidatorsMethod;
-	auth: AuthMethod;
-	token: TokenMethod;
-	fee: FeeMethod;
-	random: RandomMethod;
-	reward: DynamicRewardMethod;
-	pos: PoSMethod;
-	interoperability: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
+	validator: Modules.Validators.ValidatorsMethod;
+	auth: Modules.Auth.AuthMethod;
+	token: Modules.Token.TokenMethod;
+	fee: Modules.Fee.FeeMethod;
+	random: Modules.Random.RandomMethod;
+	reward: Modules.DynamicReward.DynamicRewardMethod;
+	pos: Modules.PoS.PoSMethod;
+	interoperability: Modules.Interoperability.SidechainInteroperabilityMethod | Modules.Interoperability.MainchainInteroperabilityMethod;
 }
 
 export const registerModules = (app: Application, method: KlayrMethod): void => {
-	const nftModule = new NFTModule();
+	const nftModule = new Modules.NFT.NFTModule();
 	const tokenFactoryModule = new TokenFactoryModule();
 	const dexModule = new DexModule();
 	const feeConversionModule = new FeeConversionModule();

@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { MintCommand } from '../../../../../src/app/modules/dex/commands/mint_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { mintCommandSchema } from '../../../../../src/app/modules/dex/schema';
@@ -36,8 +36,8 @@ describe('MintCommand', () => {
 	let module: DexModule;
 	let command: MintCommand;
 	let nft: NonfungiblePositionManager;
-	let createCommandVerifyContext: (params: CommandParam) => CommandVerifyContext<CommandParam>;
-	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
+	let createCommandVerifyContext: (params: CommandParam) => StateMachine.CommandVerifyContext<CommandParam>;
+	let createCommandExecuteContext: (params: CommandParam) => StateMachine.CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
 		({ module, createCommandExecuteContext, createCommandVerifyContext, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
@@ -62,7 +62,7 @@ describe('MintCommand', () => {
 	describe('verify', () => {
 		it('should return status OK when called with valid input', async () => {
 			const context = createCommandVerifyContext(validParam);
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.OK);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (token0)', async () => {
@@ -70,7 +70,7 @@ describe('MintCommand', () => {
 				...validParam,
 				token0: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (token1)', async () => {
@@ -78,7 +78,7 @@ describe('MintCommand', () => {
 				...validParam,
 				token1: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (fee)', async () => {
@@ -86,7 +86,7 @@ describe('MintCommand', () => {
 				...validParam,
 				fee: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (tickLower)', async () => {
@@ -94,7 +94,7 @@ describe('MintCommand', () => {
 				...validParam,
 				tickLower: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (tickUpper)', async () => {
@@ -102,7 +102,7 @@ describe('MintCommand', () => {
 				...validParam,
 				tickUpper: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amount0Desired)', async () => {
@@ -110,7 +110,7 @@ describe('MintCommand', () => {
 				...validParam,
 				amount0Desired: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amount1Desired)', async () => {
@@ -118,7 +118,7 @@ describe('MintCommand', () => {
 				...validParam,
 				amount1Desired: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amount0Min)', async () => {
@@ -126,7 +126,7 @@ describe('MintCommand', () => {
 				...validParam,
 				amount0Min: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amount1Min)', async () => {
@@ -134,7 +134,7 @@ describe('MintCommand', () => {
 				...validParam,
 				amount1Min: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid address (recipient)', async () => {
@@ -142,7 +142,7 @@ describe('MintCommand', () => {
 				...validParam,
 				recipient: invalidAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (deadline)', async () => {
@@ -150,7 +150,7 @@ describe('MintCommand', () => {
 				...validParam,
 				deadline: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 	});
 

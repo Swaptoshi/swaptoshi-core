@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable camelcase */
 import { Decimal } from 'decimal.js';
-import { MethodContext, TokenMethod } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { formatPrice, formatTokenAmount } from '../shared/format';
 import {
 	createPoolFunctions,
@@ -16,11 +16,7 @@ import {
 	TICK_SPACINGS,
 } from '../shared/utilities';
 import { TEST_POOL_START_TIME, poolFixture } from '../shared/pool';
-import {
-	BigIntAble,
-	Uint,
-	Uint128,
-} from '../../../../../../src/app/modules/dex/stores/library/int';
+import { BigIntAble, Uint, Uint128 } from '../../../../../../src/app/modules/dex/stores/library/int';
 import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { mock_token_transfer } from '../shared/token';
 import { eventResultContain } from '../../../../../utils/events';
@@ -28,6 +24,7 @@ import { SwapEvent } from '../../../../../../src/app/modules/dex/events/swap';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
 import { methodContextFixture } from '../shared/module';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
+import { TokenMethod } from '../../../../../../src/app/modules/dex/types';
 
 Decimal.config({ toExpNeg: -500, toExpPos: 500 });
 
@@ -67,24 +64,14 @@ interface SwapToLowerPrice extends BaseSwapTestCase {
 	zeroForOne: true;
 	sqrtPriceLimit: Uint;
 }
-type SwapTestCase =
-	| SwapExact0For1TestCase
-	| Swap0ForExact1TestCase
-	| SwapExact1For0TestCase
-	| Swap1ForExact0TestCase
-	| SwapToHigherPrice
-	| SwapToLowerPrice;
+type SwapTestCase = SwapExact0For1TestCase | Swap0ForExact1TestCase | SwapExact1For0TestCase | Swap1ForExact0TestCase | SwapToHigherPrice | SwapToLowerPrice;
 
 function swapCaseToDescription(testCase: SwapTestCase): string {
-	const priceClause = testCase?.sqrtPriceLimit
-		? ` to price ${formatPrice(testCase.sqrtPriceLimit)}`
-		: '';
+	const priceClause = testCase?.sqrtPriceLimit ? ` to price ${formatPrice(testCase.sqrtPriceLimit)}` : '';
 	if ('exactOut' in testCase) {
 		if (testCase.exactOut) {
 			if (testCase.zeroForOne) {
-				return `swap token0 for exactly ${formatTokenAmount(
-					testCase.amount1,
-				)} token1${priceClause}`;
+				return `swap token0 for exactly ${formatTokenAmount(testCase.amount1)} token1${priceClause}`;
 			}
 			return `swap token1 for exactly ${formatTokenAmount(testCase.amount0)} token0${priceClause}`;
 		}
@@ -105,44 +92,21 @@ const sender = Buffer.from('0000000000000000000000000000000000000001', 'hex');
 
 // can't use address zero because the Buffer token does not allow it
 const SWAP_RECIPIENT_ADDRESS = Buffer.from('0000000000000000000000000000000000000002', 'hex');
-const POSITION_PROCEEDS_OUTPUT_ADDRESS = Buffer.from(
-	'0000000000000000000000000000000000000003',
-	'hex',
-);
+const POSITION_PROCEEDS_OUTPUT_ADDRESS = Buffer.from('0000000000000000000000000000000000000003', 'hex');
 
-async function executeSwap(
-	_pool: DEXPool,
-	testCase: SwapTestCase,
-	poolFunctions: PoolFunctions,
-): Promise<void> {
+async function executeSwap(_pool: DEXPool, testCase: SwapTestCase, poolFunctions: PoolFunctions): Promise<void> {
 	let swap: void;
 	if ('exactOut' in testCase) {
 		if (testCase.exactOut) {
 			if (testCase.zeroForOne) {
-				swap = await poolFunctions.swap0ForExact1(
-					testCase.amount1,
-					SWAP_RECIPIENT_ADDRESS,
-					testCase.sqrtPriceLimit,
-				);
+				swap = await poolFunctions.swap0ForExact1(testCase.amount1, SWAP_RECIPIENT_ADDRESS, testCase.sqrtPriceLimit);
 			} else {
-				swap = await poolFunctions.swap1ForExact0(
-					testCase.amount0,
-					SWAP_RECIPIENT_ADDRESS,
-					testCase.sqrtPriceLimit,
-				);
+				swap = await poolFunctions.swap1ForExact0(testCase.amount0, SWAP_RECIPIENT_ADDRESS, testCase.sqrtPriceLimit);
 			}
 		} else if (testCase.zeroForOne) {
-			swap = await poolFunctions.swapExact0For1(
-				testCase.amount0,
-				SWAP_RECIPIENT_ADDRESS,
-				testCase.sqrtPriceLimit,
-			);
+			swap = await poolFunctions.swapExact0For1(testCase.amount0, SWAP_RECIPIENT_ADDRESS, testCase.sqrtPriceLimit);
 		} else {
-			swap = await poolFunctions.swapExact1For0(
-				testCase.amount1,
-				SWAP_RECIPIENT_ADDRESS,
-				testCase.sqrtPriceLimit,
-			);
+			swap = await poolFunctions.swapExact1For0(testCase.amount1, SWAP_RECIPIENT_ADDRESS, testCase.sqrtPriceLimit);
 		}
 	} else if (testCase.zeroForOne) {
 		swap = await poolFunctions.swapToLowerPrice(testCase.sqrtPriceLimit, SWAP_RECIPIENT_ADDRESS);
@@ -470,8 +434,8 @@ const TEST_POOLS: PoolTestCase[] = [
 describe('DEX Pool swap tests', () => {
 	for (const poolCase of TEST_POOLS) {
 		let module: DexModule;
-		let createMethodContext: () => MethodContext;
-		let context: MethodContext;
+		let createMethodContext: () => StateMachine.MethodContext;
+		let context: StateMachine.MethodContext;
 		let tokenMethod: TokenMethod;
 
 		describe(poolCase.description, () => {
@@ -479,35 +443,18 @@ describe('DEX Pool swap tests', () => {
 				({ module, createMethodContext, tokenMethod } = await methodContextFixture());
 				context = createMethodContext();
 				const swapContext = methodSwapContext(context, sender, parseInt(TEST_POOL_START_TIME, 10));
-				const {
-					createPool,
-					token0,
-					token1,
-					swapTargetCallee: swapTarget,
-				} = await poolFixture(swapContext, module);
-				const pool = await createPool(
-					poolCase.feeAmount.toString(),
-					poolCase.tickSpacing.toString(),
-				);
+				const { createPool, token0, token1, swapTargetCallee: swapTarget } = await poolFixture(swapContext, module);
+				const pool = await createPool(poolCase.feeAmount.toString(), poolCase.tickSpacing.toString());
 				const poolFunctions = createPoolFunctions({ swapTarget, token0, token1, pool });
 				await pool.initialize(poolCase.startingPrice.toString());
 				// mint all positions
 				for (const position of poolCase.positions) {
-					await poolFunctions.mint(
-						sender.toString('hex'),
-						position.tickLower,
-						position.tickUpper,
-						position.liquidity,
-					);
+					await poolFunctions.mint(sender.toString('hex'), position.tickLower, position.tickUpper, position.liquidity);
 				}
 
 				const [poolBalance0, poolBalance1] = await Promise.all([
-					(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token0)) ?? BigInt(0)
-					).toString(),
-					(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token1)) ?? BigInt(0)
-					).toString(),
+					((await tokenMethod.getAvailableBalance(context, pool.address, token0)) ?? BigInt(0)).toString(),
+					((await tokenMethod.getAvailableBalance(context, pool.address, token1)) ?? BigInt(0)).toString(),
 				]);
 
 				return { token0, token1, pool, poolFunctions, poolBalance0, poolBalance1, swapTarget };
@@ -523,20 +470,13 @@ describe('DEX Pool swap tests', () => {
 			let poolFunctions: PoolFunctions;
 
 			beforeEach(async () => {
-				({ token0, token1, pool, poolFunctions, poolBalance0, poolBalance1 } =
-					await poolCaseFixture());
+				({ token0, token1, pool, poolFunctions, poolBalance0, poolBalance1 } = await poolCaseFixture());
 			});
 
 			afterEach(async () => {
 				for (const { liquidity, tickUpper, tickLower } of poolCase.positions) {
 					await pool.burn(tickLower.toString(), tickUpper.toString(), liquidity.toString());
-					await pool.collect(
-						POSITION_PROCEEDS_OUTPUT_ADDRESS,
-						tickLower.toString(),
-						tickUpper.toString(),
-						Uint128.MAX,
-						Uint128.MAX,
-					);
+					await pool.collect(POSITION_PROCEEDS_OUTPUT_ADDRESS, tickLower.toString(), tickUpper.toString(), Uint128.MAX, Uint128.MAX);
 				}
 			});
 
@@ -547,9 +487,7 @@ describe('DEX Pool swap tests', () => {
 						await executeSwap(pool, testCase, poolFunctions);
 					} catch (error) {
 						expect({
-							swapError: (error as string)
-								.toString()
-								.replace('Error: ', 'VM Exception while processing transaction: revert '),
+							swapError: (error as string).toString().replace('Error: ', 'VM Exception while processing transaction: revert '),
 							poolBalance0: poolBalance0.toString(),
 							poolBalance1: poolBalance1.toString(),
 							poolPriceBefore: formatPrice(slot0.sqrtPriceX96),
@@ -557,20 +495,9 @@ describe('DEX Pool swap tests', () => {
 						}).toMatchSnapshot();
 						return;
 					}
-					const [
-						poolBalance0After,
-						poolBalance1After,
-						slot0After,
-						liquidityAfter,
-						feeGrowthGlobal0X128,
-						feeGrowthGlobal1X128,
-					] = await Promise.all([
-						(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)) ?? BigInt(0)
-						).toString(),
-						(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)) ?? BigInt(0)
-						).toString(),
+					const [poolBalance0After, poolBalance1After, slot0After, liquidityAfter, feeGrowthGlobal0X128, feeGrowthGlobal1X128] = await Promise.all([
+						((await tokenMethod.getAvailableBalance(context, pool.address, token0)) ?? BigInt(0)).toString(),
+						((await tokenMethod.getAvailableBalance(context, pool.address, token1)) ?? BigInt(0)).toString(),
 						pool.slot0,
 						pool.liquidity,
 						pool.feeGrowthGlobal0X128,
@@ -580,43 +507,15 @@ describe('DEX Pool swap tests', () => {
 					const poolBalance1Delta = Uint.from(poolBalance1After).sub(poolBalance1);
 
 					// check all the events were emitted corresponding to balance changes
-					if (poolBalance0Delta.eq(0))
-						expect(mock_token_transfer).not.toHaveBeenCalledWith(
-							pool.address.toString('hex'),
-							SWAP_RECIPIENT_ADDRESS.toString('hex'),
-							'0',
-						);
+					if (poolBalance0Delta.eq(0)) expect(mock_token_transfer).not.toHaveBeenCalledWith(pool.address.toString('hex'), SWAP_RECIPIENT_ADDRESS.toString('hex'), '0');
 					else if (poolBalance0Delta.lt(0))
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							pool.address.toString('hex'),
-							SWAP_RECIPIENT_ADDRESS.toString('hex'),
-							poolBalance0Delta.mul(-1).toString(),
-						);
-					else
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							poolBalance0Delta.toString(),
-						);
+						expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), SWAP_RECIPIENT_ADDRESS.toString('hex'), poolBalance0Delta.mul(-1).toString());
+					else expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), poolBalance0Delta.toString());
 
-					if (poolBalance1Delta.eq(0))
-						expect(mock_token_transfer).not.toHaveBeenCalledWith(
-							pool.address.toString('hex'),
-							SWAP_RECIPIENT_ADDRESS.toString('hex'),
-							'0',
-						);
+					if (poolBalance1Delta.eq(0)) expect(mock_token_transfer).not.toHaveBeenCalledWith(pool.address.toString('hex'), SWAP_RECIPIENT_ADDRESS.toString('hex'), '0');
 					else if (poolBalance1Delta.lt(0))
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							pool.address.toString('hex'),
-							SWAP_RECIPIENT_ADDRESS.toString('hex'),
-							poolBalance1Delta.mul(-1).toString(),
-						);
-					else
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							poolBalance1Delta.toString(),
-						);
+						expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), SWAP_RECIPIENT_ADDRESS.toString('hex'), poolBalance1Delta.mul(-1).toString());
+					else expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), poolBalance1Delta.toString());
 
 					// check that the swap event was emitted too
 					eventResultContain(context.eventQueue, SwapEvent, module.name, {
@@ -636,9 +535,7 @@ describe('DEX Pool swap tests', () => {
 						feeGrowthGlobal1X128: feeGrowthGlobal1X128.toString(),
 					});
 
-					const executionPrice = new Decimal(poolBalance1Delta.toString())
-						.div(poolBalance0Delta.toString())
-						.mul(-1);
+					const executionPrice = new Decimal(poolBalance1Delta.toString()).div(poolBalance0Delta.toString()).mul(-1);
 
 					expect({
 						amount0Before: poolBalance0.toString(),

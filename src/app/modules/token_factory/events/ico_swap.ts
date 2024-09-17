@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { icoSwapEventSchema } from '../schema';
 import { ICOSwapEventData } from '../types';
 
-export class IcoSwapEvent extends BaseEvent<ICOSwapEventData> {
+export class IcoSwapEvent extends Modules.BaseEvent<ICOSwapEventData> {
 	public schema = icoSwapEventSchema;
 }

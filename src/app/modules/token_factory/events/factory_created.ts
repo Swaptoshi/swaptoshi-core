@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { factoryCreatedEventSchema } from '../schema';
 import { FactoryCreatedEventData } from '../types';
 
-export class FactoryCreatedEvent extends BaseEvent<FactoryCreatedEventData> {
+export class FactoryCreatedEvent extends Modules.BaseEvent<FactoryCreatedEventData> {
 	public schema = factoryCreatedEventSchema;
 }

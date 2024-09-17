@@ -4,13 +4,13 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { ImmutableMethodContext, MethodContext } from 'klayr-sdk';
-import { InternalMethod } from '../../../../../../../src/app/modules/nft/internal_method';
-import { NFTAttributes } from '../../../../../../../src/app/modules/nft/stores/nft';
-import { ModuleConfig, FeeMethod, NFT } from '../../../../../../../src/app/modules/nft/types';
+import { StateMachine } from 'klayr-sdk';
+import { InternalMethod } from 'klayr-framework/dist-node/modules/nft/internal_method';
+import { NFTAttributes } from 'klayr-framework/dist-node/modules/nft/stores/nft';
+import { ModuleConfig, FeeMethod, NFT } from 'klayr-framework/dist-node/modules/nft/types';
+import { NFTMethod } from 'klayr-framework/dist-node/modules/nft/method';
 import { NFTRegistry } from './nft_registry';
 import { chainID } from '../module';
-import { NFTMethod } from '../../../../../../../src/app/modules/nft';
 
 export const mock_nft_init = jest.fn();
 export const mock_nft_addDependencies = jest.fn();
@@ -55,7 +55,7 @@ export class MockedNFTMethod implements Omit<NFTMethod, ''> {
 		mock_nft_isNFTLocked(_nft);
 		return true;
 	}
-	public async getNFT(_methodContext: ImmutableMethodContext, _nftID: Buffer): Promise<NFT> {
+	public async getNFT(_methodContext: StateMachine.ImmutableMethodContext, _nftID: Buffer): Promise<NFT> {
 		mock_nft_getNFT(_nftID);
 		const nft = NFTRegistry.instance.get(_nftID.toString('hex'));
 		if (nft) {
@@ -63,11 +63,7 @@ export class MockedNFTMethod implements Omit<NFTMethod, ''> {
 		}
 		throw new Error(`NFT doesnt exist`);
 	}
-	public async destroy(
-		_methodContext: MethodContext,
-		_address: Buffer,
-		_nftID: Buffer,
-	): Promise<void> {
+	public async destroy(_methodContext: StateMachine.MethodContext, _address: Buffer, _nftID: Buffer): Promise<void> {
 		mock_nft_destroy(_address, _nftID);
 		const nft = NFTRegistry.instance.get(_nftID.toString('hex'));
 		if (nft && nft.owner.compare(_address) === 0) {
@@ -80,26 +76,15 @@ export class MockedNFTMethod implements Omit<NFTMethod, ''> {
 		mock_nft_getCollectionID(_nftID);
 		return Buffer.alloc(0);
 	}
-	public async isNFTSupported(
-		_methodContext: ImmutableMethodContext,
-		_nftID: Buffer,
-	): Promise<boolean> {
+	public async isNFTSupported(_methodContext: StateMachine.ImmutableMethodContext, _nftID: Buffer): Promise<boolean> {
 		mock_nft_isNFTSupported(_nftID);
 		return true;
 	}
-	public async getNextAvailableIndex(
-		_methodContext: MethodContext,
-		_collectionID: Buffer,
-	): Promise<bigint> {
+	public async getNextAvailableIndex(_methodContext: StateMachine.MethodContext, _collectionID: Buffer): Promise<bigint> {
 		mock_nft_getNextAvailableIndex(_collectionID);
 		return NFTRegistry.nextAvailableId.get(_collectionID.toString('hex')) ?? BigInt(0);
 	}
-	public async create(
-		_methodContext: MethodContext,
-		_address: Buffer,
-		_collectionID: Buffer,
-		_attributesArray: NFTAttributes[],
-	): Promise<void> {
+	public async create(_methodContext: StateMachine.MethodContext, _address: Buffer, _collectionID: Buffer, _attributesArray: NFTAttributes[]): Promise<void> {
 		mock_nft_create(_address, _collectionID, _attributesArray);
 		const nft = {
 			owner: _address,
@@ -107,26 +92,17 @@ export class MockedNFTMethod implements Omit<NFTMethod, ''> {
 		};
 		NFTRegistry.createToken(_address, _collectionID, nft);
 	}
-	public async lock(_methodContext: MethodContext, _module: string, _nftID: Buffer): Promise<void> {
+	public async lock(_methodContext: StateMachine.MethodContext, _module: string, _nftID: Buffer): Promise<void> {
 		mock_nft_lock(_module, _nftID);
 	}
-	public async unlock(
-		_methodContext: MethodContext,
-		_module: string,
-		_nftID: Buffer,
-	): Promise<void> {
+	public async unlock(_methodContext: StateMachine.MethodContext, _module: string, _nftID: Buffer): Promise<void> {
 		mock_nft_unlock(_module, _nftID);
 	}
-	public async transfer(
-		_methodContext: MethodContext,
-		_senderAddress: Buffer,
-		_recipientAddress: Buffer,
-		_nftID: Buffer,
-	): Promise<void> {
+	public async transfer(_methodContext: StateMachine.MethodContext, _senderAddress: Buffer, _recipientAddress: Buffer, _nftID: Buffer): Promise<void> {
 		mock_nft_transfer(_senderAddress, _recipientAddress, _nftID);
 	}
 	public async transferCrossChain(
-		_methodContext: MethodContext,
+		_methodContext: StateMachine.MethodContext,
 		_senderAddress: Buffer,
 		_recipientAddress: Buffer,
 		_nftID: Buffer,
@@ -135,63 +111,30 @@ export class MockedNFTMethod implements Omit<NFTMethod, ''> {
 		_data: string,
 		_includeAttributes: boolean,
 	): Promise<void> {
-		mock_nft_transferCrossChain(
-			_senderAddress,
-			_recipientAddress,
-			_nftID,
-			_receivingChainID,
-			_messageFee,
-			_data,
-			_includeAttributes,
-		);
+		mock_nft_transferCrossChain(_senderAddress, _recipientAddress, _nftID, _receivingChainID, _messageFee, _data, _includeAttributes);
 	}
-	public async supportAllNFTs(_methodContext: MethodContext): Promise<void> {
+	public async supportAllNFTs(_methodContext: StateMachine.MethodContext): Promise<void> {
 		mock_nft_supportAllNFTs();
 	}
-	public async removeSupportAllNFTs(_methodContext: MethodContext): Promise<void> {
+	public async removeSupportAllNFTs(_methodContext: StateMachine.MethodContext): Promise<void> {
 		mock_nft_removeSupportAllNFTs();
 	}
-	public async supportAllNFTsFromChain(
-		_methodContext: MethodContext,
-		_chainID: Buffer,
-	): Promise<void> {
+	public async supportAllNFTsFromChain(_methodContext: StateMachine.MethodContext, _chainID: Buffer): Promise<void> {
 		mock_nft_supportAllNFTsFromChain(_chainID);
 	}
-	public async removeSupportAllNFTsFromChain(
-		_methodContext: MethodContext,
-		_chainID: Buffer,
-	): Promise<void> {
+	public async removeSupportAllNFTsFromChain(_methodContext: StateMachine.MethodContext, _chainID: Buffer): Promise<void> {
 		mock_nft_removeSupportAllNFTsFromChain(_chainID);
 	}
-	public async supportAllNFTsFromCollection(
-		_methodContext: MethodContext,
-		_chainID: Buffer,
-		_collectionID: Buffer,
-	): Promise<void> {
+	public async supportAllNFTsFromCollection(_methodContext: StateMachine.MethodContext, _chainID: Buffer, _collectionID: Buffer): Promise<void> {
 		mock_nft_supportAllNFTsFromCollection(_chainID, _collectionID);
 	}
-	public async removeSupportAllNFTsFromCollection(
-		_methodContext: MethodContext,
-		_chainID: Buffer,
-		_collectionID: Buffer,
-	): Promise<void> {
+	public async removeSupportAllNFTsFromCollection(_methodContext: StateMachine.MethodContext, _chainID: Buffer, _collectionID: Buffer): Promise<void> {
 		mock_nft_removeSupportAllNFTsFromCollection(_chainID, _collectionID);
 	}
-	public async recover(
-		_methodContext: MethodContext,
-		_terminatedChainID: Buffer,
-		_substorePrefix: Buffer,
-		_nftID: Buffer,
-		_nft: Buffer,
-	): Promise<void> {
+	public async recover(_methodContext: StateMachine.MethodContext, _terminatedChainID: Buffer, _substorePrefix: Buffer, _nftID: Buffer, _nft: Buffer): Promise<void> {
 		mock_nft_recover(_terminatedChainID, _substorePrefix, _nftID, _nft);
 	}
-	public async setAttributes(
-		_methodContext: MethodContext,
-		_module: string,
-		_nftID: Buffer,
-		_attributes: Buffer,
-	): Promise<void> {
+	public async setAttributes(_methodContext: StateMachine.MethodContext, _module: string, _nftID: Buffer, _attributes: Buffer): Promise<void> {
 		mock_nft_setAttributes(_module, _nftID, _attributes);
 		const nft = NFTRegistry.instance.get(_nftID.toString('hex'));
 		if (nft) {

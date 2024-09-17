@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { MethodContext, TokenMethod } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import {
 	expandTo18Decimals,
 	FeeAmount,
@@ -24,15 +24,7 @@ import { checkObservationEquals } from '../shared/fixtures/OracleTest';
 
 import * as sqrtTickMath from '../../../../../../src/app/modules/dex/stores/library/core/tick_math';
 import * as swapMath from '../../../../../../src/app/modules/dex/stores/library/core/swap_math';
-import {
-	BigIntAble,
-	Int24,
-	Int56,
-	Uint,
-	Uint128,
-	Uint160,
-	Uint256,
-} from '../../../../../../src/app/modules/dex/stores/library/int';
+import { BigIntAble, Int24, Int56, Uint, Uint128, Uint160, Uint256 } from '../../../../../../src/app/modules/dex/stores/library/int';
 import { DEXPool } from '../../../../../../src/app/modules/dex/stores/factory';
 import { TestCallee, mockedFlashCallback } from '../shared/fixtures/TestCallee';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
@@ -43,12 +35,8 @@ import { eventResultContain, eventResultHaveLength } from '../../../../../utils/
 import { PoolInitializedEvent } from '../../../../../../src/app/modules/dex/events/pool_initialized';
 import { IncreaseObservationCardinalityNextEvent } from '../../../../../../src/app/modules/dex/events/increase_observation_cardinality_next';
 import { mock_token_transfer } from '../shared/token';
-import {
-	advanceTime,
-	setFeeGrowthGlobal0X128,
-	setFeeGrowthGlobal1X128,
-} from '../shared/fixtures/PoolUtilities';
-import { DexModuleConfig, MutableSwapContext } from '../../../../../../src/app/modules/dex/types';
+import { advanceTime, setFeeGrowthGlobal0X128, setFeeGrowthGlobal1X128 } from '../shared/fixtures/PoolUtilities';
+import { DexModuleConfig, MutableSwapContext, TokenMethod } from '../../../../../../src/app/modules/dex/types';
 import { FeeProtocol } from '../../../../../../src/app/modules/dex/stores/library/periphery';
 import { CollectProtocolEvent } from '../../../../../../src/app/modules/dex/events/collect_protocol';
 import { DEFAULT_TREASURY_ADDRESS } from '../../../../../../src/app/modules/dex/constants';
@@ -66,10 +54,10 @@ type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
 
 describe('DEX Pool', () => {
 	let module: DexModule;
-	let createMethodContext: () => MethodContext;
+	let createMethodContext: () => StateMachine.MethodContext;
 	let otherContext: MutableSwapContext;
 	let senderContext: MutableSwapContext;
-	let context: MethodContext;
+	let context: StateMachine.MethodContext;
 	let observationStore: ObservationStore;
 	let tokenMethod: TokenMethod;
 	let config: DexModuleConfig;
@@ -99,29 +87,22 @@ describe('DEX Pool', () => {
 	beforeEach(jest.clearAllMocks);
 
 	beforeEach(async () => {
-		({ module, createMethodContext, tokenMethod, observationStore, config, positionInfoStore } =
-			await methodContextFixture());
+		({ module, createMethodContext, tokenMethod, observationStore, config, positionInfoStore } = await methodContextFixture());
 		context = createMethodContext();
 		const swapContext = methodSwapContext(context, sender, parseInt(TEST_POOL_START_TIME, 10));
 		otherContext = methodSwapContext(context, other, parseInt(TEST_POOL_START_TIME, 10));
 		senderContext = methodSwapContext(context, sender, parseInt(TEST_POOL_START_TIME, 10));
-		({
-			token0,
-			token1,
-			createPool,
-			swapTargetCallee: swapTarget,
-		} = await poolFixture(swapContext, module));
+		({ token0, token1, createPool, swapTargetCallee: swapTarget } = await poolFixture(swapContext, module));
 
 		const oldCreatePool = createPool;
 		createPool = async (_feeAmount, _tickSpacing) => {
 			const _pool = await oldCreatePool(_feeAmount, _tickSpacing);
-			({ swapToLowerPrice, swapToHigherPrice, swapExact0For1, swapExact1For0, mint, flash } =
-				createPoolFunctions({
-					token0,
-					token1,
-					swapTarget,
-					pool: _pool,
-				}));
+			({ swapToLowerPrice, swapToHigherPrice, swapExact0For1, swapExact1For0, mint, flash } = createPoolFunctions({
+				token0,
+				token1,
+				swapTarget,
+				pool: _pool,
+			}));
 			minTick = getMinTick(_tickSpacing);
 			maxTick = getMaxTick(_tickSpacing);
 			tickSpacing = parseInt(_tickSpacing, 10);
@@ -135,9 +116,7 @@ describe('DEX Pool', () => {
 	it('constructor initializes immutables', () => {
 		expect(pool.token0).toStrictEqual(token0);
 		expect(pool.token1).toStrictEqual(token1);
-		expect(pool.maxLiquidityPerTick).toStrictEqual(
-			getMaxLiquidityPerTick(tickSpacing.toString()).toString(),
-		);
+		expect(pool.maxLiquidityPerTick).toStrictEqual(getMaxLiquidityPerTick(tickSpacing.toString()).toString());
 	});
 
 	function setFeeProtocol(tokenA: string, tokenB: string) {
@@ -150,21 +129,15 @@ describe('DEX Pool', () => {
 	describe('#initialize', () => {
 		it('fails if already initialized', async () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
-			await expect(
-				(async () => pool.initialize(encodePriceSqrt(1, 1).toString()))(),
-			).rejects.toThrow();
+			await expect((async () => pool.initialize(encodePriceSqrt(1, 1).toString()))()).rejects.toThrow();
 		});
 		it('fails if starting price is too low', async () => {
 			await expect((async () => pool.initialize('1'))()).rejects.toThrow('R');
-			await expect(
-				(async () => pool.initialize(MIN_SQRT_RATIO.sub(1).toString()))(),
-			).rejects.toThrow('R');
+			await expect((async () => pool.initialize(MIN_SQRT_RATIO.sub(1).toString()))()).rejects.toThrow('R');
 		});
 		it('fails if starting price is too high', async () => {
 			await expect((async () => pool.initialize(MAX_SQRT_RATIO.toString()))()).rejects.toThrow('R');
-			await expect(
-				(async () => pool.initialize(Uint.from(2).pow(160).sub(1).toString()))(),
-			).rejects.toThrow('R');
+			await expect((async () => pool.initialize(Uint.from(2).pow(160).sub(1).toString()))()).rejects.toThrow('R');
 		});
 		it('can be initialized at MIN_SQRT_RATIO', async () => {
 			await pool.initialize(MIN_SQRT_RATIO.toString());
@@ -185,10 +158,7 @@ describe('DEX Pool', () => {
 		});
 		it('initializes the first observations slot', async () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
-			const oracleData = await observationStore.getOrDefault(
-				context,
-				observationStore.getKey(pool.address, '0'),
-			);
+			const oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 			checkObservationEquals(oracleData, {
 				secondsPerLiquidityCumulativeX128: '0',
 				initialized: true,
@@ -222,12 +192,7 @@ describe('DEX Pool', () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
 			await pool.increaseObservationCardinalityNext('3');
 			await pool.increaseObservationCardinalityNext('2');
-			eventResultHaveLength(
-				context.eventQueue,
-				IncreaseObservationCardinalityNextEvent,
-				module.name,
-				1,
-			);
+			eventResultHaveLength(context.eventQueue, IncreaseObservationCardinalityNextEvent, module.name, 1);
 		});
 		it('does not change cardinality next if less than current', async () => {
 			await pool.initialize(encodePriceSqrt(1, 1).toString());
@@ -246,9 +211,7 @@ describe('DEX Pool', () => {
 
 	describe('#mint', () => {
 		it('fails if not initialized', async () => {
-			await expect(
-				(async () => mint(sender.toString('hex'), -tickSpacing, tickSpacing, 1))(),
-			).rejects.toThrow();
+			await expect((async () => mint(sender.toString('hex'), -tickSpacing, tickSpacing, 1))()).rejects.toThrow();
 		});
 		describe('after initialization', () => {
 			beforeEach(async () => {
@@ -263,96 +226,37 @@ describe('DEX Pool', () => {
 				});
 				it('fails if tickLower less than min tick', async () => {
 					// should be TLM but...hardhat
-					await expect(
-						(async () => mint(sender.toString('hex'), -887273, 0, 1))(),
-					).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), -887273, 0, 1))()).rejects.toThrow();
 				});
 				it('fails if tickUpper greater than max tick', async () => {
 					// should be TUM but...hardhat
-					await expect(
-						(async () => mint(sender.toString('hex'), 0, 887273, 1))(),
-					).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), 0, 887273, 1))()).rejects.toThrow();
 				});
 				it('fails if amount exceeds the max', async () => {
 					// these should fail with 'LO' but hardhat is bugged
 					const maxLiquidityGross = Uint128.from(pool.maxLiquidityPerTick);
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing,
-								maxTick - tickSpacing,
-								maxLiquidityGross.add(1).toString(),
-							))(),
-					).rejects.toThrow();
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing,
-								maxTick - tickSpacing,
-								maxLiquidityGross.toString(),
-							))(),
-					).resolves.not.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, maxLiquidityGross.add(1).toString()))()).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, maxLiquidityGross.toString()))()).resolves.not.toThrow();
 				});
 				it('fails if total amount at tick exceeds the max', async () => {
 					// these should fail with 'LO' but hardhat is bugged
 					await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 1000);
 
 					const maxLiquidityGross = Uint128.from(pool.maxLiquidityPerTick);
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing,
-								maxTick - tickSpacing,
-								maxLiquidityGross.sub(1000).add(1).toString(),
-							))(),
-					).rejects.toThrow();
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing * 2,
-								maxTick - tickSpacing,
-								maxLiquidityGross.sub(1000).add(1).toString(),
-							))(),
-					).rejects.toThrow();
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing,
-								maxTick - tickSpacing * 2,
-								maxLiquidityGross.sub(1000).add(1).toString(),
-							))(),
-					).rejects.toThrow();
-					await expect(
-						(async () =>
-							mint(
-								sender.toString('hex'),
-								minTick + tickSpacing,
-								maxTick - tickSpacing,
-								maxLiquidityGross.sub(1000).toString(),
-							))(),
-					).resolves.not.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, maxLiquidityGross.sub(1000).add(1).toString()))()).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing * 2, maxTick - tickSpacing, maxLiquidityGross.sub(1000).add(1).toString()))()).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing * 2, maxLiquidityGross.sub(1000).add(1).toString()))()).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, maxLiquidityGross.sub(1000).toString()))()).resolves.not.toThrow();
 				});
 				it('fails if amount is 0', async () => {
-					await expect(
-						(async () =>
-							mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 0))(),
-					).rejects.toThrow();
+					await expect((async () => mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 0))()).rejects.toThrow();
 				});
 			});
 
 			describe('success cases', () => {
 				it('initial balances', async () => {
-					expect(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-					).toBe('9996');
-					expect(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-					).toBe('1000');
+					expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe('9996');
+					expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe('1000');
 				});
 
 				it('initial tick', () => {
@@ -362,59 +266,28 @@ describe('DEX Pool', () => {
 				describe('above current price', () => {
 					it('transfers token0 only', async () => {
 						await mint(sender.toString('hex'), -22980, 0, 10000);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'21549',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe((9996 + 21549).toString());
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe('1000');
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '21549');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe((9996 + 21549).toString());
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe('1000');
 					});
 
 					it('max tick with max leverage', async () => {
-						await mint(
-							sender.toString('hex'),
-							maxTick - tickSpacing,
-							maxTick,
-							Uint.from(2).pow(102),
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe((9996 + 828011525).toString());
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe('1000');
+						await mint(sender.toString('hex'), maxTick - tickSpacing, maxTick, Uint.from(2).pow(102));
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe((9996 + 828011525).toString());
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe('1000');
 					});
 
 					it('works for max tick', async () => {
 						await mint(sender.toString('hex'), -22980, maxTick, 10000);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'31549',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe((9996 + 31549).toString());
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe('1000');
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '31549');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe((9996 + 31549).toString());
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe('1000');
 					});
 
 					it('removing works', async () => {
 						await mint(sender.toString('hex'), -240, 0, 10000);
 						await pool.burn('-240', '0', '10000');
-						const [amount0, amount1] = await pool.collect(
-							sender,
-							'-240',
-							'0',
-							MaxUint128.toString(),
-							MaxUint128.toString(),
-						);
+						const [amount0, amount1] = await pool.collect(sender, '-240', '0', MaxUint128.toString(), MaxUint128.toString());
 						expect(amount0).toBe('120');
 						expect(amount1).toBe('0');
 					});
@@ -448,8 +321,7 @@ describe('DEX Pool', () => {
 					it('clears tick lower if last position is removed', async () => {
 						await mint(sender.toString('hex'), -240, 0, 100);
 						await pool.burn('-240', '0', '100');
-						const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } =
-							await pool.getTick('-240');
+						const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } = await pool.getTick('-240');
 						expect(liquidityGross).toBe('0');
 						expect(feeGrowthOutside0X128).toBe('0');
 						expect(feeGrowthOutside1X128).toBe('0');
@@ -458,8 +330,7 @@ describe('DEX Pool', () => {
 					it('clears tick upper if last position is removed', async () => {
 						await mint(sender.toString('hex'), -240, 0, 100);
 						await pool.burn('-240', '0', '100');
-						const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } =
-							await pool.getTick('0');
+						const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } = await pool.getTick('0');
 						expect(liquidityGross).toBe('0');
 						expect(feeGrowthOutside0X128).toBe('0');
 						expect(feeGrowthOutside1X128).toBe('0');
@@ -469,24 +340,18 @@ describe('DEX Pool', () => {
 						await mint(sender.toString('hex'), -tickSpacing, 0, 250);
 						await pool.burn('-240', '0', '100');
 
-						let { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } =
-							await pool.getTick('-240');
+						let { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } = await pool.getTick('-240');
 						expect(liquidityGross).toBe('0');
 						expect(feeGrowthOutside0X128).toBe('0');
 						expect(feeGrowthOutside1X128).toBe('0');
-						({ liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } = await pool.getTick(
-							(-tickSpacing).toString(),
-						));
+						({ liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128 } = await pool.getTick((-tickSpacing).toString()));
 						expect(liquidityGross).toBe('250');
 						expect(feeGrowthOutside0X128).toBe('0');
 						expect(feeGrowthOutside1X128).toBe('0');
 					});
 
 					it('does not write an observation', async () => {
-						let oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						let oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '0',
 							blockTimestamp: TEST_POOL_START_TIME.toString(),
@@ -495,10 +360,7 @@ describe('DEX Pool', () => {
 						});
 						advanceTime.bind(pool)('1');
 						await mint(sender.toString('hex'), -240, 0, 100);
-						oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '0',
 							blockTimestamp: TEST_POOL_START_TIME.toString(),
@@ -511,22 +373,10 @@ describe('DEX Pool', () => {
 				describe('including current price', () => {
 					it('price within range: transfers current price of both tokens', async () => {
 						await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 100);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'317',
-						);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'32',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe((9996 + 317).toString());
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe((1000 + 32).toString());
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '317');
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '32');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe((9996 + 317).toString());
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe((1000 + 32).toString());
 					});
 
 					it('initializes lower tick', async () => {
@@ -543,47 +393,22 @@ describe('DEX Pool', () => {
 
 					it('works for min/max tick', async () => {
 						await mint(sender.toString('hex'), minTick, maxTick, 10000);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'31623',
-						);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'3163',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe((9996 + 31623).toString());
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe((1000 + 3163).toString());
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '31623');
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '3163');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe((9996 + 31623).toString());
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe((1000 + 3163).toString());
 					});
 
 					it('removing works', async () => {
 						await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 100);
-						await pool.burn(
-							(minTick + tickSpacing).toString(),
-							(maxTick - tickSpacing).toString(),
-							'100',
-						);
-						const [amount0, amount1] = await pool.collect(
-							sender,
-							(minTick + tickSpacing).toString(),
-							(maxTick - tickSpacing).toString(),
-							MaxUint128.toString(),
-							MaxUint128.toString(),
-						);
+						await pool.burn((minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString(), '100');
+						const [amount0, amount1] = await pool.collect(sender, (minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString(), MaxUint128.toString(), MaxUint128.toString());
 						expect(amount0).toBe('316');
 						expect(amount1).toBe('31');
 					});
 
 					it('writes an observation', async () => {
-						let oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						let oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '0',
 							blockTimestamp: TEST_POOL_START_TIME.toString(),
@@ -592,10 +417,7 @@ describe('DEX Pool', () => {
 						});
 						advanceTime.bind(pool)('1');
 						await mint(sender.toString('hex'), minTick, maxTick, 100);
-						oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '-23028',
 							blockTimestamp: (parseInt(TEST_POOL_START_TIME, 10) + 1).toString(),
@@ -608,68 +430,34 @@ describe('DEX Pool', () => {
 				describe('below current price', () => {
 					it('transfers token1 only', async () => {
 						await mint(sender.toString('hex'), -46080, -23040, 10000);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'2162',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe('9996');
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe((1000 + 2162).toString());
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '2162');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe('9996');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe((1000 + 2162).toString());
 					});
 
 					it('min tick with max leverage', async () => {
-						await mint(
-							sender.toString('hex'),
-							minTick,
-							minTick + tickSpacing,
-							Uint.from(2).pow(102),
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe('9996');
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe((1000 + 828011520).toString());
+						await mint(sender.toString('hex'), minTick, minTick + tickSpacing, Uint.from(2).pow(102));
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe('9996');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe((1000 + 828011520).toString());
 					});
 
 					it('works for min tick', async () => {
 						await mint(sender.toString('hex'), minTick, -23040, 10000);
-						expect(mock_token_transfer).toHaveBeenCalledWith(
-							sender.toString('hex'),
-							pool.address.toString('hex'),
-							'3161',
-						);
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-						).toBe('9996');
-						expect(
-							(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-						).toBe((1000 + 3161).toString());
+						expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '3161');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()).toBe('9996');
+						expect((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()).toBe((1000 + 3161).toString());
 					});
 
 					it('removing works', async () => {
 						await mint(sender.toString('hex'), -46080, -46020, 10000);
 						await pool.burn('-46080', '-46020', '10000');
-						const [amount0, amount1] = await pool.collect(
-							sender,
-							'-46080',
-							'-46020',
-							MaxUint128.toString(),
-							MaxUint128.toString(),
-						);
+						const [amount0, amount1] = await pool.collect(sender, '-46080', '-46020', MaxUint128.toString(), MaxUint128.toString());
 						expect(amount0).toBe('0');
 						expect(amount1).toBe('3');
 					});
 
 					it('does not write an observation', async () => {
-						let oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						let oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '0',
 							blockTimestamp: TEST_POOL_START_TIME.toString(),
@@ -678,10 +466,7 @@ describe('DEX Pool', () => {
 						});
 						advanceTime.bind(pool)('1');
 						await mint(sender.toString('hex'), -46080, -23040, 100);
-						oracleData = await observationStore.getOrDefault(
-							context,
-							observationStore.getKey(pool.address, '0'),
-						);
+						oracleData = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 						checkObservationEquals(oracleData, {
 							tickCumulative: '0',
 							blockTimestamp: TEST_POOL_START_TIME.toString(),
@@ -695,12 +480,7 @@ describe('DEX Pool', () => {
 			it('protocol fees accumulate as expected during swap', async () => {
 				setFeeProtocol('6', '6');
 
-				await mint(
-					sender.toString('hex'),
-					minTick + tickSpacing,
-					maxTick - tickSpacing,
-					expandTo18Decimals(1),
-				);
+				await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, expandTo18Decimals(1));
 				await swapExact0For1(expandTo18Decimals(1).div(10), sender);
 				await swapExact1For0(expandTo18Decimals(1).div(100), sender);
 
@@ -719,12 +499,7 @@ describe('DEX Pool', () => {
 			});
 
 			it('positions are protected before protocol fee is turned on', async () => {
-				await mint(
-					sender.toString('hex'),
-					minTick + tickSpacing,
-					maxTick - tickSpacing,
-					expandTo18Decimals(1),
-				);
+				await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, expandTo18Decimals(1));
 				await swapExact0For1(expandTo18Decimals(1).div(10), sender);
 				await swapExact1For0(expandTo18Decimals(1).div(100), sender);
 
@@ -732,33 +507,15 @@ describe('DEX Pool', () => {
 			});
 
 			it('poke is not allowed on uninitialized position', async () => {
-				await mint(
-					other.toString('hex'),
-					minTick + tickSpacing,
-					maxTick - tickSpacing,
-					expandTo18Decimals(1),
-				);
+				await mint(other.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, expandTo18Decimals(1));
 				await swapExact0For1(expandTo18Decimals(1).div(10), sender);
 				await swapExact1For0(expandTo18Decimals(1).div(100), sender);
 
 				// missing revert reason due to hardhat
-				await expect(
-					(async () =>
-						pool.burn(
-							(minTick + tickSpacing).toString(),
-							(maxTick - tickSpacing).toString(),
-							'0',
-						))(),
-				).rejects.toThrow();
+				await expect((async () => pool.burn((minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString(), '0'))()).rejects.toThrow();
 
 				await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, 1);
-				let {
-					liquidity,
-					feeGrowthInside0LastX128,
-					feeGrowthInside1LastX128,
-					tokensOwed1,
-					tokensOwed0,
-				} = await Position.get(
+				let { liquidity, feeGrowthInside0LastX128, feeGrowthInside1LastX128, tokensOwed1, tokensOwed0 } = await Position.get(
 					positionInfoStore,
 					context,
 					pool.address,
@@ -772,18 +529,8 @@ describe('DEX Pool', () => {
 				expect(tokensOwed0).toBe('0');
 				expect(tokensOwed1).toBe('0');
 
-				await pool.burn(
-					(minTick + tickSpacing).toString(),
-					(maxTick - tickSpacing).toString(),
-					'1',
-				);
-				({
-					liquidity,
-					feeGrowthInside0LastX128,
-					feeGrowthInside1LastX128,
-					tokensOwed1,
-					tokensOwed0,
-				} = await Position.get(
+				await pool.burn((minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString(), '1');
+				({ liquidity, feeGrowthInside0LastX128, feeGrowthInside1LastX128, tokensOwed1, tokensOwed0 } = await Position.get(
 					positionInfoStore,
 					context,
 					pool.address,
@@ -804,8 +551,7 @@ describe('DEX Pool', () => {
 		beforeEach(async () => initializeAtZeroTick(pool));
 
 		async function checkTickIsClear(tick: number) {
-			const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128, liquidityNet } =
-				await pool.getTick(tick.toString());
+			const { liquidityGross, feeGrowthOutside0X128, feeGrowthOutside1X128, liquidityNet } = await pool.getTick(tick.toString());
 			expect(liquidityGross).toBe('0');
 			expect(feeGrowthOutside0X128).toBe('0');
 			expect(feeGrowthOutside1X128).toBe('0');
@@ -826,13 +572,7 @@ describe('DEX Pool', () => {
 
 			pool['mutableContext'] = otherContext;
 			await pool.burn(minTick.toString(), maxTick.toString(), expandTo18Decimals(1).toString());
-			const {
-				liquidity,
-				tokensOwed0,
-				tokensOwed1,
-				feeGrowthInside0LastX128,
-				feeGrowthInside1LastX128,
-			} = await Position.get(
+			const { liquidity, tokensOwed0, tokensOwed1, feeGrowthInside0LastX128, feeGrowthInside1LastX128 } = await Position.get(
 				positionInfoStore,
 				context,
 				pool.address,
@@ -956,16 +696,12 @@ describe('DEX Pool', () => {
 			expect(liquidityAfter.gte(liquidityBefore)).toBe(true);
 
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString())
 					.sub(b0)
 					.toString(),
 			).toBe('1');
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString())
 					.sub(b1)
 					.toString(),
 			).toBe('0');
@@ -987,16 +723,12 @@ describe('DEX Pool', () => {
 			expect(liquidityAfter.gte(liquidityBefore)).toBe(true);
 
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString())
 					.sub(b0)
 					.toString(),
 			).toBe('0');
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString())
 					.sub(b1)
 					.toString(),
 			).toBe('1');
@@ -1018,16 +750,12 @@ describe('DEX Pool', () => {
 			expect(liquidityAfter.gte(liquidityBefore)).toBe(true);
 
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString())
 					.sub(b0)
 					.toString(),
 			).toBe('1');
 			expect(
-				Uint256.from(
-					(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-				)
+				Uint256.from((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString())
 					.sub(b1)
 					.toString(),
 			).toBe('1');
@@ -1038,14 +766,7 @@ describe('DEX Pool', () => {
 			const upperTick = tickSpacing;
 			await mint(sender.toString('hex'), lowerTick, upperTick, expandTo18Decimals(1000));
 			// should be 'LS', hardhat is bugged
-			await expect(
-				(async () =>
-					pool.burn(
-						lowerTick.toString(),
-						upperTick.toString(),
-						expandTo18Decimals(1001).toString(),
-					))(),
-			).rejects.toThrow();
+			await expect((async () => pool.burn(lowerTick.toString(), upperTick.toString(), expandTo18Decimals(1001).toString()))()).rejects.toThrow();
 		});
 
 		it('collect fees within the current price after swap', async () => {
@@ -1063,51 +784,23 @@ describe('DEX Pool', () => {
 			const liquidityAfter = Uint128.from(pool.liquidity);
 			expect(liquidityAfter.gte(liquidityBefore)).toBe(true);
 
-			const token0BalanceBeforePool = (
-				await tokenMethod.getAvailableBalance(context, pool.address, token0)
-			).toString();
-			const token1BalanceBeforePool = (
-				await tokenMethod.getAvailableBalance(context, pool.address, token1)
-			).toString();
-			const token0BalanceBeforeWallet = (
-				await tokenMethod.getAvailableBalance(context, sender, token0)
-			).toString();
-			const token1BalanceBeforeWallet = (
-				await tokenMethod.getAvailableBalance(context, sender, token1)
-			).toString();
+			const token0BalanceBeforePool = (await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString();
+			const token1BalanceBeforePool = (await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString();
+			const token0BalanceBeforeWallet = (await tokenMethod.getAvailableBalance(context, sender, token0)).toString();
+			const token1BalanceBeforeWallet = (await tokenMethod.getAvailableBalance(context, sender, token1)).toString();
 
 			await pool.burn(lowerTick.toString(), upperTick.toString(), '0');
-			await pool.collect(
-				sender,
-				lowerTick.toString(),
-				upperTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			await pool.collect(sender, lowerTick.toString(), upperTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 
 			await pool.burn(lowerTick.toString(), upperTick.toString(), '0');
-			const [fees0, fees1] = await pool.collect(
-				sender,
-				lowerTick.toString(),
-				upperTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			const [fees0, fees1] = await pool.collect(sender, lowerTick.toString(), upperTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			expect(fees0).toBe('0');
 			expect(fees1).toBe('0');
 
-			const token0BalanceAfterWallet = (
-				await tokenMethod.getAvailableBalance(context, sender, token0)
-			).toString();
-			const token1BalanceAfterWallet = (
-				await tokenMethod.getAvailableBalance(context, sender, token1)
-			).toString();
-			const token0BalanceAfterPool = (
-				await tokenMethod.getAvailableBalance(context, pool.address, token0)
-			).toString();
-			const token1BalanceAfterPool = (
-				await tokenMethod.getAvailableBalance(context, pool.address, token1)
-			).toString();
+			const token0BalanceAfterWallet = (await tokenMethod.getAvailableBalance(context, sender, token0)).toString();
+			const token1BalanceAfterWallet = (await tokenMethod.getAvailableBalance(context, sender, token1)).toString();
+			const token0BalanceAfterPool = (await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString();
+			const token1BalanceAfterPool = (await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString();
 
 			expect(Uint.from(token0BalanceAfterWallet).gt(token0BalanceBeforeWallet)).toBe(true);
 			expect(Uint.from(token1BalanceAfterWallet).eq(token1BalanceBeforeWallet)).toBe(true);
@@ -1193,11 +886,7 @@ describe('DEX Pool', () => {
 
 		it('limit selling 0 for 1 at tick 0 thru 1', async () => {
 			await mint(sender.toString('hex'), 0, 120, expandTo18Decimals(1));
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				sender.toString('hex'),
-				pool.address.toString('hex'),
-				'5981737760509663',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '5981737760509663');
 			// somebody takes the limit order
 			await swapExact1For0(expandTo18Decimals(2), other);
 			await pool.burn('0', '120', expandTo18Decimals(1).toString());
@@ -1213,20 +902,12 @@ describe('DEX Pool', () => {
 			});
 
 			await pool.collect(sender, '0', '120', MaxUint128.toString(), MaxUint128.toString());
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				pool.address.toString('hex'),
-				sender.toString('hex'),
-				Uint.from('6017734268818165').add('18107525382602').toString(),
-			); // roughly 0.3% despite other liquidity
+			expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), sender.toString('hex'), Uint.from('6017734268818165').add('18107525382602').toString()); // roughly 0.3% despite other liquidity
 			expect(Int24.from(pool.slot0.tick).gte(120)).toBe(true);
 		});
 		it('limit selling 1 for 0 at tick 0 thru -1', async () => {
 			await mint(sender.toString('hex'), -120, 0, expandTo18Decimals(1));
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				sender.toString('hex'),
-				pool.address.toString('hex'),
-				'5981737760509663',
-			);
+			expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '5981737760509663');
 			// somebody takes the limit order
 			await swapExact0For1(expandTo18Decimals(2), other);
 			await pool.burn('-120', '0', expandTo18Decimals(1).toString());
@@ -1240,11 +921,7 @@ describe('DEX Pool', () => {
 				upperLiquidityNetBefore: '-1000000000000000000',
 			});
 			await pool.collect(sender, '-120', '0', MaxUint128.toString(), MaxUint128.toString());
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				pool.address.toString('hex'),
-				sender.toString('hex'),
-				Uint.from('6017734268818165').add('18107525382602').toString(),
-			); // roughly 0.3% despite other liquidity
+			expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), sender.toString('hex'), Uint.from('6017734268818165').add('18107525382602').toString()); // roughly 0.3% despite other liquidity
 			expect(Int24.from(pool.slot0.tick).lt(-120)).toBe(true);
 		});
 
@@ -1254,11 +931,7 @@ describe('DEX Pool', () => {
 			});
 			it('limit selling 0 for 1 at tick 0 thru 1', async () => {
 				await mint(sender.toString('hex'), 0, 120, expandTo18Decimals(1));
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					sender.toString('hex'),
-					pool.address.toString('hex'),
-					'5981737760509663',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '5981737760509663');
 				// somebody takes the limit order
 				await swapExact1For0(expandTo18Decimals(2), other);
 				await pool.burn('0', '120', expandTo18Decimals(1).toString());
@@ -1272,20 +945,12 @@ describe('DEX Pool', () => {
 					upperLiquidityNetBefore: '-1000000000000000000',
 				});
 				await pool.collect(sender, '0', '120', MaxUint128.toString(), MaxUint128.toString());
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address.toString('hex'),
-					sender.toString('hex'),
-					Uint.from('6017734268818165').add('15089604485501').toString(),
-				); // roughly 0.25% despite other liquidity
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), sender.toString('hex'), Uint.from('6017734268818165').add('15089604485501').toString()); // roughly 0.25% despite other liquidity
 				expect(Int24.from(pool.slot0.tick).gte(120)).toBe(true);
 			});
 			it('limit selling 1 for 0 at tick 0 thru -1', async () => {
 				await mint(sender.toString('hex'), -120, 0, expandTo18Decimals(1));
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					sender.toString('hex'),
-					pool.address.toString('hex'),
-					'5981737760509663',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '5981737760509663');
 				// somebody takes the limit order
 				await swapExact0For1(expandTo18Decimals(2), other);
 				await pool.burn('-120', '0', expandTo18Decimals(1).toString());
@@ -1299,11 +964,7 @@ describe('DEX Pool', () => {
 					upperLiquidityNetBefore: '-1000000000000000000',
 				});
 				await pool.collect(sender, '-120', '0', MaxUint128.toString(), MaxUint128.toString());
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address.toString('hex'),
-					sender.toString('hex'),
-					Uint.from('6017734268818165').add('15089604485501').toString(),
-				); // roughly 0.25% despite other liquidity
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), sender.toString('hex'), Uint.from('6017734268818165').add('15089604485501').toString()); // roughly 0.25% despite other liquidity
 				expect(Int24.from(pool.slot0.tick).lt(-120)).toBe(true);
 			});
 		});
@@ -1317,12 +978,7 @@ describe('DEX Pool', () => {
 
 		it('works with multiple LPs', async () => {
 			await mint(sender.toString('hex'), minTick, maxTick, expandTo18Decimals(1));
-			await mint(
-				sender.toString('hex'),
-				minTick + tickSpacing,
-				maxTick - tickSpacing,
-				expandTo18Decimals(2),
-			);
+			await mint(sender.toString('hex'), minTick + tickSpacing, maxTick - tickSpacing, expandTo18Decimals(2));
 
 			await swapExact0For1(expandTo18Decimals(1), sender);
 
@@ -1330,22 +986,8 @@ describe('DEX Pool', () => {
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
 			await pool.burn((minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString(), '0');
 
-			const { tokensOwed0: tokensOwed0Position0 } = await Position.get(
-				positionInfoStore,
-				context,
-				pool.address,
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-			);
-			const { tokensOwed0: tokensOwed0Position1 } = await Position.get(
-				positionInfoStore,
-				context,
-				pool.address,
-				sender,
-				(minTick + tickSpacing).toString(),
-				(maxTick - tickSpacing).toString(),
-			);
+			const { tokensOwed0: tokensOwed0Position0 } = await Position.get(positionInfoStore, context, pool.address, sender, minTick.toString(), maxTick.toString());
+			const { tokensOwed0: tokensOwed0Position1 } = await Position.get(positionInfoStore, context, pool.address, sender, (minTick + tickSpacing).toString(), (maxTick - tickSpacing).toString());
 
 			expect(tokensOwed0Position0).toBe('166666666666667');
 			expect(tokensOwed0Position1).toBe('333333333333334');
@@ -1364,14 +1006,7 @@ describe('DEX Pool', () => {
 				setFeeGrowthGlobal0X128.bind(pool)(magicNumber.toString());
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
-				const { tokensOwed0, tokensOwed1 } = await Position.get(
-					positionInfoStore,
-					context,
-					pool.address,
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-				);
+				const { tokensOwed0, tokensOwed1 } = await Position.get(positionInfoStore, context, pool.address, sender, minTick.toString(), maxTick.toString());
 
 				expect(tokensOwed0).toBe(MaxUint128.sub(1).toString());
 				expect(tokensOwed1).toBe('0');
@@ -1381,14 +1016,7 @@ describe('DEX Pool', () => {
 				setFeeGrowthGlobal0X128.bind(pool)(magicNumber.add(1).toString());
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
-				const { tokensOwed0, tokensOwed1 } = await Position.get(
-					positionInfoStore,
-					context,
-					pool.address,
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-				);
+				const { tokensOwed0, tokensOwed1 } = await Position.get(positionInfoStore, context, pool.address, sender, minTick.toString(), maxTick.toString());
 
 				expect(tokensOwed0).toBe(MaxUint128.toString());
 				expect(tokensOwed1).toBe('0');
@@ -1398,14 +1026,7 @@ describe('DEX Pool', () => {
 				setFeeGrowthGlobal0X128.bind(pool)(Uint256.MAX);
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
-				const { tokensOwed0, tokensOwed1 } = await Position.get(
-					positionInfoStore,
-					context,
-					pool.address,
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-				);
+				const { tokensOwed0, tokensOwed1 } = await Position.get(positionInfoStore, context, pool.address, sender, minTick.toString(), maxTick.toString());
 
 				expect(tokensOwed0).toBe(MaxUint128.toString());
 				expect(tokensOwed1).toBe('0');
@@ -1422,26 +1043,14 @@ describe('DEX Pool', () => {
 			it('token0', async () => {
 				await swapExact0For1(expandTo18Decimals(1), sender);
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
-				const [amount0, amount1] = await pool.collect(
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-					MaxUint128.toString(),
-					MaxUint128.toString(),
-				);
+				const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 				expect(amount0).toBe('499999999999999');
 				expect(amount1).toBe('0');
 			});
 			it('token1', async () => {
 				await swapExact1For0(expandTo18Decimals(1), sender);
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
-				const [amount0, amount1] = await pool.collect(
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-					MaxUint128.toString(),
-					MaxUint128.toString(),
-				);
+				const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 				expect(amount0).toBe('0');
 				expect(amount1).toBe('499999999999999');
 			});
@@ -1449,13 +1058,7 @@ describe('DEX Pool', () => {
 				await swapExact0For1(expandTo18Decimals(1), sender);
 				await swapExact1For0(expandTo18Decimals(1), sender);
 				await pool.burn(minTick.toString(), maxTick.toString(), '0');
-				const [amount0, amount1] = await pool.collect(
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-					MaxUint128.toString(),
-					MaxUint128.toString(),
-				);
+				const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 				expect(amount0).toBe('499999999999999');
 				expect(amount1).toBe('500000000000000');
 			});
@@ -1476,28 +1079,12 @@ describe('DEX Pool', () => {
 			await expect((async () => setFeeProtocol('11', '11'))()).rejects.toThrow();
 		});
 
-		async function swapAndGetFeesOwed({
-			amount,
-			zeroForOne,
-			poke,
-		}: {
-			amount: BigIntAble;
-			zeroForOne: boolean;
-			poke: boolean;
-		}) {
+		async function swapAndGetFeesOwed({ amount, zeroForOne, poke }: { amount: BigIntAble; zeroForOne: boolean; poke: boolean }) {
 			await (zeroForOne ? swapExact0For1(amount, sender) : swapExact1For0(amount, sender));
 
 			if (poke) await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
-			const [fees0, fees1] = await pool
-				.createEmulator()
-				.collect(
-					sender,
-					minTick.toString(),
-					maxTick.toString(),
-					MaxUint128.toString(),
-					MaxUint128.toString(),
-				);
+			const [fees0, fees1] = await pool.createEmulator().collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 
 			expect(Uint128.from(fees0).gte(0)).toBe(true);
 			expect(Uint128.from(fees1).gte(0)).toBe(true);
@@ -1592,11 +1179,7 @@ describe('DEX Pool', () => {
 					poke: true,
 				});
 
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address.toString('hex'),
-					DEFAULT_TREASURY_ADDRESS.toString('hex'),
-					'83333333333333',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), DEFAULT_TREASURY_ADDRESS.toString('hex'), '83333333333333');
 			});
 
 			it('fees collected can differ between token0 and token1', async () => {
@@ -1613,18 +1196,10 @@ describe('DEX Pool', () => {
 					poke: false,
 				});
 
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address.toString('hex'),
-					DEFAULT_TREASURY_ADDRESS.toString('hex'),
-					'62500000000000',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), DEFAULT_TREASURY_ADDRESS.toString('hex'), '62500000000000');
 
 				// less token1 fees because it's 1/8th the swap fees
-				expect(mock_token_transfer).toHaveBeenCalledWith(
-					pool.address.toString('hex'),
-					DEFAULT_TREASURY_ADDRESS.toString('hex'),
-					'99999999999999',
-				);
+				expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), DEFAULT_TREASURY_ADDRESS.toString('hex'), '99999999999999');
 			});
 		});
 
@@ -1677,13 +1252,7 @@ describe('DEX Pool', () => {
 			expect(token1Fees).toBe('0');
 
 			// collect the fees
-			await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 
 			const { token0Fees: token0FeesNext, token1Fees: token1FeesNext } = await swapAndGetFeesOwed({
 				amount: expandTo18Decimals(1),
@@ -1704,18 +1273,8 @@ describe('DEX Pool', () => {
 
 			await pool.burn(minTick.toString(), maxTick.toString(), '0'); // poke to update fees
 
-			await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
-			expect(mock_token_transfer).toHaveBeenCalledWith(
-				pool.address.toString('hex'),
-				sender.toString('hex'),
-				'416666666666666',
-			);
+			await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
+			expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), sender.toString('hex'), '416666666666666');
 
 			eventResultHaveLength(context.eventQueue, CollectProtocolEvent, module.name, 2);
 			eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
@@ -1800,13 +1359,7 @@ describe('DEX Pool', () => {
 
 		// check the math works out to moving the price down 1, sending no amount out, and having some amount remaining
 		{
-			const [sqrtQ, amountIn, amountOut, feeAmount] = swapMath.computeSwapStep(
-				p0.toString(),
-				p0.sub(1).toString(),
-				liquidity.toString(),
-				'3',
-				FeeAmount.MEDIUM,
-			);
+			const [sqrtQ, amountIn, amountOut, feeAmount] = swapMath.computeSwapStep(p0.toString(), p0.sub(1).toString(), liquidity.toString(), '3', FeeAmount.MEDIUM);
 			expect(sqrtQ).toBe(p0.sub(1).toString());
 			expect(feeAmount).toBe('1');
 			expect(amountIn).toBe('1');
@@ -1815,11 +1368,7 @@ describe('DEX Pool', () => {
 
 		// swap 2 amount in, should get 0 amount out
 		await swapExact0For1(3, sender);
-		expect(mock_token_transfer).toHaveBeenCalledWith(
-			sender.toString('hex'),
-			pool.address.toString('hex'),
-			'3',
-		);
+		expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '3');
 
 		const { tick, sqrtPriceX96 } = pool.slot0;
 
@@ -1846,12 +1395,8 @@ describe('DEX Pool', () => {
 			beforeEach(async () => {
 				await initializeAtZeroTick(pool);
 				[balance0, balance1] = await Promise.all([
-					Uint.from(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString(),
-					),
-					Uint.from(
-						(await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString(),
-					),
+					Uint.from((await tokenMethod.getAvailableBalance(context, pool.address, token0)).toString()),
+					Uint.from((await tokenMethod.getAvailableBalance(context, pool.address, token1)).toString()),
 				]);
 			});
 
@@ -1870,56 +1415,28 @@ describe('DEX Pool', () => {
 
 				it('transfers the amount0 to the recipient', async () => {
 					await flash(100, 200, other);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						'100',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), '100');
 				});
 				it('transfers the amount1 to the recipient', async () => {
 					await flash(100, 200, other);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						'200',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), '200');
 				});
 				it('can flash only token0', async () => {
 					await flash(101, 0, other);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						'101',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), '101');
 				});
 				it('can flash only token1', async () => {
 					await flash(0, 102, other);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						'102',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), '102');
 				});
 				it('can flash entire token balance', async () => {
 					await flash(balance0, balance1, other);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						balance0.toString(),
-					);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						pool.address.toString('hex'),
-						other.toString('hex'),
-						balance1.toString(),
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), balance0.toString());
+					expect(mock_token_transfer).toHaveBeenCalledWith(pool.address.toString('hex'), other.toString('hex'), balance1.toString());
 				});
 				it('no-op if both amounts are 0', async () => {
 					await flash(0, 0, other);
-					expect(mock_token_transfer).not.toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'0',
-					);
+					expect(mock_token_transfer).not.toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '0');
 				});
 				it('fails if flash amount is greater than token balance', async () => {
 					await expect((async () => flash(balance0.add(1), balance1, other))()).rejects.toThrow();
@@ -1931,12 +1448,8 @@ describe('DEX Pool', () => {
 				});
 				it('increases the fee growth by the expected amount', async () => {
 					await flash(1001, 2002, other);
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(4).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(7).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(4).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(7).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('fails if original balance not returned in either token', async () => {
 					await expect((async () => flash(1000, 0, other, 999, 0))()).rejects.toThrow();
@@ -1948,46 +1461,22 @@ describe('DEX Pool', () => {
 				});
 				it('allows donating token0', async () => {
 					await flash(0, 0, AddressZero, 567, 0);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'567',
-					);
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(567).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '567');
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(567).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('allows donating token1', async () => {
 					await flash(0, 0, AddressZero, 0, 678);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'678',
-					);
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(678).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '678');
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(678).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('allows donating token0 and token1 together', async () => {
 					await flash(0, 0, AddressZero, 789, 1234);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'789',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '789');
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'1234',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '1234');
 
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(789).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(1234).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(789).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(1234).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 			});
 
@@ -2024,20 +1513,12 @@ describe('DEX Pool', () => {
 						amount1: '2',
 					});
 
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(6).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(11).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(6).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(11).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('allows donating token0', async () => {
 					await flash(0, 0, AddressZero, 567, 0);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'567',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '567');
 
 					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
@@ -2046,17 +1527,11 @@ describe('DEX Pool', () => {
 						amount1: '0',
 					});
 
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(473).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(473).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('allows donating token1', async () => {
 					await flash(0, 0, AddressZero, 0, 678);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'678',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '678');
 
 					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
@@ -2065,23 +1540,13 @@ describe('DEX Pool', () => {
 						amount1: '113',
 					});
 
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(565).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(565).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 				it('allows donating token0 and token1 together', async () => {
 					await flash(0, 0, AddressZero, 789, 1234);
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'789',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '789');
 
-					expect(mock_token_transfer).toHaveBeenCalledWith(
-						sender.toString('hex'),
-						pool.address.toString('hex'),
-						'1234',
-					);
+					expect(mock_token_transfer).toHaveBeenCalledWith(sender.toString('hex'), pool.address.toString('hex'), '1234');
 
 					eventResultContain(context.eventQueue, CollectProtocolEvent, module.name, {
 						senderAddress: sender,
@@ -2096,12 +1561,8 @@ describe('DEX Pool', () => {
 						amount1: '205',
 					});
 
-					expect(pool.feeGrowthGlobal0X128).toBe(
-						Uint.from(658).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
-					expect(pool.feeGrowthGlobal1X128).toBe(
-						Uint.from(1029).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString(),
-					);
+					expect(pool.feeGrowthGlobal0X128).toBe(Uint.from(658).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
+					expect(pool.feeGrowthGlobal1X128).toBe(Uint.from(1029).mul(Uint.from(2).pow(128)).div(expandTo18Decimals(2)).toString());
 				});
 			});
 		});
@@ -2118,8 +1579,7 @@ describe('DEX Pool', () => {
 				expect(observationCardinality).toBe('1');
 				expect(observationIndex).toBe('0');
 				expect(observationCardinalityNext).toBe('1');
-				const { secondsPerLiquidityCumulativeX128, tickCumulative, initialized, blockTimestamp } =
-					await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
+				const { secondsPerLiquidityCumulativeX128, tickCumulative, initialized, blockTimestamp } = await observationStore.getOrDefault(context, observationStore.getKey(pool.address, '0'));
 				expect(secondsPerLiquidityCumulativeX128).toBe('0');
 				expect(tickCumulative).toBe('0');
 				expect(initialized).toBe(true);
@@ -2153,52 +1613,32 @@ describe('DEX Pool', () => {
 			await mint(sender.toString('hex'), tickLower, tickUpper, 10);
 		});
 		it('throws if ticks are in reverse order', async () => {
-			await expect(
-				(async () => pool.snapshotCumulativesInside(tickUpper, tickLower))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside(tickUpper, tickLower))()).rejects.toThrow();
 		});
 		it('throws if ticks are the same', async () => {
-			await expect(
-				(async () => pool.snapshotCumulativesInside(tickUpper, tickUpper))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside(tickUpper, tickUpper))()).rejects.toThrow();
 		});
 		it('throws if tick lower is too low', async () => {
-			await expect(
-				(async () =>
-					pool.snapshotCumulativesInside((getMinTick(tickSpacing) - 1).toString(), tickUpper))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside((getMinTick(tickSpacing) - 1).toString(), tickUpper))()).rejects.toThrow();
 		});
 		it('throws if tick upper is too high', async () => {
-			await expect(
-				(async () =>
-					pool.snapshotCumulativesInside(tickLower, (getMaxTick(tickSpacing) + 1).toString()))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside(tickLower, (getMaxTick(tickSpacing) + 1).toString()))()).rejects.toThrow();
 		});
 		it('throws if tick lower is not initialized', async () => {
-			await expect(
-				(async () =>
-					pool.snapshotCumulativesInside(
-						(parseInt(tickLower, 10) - parseInt(tickSpacing, 10)).toString(),
-						tickUpper,
-					))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside((parseInt(tickLower, 10) - parseInt(tickSpacing, 10)).toString(), tickUpper))()).rejects.toThrow();
 		});
 		it('throws if tick upper is not initialized', async () => {
-			await expect(
-				(async () => pool.snapshotCumulativesInside(tickLower, tickUpper + tickSpacing))(),
-			).rejects.toThrow();
+			await expect((async () => pool.snapshotCumulativesInside(tickLower, tickUpper + tickSpacing))()).rejects.toThrow();
 		});
 		it('is zero immediately after initialize', async () => {
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe('0');
 			expect(tickCumulativeInside).toBe('0');
 			expect(secondsInside).toBe('0');
 		});
 		it('increases by expected amount when time elapses in the range', async () => {
 			advanceTime.bind(pool)('5');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(5).shl(128).div(10).toString());
 			expect(tickCumulativeInside).toBe('0');
 			expect(secondsInside).toBe('5');
@@ -2207,8 +1647,7 @@ describe('DEX Pool', () => {
 			advanceTime.bind(pool)('5');
 			await swapToHigherPrice(encodePriceSqrt(2, 1), sender);
 			advanceTime.bind(pool)('7');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(5).shl(128).div(10).toString());
 			expect(tickCumulativeInside).toBe('0');
 			expect(secondsInside).toBe('5');
@@ -2217,8 +1656,7 @@ describe('DEX Pool', () => {
 			advanceTime.bind(pool)('5');
 			await swapToLowerPrice(encodePriceSqrt(1, 2), sender);
 			advanceTime.bind(pool)('7');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(5).shl(128).div(10).toString());
 			// tick is 0 for 5 seconds, then not in range
 			expect(tickCumulativeInside).toBe('0');
@@ -2229,8 +1667,7 @@ describe('DEX Pool', () => {
 			advanceTime.bind(pool)('5');
 			await swapToHigherPrice(encodePriceSqrt(1, 1), sender);
 			advanceTime.bind(pool)('7');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(7).shl(128).div(10).toString());
 			// tick is not in range then tick is 0 for 7 seconds
 			expect(tickCumulativeInside).toBe('0');
@@ -2241,8 +1678,7 @@ describe('DEX Pool', () => {
 			advanceTime.bind(pool)('5');
 			await swapToLowerPrice(encodePriceSqrt(1, 1), sender);
 			advanceTime.bind(pool)('7');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(7).shl(128).div(10).toString());
 			expect(pool.slot0.tick).toBe('-1'); // justify the -7 tick cumulative inside value
 			expect(tickCumulativeInside).toBe('-7');
@@ -2253,8 +1689,7 @@ describe('DEX Pool', () => {
 			await mint(sender.toString('hex'), tickUpper, getMaxTick(tickSpacing), 15);
 			await swapToHigherPrice(encodePriceSqrt(2, 1), sender);
 			advanceTime.bind(pool)('8');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickUpper, getMaxTick(tickSpacing).toString());
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickUpper, getMaxTick(tickSpacing).toString());
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(8).shl(128).div(15).toString());
 			// the tick of 2/1 is 6931
 			// 8 seconds * 6931 = 55448
@@ -2266,8 +1701,7 @@ describe('DEX Pool', () => {
 			advanceTime.bind(pool)('5');
 			await swapToHigherPrice(encodePriceSqrt(2, 1), sender);
 			advanceTime.bind(pool)('8');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(tickLower, tickUpper);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(tickLower, tickUpper);
 			expect(secondsPerLiquidityInsideX128).toBe(Uint.from(5).shl(128).div(25).toString());
 			expect(tickCumulativeInside).toBe('0');
 			expect(secondsInside).toBe('5');
@@ -2275,26 +1709,18 @@ describe('DEX Pool', () => {
 		it('relative behavior of snapshots', async () => {
 			advanceTime.bind(pool)('5');
 			await mint(sender.toString('hex'), getMinTick(tickSpacing), tickLower, 15);
-			const [tickCumulativeInsideStart, secondsPerLiquidityInsideX128Start, secondsInsideStart] =
-				await pool.snapshotCumulativesInside(getMinTick(tickSpacing).toString(), tickLower);
+			const [tickCumulativeInsideStart, secondsPerLiquidityInsideX128Start, secondsInsideStart] = await pool.snapshotCumulativesInside(getMinTick(tickSpacing).toString(), tickLower);
 			advanceTime.bind(pool)('8');
 			// 13 seconds in starting range, then 3 seconds in newly minted range
 			await swapToLowerPrice(encodePriceSqrt(1, 2), sender);
 			advanceTime.bind(pool)('3');
-			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] =
-				await pool.snapshotCumulativesInside(getMinTick(tickSpacing).toString(), tickLower);
+			const [tickCumulativeInside, secondsPerLiquidityInsideX128, secondsInside] = await pool.snapshotCumulativesInside(getMinTick(tickSpacing).toString(), tickLower);
 			const expectedDiffSecondsPerLiquidity = Uint.from(3).shl(128).div(15);
-			expect(
-				Uint160.from(secondsPerLiquidityInsideX128)
-					.sub(secondsPerLiquidityInsideX128Start)
-					.toString(),
-			).toBe(expectedDiffSecondsPerLiquidity.toString());
+			expect(Uint160.from(secondsPerLiquidityInsideX128).sub(secondsPerLiquidityInsideX128Start).toString()).toBe(expectedDiffSecondsPerLiquidity.toString());
 			expect(secondsPerLiquidityInsideX128).not.toBe(expectedDiffSecondsPerLiquidity.toString());
 			// the tick is the one corresponding to the price of 1/2, or log base 1.0001 of 0.5
 			// this is -6932, and 3 seconds have passed, so the cumulative computed from the diff equals 6932 * 3
-			expect(Int56.from(tickCumulativeInside).sub(tickCumulativeInsideStart).toString()).toBe(
-				'-20796',
-			);
+			expect(Int56.from(tickCumulativeInside).sub(tickCumulativeInsideStart).toString()).toBe('-20796');
 			expect(parseInt(secondsInside, 10) - parseInt(secondsInsideStart, 10)).toBe(3);
 			expect(secondsInside).not.toBe('3');
 		});
@@ -2306,21 +1732,12 @@ describe('DEX Pool', () => {
 			await mint(sender.toString('hex'), minTick, maxTick, 1);
 			await flash(0, 0, sender, MaxUint128, MaxUint128);
 
-			const [feeGrowthGlobal0X128, feeGrowthGlobal1X128] = await Promise.all([
-				pool.feeGrowthGlobal0X128,
-				pool.feeGrowthGlobal1X128,
-			]);
+			const [feeGrowthGlobal0X128, feeGrowthGlobal1X128] = await Promise.all([pool.feeGrowthGlobal0X128, pool.feeGrowthGlobal1X128]);
 			// all 1s in first 128 bits
 			expect(feeGrowthGlobal0X128).toBe(MaxUint128.shl(128).toString());
 			expect(feeGrowthGlobal1X128).toBe(MaxUint128.shl(128).toString());
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
-			const [amount0, amount1] = await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			expect(amount0).toBe(MaxUint128.toString());
 			expect(amount1).toBe(MaxUint128.toString());
 		});
@@ -2331,21 +1748,12 @@ describe('DEX Pool', () => {
 			await flash(0, 0, sender, MaxUint128, MaxUint128);
 			await flash(0, 0, sender, 1, 1);
 
-			const [feeGrowthGlobal0X128, feeGrowthGlobal1X128] = await Promise.all([
-				pool.feeGrowthGlobal0X128,
-				pool.feeGrowthGlobal1X128,
-			]);
+			const [feeGrowthGlobal0X128, feeGrowthGlobal1X128] = await Promise.all([pool.feeGrowthGlobal0X128, pool.feeGrowthGlobal1X128]);
 			// all 1s in first 128 bits
 			expect(feeGrowthGlobal0X128).toBe('0');
 			expect(feeGrowthGlobal1X128).toBe('0');
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
-			const [amount0, amount1] = await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			// fees burned
 			expect(amount0).toBe('0');
 			expect(amount1).toBe('0');
@@ -2359,13 +1767,7 @@ describe('DEX Pool', () => {
 			await flash(0, 0, sender, 1, 1);
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
-			const [amount0, amount1] = await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			const [amount0, amount1] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			// fees burned
 			expect(amount0).toBe('0');
 			expect(amount1).toBe('0');
@@ -2388,24 +1790,12 @@ describe('DEX Pool', () => {
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
 			pool['mutableContext'] = senderContext;
-			let [amount0] = await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			let [amount0] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 
 			expect(amount0).toBe('0');
 
 			pool['mutableContext'] = otherContext;
-			[amount0] = await pool.collect(
-				other,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			[amount0] = await pool.collect(other, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			pool['mutableContext'] = senderContext;
 			expect(amount0).toBe('0');
 		});
@@ -2428,23 +1818,11 @@ describe('DEX Pool', () => {
 			await pool.burn(minTick.toString(), maxTick.toString(), '0');
 
 			pool['mutableContext'] = senderContext;
-			let [amount0] = await pool.collect(
-				sender,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			let [amount0] = await pool.collect(sender, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			expect(amount0).toBe('1');
 
 			pool['mutableContext'] = otherContext;
-			[amount0] = await pool.collect(
-				other,
-				minTick.toString(),
-				maxTick.toString(),
-				MaxUint128.toString(),
-				MaxUint128.toString(),
-			);
+			[amount0] = await pool.collect(other, minTick.toString(), maxTick.toString(), MaxUint128.toString(), MaxUint128.toString());
 			expect(amount0).toBe('0');
 		});
 	});
@@ -2460,172 +1838,40 @@ describe('DEX Pool', () => {
 		});
 
 		it('underpay zero for one and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'1000',
-						'1',
-						'0',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '1000', '1', '0'))()).rejects.toThrow('IIA');
 		});
 		it('pay in the wrong token zero for one and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'1000',
-						'0',
-						'2000',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '1000', '0', '2000'))()).rejects.toThrow('IIA');
 		});
 		it('overpay zero for one and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'1000',
-						'2000',
-						'0',
-					))(),
-			).resolves.not.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '1000', '2000', '0'))()).resolves.not.toThrow('IIA');
 		});
 		it('underpay zero for one and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'-1000',
-						'1',
-						'0',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '-1000', '1', '0'))()).rejects.toThrow('IIA');
 		});
 		it('pay in the wrong token zero for one and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'-1000',
-						'0',
-						'2000',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '-1000', '0', '2000'))()).rejects.toThrow('IIA');
 		});
 		it('overpay zero for one and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						true,
-						MIN_SQRT_RATIO.add(1).toString(),
-						'-1000',
-						'2000',
-						'0',
-					))(),
-			).resolves.not.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, true, MIN_SQRT_RATIO.add(1).toString(), '-1000', '2000', '0'))()).resolves.not.toThrow('IIA');
 		});
 		it('(async() => underpay one for zero and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'1000',
-						'0',
-						'1',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '1000', '0', '1'))()).rejects.toThrow('IIA');
 		});
 		it('pay in the wrong token one for zero and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'1000',
-						'2000',
-						'0',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '1000', '2000', '0'))()).rejects.toThrow('IIA');
 		});
 		it('overpay one for zero and exact in', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'1000',
-						'0',
-						'2000',
-					))(),
-			).resolves.not.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '1000', '0', '2000'))()).resolves.not.toThrow('IIA');
 		});
 		it('(async() => underpay one for zero and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'-1000',
-						'0',
-						'1',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '-1000', '0', '1'))()).rejects.toThrow('IIA');
 		});
 		it('pay in the wrong token one for zero and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'-1000',
-						'2000',
-						'0',
-					))(),
-			).rejects.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '-1000', '2000', '0'))()).rejects.toThrow('IIA');
 		});
 		it('overpay one for zero and exact out', async () => {
-			await expect(
-				(async () =>
-					underpay.swap.bind(underpay)(
-						pool,
-						sender,
-						false,
-						MAX_SQRT_RATIO.sub(1).toString(),
-						'-1000',
-						'0',
-						'2000',
-					))(),
-			).resolves.not.toThrow('IIA');
+			await expect((async () => underpay.swap.bind(underpay)(pool, sender, false, MAX_SQRT_RATIO.sub(1).toString(), '-1000', '0', '2000'))()).resolves.not.toThrow('IIA');
 		});
 	});
 });

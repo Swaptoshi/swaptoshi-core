@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { proposalVotedEventSchema } from '../schema';
 import { ProposalVotedEventData } from '../types';
 
-export class ProposalVotedEvent extends BaseEvent<ProposalVotedEventData> {
+export class ProposalVotedEvent extends Modules.BaseEvent<ProposalVotedEventData> {
 	public schema = proposalVotedEventSchema;
 }

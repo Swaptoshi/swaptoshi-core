@@ -3,23 +3,7 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable import/no-extraneous-dependencies */
 
-import {
-	ImmutableStoreGetter,
-	GenesisConfig,
-	ModuleInitArgs,
-	StoreGetter,
-	BaseStore,
-	Schema,
-	NamedRegistry,
-	validator,
-	utils,
-	codec,
-	MethodContext,
-	VerificationResult,
-	VerifyStatus,
-	BlockExecuteContext,
-	ImmutableMethodContext,
-} from 'klayr-sdk';
+import { Schema, validator, utils, codec, Modules, Types, StateMachine } from 'klayr-sdk';
 import { emptySchema } from '@klayr/codec';
 import { IterateOptions } from '@liskhq/lisk-db';
 import { ConfigPathKeys, ConfigPathType, GovernableConfigSetContext, GovernableConfigStoreData, GovernableConfigVerifyContext, UpdatedProperty } from './types';
@@ -31,9 +15,9 @@ import { GovernanceMethod } from './method';
 /**
  * The `BaseGovernableConfig` provides a framework for implementing on-chain configurations that can be managed through proposals in the `governance` module.
  */
-export abstract class BaseGovernableConfig<T extends object> extends BaseStore<GovernableConfigStoreData> {
+export abstract class BaseGovernableConfig<T extends object> extends Modules.BaseStore<GovernableConfigStoreData> {
 	protected storeKey = Buffer.alloc(0);
-	protected governanceEvent: NamedRegistry = new NamedRegistry();
+	protected governanceEvent: Modules.NamedRegistry = new Modules.NamedRegistry();
 	protected module: string = '';
 	protected method: GovernanceMethod | undefined;
 
@@ -66,7 +50,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	/**
 	 * The chain genesis configuration.
 	 */
-	public genesisConfig: GenesisConfig | undefined;
+	public genesisConfig: Types.GenesisConfig | undefined;
 
 	/**
 	 * The governable config name is the unique identifier for the config.
@@ -85,7 +69,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param events - The registry of named events.
 	 * @param treasuryAddress - The treasury address, as configured on governance module.
 	 */
-	public register(events: NamedRegistry, governanceMethod: GovernanceMethod, args: ModuleInitArgs) {
+	public register(events: Modules.NamedRegistry, governanceMethod: GovernanceMethod, args: Modules.ModuleInitArgs) {
 		this.governanceEvent = events;
 		this.method = governanceMethod;
 		this.genesisConfig = args.genesisConfig;
@@ -111,7 +95,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 *
 	 * @param _genesisConfig - The genesis configuration.
 	 */
-	public beforeConfigInit(_genesisConfig: GenesisConfig): void {}
+	public beforeConfigInit(_genesisConfig: Types.GenesisConfig): void {}
 
 	/**
 	 * Hook called before on-chain config is changed.
@@ -136,8 +120,8 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param _context - The config verify context.
 	 */
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: GovernableConfigVerifyContext<T>): Promise<VerificationResult> {
-		return { status: VerifyStatus.OK };
+	public async verify(_context: GovernableConfigVerifyContext<T>): Promise<StateMachine.VerificationResult> {
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
 	/**
@@ -146,7 +130,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 *
 	 * @param args - The initialization arguments including the genesis configuration and module configuration.
 	 */
-	public init(args: ModuleInitArgs): void {
+	public init(args: Modules.ModuleInitArgs): void {
 		this.beforeConfigInit(args.genesisConfig);
 		this.default = utils.objects.mergeDeep({}, this.default, args.moduleConfig) as T;
 
@@ -163,7 +147,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 *
 	 * @param context - The genesis block execution context.
 	 */
-	public async initRegisteredConfig(context: BlockExecuteContext): Promise<void> {
+	public async initRegisteredConfig(context: StateMachine.BlockExecuteContext): Promise<void> {
 		if (await this.has(context, this.storeKey)) return;
 
 		if (Object.keys(this.schema.properties).length === 0) throw new Error(`schema for ${this.name} is not configured`);
@@ -178,7 +162,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param context - The context for retrieving the immutable store.
 	 * @returns The current configuration.
 	 */
-	public async getConfig(context: ImmutableStoreGetter): Promise<T> {
+	public async getConfig(context: Modules.ImmutableStoreGetter): Promise<T> {
 		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
 
 		if (this.registered) {
@@ -194,7 +178,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param context - The context for setting the store.
 	 * @param value - The new configuration value.
 	 */
-	public async setConfig(context: MethodContext, value: T): Promise<void> {
+	public async setConfig(context: StateMachine.MethodContext, value: T): Promise<void> {
 		await this._setConfigHandler(context, value, true, true);
 	}
 
@@ -207,7 +191,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @returns The value at the specified path in the configuration.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async getConfigWithPath<P extends ConfigPathKeys<T>>(context: ImmutableStoreGetter, path: P): Promise<ConfigPathType<T, P>> {
+	public async getConfigWithPath<P extends ConfigPathKeys<T>>(context: Modules.ImmutableStoreGetter, path: P): Promise<ConfigPathType<T, P>> {
 		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
@@ -224,7 +208,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The value to set at the specified path.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async setConfigWithPath<P extends ConfigPathKeys<T>>(context: MethodContext, path: P, value: ConfigPathType<T, P>): Promise<void> {
+	public async setConfigWithPath<P extends ConfigPathKeys<T>>(context: StateMachine.MethodContext, path: P, value: ConfigPathType<T, P>): Promise<void> {
 		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
@@ -239,8 +223,8 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param context - The context for setting the store.
 	 * @param value - The new configuration value.
 	 */
-	public async dryRunSetConfig(context: ImmutableMethodContext, value: T): Promise<UpdatedProperty[]> {
-		return this._setConfigHandler(context as MethodContext, value, false, true);
+	public async dryRunSetConfig(context: StateMachine.ImmutableMethodContext, value: T): Promise<UpdatedProperty[]> {
+		return this._setConfigHandler(context as StateMachine.MethodContext, value, false, true);
 	}
 
 	/**
@@ -251,7 +235,7 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param value - The value to set at the specified path.
 	 * @throws Will throw an error if the path does not exist in the configuration.
 	 */
-	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(context: ImmutableMethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
+	public async dryRunSetConfigWithPath<P extends ConfigPathKeys<T>>(context: StateMachine.ImmutableMethodContext, path: P, value: ConfigPathType<T, P>): Promise<UpdatedProperty[]> {
 		const config = (await this.getConfig(context)) as T;
 		if (!pathExists(config, path)) {
 			throw new Error(`config with path ${path} on ${this.name} dosen't exists`);
@@ -269,12 +253,12 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 	 * @param verifyGovernability - Whether governable props will be strictly checked
 	 * @throws Will throw an error if: instance is not configured, verify failed, invalid schema, or non-governable props found (in case verifyGovernability is true).
 	 */
-	private async _setConfigHandler(context: MethodContext, value: T, mutateState: boolean, verifyGovernability: boolean) {
+	private async _setConfigHandler(context: StateMachine.MethodContext, value: T, mutateState: boolean, verifyGovernability: boolean) {
 		if (!this.initialized) throw new Error(`${this.name} config not initialized. Call .init() in module.init() if not governable.`);
 		if (!this.genesisConfig) throw new Error(`${this.name} genesis config is not registered`);
 
 		const verify = await this.verify({ context, config: value, genesisConfig: this.genesisConfig });
-		if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
+		if (verify.status !== StateMachine.VerifyStatus.OK) throw new Error(`failed to verify governable config for ${this.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		validator.validator.validate<T>(removeProperty(this.schema, ['governable']) as Schema, value);
 
 		let updatedPaths: UpdatedProperty[] = [];
@@ -323,27 +307,27 @@ export abstract class BaseGovernableConfig<T extends object> extends BaseStore<G
 
 	// Below this are Klayr SDK BaseStore overriden implementation
 
-	public async get(context: ImmutableStoreGetter, key: Buffer): Promise<GovernableConfigStoreData> {
+	public async get(context: Modules.ImmutableStoreGetter, key: Buffer): Promise<GovernableConfigStoreData> {
 		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.getWithSchema<GovernableConfigStoreData>(key, governableConfigSchema);
 	}
 
-	public async has(context: ImmutableStoreGetter, key: Buffer): Promise<boolean> {
+	public async has(context: Modules.ImmutableStoreGetter, key: Buffer): Promise<boolean> {
 		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.has(key);
 	}
 
-	public async iterate(context: ImmutableStoreGetter, options: IterateOptions): Promise<{ key: Buffer; value: GovernableConfigStoreData }[]> {
+	public async iterate(context: Modules.ImmutableStoreGetter, options: IterateOptions): Promise<{ key: Buffer; value: GovernableConfigStoreData }[]> {
 		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.iterateWithSchema<GovernableConfigStoreData>(options, governableConfigSchema);
 	}
 
-	public async set(context: StoreGetter, key: Buffer, value: GovernableConfigStoreData): Promise<void> {
+	public async set(context: Modules.StoreGetter, key: Buffer, value: GovernableConfigStoreData): Promise<void> {
 		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.setWithSchema(key, value, governableConfigSchema);
 	}
 
-	public async del(context: StoreGetter, key: Buffer): Promise<void> {
+	public async del(context: Modules.StoreGetter, key: Buffer): Promise<void> {
 		const subStore = context.getStore(this.storePrefix, this.subStorePrefix);
 		return subStore.del(key);
 	}

@@ -1,7 +1,7 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { treasuryMintEventSchema } from '../schema';
 import { TreasuryMintEventData } from '../types';
 
-export class TreasuryMintEvent extends BaseEvent<TreasuryMintEventData> {
+export class TreasuryMintEvent extends Modules.BaseEvent<TreasuryMintEventData> {
 	public schema = treasuryMintEventSchema;
 }

@@ -1,8 +1,7 @@
 /* eslint-disable import/no-cycle */
-import { TokenMethod, FeeMethod, SidechainInteroperabilityMethod, MainchainInteroperabilityMethod } from 'klayr-sdk';
 import { FeeConversionMethod } from '../../fee_conversion';
 import { GovernanceMethod } from '../../governance';
-import { NFTMethod } from '../../nft';
+import { SidechainInteroperabilityMethod, MainchainInteroperabilityMethod, FeeMethod, TokenMethod, NFTMethod } from './utils';
 
 export interface DexModuleDependencies {
 	tokenMethod: TokenMethod;

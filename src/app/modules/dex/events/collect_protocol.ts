@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { collectProtocolEventSchema } from '../schema';
 
 export interface CollectProtocolEventData {
@@ -9,6 +9,6 @@ export interface CollectProtocolEventData {
 	amount1: string;
 }
 
-export class CollectProtocolEvent extends BaseEvent<CollectProtocolEventData> {
+export class CollectProtocolEvent extends Modules.BaseEvent<CollectProtocolEventData> {
 	public schema = collectProtocolEventSchema;
 }

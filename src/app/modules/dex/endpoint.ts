@@ -1,4 +1,4 @@
-import { BaseEndpoint, cryptography, ModuleEndpointContext } from 'klayr-sdk';
+import { Modules, Types, cryptography } from 'klayr-sdk';
 import { endpointSwapContext } from './stores/context';
 import { Quoter } from './stores/library/lens';
 import {
@@ -46,14 +46,14 @@ import {
 	quotePriceEndpointResponseSchema,
 } from './schema';
 
-export class DexEndpoint extends BaseEndpoint {
-	public async getConfig(_context: ModuleEndpointContext) {
+export class DexEndpoint extends Modules.BaseEndpoint {
+	public async getConfig(_context: Types.ModuleEndpointContext) {
 		const configStore = this.stores.get(DexGovernableConfig);
 		const config = await configStore.getConfig(_context);
 		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
-	public async quoteExactInput(context: ModuleEndpointContext) {
+	public async quoteExactInput(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteExactInputParams;
 		verifyQuoteExactInputParam(param);
 
@@ -62,7 +62,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await quoter.quoteExactInput(Buffer.from(param.path, 'hex'), param.amountIn), quoteExactInputEndpointResponseSchema);
 	}
 
-	public async quoteExactInputSingle(context: ModuleEndpointContext) {
+	public async quoteExactInputSingle(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteExactInputSingleParams;
 		verifyQuoteExactInputSingleParam(param);
 
@@ -71,7 +71,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await quoter.quoteExactInputSingle(param), quoteExactInputSingleEndpointResponseSchema);
 	}
 
-	public async quoteExactOutput(context: ModuleEndpointContext) {
+	public async quoteExactOutput(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteExactOutputParams;
 		verifyQuoteExactOutputParam(param);
 
@@ -80,7 +80,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await quoter.quoteExactOutput(Buffer.from(param.path, 'hex'), param.amountOut), quoteExactOutputEndpointResponseSchema);
 	}
 
-	public async quoteExactOutputSingle(context: ModuleEndpointContext) {
+	public async quoteExactOutputSingle(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteExactOutputSingleParams;
 		verifyQuoteExactOutputSingleParam(param);
 
@@ -89,7 +89,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await quoter.quoteExactOutputSingle(param), quoteExactOutputSingleEndpointResponseSchema);
 	}
 
-	public async quotePrice(context: ModuleEndpointContext) {
+	public async quotePrice(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuotePriceParams;
 		verifyPriceParam(param);
 
@@ -98,7 +98,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await quoter.quotePrice(Buffer.from(param.path, 'hex')), quotePriceEndpointResponseSchema);
 	}
 
-	public async getPoolAddressFromCollectionId(context: ModuleEndpointContext) {
+	public async getPoolAddressFromCollectionId(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetPoolAddressFromCollectionIdParams;
 		verifyGetPoolAddressFromCollectionIdParam(param);
 
@@ -108,7 +108,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return { poolAddress: positionManager.poolAddress.toString('hex') };
 	}
 
-	public async getPool(context: ModuleEndpointContext) {
+	public async getPool(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetPoolParams;
 		verifyGetPoolParam(param);
 
@@ -125,7 +125,7 @@ export class DexEndpoint extends BaseEndpoint {
 		);
 	}
 
-	public async getPosition(context: ModuleEndpointContext) {
+	public async getPosition(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetPositionParams;
 		verifyGetPositionParam(param);
 
@@ -152,7 +152,7 @@ export class DexEndpoint extends BaseEndpoint {
 		);
 	}
 
-	public async getTokenURI(context: ModuleEndpointContext) {
+	public async getTokenURI(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetTokenURIParams;
 		verifyGetTokenURIParam(param);
 
@@ -162,7 +162,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer({ tokenURI: await positionManager.tokenURI(param.tokenId) }, getTokenURIEndpointResponseSchema);
 	}
 
-	public async getMetadata(context: ModuleEndpointContext) {
+	public async getMetadata(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetMetadataParams;
 		verifyGetMetadataParam(param);
 
@@ -172,7 +172,7 @@ export class DexEndpoint extends BaseEndpoint {
 		return serializer(await positionManager.getMetadata(param.tokenId), getMetadataEndpointResponseSchema);
 	}
 
-	public async observe(context: ModuleEndpointContext) {
+	public async observe(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as ObserveParams;
 		verifyObserveParam(param);
 

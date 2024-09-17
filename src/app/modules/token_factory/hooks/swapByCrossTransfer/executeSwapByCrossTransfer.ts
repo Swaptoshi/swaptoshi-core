@@ -1,15 +1,12 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { crossChainMethodFactoryContext } from '../../stores/context';
 import { isSwapByCrossTransfer } from './isSwapByCrossTransfer';
 import { TokenFactoryInteroperableMethod } from '../../cc_method';
 import { decodeICOPoolAddress } from '../../stores/library';
 import { ICOStore } from '../../stores/ico';
 
-export async function executeSwapByCrossTransfer(
-	this: TokenFactoryInteroperableMethod,
-	ctx: CrossChainMessageContext,
-) {
+export async function executeSwapByCrossTransfer(this: TokenFactoryInteroperableMethod, ctx: Modules.Interoperability.CrossChainMessageContext) {
 	const check = await isSwapByCrossTransfer.bind(this)(ctx);
 	if (check.status && check.payload) {
 		const icoStore = this.stores.get(ICOStore);
@@ -28,13 +25,7 @@ export async function executeSwapByCrossTransfer(
 					recipient: check.payload.senderAddress,
 				});
 			} catch {
-				await this._tokenMethod?.transfer(
-					ctx.getMethodContext(),
-					check.payload.recipientAddress,
-					check.payload.senderAddress,
-					check.payload.tokenID,
-					check.payload.amount,
-				);
+				await this._tokenMethod?.transfer(ctx.getMethodContext(), check.payload.recipientAddress, check.payload.senderAddress, check.payload.tokenID, check.payload.amount);
 			}
 		}
 	}

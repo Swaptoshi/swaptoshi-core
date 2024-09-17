@@ -1,18 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/member-ordering */
-import {
-	BaseMethod,
-	BlockAfterExecuteContext,
-	BlockExecuteContext,
-	GenesisBlockExecuteContext,
-	ImmutableStoreGetter,
-	TokenMethod,
-	TransactionExecuteContext,
-	VerifyStatus,
-	codec,
-	cryptography,
-} from 'klayr-sdk';
+import { Modules, StateMachine, codec, cryptography } from 'klayr-sdk';
 import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD, POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tax';
@@ -20,7 +9,7 @@ import { GovernanceGovernableConfig } from './config';
 import { GovernableConfigRegistry } from './registry';
 import { methodGovernanceContext, mutableBlockHookGovernanceContext } from './stores/context';
 import { ProposalQueueStore } from './stores/queue';
-import { MutableContext, StakeTransactionParams, VoteScoreOrArray } from './types';
+import { MutableContext, StakeTransactionParams, TokenMethod, VoteScoreOrArray } from './types';
 import { stakeCommandParamsSchema } from './schema';
 import { DelegatedVoteStore } from './stores/delegated_vote';
 import { CastedVoteStore } from './stores/casted_vote';
@@ -34,7 +23,7 @@ interface BlockReward {
 	reduction: number;
 }
 
-export class GovernanceInternalMethod extends BaseMethod {
+export class GovernanceInternalMethod extends Modules.BaseMethod {
 	private _governableConfig: GovernableConfigRegistry | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 
@@ -44,7 +33,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async updateVoteScoreAfterStake(context: TransactionExecuteContext) {
+	public async updateVoteScoreAfterStake(context: StateMachine.TransactionExecuteContext) {
 		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
 			let totalAddedStake = BigInt(0);
 			let totalSubtractedStake = BigInt(0);
@@ -112,14 +101,14 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	public async executeQueuedProposal(context: BlockExecuteContext) {
+	public async executeQueuedProposal(context: StateMachine.BlockExecuteContext) {
 		const proposalQueueStore = this.stores.get(ProposalQueueStore);
 		const ctx = mutableBlockHookGovernanceContext(context);
 		const queue = await proposalQueueStore.getInstance(ctx);
 		await queue.executeQueue();
 	}
 
-	public async initializeGovernableConfig(context: BlockExecuteContext) {
+	public async initializeGovernableConfig(context: StateMachine.BlockExecuteContext) {
 		if (!this._governableConfig) throw new Error('GovernanceInternalMethod dependencies is not configured');
 
 		if (context.header.height === 1) {
@@ -131,7 +120,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	public async verifyGovernableConfig(context: GenesisBlockExecuteContext) {
+	public async verifyGovernableConfig(context: StateMachine.GenesisBlockExecuteContext) {
 		if (!this._governableConfig) throw new Error('GovernanceInternalMethod dependencies is not configured');
 
 		const governableConfigList = this._governableConfig.values();
@@ -142,11 +131,11 @@ export class GovernanceInternalMethod extends BaseMethod {
 
 			const verify = await governableConfig.verify({ context, config: governableConfig.default, genesisConfig: governableConfig.genesisConfig });
 
-			if (verify.status !== VerifyStatus.OK) throw new Error(`failed to verify governable config for ${governableConfig.name}: ${verify.error ? verify.error.message : 'unknown'}`);
+			if (verify.status !== StateMachine.VerifyStatus.OK) throw new Error(`failed to verify governable config for ${governableConfig.name}: ${verify.error ? verify.error.message : 'unknown'}`);
 		}
 	}
 
-	public async addTreasuryReward(context: BlockAfterExecuteContext) {
+	public async addTreasuryReward(context: StateMachine.BlockAfterExecuteContext) {
 		if (!this._tokenMethod) throw new Error('GovernanceInternalMethod dependencies is not configured');
 
 		const config = await this._getGovernanceConfig(context);
@@ -179,7 +168,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		}
 	}
 
-	private async _getMintBracket(context: BlockAfterExecuteContext, reward: BlockReward, height: number) {
+	private async _getMintBracket(context: StateMachine.BlockAfterExecuteContext, reward: BlockReward, height: number) {
 		const config = await this._getGovernanceConfig(context);
 		const bracket = await this._getBracket(context, config.treasuryReward.mintBracket, height);
 
@@ -188,7 +177,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return parseBigintOrPercentage(bracket, reward.blockReward);
 	}
 
-	private async _getBlockRewardTaxBracket(context: BlockAfterExecuteContext, reward: BlockReward, height: number) {
+	private async _getBlockRewardTaxBracket(context: StateMachine.BlockAfterExecuteContext, reward: BlockReward, height: number) {
 		const config = await this._getGovernanceConfig(context);
 		const bracket = await this._getBracket(context, config.treasuryReward.blockRewardTaxBracket, height);
 
@@ -197,7 +186,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return parseBigintOrPercentage(bracket, reward.blockReward);
 	}
 
-	private _getRewardDeduction(context: BlockAfterExecuteContext): BlockReward {
+	private _getRewardDeduction(context: StateMachine.BlockAfterExecuteContext): BlockReward {
 		const blockReward = context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD) as bigint;
 		const reduction = context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION) as number;
 
@@ -207,11 +196,11 @@ export class GovernanceInternalMethod extends BaseMethod {
 		};
 	}
 
-	private _setRewardContext(context: BlockAfterExecuteContext, updatedReward: bigint) {
+	private _setRewardContext(context: StateMachine.BlockAfterExecuteContext, updatedReward: bigint) {
 		context.contextStore.set(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD, updatedReward);
 	}
 
-	private async _getBracketLocation(context: BlockAfterExecuteContext, height: number): Promise<number> {
+	private async _getBracketLocation(context: StateMachine.BlockAfterExecuteContext, height: number): Promise<number> {
 		const config = await this._getGovernanceConfig(context);
 
 		if (height < config.treasuryReward.offset) {
@@ -224,7 +213,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return location;
 	}
 
-	private async _getBracket(context: BlockAfterExecuteContext, brackets: string[], height: number) {
+	private async _getBracket(context: StateMachine.BlockAfterExecuteContext, brackets: string[], height: number) {
 		if (brackets.length === 0) return '0';
 
 		const location = await this._getBracketLocation(context, height);
@@ -235,7 +224,7 @@ export class GovernanceInternalMethod extends BaseMethod {
 		return brackets[bracket];
 	}
 
-	private async _getGovernanceConfig(context: ImmutableStoreGetter) {
+	private async _getGovernanceConfig(context: Modules.ImmutableStoreGetter) {
 		const configStore = this.stores.get(GovernanceGovernableConfig);
 		return configStore.getConfig(context);
 	}

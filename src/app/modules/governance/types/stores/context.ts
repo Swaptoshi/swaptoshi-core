@@ -1,4 +1,4 @@
-import { CommandExecuteContext, ImmutableMethodContext, MethodContext, ModuleEndpointContext, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
+import { StateMachine, Types } from 'klayr-sdk';
 
 export interface ImmutableGovernanceContext<T = unknown> {
 	context: ImmutableContext & T;
@@ -12,6 +12,6 @@ export interface MutableGovernanceContext<T = unknown> {
 	height: number;
 }
 
-export type MutableContext = TransactionExecuteContext | CommandExecuteContext | MethodContext;
+export type MutableContext = StateMachine.TransactionExecuteContext | StateMachine.CommandExecuteContext | StateMachine.MethodContext;
 
-export type ImmutableContext = ImmutableMethodContext | TransactionVerifyContext | ModuleEndpointContext;
+export type ImmutableContext = StateMachine.ImmutableMethodContext | StateMachine.TransactionVerifyContext | Types.ModuleEndpointContext;

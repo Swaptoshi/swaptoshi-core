@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { GenesisConfig, VerificationResult, VerifyStatus, cryptography, utils } from 'klayr-sdk';
+import { Types, StateMachine, cryptography, utils } from 'klayr-sdk';
 import { BaseGovernableConfig } from './base_governable_config';
 import { DEFAULT_MAX_BOOST_DURATION_DAY, DEFAULT_VOTE_DURATION_DAY, defaultConfig } from './constants';
 import { configSchema } from './schema';
@@ -11,7 +11,7 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 	public schema = configSchema;
 	public default = defaultConfig;
 
-	public beforeConfigInit(genesisConfig: GenesisConfig): void {
+	public beforeConfigInit(genesisConfig: Types.GenesisConfig): void {
 		this.default = utils.objects.mergeDeep({}, this.default, {
 			voteDuration: (DEFAULT_VOTE_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
 			quorumDuration: (DEFAULT_VOTE_DURATION_DAY * 24 * 3600) / genesisConfig.blockTime,
@@ -22,16 +22,16 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: GovernableConfigVerifyContext<GovernanceModuleConfig>): Promise<VerificationResult> {
+	public async verify(_context: GovernableConfigVerifyContext<GovernanceModuleConfig>): Promise<StateMachine.VerificationResult> {
 		try {
 			this._verifyConfig(_context.config);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
 	private _verifyConfig(config: GovernanceModuleConfig) {

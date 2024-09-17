@@ -1,18 +1,9 @@
 import { Schema } from 'klayr-sdk';
-import {
-	commandSwapContext,
-	methodSwapContext,
-} from '../../../../../src/app/modules/dex/stores/context';
+import { commandSwapContext, methodSwapContext } from '../../../../../src/app/modules/dex/stores/context';
 import { PositionManagerStore } from '../../../../../src/app/modules/dex/stores/position_manager';
 import { commandContextFixture, methodContextFixture } from '../stores/shared/module';
 import { completeFixture } from '../stores/shared/pool';
-import {
-	FeeAmount,
-	TICK_SPACINGS,
-	encodePriceSqrt,
-	getMaxTick,
-	getMinTick,
-} from '../stores/shared/utilities';
+import { FeeAmount, TICK_SPACINGS, encodePriceSqrt, getMaxTick, getMinTick } from '../stores/shared/utilities';
 
 interface Token {
 	address: Buffer;
@@ -22,36 +13,12 @@ interface Token {
 
 export type Tokens = [Token, Token, Token];
 
-export async function commandFixture<T extends object>(
-	command: string,
-	commandSchema: Schema,
-	senderPublicKey: Buffer,
-	param: T,
-) {
+export async function commandFixture<T extends object>(command: string, commandSchema: Schema, senderPublicKey: Buffer, param: T) {
 	const fixture = await commandContextFixture<T>(command, commandSchema, senderPublicKey);
 	const context = commandSwapContext(fixture.createCommandExecuteContext(param));
-	const {
-		token0,
-		token1,
-		token2,
-		token0Decimal,
-		token0Symbol,
-		token1Decimal,
-		token1Symbol,
-		token2Decimal,
-		token2Symbol,
-	} = await completeFixture(context, fixture.module);
+	const { token0, token1, token2, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol } = await completeFixture(context, fixture.module);
 
-	const pool = await fixture.poolStore.createPool(
-		context,
-		token0,
-		token0Symbol,
-		parseInt(token0Decimal, 10),
-		token1,
-		token1Symbol,
-		parseInt(token1Decimal, 10),
-		FeeAmount.MEDIUM,
-	);
+	const pool = await fixture.poolStore.createPool(context, token0, token0Symbol, parseInt(token0Decimal, 10), token1, token1Symbol, parseInt(token1Decimal, 10), FeeAmount.MEDIUM);
 	await pool.initialize(encodePriceSqrt(1, 1).toString());
 
 	const positionManagerStore = fixture.module.stores.get(PositionManagerStore);
@@ -63,9 +30,7 @@ export async function commandFixture<T extends object>(
 		{ address: token2, symbol: () => token2Symbol, decimals: () => token2Decimal },
 	];
 
-	tokens.sort((a, b) =>
-		a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-	);
+	tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 	return {
 		...fixture,
@@ -82,28 +47,9 @@ export async function endpointFixture() {
 	const timestamp = Date.now();
 	const fixture = await methodContextFixture();
 	const context = methodSwapContext(fixture.createMethodContext(), Buffer.alloc(20), timestamp);
-	const {
-		token0,
-		token1,
-		token2,
-		token0Decimal,
-		token0Symbol,
-		token1Decimal,
-		token1Symbol,
-		token2Decimal,
-		token2Symbol,
-	} = await completeFixture(context, fixture.module);
+	const { token0, token1, token2, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol } = await completeFixture(context, fixture.module);
 
-	let pool = await fixture.poolStore.createPool(
-		context,
-		token2,
-		token2Symbol,
-		parseInt(token2Decimal, 10),
-		token1,
-		token1Symbol,
-		parseInt(token1Decimal, 10),
-		FeeAmount.MEDIUM,
-	);
+	let pool = await fixture.poolStore.createPool(context, token2, token2Symbol, parseInt(token2Decimal, 10), token1, token1Symbol, parseInt(token1Decimal, 10), FeeAmount.MEDIUM);
 	await pool.initialize(encodePriceSqrt(1, 1).toString());
 
 	const positionManagerStore = fixture.module.stores.get(PositionManagerStore);
@@ -133,9 +79,7 @@ export async function endpointFixture() {
 		{ address: token2, symbol: () => token2Symbol, decimals: () => token2Decimal },
 	];
 
-	tokens.sort((a, b) =>
-		a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-	);
+	tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 	return {
 		...fixture,

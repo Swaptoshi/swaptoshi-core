@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { TokenMethod } from 'klayr-sdk';
 import {
 	MockedTokenMethod,
 	mock_token_addDependencies,
@@ -34,6 +33,7 @@ import {
 } from '.';
 import { TokenRegistry } from './token_registry';
 import { Token } from './token';
+import { TokenMethod } from '../../../../../../../src/app/modules/dex/types';
 
 const context = {} as any;
 const tokenModule = 'module';
@@ -64,10 +64,7 @@ describe('MockedTokenMethod', () => {
 	describe('addDependencies', () => {
 		it('should call mock method', () => {
 			tokenMethod.addDependencies('interoperabilityMethod' as any, 'internalMethod' as any);
-			expect(mock_token_addDependencies).toHaveBeenCalledWith(
-				'interoperabilityMethod',
-				'internalMethod',
-			);
+			expect(mock_token_addDependencies).toHaveBeenCalledWith('interoperabilityMethod', 'internalMethod');
 		});
 	});
 
@@ -170,25 +167,8 @@ describe('MockedTokenMethod', () => {
 
 	describe('transferCrossChain', () => {
 		it('should call mock method', async () => {
-			await tokenMethod.transferCrossChain(
-				context,
-				sender,
-				receivingChainID,
-				recipient,
-				tokenId,
-				BigInt(10),
-				BigInt(0),
-				'',
-			);
-			expect(mock_token_transferCrossChain).toHaveBeenCalledWith(
-				sender,
-				receivingChainID,
-				recipient,
-				tokenId,
-				BigInt(10),
-				BigInt(0),
-				'',
-			);
+			await tokenMethod.transferCrossChain(context, sender, receivingChainID, recipient, tokenId, BigInt(10), BigInt(0), '');
+			expect(mock_token_transferCrossChain).toHaveBeenCalledWith(sender, receivingChainID, recipient, tokenId, BigInt(10), BigInt(0), '');
 		});
 	});
 
@@ -204,9 +184,7 @@ describe('MockedTokenMethod', () => {
 
 		it('should lock token', async () => {
 			await tokenMethod.lock(context, sender, tokenModule, tokenId, BigInt(10));
-			expect(
-				(await tokenMethod.getLockedAmount(context, sender, tokenId, tokenModule)).toString(),
-			).toBe('10');
+			expect((await tokenMethod.getLockedAmount(context, sender, tokenId, tokenModule)).toString()).toBe('10');
 		});
 	});
 
@@ -223,9 +201,7 @@ describe('MockedTokenMethod', () => {
 
 		it('should unlock token', async () => {
 			await tokenMethod.unlock(context, sender, tokenModule, tokenId, BigInt(10));
-			expect(
-				(await tokenMethod.getLockedAmount(context, sender, tokenId, tokenModule)).toString(),
-			).toBe('0');
+			expect((await tokenMethod.getLockedAmount(context, sender, tokenId, tokenModule)).toString()).toBe('0');
 		});
 	});
 
@@ -317,12 +293,8 @@ describe('MockedTokenMethod', () => {
 
 		it('should transfer', async () => {
 			await tokenMethod.transfer(context, sender, recipient, tokenId, BigInt(10));
-			expect((await tokenMethod.getAvailableBalance(context, sender, tokenId)).toString()).toBe(
-				'0',
-			);
-			expect((await tokenMethod.getAvailableBalance(context, recipient, tokenId)).toString()).toBe(
-				'10',
-			);
+			expect((await tokenMethod.getAvailableBalance(context, sender, tokenId)).toString()).toBe('0');
+			expect((await tokenMethod.getAvailableBalance(context, recipient, tokenId)).toString()).toBe('10');
 		});
 	});
 

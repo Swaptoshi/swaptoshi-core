@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { BaseGovernableConfig, GovernableConfigVerifyContext } from '../governance';
 import { FeeConversionModuleConfig } from './types';
 import { configSchema } from './schema';
@@ -10,7 +10,7 @@ export class FeeConversionGovernableConfig extends BaseGovernableConfig<FeeConve
 	public default = defaultConfig;
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: GovernableConfigVerifyContext<FeeConversionModuleConfig>): Promise<VerificationResult> {
+	public async verify(_context: GovernableConfigVerifyContext<FeeConversionModuleConfig>): Promise<StateMachine.VerificationResult> {
 		try {
 			const { chainID } = _context.genesisConfig;
 
@@ -31,10 +31,10 @@ export class FeeConversionGovernableConfig extends BaseGovernableConfig<FeeConve
 			}
 		} catch (error) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 }

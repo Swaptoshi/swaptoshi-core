@@ -1,8 +1,8 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
-import { ExactOutputSingleParams } from '../../../../../src/app/modules/dex/types';
+import { ExactOutputSingleParams, TokenMethod } from '../../../../../src/app/modules/dex/types';
 import { invalidAddress, invalidNumberString, invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
 import { NonfungiblePositionManager } from '../../../../../src/app/modules/dex/stores/factory';
@@ -35,8 +35,8 @@ describe('ExactOutputSingleCommand', () => {
 	let command: ExactOutputSingleCommand;
 	let nft: NonfungiblePositionManager;
 	let tokenMethod: TokenMethod;
-	let createCommandVerifyContext: (params: CommandParam) => CommandVerifyContext<CommandParam>;
-	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
+	let createCommandVerifyContext: (params: CommandParam) => StateMachine.CommandVerifyContext<CommandParam>;
+	let createCommandExecuteContext: (params: CommandParam) => StateMachine.CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
 		({ module, createCommandExecuteContext, createCommandVerifyContext, nft, tokenMethod } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
@@ -62,7 +62,7 @@ describe('ExactOutputSingleCommand', () => {
 		TokenRegistry.reset();
 	});
 
-	const getBalances = async (who: Buffer, context: CommandExecuteContext<CommandParam>) => {
+	const getBalances = async (who: Buffer, context: StateMachine.CommandExecuteContext<CommandParam>) => {
 		const balances = await Promise.all([await tokenMethod.getAvailableBalance(context, who, token0), await tokenMethod.getAvailableBalance(context, who, token1)]);
 		return {
 			token0: Uint.from(balances[0]),
@@ -83,7 +83,7 @@ describe('ExactOutputSingleCommand', () => {
 	describe('verify', () => {
 		it('should return status OK when called with valid input', async () => {
 			const context = createCommandVerifyContext(validParam);
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.OK);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (tokenIn)', async () => {
@@ -91,7 +91,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				tokenIn: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (tokenOut)', async () => {
@@ -99,7 +99,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				tokenOut: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (fee)', async () => {
@@ -107,7 +107,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				fee: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid address (recipient)', async () => {
@@ -115,7 +115,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				recipient: invalidAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (deadline)', async () => {
@@ -123,7 +123,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				deadline: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amountInMaximum)', async () => {
@@ -131,7 +131,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				amountInMaximum: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (amountOut)', async () => {
@@ -139,7 +139,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				amountOut: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (sqrtPriceLimitX96)', async () => {
@@ -147,7 +147,7 @@ describe('ExactOutputSingleCommand', () => {
 				...validParam,
 				sqrtPriceLimitX96: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 	});
 

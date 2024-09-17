@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { GetCastedVoteParams, TypedSchema, CastedVoteStoreData } from '../../types';
 
-export const getCastedVoteEndpointResponseSchema: TypedSchema<JSONObject<CastedVoteStoreData>> = {
+export const getCastedVoteEndpointResponseSchema: TypedSchema<Types.JSONObject<CastedVoteStoreData>> = {
 	$id: '/governance/endpoint/response/getCastedVote',
 	type: 'object',
 	required: ['activeVote'],

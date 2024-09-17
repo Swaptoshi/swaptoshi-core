@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { flashEventSchema } from '../schema';
 
 export interface FlashEventData {
@@ -11,6 +11,6 @@ export interface FlashEventData {
 	paid1: string;
 }
 
-export class FlashEvent extends BaseEvent<FlashEventData> {
+export class FlashEvent extends Modules.BaseEvent<FlashEventData> {
 	public schema = flashEventSchema;
 }

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { FeeMethod } from 'klayr-sdk';
 import { MockedFeeMethod, mock_fee_getFeeTokenID, mock_fee_init, mock_fee_payFee } from '.';
+import { FeeMethod } from '../../../../../../../src/app/modules/dex/types';
 
 describe('MockedFeeMethod', () => {
 	let feeMethod: FeeMethod;

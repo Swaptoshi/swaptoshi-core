@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { BurnCommand } from '../../../../../src/app/modules/dex/commands/burn_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { burnCommandSchema } from '../../../../../src/app/modules/dex/schema';
@@ -28,8 +28,8 @@ describe('BurnCommand', () => {
 	let command: BurnCommand;
 	let nft: NonfungiblePositionManager;
 	let tokens: Tokens;
-	let createCommandVerifyContext: (params: CommandParam) => CommandVerifyContext<CommandParam>;
-	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
+	let createCommandVerifyContext: (params: CommandParam) => StateMachine.CommandVerifyContext<CommandParam>;
+	let createCommandExecuteContext: (params: CommandParam) => StateMachine.CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
 		({ module, createCommandExecuteContext, createCommandVerifyContext, tokens, nft } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
@@ -85,7 +85,7 @@ describe('BurnCommand', () => {
 	describe('verify', () => {
 		it('should return status OK when called with valid input', async () => {
 			const context = createCommandVerifyContext(validParam);
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.OK);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 		});
 
 		it('should throw error when user sends transaction with invalid address (poolAddress)', async () => {
@@ -93,7 +93,7 @@ describe('BurnCommand', () => {
 				...validParam,
 				poolAddress: invalidAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (tokenId)', async () => {
@@ -101,7 +101,7 @@ describe('BurnCommand', () => {
 				...validParam,
 				tokenId: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 	});
 

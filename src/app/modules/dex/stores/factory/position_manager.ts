@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, MethodContext, NamedRegistry, TokenMethod, codec, utils } from 'klayr-sdk';
+import { Modules, StateMachine, Types, codec, utils } from 'klayr-sdk';
 import * as IPFSHash from 'ipfs-only-hash';
 import { Uint24String, Int24String, Uint256String, Uint128String, Uint256, Uint160String, Uint128, Uint64String, Int24 } from '../library/int';
 import { PositionInfoStore } from '../position_info';
@@ -18,6 +18,8 @@ import {
 	IncreaseLiquidityParams,
 	MintParams,
 	DexModuleConfig,
+	TokenMethod,
+	NFTMethod,
 } from '../../types';
 import { PoolStore } from '../pool';
 import { DEXPool } from './pool';
@@ -37,7 +39,6 @@ import { IncreaseLiquidityEvent } from '../../events/increase_liquidity';
 import { TokenURICreatedEvent } from '../../events/tokenuri_created';
 import { POSITION_MANAGER_ADDRESS, TOKENURI_ATTTRIBUTE } from '../../constants';
 import { TokenURIDestroyedEvent } from '../../events/tokenuri_destroyed';
-import { NFTMethod } from '../../../nft';
 
 interface AddLiquidityParams {
 	token0: Buffer;
@@ -75,7 +76,14 @@ interface FeeParams {
 }
 
 export class NonfungiblePositionManager {
-	public constructor(positionManager: PositionManager, stores: NamedRegistry, events: NamedRegistry, genesisConfig: GenesisConfig, dexConfig: DexModuleConfig, moduleName: string) {
+	public constructor(
+		positionManager: PositionManager,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
+		genesisConfig: Types.GenesisConfig,
+		dexConfig: DexModuleConfig,
+		moduleName: string,
+	) {
 		Object.assign(this, utils.objects.cloneDeep(positionManager));
 		this.collectionId = PoolAddress.computePoolId(positionManager.poolAddress);
 		this.events = events;
@@ -158,7 +166,7 @@ export class NonfungiblePositionManager {
 
 	public async getPositions(tokenId: Uint64String): Promise<DexNFTAttribute> {
 		this._checkImmutableDependency();
-		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
+		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as StateMachine.MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
 		const dexAttribute = nft.attributesArray.find(t => t.module === this.moduleName);
 		if (!dexAttribute) throw new Error(`attributes '${this.moduleName}' doesnt exist on nft ${PositionKey.getNFTId(this.chainId, this.collectionId, tokenId).toString('hex')}`);
 		const positionBuf = dexAttribute.attributes;
@@ -433,7 +441,7 @@ export class NonfungiblePositionManager {
 
 	public async tokenURI(tokenId: Uint64String): Promise<string> {
 		this._checkImmutableDependency();
-		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
+		const nft = await this.nftMethod!.getNFT(this.immutableContext!.context as StateMachine.MethodContext, PositionKey.getNFTId(this.chainId, this.collectionId, tokenId));
 		const tokenUriAttribute = nft.attributesArray.find(t => t.module === TOKENURI_ATTTRIBUTE);
 		if (!tokenUriAttribute) throw new Error(`attributes '${TOKENURI_ATTTRIBUTE}' doesnt exist on nft ${PositionKey.getNFTId(this.chainId, this.collectionId, tokenId).toString('hex')}`);
 		return codec.decode<TokenURINFTAttribute>(tokenUriNFTAttributeSchema, tokenUriAttribute.attributes).tokenURI;
@@ -661,7 +669,7 @@ export class NonfungiblePositionManager {
 
 	private readonly moduleName: string;
 	private readonly chainId: Buffer = Buffer.alloc(0);
-	private readonly events: NamedRegistry | undefined;
+	private readonly events: Modules.NamedRegistry | undefined;
 	private readonly poolStore: PoolStore | undefined;
 	private readonly tokenSymbolStore: TokenSymbolStore | undefined;
 	private readonly positionInfoStore: PositionInfoStore | undefined;

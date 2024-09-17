@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { ModuleInitArgs, MethodContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import {
 	MockedGovernanceMethod,
 	mock_get_governable_config,
@@ -38,7 +38,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('registerGovernableConfig', () => {
 		it('should call mock_register_governable_config', () => {
-			const args = {} as ModuleInitArgs;
+			const args = {} as Modules.ModuleInitArgs;
 			const moduleName = 'moduleName';
 			const governableConfig = { init: _args => {} } as BaseGovernableConfig<any>;
 			governanceMethod.registerGovernableConfig(args, moduleName, governableConfig);
@@ -65,7 +65,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getGovernanceConfig', () => {
 		it('should call mock_get_governance_config', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			await governanceMethod.getGovernanceConfig(context);
 			expect(mock_get_governance_config).toHaveBeenCalledWith(context);
 		});
@@ -74,7 +74,7 @@ describe('MockedGovernanceMethod', () => {
 	// New tests for added methods
 	describe('getCastedVote', () => {
 		it('should call mock_get_casted_vote', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const address = Buffer.from('someAddress');
 			await governanceMethod.getCastedVote(context, address);
 			expect(mock_get_casted_vote).toHaveBeenCalledWith(context, address);
@@ -83,7 +83,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getBaseVoteScore', () => {
 		it('should call mock_get_base_vote_score', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const address = Buffer.from('someAddress');
 			await governanceMethod.getBaseVoteScore(context, address);
 			expect(mock_get_base_vote_score).toHaveBeenCalledWith(context, address);
@@ -92,7 +92,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('createProposal', () => {
 		it('should call mock_create_proposal', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
 			const height = 100;
 			const title = 'Proposal Title';
@@ -108,7 +108,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getProposalInstance', () => {
 		it('should call mock_get_proposal', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
 			const height = 100;
 			const proposalId = 1;
@@ -120,7 +120,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getProposalQueueInstance', () => {
 		it('should call mock_get_proposal_queue', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const senderAddress = Buffer.from('senderAddress');
 			const height = 100;
 
@@ -131,7 +131,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getBoostedAccountInstance', () => {
 		it('should call mock_get_boosted_account', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const address = Buffer.from('address');
 			const height = 100;
 
@@ -142,7 +142,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getDelegatedVoteInstance', () => {
 		it('should call mock_get_delegated_vote', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			const address = Buffer.from('address');
 			const height = 100;
 
@@ -153,7 +153,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getNextAvailableProposalId', () => {
 		it('should call mock_get_next_available_proposal_id', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			await governanceMethod.getNextAvailableProposalId(context);
 			expect(mock_get_next_available_proposal_id).toHaveBeenCalledWith(context);
 		});
@@ -161,7 +161,7 @@ describe('MockedGovernanceMethod', () => {
 
 	describe('getConfig', () => {
 		it('should call mock_get_config', async () => {
-			const context = {} as MethodContext;
+			const context = {} as StateMachine.MethodContext;
 			await governanceMethod.getConfig(context);
 			expect(mock_get_config).toHaveBeenCalledWith(context);
 		});

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BlockExecuteContext, CommandExecuteContext, ImmutableMethodContext, MethodContext, ModuleEndpointContext, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
+import { StateMachine, Types } from 'klayr-sdk';
 import { ImmutableGovernanceContext, MutableGovernanceContext } from '../../types';
 
-export function commandGovernanceContext(context: CommandExecuteContext<any>): MutableGovernanceContext<typeof context> {
+export function commandGovernanceContext(context: StateMachine.CommandExecuteContext<any>): MutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -10,7 +10,7 @@ export function commandGovernanceContext(context: CommandExecuteContext<any>): M
 	};
 }
 
-export function mutableTransactionHookGovernanceContext(context: TransactionExecuteContext): MutableGovernanceContext<typeof context> {
+export function mutableTransactionHookGovernanceContext(context: StateMachine.TransactionExecuteContext): MutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -18,7 +18,7 @@ export function mutableTransactionHookGovernanceContext(context: TransactionExec
 	};
 }
 
-export function mutableBlockHookGovernanceContext(context: BlockExecuteContext): MutableGovernanceContext<typeof context> {
+export function mutableBlockHookGovernanceContext(context: StateMachine.BlockExecuteContext): MutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
@@ -26,7 +26,7 @@ export function mutableBlockHookGovernanceContext(context: BlockExecuteContext):
 	};
 }
 
-export function immutableTransactionHookGovernanceContext(context: TransactionVerifyContext): ImmutableGovernanceContext<typeof context> {
+export function immutableTransactionHookGovernanceContext(context: StateMachine.TransactionVerifyContext): ImmutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -34,7 +34,7 @@ export function immutableTransactionHookGovernanceContext(context: TransactionVe
 	};
 }
 
-export function methodGovernanceContext(context: MethodContext, senderAddress: Buffer, height: number): MutableGovernanceContext<typeof context> {
+export function methodGovernanceContext(context: StateMachine.MethodContext, senderAddress: Buffer, height: number): MutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -42,7 +42,7 @@ export function methodGovernanceContext(context: MethodContext, senderAddress: B
 	};
 }
 
-export function immutableMethodGovernanceContext(context: ImmutableMethodContext, senderAddress: Buffer, height: number): ImmutableGovernanceContext<typeof context> {
+export function immutableMethodGovernanceContext(context: StateMachine.ImmutableMethodContext, senderAddress: Buffer, height: number): ImmutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -50,7 +50,7 @@ export function immutableMethodGovernanceContext(context: ImmutableMethodContext
 	};
 }
 
-export function endpointGovernanceContext(context: ModuleEndpointContext): ImmutableGovernanceContext<typeof context> {
+export function endpointGovernanceContext(context: Types.ModuleEndpointContext): ImmutableGovernanceContext<typeof context> {
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),

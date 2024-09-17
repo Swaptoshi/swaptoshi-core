@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { swapEventSchema } from '../schema';
 
 export interface SwapEventData {
@@ -19,6 +19,6 @@ export interface SwapEventData {
 	feeGrowthGlobal1X128: string;
 }
 
-export class SwapEvent extends BaseEvent<SwapEventData> {
+export class SwapEvent extends Modules.BaseEvent<SwapEventData> {
 	public schema = swapEventSchema;
 }

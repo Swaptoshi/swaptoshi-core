@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable import/no-cycle */
-import { BaseStore, GenesisConfig, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
-import { ImmutableSwapContext, MutableSwapContext, PositionManager } from '../types';
+import { Modules, Types, cryptography } from 'klayr-sdk';
+import { ImmutableSwapContext, MutableSwapContext, NFTMethod, PositionManager, TokenMethod } from '../types';
 import { positionManagerStoreSchema } from '../schema';
 import { createImmutablePositionManagerinstance, createMutablePositionManagerinstance } from './factory';
-import { NFTMethod } from '../../nft';
 import { DexGovernableConfig } from '../config';
 
-export class PositionManagerStore extends BaseStore<PositionManager> {
-	public constructor(moduleName: string, index: number, stores: NamedRegistry, events: NamedRegistry) {
+export class PositionManagerStore extends Modules.BaseStore<PositionManager> {
+	public constructor(moduleName: string, index: number, stores: Modules.NamedRegistry, events: Modules.NamedRegistry) {
 		super(moduleName, index);
 		this.stores = stores;
 		this.events = events;
@@ -21,7 +20,7 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 		if (this.genesisConfig !== undefined && this.dexConfig !== undefined) this.dependencyReady = true;
 	}
 
-	public init(genesisConfig: GenesisConfig, dexConfig: DexGovernableConfig) {
+	public init(genesisConfig: Types.GenesisConfig, dexConfig: DexGovernableConfig) {
 		this.genesisConfig = genesisConfig;
 		this.dexConfig = dexConfig;
 		if (this.tokenMethod !== undefined && this.nftMethod !== undefined) this.dependencyReady = true;
@@ -66,11 +65,11 @@ export class PositionManagerStore extends BaseStore<PositionManager> {
 
 	public schema = positionManagerStoreSchema;
 
-	private readonly events: NamedRegistry;
-	private readonly stores: NamedRegistry;
+	private readonly events: Modules.NamedRegistry;
+	private readonly stores: Modules.NamedRegistry;
 	private readonly moduleName: string;
 
-	private genesisConfig: GenesisConfig | undefined = undefined;
+	private genesisConfig: Types.GenesisConfig | undefined = undefined;
 	private dexConfig: DexGovernableConfig | undefined = undefined;
 	private tokenMethod: TokenMethod | undefined;
 	private nftMethod: NFTMethod | undefined;

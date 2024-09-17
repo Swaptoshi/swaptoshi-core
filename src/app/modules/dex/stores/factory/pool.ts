@@ -1,30 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { NamedRegistry, TokenMethod, cryptography, utils } from 'klayr-sdk';
-import {
-	PositionInfo,
-	Slot0,
-	DEXPoolData,
-	DexModuleConfig,
-	ImmutableSwapContext,
-	MutableSwapContext,
-	MutableContext,
-	ImmutableContext,
-	TickInfo,
-} from '../../types';
-import {
-	Tick,
-	Oracle,
-	TickMath,
-	SqrtPriceMath,
-	LiquidityMath,
-	Position,
-	TickBitmap,
-	SwapMath,
-	FullMath,
-	FixedPoint128,
-} from '../library/core';
+import { Modules, cryptography, utils } from 'klayr-sdk';
+import { PositionInfo, Slot0, DEXPoolData, DexModuleConfig, ImmutableSwapContext, MutableSwapContext, MutableContext, ImmutableContext, TickInfo, TokenMethod } from '../../types';
+import { Tick, Oracle, TickMath, SqrtPriceMath, LiquidityMath, Position, TickBitmap, SwapMath, FullMath, FixedPoint128 } from '../library/core';
 import {
 	Uint128String,
 	Int24String,
@@ -111,18 +90,9 @@ const defaultStepComputations: StepComputations = Object.freeze({
 });
 
 export class DEXPool implements DEXPoolData {
-	public constructor(
-		pool: DEXPoolData,
-		stores: NamedRegistry,
-		events: NamedRegistry,
-		config: DexModuleConfig,
-		moduleName: string,
-		simulation = false,
-	) {
+	public constructor(pool: DEXPoolData, stores: Modules.NamedRegistry, events: Modules.NamedRegistry, config: DexModuleConfig, moduleName: string, simulation = false) {
 		Object.assign(this, utils.objects.cloneDeep(pool));
-		this.address = PoolAddress.computeAddress(
-			PoolAddress.getPoolKey(pool.token0, pool.token1, pool.fee),
-		);
+		this.address = PoolAddress.computeAddress(PoolAddress.getPoolKey(pool.token0, pool.token1, pool.fee));
 		this.klayr32 = cryptography.address.getKlayr32AddressFromAddress(this.address);
 		this.collectionId = PoolAddress.computePoolId(this.address);
 
@@ -143,14 +113,7 @@ export class DEXPool implements DEXPoolData {
 	}
 
 	public createEmulator(): DEXPool {
-		const emulatedPool = new DEXPool(
-			this.toJSON(),
-			this.stores!,
-			this.events!,
-			this.config!,
-			this.moduleName,
-			true,
-		);
+		const emulatedPool = new DEXPool(this.toJSON(), this.stores!, this.events!, this.config!, this.moduleName, true);
 		if (this.mutableContext) {
 			emulatedPool.addMutableDependencies(this.mutableContext, this.tokenMethod!);
 		} else if (this.immutableContext) {
@@ -170,12 +133,7 @@ export class DEXPool implements DEXPoolData {
 	public setConfig(config: DexModuleConfig) {
 		this.feeProtocol = config.feeProtocol ?? 0;
 
-		this.feeProtocolPool = config.feeProtocolPool
-			? cryptography.address.getAddressFromKlayr32Address(
-					config.feeProtocolPool,
-					config.feeProtocolPool.substring(0, 3),
-			  )
-			: undefined;
+		this.feeProtocolPool = config.feeProtocolPool ? cryptography.address.getAddressFromKlayr32Address(config.feeProtocolPool, config.feeProtocolPool.substring(0, 3)) : undefined;
 
 		this._validateFeeProtocol();
 	}
@@ -203,24 +161,12 @@ export class DEXPool implements DEXPoolData {
 	public async snapshotCumulativesInside(
 		tickLower: Int24String,
 		tickUpper: Int24String,
-	): Promise<
-		[
-			tickCumulativeInside: Int56String,
-			secondsPerLiquidityInsideX128: Uint160String,
-			secondsInside: Uint32String,
-		]
-	> {
+	): Promise<[tickCumulativeInside: Int56String, secondsPerLiquidityInsideX128: Uint160String, secondsInside: Uint32String]> {
 		this._checkImmutableDependencies();
 		this._checkTicks(tickLower, tickUpper);
 
-		const lower = await this.tickInfoStore!.getOrDefault(
-			this.immutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickLower),
-		);
-		const upper = await this.tickInfoStore!.getOrDefault(
-			this.immutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickUpper),
-		);
+		const lower = await this.tickInfoStore!.getOrDefault(this.immutableContext!.context, this.tickInfoStore!.getKey(this.address, tickLower));
+		const upper = await this.tickInfoStore!.getOrDefault(this.immutableContext!.context, this.tickInfoStore!.getKey(this.address, tickUpper));
 
 		const tickCumulativeLower = Int56.from(lower.tickCumulativeOutside);
 		const secondsPerLiquidityOutsideLowerX128 = Uint160.from(lower.secondsPerLiquidityOutsideX128);
@@ -260,10 +206,7 @@ export class DEXPool implements DEXPoolData {
 			);
 			return [
 				Int56.from(tickCumulative).sub(tickCumulativeLower).sub(tickCumulativeUpper).toString(),
-				Uint160.from(secondsPerLiquidityCumulativeX128)
-					.sub(secondsPerLiquidityOutsideLowerX128)
-					.sub(secondsPerLiquidityOutsideUpperX128)
-					.toString(),
+				Uint160.from(secondsPerLiquidityCumulativeX128).sub(secondsPerLiquidityOutsideLowerX128).sub(secondsPerLiquidityOutsideUpperX128).toString(),
 				Uint32.from(time).sub(secondsOutsideLower).sub(secondsOutsideUpper).toString(),
 			];
 		}
@@ -274,9 +217,7 @@ export class DEXPool implements DEXPoolData {
 		];
 	}
 
-	public async observe(
-		secondsAgos: Uint32String[],
-	): Promise<{ tickCumulatives: string[]; secondsPerLiquidityCumulativeX128s: string[] }> {
+	public async observe(secondsAgos: Uint32String[]): Promise<{ tickCumulatives: string[]; secondsPerLiquidityCumulativeX128s: string[] }> {
 		this._checkImmutableDependencies();
 
 		return Oracle.observe(
@@ -295,18 +236,9 @@ export class DEXPool implements DEXPoolData {
 	public async increaseObservationCardinalityNext(observationCardinalityNext: Uint16String) {
 		this._checkMutableDependencies();
 
-		const observationCardinalityNextOld: Uint16 = Uint16.from(
-			this.slot0.observationCardinalityNext,
-		);
+		const observationCardinalityNextOld: Uint16 = Uint16.from(this.slot0.observationCardinalityNext);
 		const observationCardinalityNextNew: Uint16 = Uint16.from(
-			await Oracle.grow(
-				this.observationStore!,
-				this.mutableContext!.context,
-				this.address,
-				observationCardinalityNextOld.toString(),
-				observationCardinalityNext,
-				this.simulation,
-			),
+			await Oracle.grow(this.observationStore!, this.mutableContext!.context, this.address, observationCardinalityNextOld.toString(), observationCardinalityNext, this.simulation),
 		);
 		this.slot0.observationCardinalityNext = observationCardinalityNextNew.toString();
 		if (!observationCardinalityNextOld.eq(observationCardinalityNextNew)) {
@@ -332,13 +264,7 @@ export class DEXPool implements DEXPoolData {
 
 		const tick = TickMath.getTickAtSqrtRatio(sqrtPriceX96);
 
-		const [cardinality, cardinalityNext] = await Oracle.initialize(
-			this.observationStore!,
-			this.mutableContext!.context,
-			this.address,
-			this.mutableContext!.timestamp,
-			this.simulation,
-		);
+		const [cardinality, cardinalityNext] = await Oracle.initialize(this.observationStore!, this.mutableContext!.context, this.address, this.mutableContext!.timestamp, this.simulation);
 
 		this.slot0 = {
 			sqrtPriceX96,
@@ -367,14 +293,8 @@ export class DEXPool implements DEXPoolData {
 		this._checkMutableDependencies();
 		if (Uint128.from(amount).lte(0)) throw new Error('amount must be positive');
 
-		const tickLowerBefore = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickLower),
-		);
-		const tickUpperBefore = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickUpper),
-		);
+		const tickLowerBefore = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickLower));
+		const tickUpperBefore = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickUpper));
 
 		const [_, amount0Int, amount1Int, tickLowerAfter, tickUpperAfter] = await this._modifyPosition({
 			owner: recipient,
@@ -395,10 +315,8 @@ export class DEXPool implements DEXPoolData {
 		await callback(amount0.toString(), amount1.toString(), data, this.toJSON());
 
 		if (!this.simulation) {
-			if (amount0.gt(0) && balance0Before.add(amount0).gt(await this._getBalance0()))
-				throw new Error('M0');
-			if (amount1.gt(0) && balance1Before.add(amount1).gt(await this._getBalance1()))
-				throw new Error('M1');
+			if (amount0.gt(0) && balance0Before.add(amount0).gt(await this._getBalance0())) throw new Error('M0');
+			if (amount1.gt(0) && balance1Before.add(amount1).gt(await this._getBalance1())) throw new Error('M1');
 
 			const events = this.events!.get(MintEvent);
 			events.add(
@@ -431,59 +349,28 @@ export class DEXPool implements DEXPoolData {
 	): Promise<[amount0: string, amount1: string]> {
 		this._checkMutableDependencies();
 
-		const position = await Position.get(
-			this.positionInfoStore!,
-			this.mutableContext!.context,
-			this.address,
-			this.mutableContext!.senderAddress,
-			tickLower,
-			tickUpper,
-		);
+		const position = await Position.get(this.positionInfoStore!, this.mutableContext!.context, this.address, this.mutableContext!.senderAddress, tickLower, tickUpper);
 
-		const amount0 = Uint128.from(amount0Requested).gt(position.tokensOwed0)
-			? Uint128.from(position.tokensOwed0)
-			: Uint128.from(amount0Requested);
-		const amount1 = Uint128.from(amount1Requested).gt(position.tokensOwed1)
-			? Uint128.from(position.tokensOwed1)
-			: Uint128.from(amount1Requested);
+		const amount0 = Uint128.from(amount0Requested).gt(position.tokensOwed0) ? Uint128.from(position.tokensOwed0) : Uint128.from(amount0Requested);
+		const amount1 = Uint128.from(amount1Requested).gt(position.tokensOwed1) ? Uint128.from(position.tokensOwed1) : Uint128.from(amount1Requested);
 
 		if (amount0.gt(0)) {
 			position.tokensOwed0 = Uint128.from(position.tokensOwed0).sub(amount0).toString();
 
 			if (!this.simulation) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token0,
-					amount0.toBigInt(),
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token0, amount0.toBigInt());
 			}
 		}
 		if (amount1.gt(0)) {
 			position.tokensOwed1 = Uint128.from(position.tokensOwed1).sub(amount1).toString();
 
 			if (!this.simulation) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token1,
-					amount1.toBigInt(),
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token1, amount1.toBigInt());
 			}
 		}
 
 		if (!this.simulation) {
-			await Position.set(
-				this.positionInfoStore!,
-				this.mutableContext!.context,
-				this.address,
-				this.mutableContext!.senderAddress,
-				tickLower,
-				tickUpper,
-				position,
-			);
+			await Position.set(this.positionInfoStore!, this.mutableContext!.context, this.address, this.mutableContext!.senderAddress, tickLower, tickUpper, position);
 
 			const events = this.events!.get(CollectEvent);
 			events.add(
@@ -505,41 +392,26 @@ export class DEXPool implements DEXPoolData {
 		return [amount0.toString(), amount1.toString()];
 	}
 
-	public async burn(
-		tickLower: Int24String,
-		tickUpper: Int24String,
-		amount: Uint128String,
-	): Promise<[amount0: string, amount1: string]> {
+	public async burn(tickLower: Int24String, tickUpper: Int24String, amount: Uint128String): Promise<[amount0: string, amount1: string]> {
 		this._checkMutableDependencies();
 
-		const tickLowerBefore = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickLower),
-		);
-		const tickUpperBefore = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickUpper),
-		);
+		const tickLowerBefore = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickLower));
+		const tickUpperBefore = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickUpper));
 
-		const [position, amount0Int, amount1Int, tickLowerAfter, tickUpperAfter] =
-			await this._modifyPosition({
-				owner: this.mutableContext!.senderAddress,
-				tickLower,
-				tickUpper,
-				liquidityDelta: Int128.from(Int256.from(amount).mul(-1)).toString(),
-			});
+		const [position, amount0Int, amount1Int, tickLowerAfter, tickUpperAfter] = await this._modifyPosition({
+			owner: this.mutableContext!.senderAddress,
+			tickLower,
+			tickUpper,
+			liquidityDelta: Int128.from(Int256.from(amount).mul(-1)).toString(),
+		});
 
 		const amount0 = Uint256.from(0).sub(amount0Int);
 		const amount1 = Uint256.from(0).sub(amount1Int);
 
 		if (!this.simulation) {
 			if (amount0.gt(0) || amount1.gt(0)) {
-				position.tokensOwed0 = Uint128.from(position.tokensOwed0)
-					.add(Uint128.from(amount0))
-					.toString();
-				position.tokensOwed1 = Uint128.from(position.tokensOwed1)
-					.add(Uint128.from(amount1))
-					.toString();
+				position.tokensOwed0 = Uint128.from(position.tokensOwed0).add(Uint128.from(amount0)).toString();
+				position.tokensOwed1 = Uint128.from(position.tokensOwed1).add(Uint128.from(amount1)).toString();
 			}
 
 			const events = this.events!.get(BurnEvent);
@@ -557,15 +429,7 @@ export class DEXPool implements DEXPoolData {
 				[this.address, this.mutableContext!.senderAddress],
 			);
 
-			await Position.set(
-				this.positionInfoStore!,
-				this.mutableContext!.context,
-				this.address,
-				this.mutableContext!.senderAddress,
-				tickLower,
-				tickUpper,
-				position,
-			);
+			await Position.set(this.positionInfoStore!, this.mutableContext!.context, this.address, this.mutableContext!.senderAddress, tickLower, tickUpper, position);
 			await this._saveStore();
 		}
 
@@ -607,10 +471,8 @@ export class DEXPool implements DEXPoolData {
 
 		if (
 			zeroForOne
-				? Uint160.from(sqrtPriceLimitX96).gte(slot0Start.sqrtPriceX96) ||
-				  Uint160.from(sqrtPriceLimitX96).lte(TickMath.MIN_SQRT_RATIO)
-				: Uint160.from(sqrtPriceLimitX96).lte(slot0Start.sqrtPriceX96) ||
-				  Uint160.from(sqrtPriceLimitX96).gte(TickMath.MAX_SQRT_RATIO)
+				? Uint160.from(sqrtPriceLimitX96).gte(slot0Start.sqrtPriceX96) || Uint160.from(sqrtPriceLimitX96).lte(TickMath.MIN_SQRT_RATIO)
+				: Uint160.from(sqrtPriceLimitX96).lte(slot0Start.sqrtPriceX96) || Uint160.from(sqrtPriceLimitX96).gte(TickMath.MAX_SQRT_RATIO)
 		) {
 			throw new Error('SPL');
 		}
@@ -618,9 +480,7 @@ export class DEXPool implements DEXPoolData {
 		const cache: SwapCache = {
 			liquidityStart: this.liquidity,
 			blockTimestamp: timestamp,
-			feeProtocol: zeroForOne
-				? Uint8.from(this.feeProtocol).mod(16).toString()
-				: Uint8.from(this.feeProtocol).shr(4).toString(),
+			feeProtocol: zeroForOne ? Uint8.from(this.feeProtocol).mod(16).toString() : Uint8.from(this.feeProtocol).shr(4).toString(),
 			secondsPerLiquidityCumulativeX128: '0',
 			tickCumulative: '0',
 			computedLatestObservation: false,
@@ -638,20 +498,10 @@ export class DEXPool implements DEXPoolData {
 			liquidity: cache.liquidityStart,
 		};
 
-		while (
-			!Int256.from(state.amountSpecifiedRemaining).eq(0) &&
-			!Uint160.from(state.sqrtPriceX96).eq(sqrtPriceLimitX96)
-		) {
+		while (!Int256.from(state.amountSpecifiedRemaining).eq(0) && !Uint160.from(state.sqrtPriceX96).eq(sqrtPriceLimitX96)) {
 			const step: StepComputations = { ...defaultStepComputations };
 
-			const [tickNext, initialized] = await TickBitmap.nextInitializedTickWithinOneWord(
-				this.tickBitmapStore!,
-				context,
-				this.address,
-				state.tick,
-				this.tickSpacing,
-				zeroForOne,
-			);
+			const [tickNext, initialized] = await TickBitmap.nextInitializedTickWithinOneWord(this.tickBitmapStore!, context, this.address, state.tick, this.tickSpacing, zeroForOne);
 			step.sqrtPriceStartX96 = state.sqrtPriceX96;
 			step.tickNext = tickNext;
 			step.initialized = initialized;
@@ -666,13 +516,7 @@ export class DEXPool implements DEXPoolData {
 
 			const [sqrtPriceX96, amountIn, amountOut, feeAmount] = SwapMath.computeSwapStep(
 				state.sqrtPriceX96,
-				(
-					zeroForOne
-						? Uint160.from(step.sqrtPriceNextX96).lt(sqrtPriceLimitX96)
-						: Uint160.from(step.sqrtPriceNextX96).gt(sqrtPriceLimitX96)
-				)
-					? sqrtPriceLimitX96
-					: step.sqrtPriceNextX96,
+				(zeroForOne ? Uint160.from(step.sqrtPriceNextX96).lt(sqrtPriceLimitX96) : Uint160.from(step.sqrtPriceNextX96).gt(sqrtPriceLimitX96)) ? sqrtPriceLimitX96 : step.sqrtPriceNextX96,
 				state.liquidity,
 				state.amountSpecifiedRemaining,
 				this.fee,
@@ -683,19 +527,11 @@ export class DEXPool implements DEXPoolData {
 			step.feeAmount = feeAmount;
 
 			if (exactInput) {
-				state.amountSpecifiedRemaining = Int256.from(state.amountSpecifiedRemaining)
-					.sub(Int256.from(step.amountIn).add(step.feeAmount))
-					.toString();
-				state.amountCalculated = Int256.from(state.amountCalculated)
-					.sub(Int256.from(step.amountOut))
-					.toString();
+				state.amountSpecifiedRemaining = Int256.from(state.amountSpecifiedRemaining).sub(Int256.from(step.amountIn).add(step.feeAmount)).toString();
+				state.amountCalculated = Int256.from(state.amountCalculated).sub(Int256.from(step.amountOut)).toString();
 			} else {
-				state.amountSpecifiedRemaining = Int256.from(state.amountSpecifiedRemaining)
-					.add(Int256.from(step.amountOut))
-					.toString();
-				state.amountCalculated = Int256.from(state.amountCalculated)
-					.add(Int256.from(step.amountIn).add(step.feeAmount))
-					.toString();
+				state.amountSpecifiedRemaining = Int256.from(state.amountSpecifiedRemaining).add(Int256.from(step.amountOut)).toString();
+				state.amountCalculated = Int256.from(state.amountCalculated).add(Int256.from(step.amountIn).add(step.feeAmount)).toString();
 			}
 
 			if (Uint8.from(cache.feeProtocol).gt(0)) {
@@ -705,9 +541,7 @@ export class DEXPool implements DEXPoolData {
 			}
 
 			if (Uint128.from(state.liquidity).gt(0)) {
-				state.feeGrowthGlobalX128 = Uint256.from(state.feeGrowthGlobalX128)
-					.add(FullMath.mulDiv(step.feeAmount, FixedPoint128.Q128, state.liquidity))
-					.toString();
+				state.feeGrowthGlobalX128 = Uint256.from(state.feeGrowthGlobalX128).add(FullMath.mulDiv(step.feeAmount, FixedPoint128.Q128, state.liquidity)).toString();
 			}
 
 			if (state.sqrtPriceX96 === step.sqrtPriceNextX96) {
@@ -779,13 +613,7 @@ export class DEXPool implements DEXPoolData {
 			this.feeGrowthGlobal0X128 = state.feeGrowthGlobalX128;
 			if (!this.simulation && Uint128.from(state.protocolFee).gt(0)) {
 				if (this._checkFeeProtocol()) {
-					await this.tokenMethod!.transfer(
-						this.mutableContext!.context,
-						this.address,
-						this.feeProtocolPool!,
-						this.token0,
-						BigInt(state.protocolFee),
-					);
+					await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, this.feeProtocolPool!, this.token0, BigInt(state.protocolFee));
 					const events = this.events!.get(CollectProtocolEvent);
 					events.add(
 						this.mutableContext!.context,
@@ -798,26 +626,14 @@ export class DEXPool implements DEXPoolData {
 						[this.address, this.feeProtocolPool!],
 					);
 				} else {
-					await this.tokenMethod!.lock(
-						this.mutableContext!.context,
-						this.address,
-						this.moduleName,
-						this.token0,
-						BigInt(state.protocolFee),
-					);
+					await this.tokenMethod!.lock(this.mutableContext!.context, this.address, this.moduleName, this.token0, BigInt(state.protocolFee));
 				}
 			}
 		} else {
 			this.feeGrowthGlobal1X128 = state.feeGrowthGlobalX128;
 			if (!this.simulation && Uint128.from(state.protocolFee).gt(0)) {
 				if (this._checkFeeProtocol()) {
-					await this.tokenMethod!.transfer(
-						this.mutableContext!.context,
-						this.address,
-						this.feeProtocolPool!,
-						this.token1,
-						BigInt(state.protocolFee),
-					);
+					await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, this.feeProtocolPool!, this.token1, BigInt(state.protocolFee));
 					const events = this.events!.get(CollectProtocolEvent);
 					events.add(
 						this.mutableContext!.context,
@@ -830,13 +646,7 @@ export class DEXPool implements DEXPoolData {
 						[this.address, this.feeProtocolPool!],
 					);
 				} else {
-					await this.tokenMethod!.lock(
-						this.mutableContext!.context,
-						this.address,
-						this.moduleName,
-						this.token1,
-						BigInt(state.protocolFee),
-					);
+					await this.tokenMethod!.lock(this.mutableContext!.context, this.address, this.moduleName, this.token1, BigInt(state.protocolFee));
 				}
 			}
 		}
@@ -851,46 +661,26 @@ export class DEXPool implements DEXPoolData {
 
 		if (zeroForOne) {
 			if (!this.simulation && amount1.lt(0)) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token1,
-					Uint256.from(0).sub(amount1).toBigInt(),
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token1, Uint256.from(0).sub(amount1).toBigInt());
 			}
 
 			const balance0Before = Uint256.from(await this._getBalance0());
 
 			await callback(amount0.toString(), amount1.toString(), data, this.toJSON());
 
-			if (
-				!this.simulation &&
-				this.mutableContext!.senderAddress.compare(this.address) !== 0 &&
-				balance0Before.add(Uint256.from(amount0)).gt(await this._getBalance0())
-			) {
+			if (!this.simulation && this.mutableContext!.senderAddress.compare(this.address) !== 0 && balance0Before.add(Uint256.from(amount0)).gt(await this._getBalance0())) {
 				throw new Error('IIA');
 			}
 		} else {
 			if (!this.simulation && amount0.lt(0)) {
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token0,
-					Uint256.from(0).sub(amount0).toBigInt(),
-				);
+				await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token0, Uint256.from(0).sub(amount0).toBigInt());
 			}
 
 			const balance1Before = Uint256.from(await this._getBalance1());
 
 			await callback(amount0.toString(), amount1.toString(), data, this.toJSON());
 
-			if (
-				!this.simulation &&
-				this.mutableContext!.senderAddress.compare(this.address) !== 0 &&
-				balance1Before.add(Uint256.from(amount1)).gt(await this._getBalance1())
-			) {
+			if (!this.simulation && this.mutableContext!.senderAddress.compare(this.address) !== 0 && balance1Before.add(Uint256.from(amount1)).gt(await this._getBalance1())) {
 				throw new Error('IIA');
 			}
 		}
@@ -924,13 +714,7 @@ export class DEXPool implements DEXPoolData {
 		return [amount0.toString(), amount1.toString()];
 	}
 
-	public async flash(
-		recipient: Buffer,
-		amount0: Uint256String,
-		amount1: Uint256String,
-		data: string,
-		callback: (fee0: string, fee1: string, data: string, pool?: DEXPoolData) => Promise<void>,
-	) {
+	public async flash(recipient: Buffer, amount0: Uint256String, amount1: Uint256String, data: string, callback: (fee0: string, fee1: string, data: string, pool?: DEXPoolData) => Promise<void>) {
 		this._checkMutableDependencies();
 
 		const _liquidity = this.liquidity;
@@ -942,22 +726,8 @@ export class DEXPool implements DEXPoolData {
 		const balance1Before: Uint256 = Uint256.from(await this._getBalance1());
 
 		if (!this.simulation) {
-			if (Uint256.from(amount0).gt(0))
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token0,
-					BigInt(amount0),
-				);
-			if (Uint256.from(amount1).gt(0))
-				await this.tokenMethod!.transfer(
-					this.mutableContext!.context,
-					this.address,
-					recipient,
-					this.token1,
-					BigInt(amount1),
-				);
+			if (Uint256.from(amount0).gt(0)) await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token0, BigInt(amount0));
+			if (Uint256.from(amount1).gt(0)) await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, recipient, this.token1, BigInt(amount1));
 		}
 
 		await callback(fee0.toString(), fee1.toString(), data, this.toJSON());
@@ -979,24 +749,12 @@ export class DEXPool implements DEXPoolData {
 			if (Uint128.from(fees0).gt(0)) {
 				if (this._checkFeeProtocol()) {
 					if (!this.simulation) {
-						await this.tokenMethod!.transfer(
-							this.mutableContext!.context,
-							this.address,
-							this.feeProtocolPool!,
-							this.token0,
-							fees0.toBigInt(),
-						);
+						await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, this.feeProtocolPool!, this.token0, fees0.toBigInt());
 					}
 				} else {
 					// eslint-disable-next-line no-lonely-if
 					if (!this.simulation) {
-						await this.tokenMethod!.lock(
-							this.mutableContext!.context,
-							this.address,
-							this.moduleName,
-							this.token0,
-							fees0.toBigInt(),
-						);
+						await this.tokenMethod!.lock(this.mutableContext!.context, this.address, this.moduleName, this.token0, fees0.toBigInt());
 					}
 				}
 				const events = this.events!.get(CollectProtocolEvent);
@@ -1021,24 +779,12 @@ export class DEXPool implements DEXPoolData {
 			if (Uint128.from(fees1).gt(0)) {
 				if (this._checkFeeProtocol()) {
 					if (!this.simulation) {
-						await this.tokenMethod!.transfer(
-							this.mutableContext!.context,
-							this.address,
-							this.feeProtocolPool!,
-							this.token1,
-							fees1.toBigInt(),
-						);
+						await this.tokenMethod!.transfer(this.mutableContext!.context, this.address, this.feeProtocolPool!, this.token1, fees1.toBigInt());
 					}
 				} else {
 					// eslint-disable-next-line no-lonely-if
 					if (!this.simulation) {
-						await this.tokenMethod!.lock(
-							this.mutableContext!.context,
-							this.address,
-							this.moduleName,
-							this.token1,
-							fees1.toBigInt(),
-						);
+						await this.tokenMethod!.lock(this.mutableContext!.context, this.address, this.moduleName, this.token1, fees1.toBigInt());
 					}
 				}
 				const events = this.events!.get(CollectProtocolEvent);
@@ -1079,20 +825,12 @@ export class DEXPool implements DEXPoolData {
 
 	public async getTick(tick: Int24String) {
 		this._checkImmutableDependencies();
-		return this.tickInfoStore!.getOrDefault(
-			this.immutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tick),
-		);
+		return this.tickInfoStore!.getOrDefault(this.immutableContext!.context, this.tickInfoStore!.getKey(this.address, tick));
 	}
 
 	public async getTickBitmap(index: Int16String) {
 		this._checkImmutableDependencies();
-		return (
-			await this.tickBitmapStore!.getOrDefault(
-				this.immutableContext!.context,
-				this.tickBitmapStore!.getKey(this.address, index),
-			)
-		).bitmap;
+		return (await this.tickBitmapStore!.getOrDefault(this.immutableContext!.context, this.tickBitmapStore!.getKey(this.address, index))).bitmap;
 	}
 
 	public toJSON(): DEXPoolData {
@@ -1110,19 +848,11 @@ export class DEXPool implements DEXPoolData {
 	}
 
 	private async _getBalance0() {
-		return this.tokenMethod!.getAvailableBalance(
-			this.immutableContext!.context,
-			this.address,
-			this.token0,
-		);
+		return this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.address, this.token0);
 	}
 
 	private async _getBalance1() {
-		return this.tokenMethod!.getAvailableBalance(
-			this.immutableContext!.context,
-			this.address,
-			this.token1,
-		);
+		return this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.address, this.token1);
 	}
 
 	private async _saveStore() {
@@ -1151,17 +881,7 @@ export class DEXPool implements DEXPoolData {
 		if (Int24.from(tickUpper).gt(TickMath.MAX_TICK)) throw new Error('TUM');
 	}
 
-	private async _modifyPosition(
-		params: ModifyPositionParams,
-	): Promise<
-		[
-			position: PositionInfo,
-			amount0: Int256String,
-			amount1: Int256String,
-			lowerTickInfo: TickInfo,
-			upperTickInfo: TickInfo,
-		]
-	> {
+	private async _modifyPosition(params: ModifyPositionParams): Promise<[position: PositionInfo, amount0: Int256String, amount1: Int256String, lowerTickInfo: TickInfo, upperTickInfo: TickInfo]> {
 		this._checkTicks(params.tickLower, params.tickUpper);
 
 		let amount0: Int256 = Int256.from(0);
@@ -1169,23 +889,11 @@ export class DEXPool implements DEXPoolData {
 
 		const _slot0 = this.slot0;
 
-		const [position, lowerTickInfo, upperTickInfo] = await this._updatePosition(
-			params.owner,
-			params.tickLower,
-			params.tickUpper,
-			params.liquidityDelta,
-			_slot0.tick,
-		);
+		const [position, lowerTickInfo, upperTickInfo] = await this._updatePosition(params.owner, params.tickLower, params.tickUpper, params.liquidityDelta, _slot0.tick);
 
 		if (!Int128.from(params.liquidityDelta).eq(0)) {
 			if (Int24.from(_slot0.tick).lt(params.tickLower)) {
-				amount0 = Int256.from(
-					SqrtPriceMath.getAmount0Delta(
-						TickMath.getSqrtRatioAtTick(params.tickLower),
-						TickMath.getSqrtRatioAtTick(params.tickUpper),
-						params.liquidityDelta,
-					),
-				);
+				amount0 = Int256.from(SqrtPriceMath.getAmount0Delta(TickMath.getSqrtRatioAtTick(params.tickLower), TickMath.getSqrtRatioAtTick(params.tickUpper), params.liquidityDelta));
 			} else if (Int24.from(_slot0.tick).lt(params.tickUpper)) {
 				const liquidityBefore = Uint128.from(this.liquidity);
 				const [observationIndex, observationCardinality] = await Oracle.write(
@@ -1202,30 +910,12 @@ export class DEXPool implements DEXPoolData {
 				);
 				this.slot0.observationIndex = observationIndex;
 				this.slot0.observationCardinality = observationCardinality;
-				amount0 = Int256.from(
-					SqrtPriceMath.getAmount0Delta(
-						_slot0.sqrtPriceX96,
-						TickMath.getSqrtRatioAtTick(params.tickUpper),
-						params.liquidityDelta,
-					),
-				);
-				amount1 = Int256.from(
-					SqrtPriceMath.getAmount1Delta(
-						TickMath.getSqrtRatioAtTick(params.tickLower),
-						_slot0.sqrtPriceX96,
-						params.liquidityDelta,
-					),
-				);
+				amount0 = Int256.from(SqrtPriceMath.getAmount0Delta(_slot0.sqrtPriceX96, TickMath.getSqrtRatioAtTick(params.tickUpper), params.liquidityDelta));
+				amount1 = Int256.from(SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(params.tickLower), _slot0.sqrtPriceX96, params.liquidityDelta));
 
 				this.liquidity = LiquidityMath.addDelta(liquidityBefore.toString(), params.liquidityDelta);
 			} else {
-				amount1 = Int256.from(
-					SqrtPriceMath.getAmount1Delta(
-						TickMath.getSqrtRatioAtTick(params.tickLower),
-						TickMath.getSqrtRatioAtTick(params.tickUpper),
-						params.liquidityDelta,
-					),
-				);
+				amount1 = Int256.from(SqrtPriceMath.getAmount1Delta(TickMath.getSqrtRatioAtTick(params.tickLower), TickMath.getSqrtRatioAtTick(params.tickUpper), params.liquidityDelta));
 			}
 		}
 
@@ -1239,14 +929,7 @@ export class DEXPool implements DEXPoolData {
 		liquidityDelta: Int128String,
 		tick: Int24String,
 	): Promise<[position: PositionInfo, lowerTickInfo: TickInfo, upperTickInfo: TickInfo]> {
-		const position = await Position.get(
-			this.positionInfoStore!,
-			this.mutableContext!.context,
-			this.address,
-			owner,
-			tickLower,
-			tickUpper,
-		);
+		const position = await Position.get(this.positionInfoStore!, this.mutableContext!.context, this.address, owner, tickLower, tickUpper);
 
 		const _feeGrowthGlobal0X128 = Uint256.from(this.feeGrowthGlobal0X128);
 		const _feeGrowthGlobal1X128 = Uint256.from(this.feeGrowthGlobal1X128);
@@ -1254,14 +937,8 @@ export class DEXPool implements DEXPoolData {
 		let flippedLower;
 		let flippedUpper;
 
-		let lowerTickInfo = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickLower),
-		);
-		let upperTickInfo = await this.tickInfoStore!.getOrDefault(
-			this.mutableContext!.context,
-			this.tickInfoStore!.getKey(this.address, tickUpper),
-		);
+		let lowerTickInfo = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickLower));
+		let upperTickInfo = await this.tickInfoStore!.getOrDefault(this.mutableContext!.context, this.tickInfoStore!.getKey(this.address, tickUpper));
 
 		if (!Int128.from(liquidityDelta).eq(0)) {
 			const time = this.mutableContext!.timestamp;
@@ -1311,24 +988,10 @@ export class DEXPool implements DEXPoolData {
 			);
 
 			if (flippedLower) {
-				await TickBitmap.flipTick(
-					this.tickBitmapStore!,
-					this.mutableContext!.context,
-					this.address,
-					tickLower,
-					this.tickSpacing,
-					this.simulation,
-				);
+				await TickBitmap.flipTick(this.tickBitmapStore!, this.mutableContext!.context, this.address, tickLower, this.tickSpacing, this.simulation);
 			}
 			if (flippedUpper) {
-				await TickBitmap.flipTick(
-					this.tickBitmapStore!,
-					this.mutableContext!.context,
-					this.address,
-					tickUpper,
-					this.tickSpacing,
-					this.simulation,
-				);
+				await TickBitmap.flipTick(this.tickBitmapStore!, this.mutableContext!.context, this.address, tickUpper, this.tickSpacing, this.simulation);
 			}
 		}
 
@@ -1345,35 +1008,15 @@ export class DEXPool implements DEXPoolData {
 
 		Position.update(position, liquidityDelta, feeGrowthInside0X128, feeGrowthInside1X128);
 		if (!this.simulation) {
-			await Position.set(
-				this.positionInfoStore!,
-				this.mutableContext!.context,
-				this.address,
-				owner,
-				tickLower,
-				tickUpper,
-				position,
-			);
+			await Position.set(this.positionInfoStore!, this.mutableContext!.context, this.address, owner, tickLower, tickUpper, position);
 		}
 
 		if (Int128.from(liquidityDelta).lt(0)) {
 			if (flippedLower) {
-				await Tick.clear(
-					this.tickInfoStore!,
-					this.mutableContext!.context,
-					this.address,
-					tickLower,
-					this.simulation,
-				);
+				await Tick.clear(this.tickInfoStore!, this.mutableContext!.context, this.address, tickLower, this.simulation);
 			}
 			if (flippedUpper) {
-				await Tick.clear(
-					this.tickInfoStore!,
-					this.mutableContext!.context,
-					this.address,
-					tickUpper,
-					this.simulation,
-				);
+				await Tick.clear(this.tickInfoStore!, this.mutableContext!.context, this.address, tickUpper, this.simulation);
 			}
 		}
 
@@ -1385,14 +1028,8 @@ export class DEXPool implements DEXPoolData {
 			const feeProtocol0 = Uint8.from(this.feeProtocol).mod(16);
 			const feeProtocol1 = Uint8.from(this.feeProtocol).shr(4);
 			if (
-				!(
-					Uint8.from(feeProtocol0).eq(0) ||
-					(Uint8.from(feeProtocol0).gte(4) && Uint8.from(feeProtocol0).lte(10))
-				) ||
-				!(
-					Uint8.from(feeProtocol1).eq(0) ||
-					(Uint8.from(feeProtocol1).gte(4) && Uint8.from(feeProtocol1).lte(10))
-				)
+				!(Uint8.from(feeProtocol0).eq(0) || (Uint8.from(feeProtocol0).gte(4) && Uint8.from(feeProtocol0).lte(10))) ||
+				!(Uint8.from(feeProtocol1).eq(0) || (Uint8.from(feeProtocol1).gte(4) && Uint8.from(feeProtocol1).lte(10)))
 			) {
 				throw new Error('setFeeeProtocol failed');
 			}
@@ -1419,8 +1056,8 @@ export class DEXPool implements DEXPoolData {
 	private readonly positionInfoStore: PositionInfoStore | undefined;
 	private readonly observationStore: ObservationStore | undefined;
 	private readonly tickBitmapStore: TickBitmapStore | undefined;
-	private readonly events: NamedRegistry | undefined;
-	private readonly stores: NamedRegistry | undefined;
+	private readonly events: Modules.NamedRegistry | undefined;
+	private readonly stores: Modules.NamedRegistry | undefined;
 	private readonly config: DexModuleConfig | undefined;
 	private readonly simulation: boolean = false;
 

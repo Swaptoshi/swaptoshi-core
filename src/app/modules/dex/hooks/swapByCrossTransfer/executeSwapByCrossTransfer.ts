@@ -1,12 +1,12 @@
 /* eslint-disable import/no-cycle */
-import { CrossChainMessageContext } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { PoolAddress } from '../../stores/library/periphery';
 import { crossChainMethodSwapContext } from '../../stores/context';
 import { isSwapByCrossTransfer } from './isSwapByCrossTransfer';
 import { DexInteroperableMethod } from '../../cc_method';
 
-export async function executeSwapByCrossTransfer(this: DexInteroperableMethod, ctx: CrossChainMessageContext) {
+export async function executeSwapByCrossTransfer(this: DexInteroperableMethod, ctx: Modules.Interoperability.CrossChainMessageContext) {
 	const check = await isSwapByCrossTransfer.bind(this)(ctx);
 	if (check.status && check.payload) {
 		const poolStore = this.stores.get(PoolStore);

@@ -2,8 +2,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable import/no-extraneous-dependencies */
 import { ModuleConfig } from 'klayr-framework/dist-node/modules/fee/types';
-import { FeeMethod, MethodContext } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { tokenID } from '../module';
+import { FeeMethod } from '../../../../../../../src/app/modules/dex/types';
 
 export const mock_fee_init = jest.fn();
 export const mock_fee_getFeeTokenID = jest.fn();
@@ -24,7 +25,7 @@ export class MockedFeeMethod implements Omit<FeeMethod, ''> {
 		mock_fee_getFeeTokenID();
 		return tokenID;
 	}
-	public payFee(_methodContext: MethodContext, _amount: bigint): void {
+	public payFee(_methodContext: StateMachine.MethodContext, _amount: bigint): void {
 		mock_fee_payFee(_amount);
 	}
 }

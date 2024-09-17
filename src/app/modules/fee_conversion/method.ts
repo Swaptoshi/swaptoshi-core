@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, FeeMethod, TokenMethod } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { FeeConversionMethodRegistry } from './registry';
 import { BaseFeeConversionMethod } from './base_fc_method';
+import { FeeMethod, TokenMethod } from './types';
 
-export class FeeConversionMethod extends BaseMethod {
+export class FeeConversionMethod extends Modules.BaseMethod {
 	private _tokenMethod: TokenMethod | undefined;
 	private _feeMethod: FeeMethod | undefined;
 	private _handler: FeeConversionMethodRegistry | undefined;

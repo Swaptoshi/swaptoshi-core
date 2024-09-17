@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, FeeMethod, ModuleInitArgs, ModuleMetadata, TransactionExecuteContext, TransactionVerifyContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { FeeConversionEndpoint } from './endpoint';
 import { FeeConversionMethod } from './method';
 import { FeeConversionMethodRegistry } from './registry';
@@ -18,10 +18,10 @@ import { FeeConvertedEvent } from './events/fee_converted';
 import { InternalFeeConversionMethod } from './internal_method';
 import { FeeConversionGovernableConfig } from './config';
 import { GovernanceMethod } from '../governance';
-import { FeeConversionModuleDependencies } from './types';
+import { FeeConversionModuleDependencies, FeeMethod } from './types';
 import { CONTEXT_STORE_KEY_AVAILABLE_FEE } from './constants';
 
-export class FeeConversionModule extends BaseModule {
+export class FeeConversionModule extends Modules.BaseModule {
 	public endpoint = new FeeConversionEndpoint(this.stores, this.offchainStores);
 	public method = new FeeConversionMethod(this.stores, this.events);
 	public commands = [];
@@ -39,7 +39,7 @@ export class FeeConversionModule extends BaseModule {
 		this.events.register(FeeConvertedEvent, new FeeConvertedEvent(this.name));
 	}
 
-	public metadata(): ModuleMetadata {
+	public metadata(): Modules.ModuleMetadata {
 		return {
 			...this.baseMetadata(),
 			endpoints: [
@@ -64,7 +64,7 @@ export class FeeConversionModule extends BaseModule {
 	}
 
 	// Lifecycle hooks
-	public async init(_args: ModuleInitArgs): Promise<void> {
+	public async init(_args: Modules.ModuleInitArgs): Promise<void> {
 		this.method.init(this._handler);
 		this.endpoint.init(this._handler);
 		await this._internalMethod.init(this._handler);
@@ -84,19 +84,19 @@ export class FeeConversionModule extends BaseModule {
 		this.endpoint.addDependencies(this._internalMethod);
 	}
 
-	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
+	public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
 		try {
 			await this._internalMethod.verify(_context);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async beforeCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		const { transaction, header } = _context;
 
 		const minFee = this._getMinFee(header.height, transaction.getBytes().length);

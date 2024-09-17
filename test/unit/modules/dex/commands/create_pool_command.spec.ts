@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { CreatePoolCommand } from '../../../../../src/app/modules/dex/commands/create_pool_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { createPoolCommandSchema } from '../../../../../src/app/modules/dex/schema';
-import { CreatePoolParams, MutableSwapContext } from '../../../../../src/app/modules/dex/types';
+import { CreatePoolParams, MutableSwapContext, TokenMethod } from '../../../../../src/app/modules/dex/types';
 import { invalidNumberString, invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
 import { FeeAmount, encodePriceSqrt } from '../stores/shared/utilities';
@@ -43,8 +43,8 @@ describe('CreatePoolCommand', () => {
 	let positionManagerStore: PositionManagerStore;
 	let tokenSymbolStore: TokenSymbolStore;
 	let tokenMethod: TokenMethod;
-	let createCommandVerifyContext: (params: CommandParam) => CommandVerifyContext<CommandParam>;
-	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
+	let createCommandVerifyContext: (params: CommandParam) => StateMachine.CommandVerifyContext<CommandParam>;
+	let createCommandExecuteContext: (params: CommandParam) => StateMachine.CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
 		({ module, createCommandExecuteContext, createCommandVerifyContext, poolStore, tokenMethod, positionManagerStore, tokenSymbolStore } = await commandFixture<CommandParam>(
@@ -74,7 +74,7 @@ describe('CreatePoolCommand', () => {
 	describe('verify', () => {
 		it('should return status OK when called with valid input', async () => {
 			const context = createCommandVerifyContext(validParam);
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.OK);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (tokenA)', async () => {
@@ -82,7 +82,7 @@ describe('CreatePoolCommand', () => {
 				...validParam,
 				tokenA: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (tokenB)', async () => {
@@ -90,7 +90,7 @@ describe('CreatePoolCommand', () => {
 				...validParam,
 				tokenB: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (fee)', async () => {
@@ -98,7 +98,7 @@ describe('CreatePoolCommand', () => {
 				...validParam,
 				fee: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid number string (sqrtPriceX96)', async () => {
@@ -106,7 +106,7 @@ describe('CreatePoolCommand', () => {
 				...validParam,
 				sqrtPriceX96: invalidNumberString,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 	});
 

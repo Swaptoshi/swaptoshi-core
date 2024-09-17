@@ -1,19 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-	BlockExecuteContext,
-	CommandExecuteContext,
-	CrossChainMessageContext,
-	ImmutableMethodContext,
-	MethodContext,
-	ModuleEndpointContext,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-} from 'klayr-sdk';
+import { Modules, StateMachine, Types } from 'klayr-sdk';
 import { ImmutableFactoryContext, MutableFactoryContext } from '../../types';
 
-export function commandFactoryContext(
-	context: CommandExecuteContext<any>,
-): MutableFactoryContext<typeof context> {
+export function commandFactoryContext(context: StateMachine.CommandExecuteContext<any>): MutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -22,9 +11,7 @@ export function commandFactoryContext(
 	};
 }
 
-export function mutableTransactionHookFactoryContext(
-	context: TransactionExecuteContext,
-): MutableFactoryContext<typeof context> {
+export function mutableTransactionHookFactoryContext(context: StateMachine.TransactionExecuteContext): MutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -33,9 +20,7 @@ export function mutableTransactionHookFactoryContext(
 	};
 }
 
-export function mutableBlockHookFactoryContext(
-	context: BlockExecuteContext,
-): MutableFactoryContext<typeof context> {
+export function mutableBlockHookFactoryContext(context: StateMachine.BlockExecuteContext): MutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
@@ -44,9 +29,7 @@ export function mutableBlockHookFactoryContext(
 	};
 }
 
-export function immutableTransactionHookFactoryContext(
-	context: TransactionVerifyContext,
-): ImmutableFactoryContext<typeof context> {
+export function immutableTransactionHookFactoryContext(context: StateMachine.TransactionVerifyContext): ImmutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress: context.transaction.senderAddress,
@@ -55,12 +38,7 @@ export function immutableTransactionHookFactoryContext(
 	};
 }
 
-export function methodFactoryContext(
-	context: MethodContext,
-	senderAddress: Buffer,
-	timestamp: number,
-	height: number,
-): MutableFactoryContext<typeof context> {
+export function methodFactoryContext(context: StateMachine.MethodContext, senderAddress: Buffer, timestamp: number, height: number): MutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -69,12 +47,7 @@ export function methodFactoryContext(
 	};
 }
 
-export function immutableMethodFactoryContext(
-	context: ImmutableMethodContext,
-	senderAddress: Buffer,
-	timestamp: number,
-	height: number,
-): ImmutableFactoryContext<typeof context> {
+export function immutableMethodFactoryContext(context: StateMachine.ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): ImmutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress,
@@ -83,9 +56,7 @@ export function immutableMethodFactoryContext(
 	};
 }
 
-export function endpointFactoryContext(
-	context: ModuleEndpointContext,
-): ImmutableFactoryContext<typeof context> {
+export function endpointFactoryContext(context: Types.ModuleEndpointContext): ImmutableFactoryContext<typeof context> {
 	return {
 		context,
 		senderAddress: Buffer.alloc(0),
@@ -94,10 +65,7 @@ export function endpointFactoryContext(
 	};
 }
 
-export function crossChainMethodFactoryContext(
-	context: CrossChainMessageContext,
-	senderAddress: Buffer,
-): MutableFactoryContext<MethodContext> {
+export function crossChainMethodFactoryContext(context: Modules.Interoperability.CrossChainMessageContext, senderAddress: Buffer): MutableFactoryContext<StateMachine.MethodContext> {
 	return {
 		context: context.getMethodContext(),
 		senderAddress,

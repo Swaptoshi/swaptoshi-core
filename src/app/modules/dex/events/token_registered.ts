@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { tokenRegisteredEventSchema } from '../schema';
 
 export interface TokenRegisteredData {
@@ -8,6 +8,6 @@ export interface TokenRegisteredData {
 	decimal: number;
 }
 
-export class TokenRegisteredEvent extends BaseEvent<TokenRegisteredData> {
+export class TokenRegisteredEvent extends Modules.BaseEvent<TokenRegisteredData> {
 	public schema = tokenRegisteredEventSchema;
 }

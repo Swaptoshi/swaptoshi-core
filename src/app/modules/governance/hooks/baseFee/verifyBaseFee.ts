@@ -1,5 +1,6 @@
-import { FeeMethod, TransactionVerifyContext } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { GovernanceGovernableConfig } from '../../config';
+import { FeeMethod } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function verifyBaseFee(
@@ -8,7 +9,7 @@ export async function verifyBaseFee(
 		_feeMethod: FeeMethod | undefined;
 		_config: GovernanceGovernableConfig;
 	},
-	context: TransactionVerifyContext,
+	context: StateMachine.TransactionVerifyContext,
 ) {
 	if (!this._feeMethod) return;
 

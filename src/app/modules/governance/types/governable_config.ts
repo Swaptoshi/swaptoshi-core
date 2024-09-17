@@ -1,16 +1,16 @@
-import { GenesisConfig, ImmutableMethodContext, MethodContext } from 'klayr-sdk';
+import { StateMachine, Types } from 'klayr-sdk';
 
 export interface GovernableConfigStoreData {
 	data: Buffer;
 }
 
 export interface GovernableConfigVerifyContext<T extends object> {
-	context: ImmutableMethodContext;
+	context: StateMachine.ImmutableMethodContext;
 	config: T;
-	genesisConfig: GenesisConfig;
+	genesisConfig: Types.GenesisConfig;
 }
 
-export interface GovernableConfigSetContext<T> extends MethodContext {
+export interface GovernableConfigSetContext<T> extends StateMachine.MethodContext {
 	oldConfig: T;
 	newConfig: T;
 }

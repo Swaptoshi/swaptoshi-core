@@ -2,18 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import {
-	BaseInteroperableModule,
-	BlockExecuteContext,
-	FeeMethod,
-	ModuleInitArgs,
-	ModuleMetadata,
-	TokenMethod,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-	VerificationResult,
-	VerifyStatus,
-} from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { FeeConversionMethod } from '../fee_conversion';
 import { GovernanceMethod } from '../governance';
 import { TokenFactoryMethod } from '../token_factory/method';
@@ -84,9 +73,9 @@ import { SupportedTokenStore } from './stores/supported_token';
 import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
-import { DexModuleDependencies } from './types';
+import { DexModuleDependencies, FeeMethod, TokenMethod } from './types';
 
-export class DexModule extends BaseInteroperableModule {
+export class DexModule extends Modules.Interoperability.BaseInteroperableModule {
 	public _config: DexGovernableConfig = new DexGovernableConfig(this.name, 8);
 	public _feeMethod: FeeMethod | undefined;
 	public _feeConversionMethod: FeeConversionMethod | undefined;
@@ -168,7 +157,7 @@ export class DexModule extends BaseInteroperableModule {
 		}
 	}
 
-	public metadata(): ModuleMetadata {
+	public metadata(): Modules.ModuleMetadata {
 		return {
 			...this.baseMetadata(),
 			endpoints: [
@@ -238,7 +227,7 @@ export class DexModule extends BaseInteroperableModule {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async init(_args: ModuleInitArgs): Promise<void> {
+	public async init(_args: Modules.ModuleInitArgs): Promise<void> {
 		const poolStore = this.stores.get(PoolStore);
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const supportedTokenStore = this.stores.get(SupportedTokenStore);
@@ -261,7 +250,7 @@ export class DexModule extends BaseInteroperableModule {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verifyTransaction(_context: TransactionVerifyContext): Promise<VerificationResult> {
+	public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
 		try {
 			await verifyMinimumFee.bind(this)(_context);
 			await verifyBaseFee.bind(this)(_context);
@@ -269,14 +258,14 @@ export class DexModule extends BaseInteroperableModule {
 			await verifySwapByTransfer.bind(this)(_context);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async beforeCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async beforeCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await verifyMinimumFee.bind(this)(_context);
 		await verifyBaseFee.bind(this)(_context);
 		await verifyValidTransfer.bind(this)(_context);
@@ -284,11 +273,11 @@ export class DexModule extends BaseInteroperableModule {
 		await executeBaseFee.bind(this)(_context);
 	}
 
-	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async afterCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await executeSwapByTransfer.bind(this)(_context);
 	}
 
-	public async beforeTransactionsExecute(context: BlockExecuteContext): Promise<void> {
+	public async beforeTransactionsExecute(context: StateMachine.BlockExecuteContext): Promise<void> {
 		await this.stores.get(SupportedTokenStore).apply(context);
 	}
 }

@@ -1,26 +1,26 @@
 /* eslint-disable class-methods-use-this */
 
-import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { verifyTreasurifyParam } from '../utils';
 import { TreasurifyParams } from '../types';
 import { treasurifyCommandSchema } from '../schema';
 import { PoolStore } from '../stores/pool';
 
-export class TreasurifyCommand extends BaseCommand {
+export class TreasurifyCommand extends Modules.BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: CommandVerifyContext<TreasurifyParams>): Promise<VerificationResult> {
+	public async verify(_context: StateMachine.CommandVerifyContext<TreasurifyParams>): Promise<StateMachine.VerificationResult> {
 		try {
 			verifyTreasurifyParam(_context.params);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async execute(_context: CommandExecuteContext<TreasurifyParams>): Promise<void> {
+	public async execute(_context: StateMachine.CommandExecuteContext<TreasurifyParams>): Promise<void> {
 		const poolStore = this.stores.get(PoolStore);
 		await poolStore.releaseTokenToProtocolTreasury(_context, _context.params);
 	}

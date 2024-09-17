@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, GenesisBlockExecuteContext, GenesisConfig, MethodContext, TokenMethod, TransactionExecuteContext, codec } from 'klayr-sdk';
+import { Modules, StateMachine, Types, codec } from 'klayr-sdk';
 import BigNumber from 'bignumber.js';
-import { LiquidPosModuleConfig, StakeTransactionParams } from './types';
+import { LiquidPosModuleConfig, StakeTransactionParams, TokenMethod } from './types';
 import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { stakeCommandParamsSchema } from './schema';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
@@ -11,12 +11,12 @@ import { LiquidPosGovernableConfig } from './config';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 
-export class InternalLiquidPosMethod extends BaseMethod {
+export class InternalLiquidPosMethod extends Modules.BaseMethod {
 	private _chainID: Buffer | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 	private _lstTokenID: Buffer | undefined;
 
-	public async init(moduleConfig: LiquidPosModuleConfig, genesisConfig: GenesisConfig) {
+	public async init(moduleConfig: LiquidPosModuleConfig, genesisConfig: Types.GenesisConfig) {
 		this._chainID = Buffer.from(genesisConfig.chainID, 'hex');
 		await this._assignLstTokenID(moduleConfig);
 	}
@@ -29,14 +29,14 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		return this._lstTokenID;
 	}
 
-	public async handleInitGenesisState(context: GenesisBlockExecuteContext) {
+	public async handleInitGenesisState(context: StateMachine.GenesisBlockExecuteContext) {
 		this.checkDependencies();
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (!isTokenIDAvailable) throw new Error('specified tokenID on liquid_pos config is not available');
 	}
 
-	public async handleAfterCommandExecute(context: TransactionExecuteContext) {
+	public async handleAfterCommandExecute(context: StateMachine.TransactionExecuteContext) {
 		this.checkDependencies();
 
 		if (context.transaction.module === POS_MODULE_NAME && context.transaction.command === POS_STAKE_COMMAND_NAME) {
@@ -52,7 +52,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		}
 	}
 
-	public async mint(context: MethodContext, address: Buffer, baseAmount: bigint) {
+	public async mint(context: StateMachine.MethodContext, address: Buffer, baseAmount: bigint) {
 		this.checkDependencies();
 		if (baseAmount < BigInt(0)) throw new Error("baseAmount minted can't be negative");
 
@@ -69,7 +69,7 @@ export class InternalLiquidPosMethod extends BaseMethod {
 		events.add(context, { address, tokenID: this._lstTokenID!, amount: mintedAmount }, [address]);
 	}
 
-	public async burn(context: MethodContext, address: Buffer, baseBurned: bigint) {
+	public async burn(context: StateMachine.MethodContext, address: Buffer, baseBurned: bigint) {
 		this.checkDependencies();
 		if (baseBurned < BigInt(0)) throw new Error("baseBurned burned can't be negative");
 

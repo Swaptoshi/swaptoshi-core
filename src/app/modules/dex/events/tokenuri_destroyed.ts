@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { tokenUriDestroyedEventSchema } from '../schema';
 
 export interface TokenURIDestroyedEventData {
@@ -7,6 +7,6 @@ export interface TokenURIDestroyedEventData {
 	tokenId: Buffer;
 }
 
-export class TokenURIDestroyedEvent extends BaseEvent<TokenURIDestroyedEventData> {
+export class TokenURIDestroyedEvent extends Modules.BaseEvent<TokenURIDestroyedEventData> {
 	public schema = tokenUriDestroyedEventSchema;
 }

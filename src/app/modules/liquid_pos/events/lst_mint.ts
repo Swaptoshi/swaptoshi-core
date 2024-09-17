@@ -1,4 +1,4 @@
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { liquidStakingTokenMintEventSchema } from '../schema';
 
 export interface LiquidStakingTokenMintEventData {
@@ -7,6 +7,6 @@ export interface LiquidStakingTokenMintEventData {
 	amount: bigint;
 }
 
-export class LiquidStakingTokenMintEvent extends BaseEvent<LiquidStakingTokenMintEventData> {
+export class LiquidStakingTokenMintEvent extends Modules.BaseEvent<LiquidStakingTokenMintEventData> {
 	public schema = liquidStakingTokenMintEventSchema;
 }

@@ -2,19 +2,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import {
-	BaseModule,
-	FeeMethod,
-	MainchainInteroperabilityMethod,
-	SidechainInteroperabilityMethod,
-	TokenMethod,
-	Transaction,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-	TransferCommand,
-	VerifyStatus,
-	codec,
-} from 'klayr-sdk';
+import { Modules, StateMachine, Transaction, codec } from 'klayr-sdk';
 import { DexModule } from '../../../../src/app/modules/dex/module';
 import { DexEndpoint } from '../../../../src/app/modules/dex/endpoint';
 import { DexMethod } from '../../../../src/app/modules/dex/method';
@@ -36,9 +24,9 @@ import { mock_token_transfer } from './stores/shared/token';
 import { SupportedTokenStore } from '../../../../src/app/modules/dex/stores/supported_token';
 import { TokenSymbolStore } from '../../../../src/app/modules/dex/stores/token_symbol';
 import { fallbackTokenSymbol } from './utils/token';
-import { NFTMethod } from '../../../../src/app/modules/nft';
 import { FeeConversionMethod } from '../../../../src/app/modules/fee_conversion';
 import { GovernanceMethod } from '../../../../src/app/modules/governance';
+import { FeeMethod, MainchainInteroperabilityMethod, NFTMethod, SidechainInteroperabilityMethod, TokenMethod } from '../../../../src/app/modules/dex/types';
 
 const baseTransaction = {
 	module: '',
@@ -65,10 +53,10 @@ describe('DexModule', () => {
 	let governanceMethod: GovernanceMethod;
 	let feeConversionMethod: FeeConversionMethod;
 	let interoperabilityMethod: SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
-	let verifyContext: TransactionVerifyContext;
-	let executeContext: TransactionExecuteContext;
-	let createTransactionExecuteContext: (transaction: Transaction) => TransactionExecuteContext;
-	let createTransactionVerifyContext: (transcation: Transaction) => TransactionVerifyContext;
+	let verifyContext: StateMachine.TransactionVerifyContext;
+	let executeContext: StateMachine.TransactionExecuteContext;
+	let createTransactionExecuteContext: (transaction: Transaction) => StateMachine.TransactionExecuteContext;
+	let createTransactionVerifyContext: (transcation: Transaction) => StateMachine.TransactionVerifyContext;
 
 	beforeEach(async () => {
 		const token0Ins = new Token();
@@ -128,8 +116,8 @@ describe('DexModule', () => {
 		return nft;
 	};
 
-	it('should inherit from BaseModule', () => {
-		expect(DexModule.prototype).toBeInstanceOf(BaseModule);
+	it('should inherit from Modules.BaseModule', () => {
+		expect(DexModule.prototype).toBeInstanceOf(Modules.BaseModule);
 	});
 
 	describe('constructor', () => {
@@ -234,7 +222,7 @@ describe('DexModule', () => {
 					it('should pass if fee is higher than config', async () => {
 						module._config.default = { ...defaultConfig, feeConversionEnabled: false };
 						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-						await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
+						await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 					});
 
 					it('should fail if fee is lower than config', async () => {
@@ -249,7 +237,7 @@ describe('DexModule', () => {
 						verifyContext = createTransactionVerifyContext(new Transaction(transaction));
 
 						const res = await module.verifyTransaction(verifyContext);
-						expect(res.status).toBe(VerifyStatus.FAIL);
+						expect(res.status).toBe(StateMachine.VerifyStatus.FAIL);
 						expect(res.error).toBeDefined();
 						expect(res.error?.message).toBe('Insufficient transaction fee. Minimum required fee is 1000000001.');
 					});
@@ -262,7 +250,7 @@ describe('DexModule', () => {
 				...baseTransaction,
 				module: 'token',
 				command: 'transfer',
-				params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+				params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 					tokenID: token0,
 					amount: BigInt(10),
 					recipientAddress: poolAddress,
@@ -278,12 +266,12 @@ describe('DexModule', () => {
 				await createPool(token0, token1);
 
 				verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
+				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 			});
 
 			it('should pass if pool doesnt exist, indicating normal transfer', async () => {
 				verifyContext = createTransactionVerifyContext(new Transaction(transaction));
-				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', VerifyStatus.OK);
+				await expect((async () => module.verifyTransaction(verifyContext))()).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 			});
 
 			it('should fail if pool exist but token transferred is not compatible with pool', async () => {
@@ -292,7 +280,7 @@ describe('DexModule', () => {
 				verifyContext = createTransactionVerifyContext(
 					new Transaction({
 						...transaction,
-						params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+						params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 							tokenID: Buffer.from('1234', 'utf8'),
 							amount: BigInt(10),
 							recipientAddress: poolAddress,
@@ -302,7 +290,7 @@ describe('DexModule', () => {
 				);
 
 				const res = await module.verifyTransaction(verifyContext);
-				expect(res.status).toBe(VerifyStatus.FAIL);
+				expect(res.status).toBe(StateMachine.VerifyStatus.FAIL);
 				expect(res.error).toBeDefined();
 				expect(res.error?.message).toBe('transfering incompatible token to pool address');
 			});
@@ -353,7 +341,7 @@ describe('DexModule', () => {
 				...baseTransaction,
 				module: 'token',
 				command: 'transfer',
-				params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+				params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 					tokenID: token0,
 					amount: BigInt(10),
 					recipientAddress: poolAddress,
@@ -383,7 +371,7 @@ describe('DexModule', () => {
 				executeContext = createTransactionExecuteContext(
 					new Transaction({
 						...transaction,
-						params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+						params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 							tokenID: Buffer.from('1234', 'utf8'),
 							amount: BigInt(10),
 							recipientAddress: poolAddress,
@@ -402,7 +390,7 @@ describe('DexModule', () => {
 				...baseTransaction,
 				module: 'token',
 				command: 'transfer',
-				params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+				params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 					tokenID: token0,
 					amount: BigInt(10),
 					recipientAddress: poolAddress,
@@ -450,7 +438,7 @@ describe('DexModule', () => {
 				executeContext = createTransactionExecuteContext(
 					new Transaction({
 						...transaction,
-						params: codec.encode(new TransferCommand(undefined as any, undefined as any).schema, {
+						params: codec.encode(new Modules.Token.TransferCommand(undefined as any, undefined as any).schema, {
 							tokenID: Buffer.from('1234', 'utf8'),
 							amount: BigInt(10),
 							recipientAddress: poolAddress,

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { Uint256String } from '../stores/library/int';
 import { treasurifyEventSchema } from '../schema';
 
@@ -10,6 +10,6 @@ export interface TreasurifyEventsData {
 	amount: Uint256String;
 }
 
-export class TreasurifyEvent extends BaseEvent<TreasurifyEventsData> {
+export class TreasurifyEvent extends Modules.BaseEvent<TreasurifyEventsData> {
 	public schema = treasurifyEventSchema;
 }

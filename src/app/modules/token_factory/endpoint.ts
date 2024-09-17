@@ -1,4 +1,4 @@
-import { BaseEndpoint, cryptography, ModuleEndpointContext } from 'klayr-sdk';
+import { Modules, cryptography, Types } from 'klayr-sdk';
 import {
 	GetAirdropParams,
 	GetFactoryParams,
@@ -31,14 +31,14 @@ import {
 	quoteICOExactOutputSingleEndpointResponseSchema,
 } from './schema';
 
-export class TokenFactoryEndpoint extends BaseEndpoint {
-	public async getConfig(_context: ModuleEndpointContext) {
+export class TokenFactoryEndpoint extends Modules.BaseEndpoint {
+	public async getConfig(_context: Types.ModuleEndpointContext) {
 		const configStore = this.stores.get(TokenFactoryGovernableConfig);
 		const config = await configStore.getConfig(_context);
 		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
-	public async getICOPool(context: ModuleEndpointContext) {
+	public async getICOPool(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetICOPoolParams;
 
 		verifyToken('tokenIn', Buffer.from(param.tokenIn, 'hex'));
@@ -61,7 +61,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		);
 	}
 
-	public async quoteICOExactInput(context: ModuleEndpointContext) {
+	public async quoteICOExactInput(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteICOExactInputParams;
 
 		verifyToken('tokenOut', Buffer.from(param.tokenOut, 'hex'));
@@ -80,7 +80,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer({ amountOut }, quoteICOExactInputEndpointResponseSchema);
 	}
 
-	public async quoteICOExactInputSingle(context: ModuleEndpointContext) {
+	public async quoteICOExactInputSingle(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteICOExactInputSingleParams;
 
 		verifyToken('tokenIn', Buffer.from(param.tokenIn, 'hex'));
@@ -99,7 +99,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer({ amountOut }, quoteICOExactInputSingleEndpointResponseSchema);
 	}
 
-	public async quoteICOExactOutput(context: ModuleEndpointContext) {
+	public async quoteICOExactOutput(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteICOExactOutputParams;
 
 		verifyToken('tokenOut', Buffer.from(param.tokenOut, 'hex'));
@@ -118,7 +118,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer({ amountIn }, quoteICOExactOutputEndpointResponseSchema);
 	}
 
-	public async quoteICOExactOutputSingle(context: ModuleEndpointContext) {
+	public async quoteICOExactOutputSingle(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as QuoteICOExactOutputSingleParams;
 
 		verifyToken('tokenIn', Buffer.from(param.tokenIn, 'hex'));
@@ -137,7 +137,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer({ amountIn }, quoteICOExactOutputSingleEndpointResponseSchema);
 	}
 
-	public async getAirdrop(context: ModuleEndpointContext) {
+	public async getAirdrop(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetAirdropParams;
 
 		verifyToken('tokenId', Buffer.from(param.tokenId, 'hex'));
@@ -148,7 +148,7 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer(airdrop.toJSON(), getAirdropEndpointResponseSchema);
 	}
 
-	public async getFactory(context: ModuleEndpointContext) {
+	public async getFactory(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetFactoryParams;
 
 		verifyToken('tokenId', Buffer.from(param.tokenId, 'hex'));
@@ -158,13 +158,13 @@ export class TokenFactoryEndpoint extends BaseEndpoint {
 		return serializer(factory.toJSON(), getFactoryEndpointResponseSchema);
 	}
 
-	public async getNextAvailableTokenId(context: ModuleEndpointContext) {
+	public async getNextAvailableTokenId(context: Types.ModuleEndpointContext) {
 		const nextAvailableTokenIdStore = this.stores.get(NextAvailableTokenIdStore);
 		const nextAvailableTokenId = await nextAvailableTokenIdStore.getOrDefault(context);
 		return serializer(nextAvailableTokenId, getNextAvailableTokenIdEndpointResponseSchema);
 	}
 
-	public async getVestingUnlock(context: ModuleEndpointContext) {
+	public async getVestingUnlock(context: Types.ModuleEndpointContext) {
 		const param = context.params as unknown as GetVestingUnlockParams;
 
 		verifyPositiveNumber('height', param.height);

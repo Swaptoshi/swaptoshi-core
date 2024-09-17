@@ -1,4 +1,8 @@
-import { FeeMethod, TokenMethod } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
+
+export type FeeMethod = Modules.Fee.FeeMethod;
+
+export type TokenMethod = Modules.Token.TokenMethod;
 
 export interface GovernanceModuleDependencies {
 	tokenMethod: TokenMethod;

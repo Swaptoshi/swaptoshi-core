@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
+import { Modules, Types, utils } from 'klayr-sdk';
 import {
 	FactorySetAttributesParams,
 	FactoryStoreData,
@@ -26,7 +26,15 @@ import { VESTING_MODULE_SUFFIX } from '../../constants';
 import { VestedTokenLockedEvent } from '../../events/vested_token_locked';
 
 export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implements FactoryStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, factory: FactoryStoreData, tokenId: Buffer) {
+	public constructor(
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
+		config: TokenFactoryGovernableConfig,
+		genesisConfig: Types.GenesisConfig,
+		moduleName: string,
+		factory: FactoryStoreData,
+		tokenId: Buffer,
+	) {
 		super(FactoryStore, stores, events, config, genesisConfig, moduleName, tokenId);
 
 		Object.assign(this, utils.objects.cloneDeep(factory));
@@ -41,7 +49,7 @@ export class Factory extends BaseInstance<FactoryStoreData, FactoryStore> implem
 				owner: this.owner,
 				attributesArray: this.attributesArray,
 			}),
-		) as JSONObject<FactoryStoreData>;
+		) as Types.JSONObject<FactoryStoreData>;
 	}
 
 	public toObject() {

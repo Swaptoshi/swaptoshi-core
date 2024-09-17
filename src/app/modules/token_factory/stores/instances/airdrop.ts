@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
+import { Modules, Types, utils } from 'klayr-sdk';
 import { AirdropCreateParams, AirdropDistributeParams, AirdropEditRecipientsParams, AirdropStoreData } from '../../types';
 import { FactoryStore } from '../factory';
 import { BaseInstance } from './base';
@@ -15,10 +15,10 @@ import { TokenFactoryGovernableConfig } from '../../config';
 
 export class Airdrop extends BaseInstance<AirdropStoreData, AirdropStore> implements AirdropStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: TokenFactoryGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		airdrop: AirdropStoreData,
 		tokenId: Buffer,
@@ -36,7 +36,7 @@ export class Airdrop extends BaseInstance<AirdropStoreData, AirdropStore> implem
 			serializer<AirdropStoreData>({
 				recipients: this.recipients,
 			}),
-		) as JSONObject<AirdropStoreData>;
+		) as Types.JSONObject<AirdropStoreData>;
 	}
 
 	public toObject() {

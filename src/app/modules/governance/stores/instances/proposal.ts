@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GenesisConfig, JSONObject, MethodContext, NamedRegistry, codec, utils } from 'klayr-sdk';
+import { Modules, StateMachine, Types, codec, utils } from 'klayr-sdk';
 import Decimal from 'decimal.js';
 import { ConfigActionPayload, CreateProposalParams, ProposalQueueStoreData, ProposalStatus, ProposalStoreData, QuorumMode, SetProposalAttributesParams, VoteParams, Votes } from '../../types';
 import { ProposalStore } from '../proposal';
@@ -26,10 +26,10 @@ import { decodeConfigProposalValue } from '../../utils/payload';
 
 export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> implements ProposalStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: GovernanceGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		governableConfigRegistry: GovernableConfigRegistry,
 		proposal: ProposalStoreData | undefined,
@@ -63,7 +63,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 				actions: this.actions,
 				attributes: this.attributes,
 			}),
-		) as JSONObject<ProposalStoreData>;
+		) as Types.JSONObject<ProposalStoreData>;
 	}
 
 	public toObject() {
@@ -100,7 +100,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 		const senderAvailableBalance = await this.tokenMethod!.getAvailableBalance(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId());
 		const senderLockedBalance = await this.tokenMethod!.getLockedAmount(this.immutableContext!.context, this.immutableContext!.senderAddress, this._getStakingTokenId(), POS_MODULE_NAME);
 
-		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.immutableContext!.context as MethodContext);
+		const totalSupplyStore = await this.tokenMethod!.getTotalSupply(this.immutableContext!.context as StateMachine.MethodContext);
 		const index = totalSupplyStore.totalSupply.findIndex(supply => supply.tokenID.equals(this._getStakingTokenId()));
 
 		const proposalCreationMinBalance = parseBigintOrPercentage(config.proposalCreationMinBalance, totalSupplyStore.totalSupply[index].totalSupply);

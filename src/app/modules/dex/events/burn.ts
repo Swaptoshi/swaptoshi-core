@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { burnEventSchema } from '../schema';
 
 export interface BurnEventData {
@@ -12,6 +12,6 @@ export interface BurnEventData {
 	upperLiquidityNet: string;
 }
 
-export class BurnEvent extends BaseEvent<BurnEventData> {
+export class BurnEvent extends Modules.BaseEvent<BurnEventData> {
 	public schema = burnEventSchema;
 }

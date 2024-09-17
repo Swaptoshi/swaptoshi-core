@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { ProposalVoterStoreData } from '../types';
 import { proposalVoterStoreSchema } from '../schema';
 import { numberToBytes } from '../utils';
@@ -7,8 +7,8 @@ export const defaultProposalVoters = Object.freeze<ProposalVoterStoreData>({
 	voters: [],
 });
 
-export class ProposalVoterStore extends BaseStore<ProposalVoterStoreData> {
-	public async getOrDefault(context: ImmutableStoreGetter, proposalId: number): Promise<ProposalVoterStoreData> {
+export class ProposalVoterStore extends Modules.BaseStore<ProposalVoterStoreData> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter, proposalId: number): Promise<ProposalVoterStoreData> {
 		try {
 			const proposalVoters = await this.get(context, numberToBytes(proposalId));
 			return proposalVoters;
@@ -21,7 +21,7 @@ export class ProposalVoterStore extends BaseStore<ProposalVoterStoreData> {
 		}
 	}
 
-	public async addVoter(context: StoreGetter, proposalId: number, address: Buffer) {
+	public async addVoter(context: Modules.StoreGetter, proposalId: number, address: Buffer) {
 		const proposalVoters = await this.getOrDefault(context, proposalId);
 		const index = proposalVoters.voters.findIndex(voter => voter.equals(address));
 		if (index === -1) {

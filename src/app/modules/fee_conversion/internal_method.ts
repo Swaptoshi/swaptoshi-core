@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { BaseMethod, FeeMethod, TokenMethod, TransactionExecuteContext, TransactionVerifyContext } from 'klayr-sdk';
-import { FeeConversionVerifyStatus, HandlerExecutionResult } from './types';
+import { Modules, StateMachine } from 'klayr-sdk';
+import { FeeConversionVerifyStatus, FeeMethod, HandlerExecutionResult, TokenMethod } from './types';
 import { FeeConversionMethodRegistry } from './registry';
 import { DexMethod } from '../dex/method';
 import { FeeConvertedEvent } from './events/fee_converted';
@@ -14,7 +14,7 @@ interface ConversionCheck {
 	amountIn: string;
 }
 
-export class InternalFeeConversionMethod extends BaseMethod {
+export class InternalFeeConversionMethod extends Modules.BaseMethod {
 	private _handler: FeeConversionMethodRegistry | undefined;
 	private _dexMethod: DexMethod | undefined;
 	private _feeMethod: FeeMethod | undefined;
@@ -30,7 +30,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		this._dexMethod = dexMethod;
 	}
 
-	public async verify(context: TransactionVerifyContext) {
+	public async verify(context: StateMachine.TransactionVerifyContext) {
 		const handlerExecutionResult = await this.executeHandlers(context);
 
 		if (handlerExecutionResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && handlerExecutionResult.payload) {
@@ -59,7 +59,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		return handlerExecutionResult;
 	}
 
-	public async execute(context: TransactionExecuteContext) {
+	public async execute(context: StateMachine.TransactionExecuteContext) {
 		const verifyResult = await this.verify(context);
 
 		if (verifyResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && verifyResult.payload) {
@@ -94,7 +94,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		}
 	}
 
-	public async executeHandlers(context: TransactionVerifyContext): Promise<HandlerExecutionResult> {
+	public async executeHandlers(context: StateMachine.TransactionVerifyContext): Promise<HandlerExecutionResult> {
 		this.checkDependencies();
 
 		const configStore = this.stores.get(FeeConversionGovernableConfig);
@@ -214,7 +214,7 @@ export class InternalFeeConversionMethod extends BaseMethod {
 		return { status: FeeConversionVerifyStatus.NO_CONVERSION };
 	}
 
-	private async _verifyPath(context: TransactionVerifyContext, _path: string): Promise<boolean> {
+	private async _verifyPath(context: StateMachine.TransactionVerifyContext, _path: string): Promise<boolean> {
 		if (!this._handler || !this._dexMethod || !this._feeMethod || !this._tokenMethod) {
 			throw new Error('InternalFeeConversionMethod dependencies is not configured properly');
 		}

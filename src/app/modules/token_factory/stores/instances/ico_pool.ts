@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, cryptography, utils } from 'klayr-sdk';
+import { Modules, cryptography, Types, utils } from 'klayr-sdk';
 import { ICOChangePriceParams, ICOCreateParams, ICODepositParams, ICOStoreData, ICOTreasurifyParams, ICOWithdrawParams } from '../../types';
 import { BaseInstance } from './base';
 import { ICOStore } from '../ico';
@@ -18,7 +18,15 @@ import { ICO_MODULE_SUFFIX } from '../../constants';
 import { TokenFactoryGovernableConfig } from '../../config';
 
 export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string, ico: ICOStoreData, poolAddress: Buffer) {
+	public constructor(
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
+		config: TokenFactoryGovernableConfig,
+		genesisConfig: Types.GenesisConfig,
+		moduleName: string,
+		ico: ICOStoreData,
+		poolAddress: Buffer,
+	) {
 		super(ICOStore, stores, events, config, genesisConfig, moduleName, poolAddress);
 
 		if (ico) Object.assign(this, utils.objects.cloneDeep(ico));
@@ -31,7 +39,7 @@ export class ICOPool extends BaseInstance<ICOStoreData, ICOStore> implements ICO
 				price: this.price,
 				providerAddress: this.providerAddress,
 			}),
-		) as JSONObject<ICOStoreData>;
+		) as Types.JSONObject<ICOStoreData>;
 	}
 
 	public toObject() {

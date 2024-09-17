@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TokenMethod } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { GovernanceMethod } from '../governance';
+
+export type TokenMethod = Modules.Token.TokenMethod;
 
 export interface LiquidPosModuleConfig {
 	tokenID: string;

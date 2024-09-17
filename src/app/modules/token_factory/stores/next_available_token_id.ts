@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { NextAvailableTokenIdStoreData } from '../types';
 import { nextAvailableTokenIdStoreSchema } from '../schema';
 
@@ -6,8 +6,8 @@ export const defaultNextId = Object.freeze<NextAvailableTokenIdStoreData>({
 	nextTokenId: BigInt(1),
 });
 
-export class NextAvailableTokenIdStore extends BaseStore<NextAvailableTokenIdStoreData> {
-	public async getOrDefault(context: ImmutableStoreGetter): Promise<NextAvailableTokenIdStoreData> {
+export class NextAvailableTokenIdStore extends Modules.BaseStore<NextAvailableTokenIdStoreData> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter): Promise<NextAvailableTokenIdStoreData> {
 		try {
 			const nextAvailableId = await this.get(context, Buffer.alloc(0));
 			return nextAvailableId;

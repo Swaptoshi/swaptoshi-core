@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable jest/expect-expect */
-import { CommandExecuteContext, CommandVerifyContext, TokenMethod, VerifyStatus } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import { TreasurifyCommand } from '../../../../../src/app/modules/dex/commands/treasurify_command';
 import { DexModule } from '../../../../../src/app/modules/dex/module';
 import { treasurifyCommandSchema } from '../../../../../src/app/modules/dex/schema';
-import { TreasurifyParams } from '../../../../../src/app/modules/dex/types';
+import { TokenMethod, TreasurifyParams } from '../../../../../src/app/modules/dex/types';
 import { invalidTokenAddress } from '../utils/invalid';
 import { commandFixture } from '../utils/fixtures';
 import { poolAddress, senderPublicKey, token2 } from '../utils/account';
@@ -30,8 +30,8 @@ describe('TreasurifyCommand', () => {
 	let command: TreasurifyCommand;
 	let tokenMethod: TokenMethod;
 	let poolStore: PoolStore;
-	let createCommandVerifyContext: (params: CommandParam) => CommandVerifyContext<CommandParam>;
-	let createCommandExecuteContext: (params: CommandParam) => CommandExecuteContext<CommandParam>;
+	let createCommandVerifyContext: (params: CommandParam) => StateMachine.CommandVerifyContext<CommandParam>;
+	let createCommandExecuteContext: (params: CommandParam) => StateMachine.CommandExecuteContext<CommandParam>;
 
 	beforeEach(async () => {
 		({ module, createCommandExecuteContext, createCommandVerifyContext, tokenMethod, poolStore } = await commandFixture<CommandParam>(COMMAND_NAME, commandSchema, senderPublicKey, validParam));
@@ -56,7 +56,7 @@ describe('TreasurifyCommand', () => {
 	describe('verify', () => {
 		it('should return status OK when called with valid input', async () => {
 			const context = createCommandVerifyContext(validParam);
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.OK);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.OK);
 		});
 
 		it('should throw error when user sends transaction with invalid address (address)', async () => {
@@ -64,7 +64,7 @@ describe('TreasurifyCommand', () => {
 				...validParam,
 				address: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 
 		it('should throw error when user sends transaction with invalid token address (token)', async () => {
@@ -72,7 +72,7 @@ describe('TreasurifyCommand', () => {
 				...validParam,
 				token: invalidTokenAddress,
 			});
-			await expect(command.verify(context)).resolves.toHaveProperty('status', VerifyStatus.FAIL);
+			await expect(command.verify(context)).resolves.toHaveProperty('status', StateMachine.VerifyStatus.FAIL);
 		});
 	});
 

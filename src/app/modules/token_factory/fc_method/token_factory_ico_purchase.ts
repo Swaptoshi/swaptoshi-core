@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { TransactionVerifyContext, codec } from 'klayr-sdk';
+import { StateMachine, codec } from 'klayr-sdk';
 import { BaseFeeConversionMethod, FeeConversionVerificationResult, FeeConversionVerifyStatus } from '../../fee_conversion';
 import { immutableMethodFactoryContext } from '../stores/context';
 import { ICOStore } from '../stores/ico';
@@ -8,7 +8,7 @@ import { icoExactInputCommandSchema, icoExactInputSingleCommandSchema, icoExactO
 import { TOKEN_ID_LENGTH } from '../constants';
 
 export class TokenFactoryICOPurchaseFeeConversionMethod extends BaseFeeConversionMethod {
-	public async verifyFeeConversion(context: TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
+	public async verifyFeeConversion(context: StateMachine.TransactionVerifyContext): Promise<FeeConversionVerificationResult> {
 		const senderFeeBalance = await this.tokenMethod.getAvailableBalance(context, context.transaction.senderAddress, this.feeMethod.getFeeTokenID());
 		const feeDifference = senderFeeBalance - context.transaction.fee;
 

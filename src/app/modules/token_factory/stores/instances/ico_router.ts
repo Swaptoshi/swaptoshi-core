@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
+import { Modules, Types, utils } from 'klayr-sdk';
 import { ICOExactInputParams, ICOExactInputSingleParams, ICOExactOutputParams, ICOExactOutputSingleParams, ICOStoreData, ImmutableFactoryContext, MutableFactoryContext } from '../../types';
 import { AddDependenciesParam, BaseInstance } from './base';
 import { ICOStore } from '../ico';
@@ -14,7 +14,7 @@ import { ICOQuoter } from './ico_quoter';
 import { TokenFactoryGovernableConfig } from '../../config';
 
 export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements ICOStoreData {
-	public constructor(stores: NamedRegistry, events: NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: GenesisConfig, moduleName: string) {
+	public constructor(stores: Modules.NamedRegistry, events: Modules.NamedRegistry, config: TokenFactoryGovernableConfig, genesisConfig: Types.GenesisConfig, moduleName: string) {
 		super(ICOStore, stores, events, config, genesisConfig, moduleName, Buffer.alloc(0));
 		this.quoter = new ICOQuoter(stores, events, config, genesisConfig, moduleName);
 	}
@@ -35,7 +35,7 @@ export class ICORouter extends BaseInstance<ICOStoreData, ICOStore> implements I
 				price: this.price,
 				providerAddress: this.providerAddress,
 			}),
-		) as JSONObject<ICOStoreData>;
+		) as Types.JSONObject<ICOStoreData>;
 	}
 
 	public toObject() {

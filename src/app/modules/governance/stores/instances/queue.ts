@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { codec, cryptography, GenesisConfig, JSONObject, NamedRegistry, utils } from 'klayr-sdk';
+import { codec, cryptography, Modules, Types, utils } from 'klayr-sdk';
 import { ConfigActionPayload, FundingActionPayload, ProposalQueueStoreData, ProposalStatus, QuorumMode } from '../../types';
 import { ProposalQueueStore } from '../queue';
 import { BaseInstance } from './base';
@@ -21,10 +21,10 @@ import { decodeConfigProposalValue } from '../../utils/payload';
 
 export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, ProposalQueueStore> implements ProposalQueueStoreData {
 	public constructor(
-		stores: NamedRegistry,
-		events: NamedRegistry,
+		stores: Modules.NamedRegistry,
+		events: Modules.NamedRegistry,
 		config: GovernanceGovernableConfig,
-		genesisConfig: GenesisConfig,
+		genesisConfig: Types.GenesisConfig,
 		moduleName: string,
 		governableConfigRegistry: GovernableConfigRegistry,
 		queue: ProposalQueueStoreData,
@@ -49,7 +49,7 @@ export class ProposalQueue extends BaseInstance<ProposalQueueStoreData, Proposal
 				ends: this.ends,
 				execute: this.execute,
 			}),
-		) as JSONObject<ProposalQueueStoreData>;
+		) as Types.JSONObject<ProposalQueueStoreData>;
 	}
 
 	public toObject() {

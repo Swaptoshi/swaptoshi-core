@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, NamedRegistry, TokenMethod, cryptography } from 'klayr-sdk';
-import { DEXPoolData, Slot0, ImmutableSwapContext, MutableSwapContext, MutableContext, TreasurifyParams } from '../types';
+import { Modules, cryptography } from 'klayr-sdk';
+import { DEXPoolData, Slot0, ImmutableSwapContext, MutableSwapContext, MutableContext, TreasurifyParams, TokenMethod } from '../types';
 import { Uint24String } from './library/int';
 import { NFTDescriptor, PoolAddress } from './library/periphery';
 import { Tick } from './library/core';
@@ -23,8 +23,8 @@ export const defaultSlot0: Slot0 = Object.freeze({
 	observationCardinalityNext: '0',
 });
 
-export class PoolStore extends BaseStore<DEXPoolData> {
-	public constructor(moduleName: string, index: number, stores: NamedRegistry, events: NamedRegistry) {
+export class PoolStore extends Modules.BaseStore<DEXPoolData> {
+	public constructor(moduleName: string, index: number, stores: Modules.NamedRegistry, events: Modules.NamedRegistry) {
 		super(moduleName, index);
 		this.stores = stores;
 		this.events = events;
@@ -228,8 +228,8 @@ export class PoolStore extends BaseStore<DEXPoolData> {
 
 	public schema = poolStoreSchema;
 
-	private readonly events: NamedRegistry;
-	private readonly stores: NamedRegistry;
+	private readonly events: Modules.NamedRegistry;
+	private readonly stores: Modules.NamedRegistry;
 	private readonly moduleName: string;
 
 	private tokenMethod: TokenMethod | undefined;

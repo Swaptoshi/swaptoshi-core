@@ -1,9 +1,9 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db } from 'klayr-sdk';
+import { Modules, db } from 'klayr-sdk';
 import { VoteScoreStoreData } from '../types';
 import { voteScoreStoreSchema } from '../schema';
 
-export class VoteScoreStore extends BaseStore<VoteScoreStoreData> {
-	public async getVoteScore(context: ImmutableStoreGetter, address: Buffer): Promise<bigint> {
+export class VoteScoreStore extends Modules.BaseStore<VoteScoreStoreData> {
+	public async getVoteScore(context: Modules.ImmutableStoreGetter, address: Buffer): Promise<bigint> {
 		try {
 			const voteScore = await this.get(context, address);
 			return voteScore.score;
@@ -15,7 +15,7 @@ export class VoteScoreStore extends BaseStore<VoteScoreStoreData> {
 		}
 	}
 
-	public async addVoteScore(context: StoreGetter, address: Buffer, addedVote: bigint): Promise<void> {
+	public async addVoteScore(context: Modules.StoreGetter, address: Buffer, addedVote: bigint): Promise<void> {
 		const voteScore = await this.getVoteScore(context, address);
 		await this.set(context, address, { score: voteScore + addedVote });
 	}

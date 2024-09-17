@@ -3,7 +3,7 @@
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
-import { MethodContext, cryptography } from 'klayr-sdk';
+import { StateMachine, cryptography } from 'klayr-sdk';
 import { Uint } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { methodContextFixture, moduleConfig } from '../../shared/module';
 import { TEST_POOL_START_TIME, poolFixture } from '../../shared/pool';
@@ -68,7 +68,7 @@ interface Tokens {
 
 describe('NFTDescriptor', () => {
 	let module: DexModule;
-	let createMethodContext: () => MethodContext;
+	let createMethodContext: () => StateMachine.MethodContext;
 
 	const nftDescriptorFixture: Fixture<{ tokens: [Tokens, Tokens, Tokens, Tokens] }> = async (_sender: Buffer) => {
 		({ createMethodContext, module } = await methodContextFixture());

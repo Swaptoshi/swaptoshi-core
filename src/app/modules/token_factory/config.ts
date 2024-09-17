@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { NamedRegistry, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { BaseGovernableConfig, GovernableConfigSetContext, GovernableConfigVerifyContext } from '../governance';
 import { defaultConfig } from './constants';
 import { configSchema } from './schema';
@@ -14,11 +14,11 @@ export class TokenFactoryGovernableConfig extends BaseGovernableConfig<TokenFact
 	public schema = configSchema;
 	public default = defaultConfig;
 
-	private stores = new NamedRegistry();
+	private stores = new Modules.NamedRegistry();
 	private _dexMethod: DexMethod | undefined;
 	private _feeConversionMethod: FeeConversionMethod | undefined;
 
-	public addDependencies(stores: NamedRegistry, dexMethod?: DexMethod, feeConversionMethod?: FeeConversionMethod) {
+	public addDependencies(stores: Modules.NamedRegistry, dexMethod?: DexMethod, feeConversionMethod?: FeeConversionMethod) {
 		this.stores = stores;
 		this._dexMethod = dexMethod;
 		this._feeConversionMethod = feeConversionMethod;
@@ -45,7 +45,7 @@ export class TokenFactoryGovernableConfig extends BaseGovernableConfig<TokenFact
 		}
 	}
 
-	public async verify(_context: GovernableConfigVerifyContext<TokenFactoryModuleConfig>): Promise<VerificationResult> {
+	public async verify(_context: GovernableConfigVerifyContext<TokenFactoryModuleConfig>): Promise<StateMachine.VerificationResult> {
 		try {
 			await verifyModuleConfig(_context.config);
 			const { chainID } = _context.genesisConfig;
@@ -72,10 +72,10 @@ export class TokenFactoryGovernableConfig extends BaseGovernableConfig<TokenFact
 			}
 		} catch (error) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 }

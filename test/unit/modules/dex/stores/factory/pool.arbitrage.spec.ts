@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-loop-func */
 import Decimal from 'decimal.js';
-import { MethodContext, TokenMethod } from 'klayr-sdk';
+import { StateMachine } from 'klayr-sdk';
 import {
 	FeeAmount,
 	MAX_SQRT_RATIO,
@@ -27,7 +27,7 @@ import { methodContextFixture } from '../shared/module';
 import { methodSwapContext } from '../../../../../../src/app/modules/dex/stores/context';
 import { FeeProtocol } from '../../../../../../src/app/modules/dex/stores/library/periphery';
 import { DexModule } from '../../../../../../src/app/modules/dex/module';
-import { DexModuleConfig } from '../../../../../../src/app/modules/dex/types';
+import { DexModuleConfig, TokenMethod } from '../../../../../../src/app/modules/dex/types';
 import { TokenRegistry } from '../shared/token/token_registry';
 
 const sender = Buffer.from('0000000000000000000000000000000000000005', 'hex');
@@ -56,7 +56,7 @@ describe('DEX Pool arbitrage tests', () => {
 			let module: DexModule;
 			let config: DexModuleConfig;
 			let tokenMethod: TokenMethod;
-			let createMethodContext: () => MethodContext;
+			let createMethodContext: () => StateMachine.MethodContext;
 
 			const startingPrice = encodePriceSqrt(1, 1);
 			const startingTick = 0;
@@ -65,46 +65,24 @@ describe('DEX Pool arbitrage tests', () => {
 			const minTick = getMinTick(tickSpacing);
 			const maxTick = getMaxTick(tickSpacing);
 
-			for (const passiveLiquidity of [
-				expandTo18Decimals(1).div(100),
-				expandTo18Decimals(1),
-				expandTo18Decimals(10),
-				expandTo18Decimals(100),
-			]) {
+			for (const passiveLiquidity of [expandTo18Decimals(1).div(100), expandTo18Decimals(1), expandTo18Decimals(10), expandTo18Decimals(100)]) {
 				describe(`passive liquidity of ${formatTokenAmount(passiveLiquidity)}`, () => {
 					const arbTestFixture = async () => {
 						({ module, createMethodContext, tokenMethod, config } = await methodContextFixture());
-						const swapContext = methodSwapContext(
-							createMethodContext(),
-							sender,
-							parseInt(TEST_POOL_START_TIME, 10),
-						);
+						const swapContext = methodSwapContext(createMethodContext(), sender, parseInt(TEST_POOL_START_TIME, 10));
 						const fix = await poolFixture(swapContext, module);
 
 						const pool = await fix.createPool(feeAmount, tickSpacing);
 
-						await tokenMethod.transfer(
-							swapContext.context,
-							sender,
-							arbitrageur,
-							fix.token0,
-							Uint.from(2).pow(254).toBigInt(),
-						);
-						await tokenMethod.transfer(
-							swapContext.context,
-							sender,
-							arbitrageur,
-							fix.token1,
-							Uint.from(2).pow(254).toBigInt(),
-						);
+						await tokenMethod.transfer(swapContext.context, sender, arbitrageur, fix.token0, Uint.from(2).pow(254).toBigInt());
+						await tokenMethod.transfer(swapContext.context, sender, arbitrageur, fix.token1, Uint.from(2).pow(254).toBigInt());
 
-						const { swapExact0For1, swapToHigherPrice, swapToLowerPrice, swapExact1For0, mint } =
-							createPoolFunctions({
-								swapTarget: fix.swapTargetCallee,
-								token0: fix.token0,
-								token1: fix.token1,
-								pool,
-							});
+						const { swapExact0For1, swapToHigherPrice, swapToLowerPrice, swapExact1For0, mint } = createPoolFunctions({
+							swapTarget: fix.swapTargetCallee,
+							token0: fix.token0,
+							token1: fix.token1,
+							pool,
+						});
 
 						const tester = new SwapTest(swapContext, module);
 
@@ -112,10 +90,7 @@ describe('DEX Pool arbitrage tests', () => {
 						if (feeProtocol !== 0) {
 							pool.setConfig({
 								...config,
-								feeProtocol: FeeProtocol.calculateFeeProtocol(
-									feeProtocol.toString(),
-									feeProtocol.toString(),
-								),
+								feeProtocol: FeeProtocol.calculateFeeProtocol(feeProtocol.toString(), feeProtocol.toString()),
 							});
 						}
 						await mint(sender.toString('hex'), minTick, maxTick, passiveLiquidity);
@@ -148,19 +123,7 @@ describe('DEX Pool arbitrage tests', () => {
 					let tester: SwapTest;
 
 					beforeEach(async () => {
-						({
-							module,
-							createMethodContext,
-							tokenMethod,
-							config,
-							swapExact0For1,
-							pool,
-							mint,
-							swapToHigherPrice,
-							swapToLowerPrice,
-							swapExact1For0,
-							tester,
-						} = await arbTestFixture());
+						({ module, createMethodContext, tokenMethod, config, swapExact0For1, pool, mint, swapToHigherPrice, swapToLowerPrice, swapExact1For0, tester } = await arbTestFixture());
 					});
 
 					async function simulateSwap(
@@ -173,39 +136,24 @@ describe('DEX Pool arbitrage tests', () => {
 						amount0Delta: Uint;
 						amount1Delta: Uint;
 					}> {
-						const token0Before = await tokenMethod.getAvailableBalance(
-							createMethodContext(),
-							pool.address,
-							pool.token0,
-						);
-						const token1Before = await tokenMethod.getAvailableBalance(
-							createMethodContext(),
-							pool.address,
-							pool.token1,
-						);
+						const token0Before = await tokenMethod.getAvailableBalance(createMethodContext(), pool.address, pool.token0);
+						const token1Before = await tokenMethod.getAvailableBalance(createMethodContext(), pool.address, pool.token1);
 
 						const { amount0Delta, amount1Delta, nextSqrtRatio } = await tester.getSwapResult(
 							pool.createEmulator(),
 							zeroForOne,
 							amountSpecified,
-							sqrtPriceLimitX96 ??
-								(zeroForOne ? MIN_SQRT_RATIO.add(1).toString() : MAX_SQRT_RATIO.sub(1).toString()),
+							sqrtPriceLimitX96 ?? (zeroForOne ? MIN_SQRT_RATIO.add(1).toString() : MAX_SQRT_RATIO.sub(1).toString()),
 						);
 
 						const amount0DeltaN = Uint.from(amount0Delta);
 						const amount1DeltaN = Uint.from(amount1Delta);
 						const nextSqrtRatioN = Uint.from(nextSqrtRatio);
 
-						const executionPrice = zeroForOne
-							? encodePriceSqrt(amount1DeltaN, amount0DeltaN.mul(-1))
-							: encodePriceSqrt(amount1DeltaN.mul(-1), amount0DeltaN);
+						const executionPrice = zeroForOne ? encodePriceSqrt(amount1DeltaN, amount0DeltaN.mul(-1)) : encodePriceSqrt(amount1DeltaN.mul(-1), amount0DeltaN);
 
-						TokenRegistry.instance
-							.get(pool.token0.toString('hex'))
-							?.balance.set(pool.address.toString('hex'), token0Before);
-						TokenRegistry.instance
-							.get(pool.token1.toString('hex'))
-							?.balance.set(pool.address.toString('hex'), token1Before);
+						TokenRegistry.instance.get(pool.token0.toString('hex'))?.balance.set(pool.address.toString('hex'), token0Before);
+						TokenRegistry.instance.get(pool.token1.toString('hex'))?.balance.set(pool.address.toString('hex'), token1Before);
 
 						return {
 							executionPrice,
@@ -217,15 +165,13 @@ describe('DEX Pool arbitrage tests', () => {
 
 					for (const { zeroForOne, assumedTruePriceAfterSwap, inputAmount, description } of [
 						{
-							description:
-								'exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98',
+							description: 'exact input of 10e18 token0 with starting price of 1.0 and true price of 0.98',
 							zeroForOne: true,
 							inputAmount: expandTo18Decimals(10),
 							assumedTruePriceAfterSwap: encodePriceSqrt(98, 100),
 						},
 						{
-							description:
-								'exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01',
+							description: 'exact input of 10e18 token0 with starting price of 1.0 and true price of 1.01',
 							zeroForOne: true,
 							inputAmount: expandTo18Decimals(10),
 							assumedTruePriceAfterSwap: encodePriceSqrt(101, 100),
@@ -233,21 +179,12 @@ describe('DEX Pool arbitrage tests', () => {
 					]) {
 						describe(description, () => {
 							function valueToken1(arbBalance0: Uint, arbBalance1: Uint) {
-								return assumedTruePriceAfterSwap
-									.mul(assumedTruePriceAfterSwap)
-									.mul(arbBalance0)
-									.div(Uint.from(2).pow(192))
-									.add(arbBalance1);
+								return assumedTruePriceAfterSwap.mul(assumedTruePriceAfterSwap).mul(arbBalance0).div(Uint.from(2).pow(192)).add(arbBalance1);
 							}
 
 							it('not sandwiched', async () => {
-								const { executionPrice, amount1Delta, amount0Delta } = await simulateSwap(
-									zeroForOne,
-									inputAmount.toString(),
-								);
-								zeroForOne
-									? await swapExact0For1(inputAmount, sender)
-									: await swapExact1For0(inputAmount, sender);
+								const { executionPrice, amount1Delta, amount0Delta } = await simulateSwap(zeroForOne, inputAmount.toString());
+								zeroForOne ? await swapExact0For1(inputAmount, sender) : await swapExact1For0(inputAmount, sender);
 								expect({
 									executionPrice: formatPrice(executionPrice),
 									amount0Delta: formatTokenAmount(amount0Delta),
@@ -261,36 +198,18 @@ describe('DEX Pool arbitrage tests', () => {
 
 								const firstTickAboveMarginalPrice = zeroForOne
 									? Math.ceil(
-											Uint.from(
-												tickMath.getTickAtSqrtRatio(
-													applySqrtRatioBipsHundredthsDelta(
-														executionPrice,
-														parseInt(feeAmount, 10),
-													).toString(),
-												),
-											)
+											Uint.from(tickMath.getTickAtSqrtRatio(applySqrtRatioBipsHundredthsDelta(executionPrice, parseInt(feeAmount, 10)).toString()))
 												.div(tickSpacing)
 												.toNumber(),
 									  ) * parseInt(tickSpacing, 10)
 									: Math.floor(
-											Uint.from(
-												tickMath.getTickAtSqrtRatio(
-													applySqrtRatioBipsHundredthsDelta(
-														executionPrice,
-														-parseInt(feeAmount, 10),
-													).toString(),
-												),
-											)
+											Uint.from(tickMath.getTickAtSqrtRatio(applySqrtRatioBipsHundredthsDelta(executionPrice, -parseInt(feeAmount, 10)).toString()))
 												.div(tickSpacing)
 												.toNumber(),
 									  ) * parseInt(tickSpacing, 10);
-								const tickAfterFirstTickAboveMarginPrice = zeroForOne
-									? firstTickAboveMarginalPrice - parseInt(tickSpacing, 10)
-									: firstTickAboveMarginalPrice + parseInt(tickSpacing, 10);
+								const tickAfterFirstTickAboveMarginPrice = zeroForOne ? firstTickAboveMarginalPrice - parseInt(tickSpacing, 10) : firstTickAboveMarginalPrice + parseInt(tickSpacing, 10);
 
-								const priceSwapStart = tickMath.getSqrtRatioAtTick(
-									firstTickAboveMarginalPrice.toString(),
-								);
+								const priceSwapStart = tickMath.getSqrtRatioAtTick(firstTickAboveMarginalPrice.toString());
 
 								let arbBalance0 = Uint.from(0);
 								let arbBalance1 = Uint.from(0);
@@ -300,76 +219,35 @@ describe('DEX Pool arbitrage tests', () => {
 									amount0Delta: frontrunDelta0,
 									amount1Delta: frontrunDelta1,
 									executionPrice: frontrunExecutionPrice,
-								} = await simulateSwap(
-									zeroForOne,
-									Uint256.from(Uint256.MAX).div(2).toString(),
-									priceSwapStart,
-								);
+								} = await simulateSwap(zeroForOne, Uint256.from(Uint256.MAX).div(2).toString(), priceSwapStart);
 
 								arbBalance0 = arbBalance0.sub(frontrunDelta0);
 								arbBalance1 = arbBalance1.sub(frontrunDelta1);
-								zeroForOne
-									? await swapToLowerPrice(priceSwapStart, arbitrageur)
-									: await swapToHigherPrice(priceSwapStart, arbitrageur);
+								zeroForOne ? await swapToLowerPrice(priceSwapStart, arbitrageur) : await swapToHigherPrice(priceSwapStart, arbitrageur);
 
 								const profitToken1AfterFrontRun = valueToken1(arbBalance0, arbBalance1);
 
-								const tickLower = zeroForOne
-									? tickAfterFirstTickAboveMarginPrice
-									: firstTickAboveMarginalPrice;
-								const tickUpper = zeroForOne
-									? firstTickAboveMarginalPrice
-									: tickAfterFirstTickAboveMarginPrice;
+								const tickLower = zeroForOne ? tickAfterFirstTickAboveMarginPrice : firstTickAboveMarginalPrice;
+								const tickUpper = zeroForOne ? firstTickAboveMarginalPrice : tickAfterFirstTickAboveMarginPrice;
 
 								// deposit max liquidity at the tick
-								const [amount0Mint, amount1Mint] = await mint(
-									sender.toString('hex'),
-									tickLower,
-									tickUpper,
-									getMaxLiquidityPerTick(tickSpacing),
-								);
+								const [amount0Mint, amount1Mint] = await mint(sender.toString('hex'), tickLower, tickUpper, getMaxLiquidityPerTick(tickSpacing));
 								arbBalance0 = arbBalance0.sub(amount0Mint);
 								arbBalance1 = arbBalance1.sub(amount1Mint);
 
 								// execute the user's swap
-								const { executionPrice: executionPriceAfterFrontrun } = await simulateSwap(
-									zeroForOne,
-									inputAmount.toString(),
-								);
-								zeroForOne
-									? await swapExact0For1(inputAmount, sender)
-									: await swapExact1For0(inputAmount, sender);
+								const { executionPrice: executionPriceAfterFrontrun } = await simulateSwap(zeroForOne, inputAmount.toString());
+								zeroForOne ? await swapExact0For1(inputAmount, sender) : await swapExact1For0(inputAmount, sender);
 
 								// burn the arb's liquidity
-								const [amount0Burn, amount1Burn] = await pool
-									.createEmulator()
-									.burn(
-										tickLower.toString(),
-										tickUpper.toString(),
-										getMaxLiquidityPerTick(tickSpacing).toString(),
-									);
-								await pool.burn(
-									tickLower.toString(),
-									tickUpper.toString(),
-									getMaxLiquidityPerTick(tickSpacing).toString(),
-								);
+								const [amount0Burn, amount1Burn] = await pool.createEmulator().burn(tickLower.toString(), tickUpper.toString(), getMaxLiquidityPerTick(tickSpacing).toString());
+								await pool.burn(tickLower.toString(), tickUpper.toString(), getMaxLiquidityPerTick(tickSpacing).toString());
 								arbBalance0 = arbBalance0.add(amount0Burn);
 								arbBalance1 = arbBalance1.add(amount1Burn);
 
 								// add the fees as well
-								const [amount0CollectAndBurn, amount1CollectAndBurn] = await pool
-									.createEmulator()
-									.collect(
-										arbitrageur,
-										tickLower.toString(),
-										tickUpper.toString(),
-										Uint128.MAX,
-										Uint128.MAX,
-									);
-								const [amount0Collect, amount1Collect] = [
-									Uint128.from(amount0CollectAndBurn).sub(amount0Burn).toString(),
-									Uint128.from(amount1CollectAndBurn).sub(amount1Burn).toString(),
-								];
+								const [amount0CollectAndBurn, amount1CollectAndBurn] = await pool.createEmulator().collect(arbitrageur, tickLower.toString(), tickUpper.toString(), Uint128.MAX, Uint128.MAX);
+								const [amount0Collect, amount1Collect] = [Uint128.from(amount0CollectAndBurn).sub(amount0Burn).toString(), Uint128.from(amount1CollectAndBurn).sub(amount1Burn).toString()];
 								arbBalance0 = arbBalance0.add(amount0Collect);
 								arbBalance1 = arbBalance1.add(amount1Collect);
 
@@ -377,23 +255,13 @@ describe('DEX Pool arbitrage tests', () => {
 
 								// backrun the swap to true price, i.e. swap to the marginal price = true price
 								const priceToSwapTo = zeroForOne
-									? applySqrtRatioBipsHundredthsDelta(
-											assumedTruePriceAfterSwap,
-											-parseInt(feeAmount, 10),
-									  )
-									: applySqrtRatioBipsHundredthsDelta(
-											assumedTruePriceAfterSwap,
-											parseInt(feeAmount, 10),
-									  );
+									? applySqrtRatioBipsHundredthsDelta(assumedTruePriceAfterSwap, -parseInt(feeAmount, 10))
+									: applySqrtRatioBipsHundredthsDelta(assumedTruePriceAfterSwap, parseInt(feeAmount, 10));
 								const {
 									amount0Delta: backrunDelta0,
 									amount1Delta: backrunDelta1,
 									executionPrice: backrunExecutionPrice,
-								} = await simulateSwap(
-									!zeroForOne,
-									Uint256.from(Uint256.MAX).div(2).toString(),
-									priceToSwapTo.toString(),
-								);
+								} = await simulateSwap(!zeroForOne, Uint256.from(Uint256.MAX).div(2).toString(), priceToSwapTo.toString());
 								await swapToHigherPrice(priceToSwapTo, sender);
 								arbBalance0 = arbBalance0.sub(backrunDelta0);
 								arbBalance1 = arbBalance1.sub(backrunDelta1);
@@ -437,34 +305,20 @@ describe('DEX Pool arbitrage tests', () => {
 								let arbBalance0 = Uint.from(0);
 								let arbBalance1 = Uint.from(0);
 
-								zeroForOne
-									? await swapExact0For1(inputAmount, sender)
-									: await swapExact1For0(inputAmount, sender);
+								zeroForOne ? await swapExact0For1(inputAmount, sender) : await swapExact1For0(inputAmount, sender);
 
 								// swap to the marginal price = true price
 								const priceToSwapTo = zeroForOne
-									? applySqrtRatioBipsHundredthsDelta(
-											assumedTruePriceAfterSwap,
-											-parseInt(feeAmount, 10),
-									  )
-									: applySqrtRatioBipsHundredthsDelta(
-											assumedTruePriceAfterSwap,
-											parseInt(feeAmount, 10),
-									  );
+									? applySqrtRatioBipsHundredthsDelta(assumedTruePriceAfterSwap, -parseInt(feeAmount, 10))
+									: applySqrtRatioBipsHundredthsDelta(assumedTruePriceAfterSwap, parseInt(feeAmount, 10));
 
 								const {
 									amount0Delta: backrunDelta0,
 									amount1Delta: backrunDelta1,
 									executionPrice: backrunExecutionPrice,
-								} = await simulateSwap(
-									!zeroForOne,
-									Uint256.from(Uint256.MAX).div(2).toString(),
-									priceToSwapTo.toString(),
-								);
+								} = await simulateSwap(!zeroForOne, Uint256.from(Uint256.MAX).div(2).toString(), priceToSwapTo.toString());
 
-								zeroForOne
-									? await swapToHigherPrice(priceToSwapTo, sender)
-									: await swapToLowerPrice(priceToSwapTo, sender);
+								zeroForOne ? await swapToHigherPrice(priceToSwapTo, sender) : await swapToLowerPrice(priceToSwapTo, sender);
 
 								arbBalance0 = arbBalance0.sub(backrunDelta0);
 								arbBalance1 = arbBalance1.sub(backrunDelta1);

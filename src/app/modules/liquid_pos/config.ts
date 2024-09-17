@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { GenesisConfig, VerificationResult, VerifyStatus, utils } from 'klayr-sdk';
+import { StateMachine, Types, utils } from 'klayr-sdk';
 import { BaseGovernableConfig, GovernableConfigVerifyContext } from '../governance';
 import { defaultConfig } from './constants';
 import { configSchema } from './schema';
@@ -9,12 +9,12 @@ export class LiquidPosGovernableConfig extends BaseGovernableConfig<LiquidPosMod
 	public schema = configSchema;
 	public default = defaultConfig;
 
-	public beforeConfigInit(_genesisConfig: GenesisConfig): void {
+	public beforeConfigInit(_genesisConfig: Types.GenesisConfig): void {
 		this.default = utils.objects.mergeDeep({}, this.default, { tokenID: `${_genesisConfig.chainID}00000001` }) as LiquidPosModuleConfig;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: GovernableConfigVerifyContext<LiquidPosModuleConfig>): Promise<VerificationResult> {
+	public async verify(_context: GovernableConfigVerifyContext<LiquidPosModuleConfig>): Promise<StateMachine.VerificationResult> {
 		try {
 			const { tokenID, ratio } = _context.config;
 			const { chainID } = _context.genesisConfig;
@@ -28,10 +28,10 @@ export class LiquidPosGovernableConfig extends BaseGovernableConfig<LiquidPosMod
 			}
 		} catch (error) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 }

@@ -1,19 +1,19 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseStore, GenesisConfig, NamedRegistry } from 'klayr-sdk';
+import { Modules, Types } from 'klayr-sdk';
 import { DexModuleConfig, MutableContext, TokenSymbol } from '../types';
 import { tokenSymbolStoreSchema } from '../schema';
 import { TokenRegisteredEvent } from '../events/token_registered';
 import { getDEXToken, getMainchainToken } from '../utils';
 import { DexGovernableConfig } from '../config';
 
-export class TokenSymbolStore extends BaseStore<TokenSymbol> {
-	public constructor(moduleName: string, index: number, events: NamedRegistry) {
+export class TokenSymbolStore extends Modules.BaseStore<TokenSymbol> {
+	public constructor(moduleName: string, index: number, events: Modules.NamedRegistry) {
 		super(moduleName, index);
 		this.events = events;
 	}
 
-	public init(genesisConfig: GenesisConfig, dexConfig: DexGovernableConfig) {
+	public init(genesisConfig: Types.GenesisConfig, dexConfig: DexGovernableConfig) {
 		this.genesisConfig = genesisConfig;
 		this.dexConfig = dexConfig;
 		this.dependencyReady = true;
@@ -83,10 +83,10 @@ export class TokenSymbolStore extends BaseStore<TokenSymbol> {
 
 	public schema = tokenSymbolStoreSchema;
 
-	private readonly events: NamedRegistry;
+	private readonly events: Modules.NamedRegistry;
 
 	private dexConfig: DexGovernableConfig | undefined = undefined;
-	private genesisConfig: GenesisConfig | undefined = undefined;
+	private genesisConfig: Types.GenesisConfig | undefined = undefined;
 
 	private dependencyReady = false;
 }

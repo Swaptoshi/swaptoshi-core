@@ -1,11 +1,11 @@
 /* eslint-disable import/no-cycle */
-import { NamedRegistry, TransactionExecuteContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { PoolStore } from '../../stores/pool';
 import { PoolAddress } from '../../stores/library/periphery';
 import { mutableHookSwapContext } from '../../stores/context';
 import { isSwapByTransfer } from './isSwapByTransfer';
 
-export async function executeSwapByTransfer(this: { stores: NamedRegistry; events: NamedRegistry }, ctx: TransactionExecuteContext) {
+export async function executeSwapByTransfer(this: { stores: Modules.NamedRegistry; events: Modules.NamedRegistry }, ctx: StateMachine.TransactionExecuteContext) {
 	const check = await isSwapByTransfer.bind(this)(ctx, ctx.transaction);
 	if (check.status && check.payload) {
 		const poolStore = this.stores.get(PoolStore);

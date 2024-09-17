@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { BaseEndpoint, cryptography, ModuleEndpointContext, validator } from 'klayr-sdk';
+import { Modules, cryptography, Types, validator } from 'klayr-sdk';
 import { GovernableConfigRegistry } from './registry';
 import { GovernanceGovernableConfig } from './config';
 import { numberToBytes, serializer } from './utils';
@@ -29,20 +29,20 @@ import { BoostedAccountStore } from './stores/boosted_account';
 import { DelegatedVoteStore } from './stores/delegated_vote';
 import { NextAvailableProposalIdStore } from './stores/next_available_proposal_id';
 
-export class GovernanceEndpoint extends BaseEndpoint {
+export class GovernanceEndpoint extends Modules.BaseEndpoint {
 	private _governableConfig: GovernableConfigRegistry | undefined;
 
 	public init(governableConfig: GovernableConfigRegistry) {
 		this._governableConfig = governableConfig;
 	}
 
-	public async getConfig(_context: ModuleEndpointContext) {
+	public async getConfig(_context: Types.ModuleEndpointContext) {
 		const configStore = this.stores.get(GovernanceGovernableConfig);
 		const config = await configStore.getConfig(_context);
 		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
-	public async getRegisteredGovernableConfig(_context: ModuleEndpointContext) {
+	public async getRegisteredGovernableConfig(_context: Types.ModuleEndpointContext) {
 		if (!this._governableConfig) throw new Error('GovernanceEndpoint is not initialized');
 		const response = {
 			modules: [...this._governableConfig!.keys()],
@@ -50,7 +50,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(response, getRegisteredGovernableConfigEndpointResponseSchema);
 	}
 
-	public async getCastedVote(context: ModuleEndpointContext) {
+	public async getCastedVote(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetCastedVoteParams;
 		validator.validator.validate(getCastedVoteEndpointRequestSchema, params);
 		const store = this.stores.get(CastedVoteStore);
@@ -58,7 +58,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(data, getCastedVoteEndpointResponseSchema);
 	}
 
-	public async getBaseVoteScore(context: ModuleEndpointContext) {
+	public async getBaseVoteScore(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetBaseVoteScoreParams;
 		validator.validator.validate(getBaseVoteScoreEndpointRequestSchema, params);
 		const store = this.stores.get(VoteScoreStore);
@@ -66,7 +66,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer({ score: data }, getBaseVoteScoreEndpointResponseSchema);
 	}
 
-	public async getProposal(context: ModuleEndpointContext) {
+	public async getProposal(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetProposalParams;
 		validator.validator.validate(getProposalEndpointRequestSchema, params);
 		const store = this.stores.get(ProposalStore);
@@ -74,7 +74,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(data, getProposalEndpointResponseSchema);
 	}
 
-	public async getProposalQueue(context: ModuleEndpointContext) {
+	public async getProposalQueue(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetProposalQueueParams;
 		validator.validator.validate(getProposalQueueEndpointRequestSchema, params);
 		const store = this.stores.get(ProposalQueueStore);
@@ -82,7 +82,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(data, getProposalQueueEndpointResponseSchema);
 	}
 
-	public async getBoostedAccount(context: ModuleEndpointContext) {
+	public async getBoostedAccount(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetBoostedAccountParams;
 		validator.validator.validate(getBoostedAccountEndpointRequestSchema, params);
 		const store = this.stores.get(BoostedAccountStore);
@@ -90,7 +90,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(data, getBoostedAccountEndpointResponseSchema);
 	}
 
-	public async getDelegatedVote(context: ModuleEndpointContext) {
+	public async getDelegatedVote(context: Types.ModuleEndpointContext) {
 		const params = context.params as unknown as GetDelegatedVoteParams;
 		validator.validator.validate(getDelegatedVoteEndpointRequestSchema, params);
 		const store = this.stores.get(DelegatedVoteStore);
@@ -98,7 +98,7 @@ export class GovernanceEndpoint extends BaseEndpoint {
 		return serializer(data, getDelegatedVoteEndpointResponseSchema);
 	}
 
-	public async getNextAvailableProposalId(context: ModuleEndpointContext) {
+	public async getNextAvailableProposalId(context: Types.ModuleEndpointContext) {
 		const store = this.stores.get(NextAvailableProposalIdStore);
 		const data = await store.getOrDefault(context);
 		return serializer(data, getNextAvailableProposalIdEndpointResponseSchema);

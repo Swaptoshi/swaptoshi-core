@@ -1,27 +1,27 @@
 /* eslint-disable class-methods-use-this */
 
-import { BaseCommand, CommandVerifyContext, CommandExecuteContext, VerificationResult, VerifyStatus } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { increaseLiquidityCommandSchema } from '../schema';
 import { PositionManagerStore } from '../stores/position_manager';
 import { commandSwapContext } from '../stores/context';
 import { IncreaseLiquidityParams } from '../types';
 import { verifyIncreaseLiquidityParam } from '../utils';
 
-export class IncreaseLiquidityCommand extends BaseCommand {
+export class IncreaseLiquidityCommand extends Modules.BaseCommand {
 	// eslint-disable-next-line @typescript-eslint/require-await
-	public async verify(_context: CommandVerifyContext<IncreaseLiquidityParams>): Promise<VerificationResult> {
+	public async verify(_context: StateMachine.CommandVerifyContext<IncreaseLiquidityParams>): Promise<StateMachine.VerificationResult> {
 		try {
 			verifyIncreaseLiquidityParam(_context.params);
 		} catch (error: unknown) {
 			return {
-				status: VerifyStatus.FAIL,
+				status: StateMachine.VerifyStatus.FAIL,
 				error: new Error((error as { message: string }).message),
 			};
 		}
-		return { status: VerifyStatus.OK };
+		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async execute(_context: CommandExecuteContext<IncreaseLiquidityParams>): Promise<void> {
+	public async execute(_context: StateMachine.CommandExecuteContext<IncreaseLiquidityParams>): Promise<void> {
 		const positionManagerStore = this.stores.get(PositionManagerStore);
 		const context = commandSwapContext(_context);
 		const positionManager = await positionManagerStore.getMutablePositionManager(context, _context.params.poolAddress);

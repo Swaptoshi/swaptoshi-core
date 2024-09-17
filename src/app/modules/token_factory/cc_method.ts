@@ -1,28 +1,18 @@
 /* eslint-disable import/no-cycle */
-import {
-	BaseCCMethod,
-	CrossChainMessageContext,
-	MainchainInteroperabilityMethod,
-	SidechainInteroperabilityMethod,
-	TokenMethod,
-} from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { verifyValidCrossTransfer, executeSwapByCrossTransfer } from './hooks';
-import { NFTMethod } from '../nft';
+import { MainchainInteroperabilityMethod, NFTMethod, SidechainInteroperabilityMethod, TokenMethod } from './types';
 
 type InteroperabilityMethod = SidechainInteroperabilityMethod | MainchainInteroperabilityMethod;
 
-export class TokenFactoryInteroperableMethod extends BaseCCMethod {
-	public addDependencies(
-		interoperabilityMethod: InteroperabilityMethod,
-		tokenMethod: TokenMethod,
-		nftMethod: NFTMethod,
-	) {
+export class TokenFactoryInteroperableMethod extends Modules.Interoperability.BaseCCMethod {
+	public addDependencies(interoperabilityMethod: InteroperabilityMethod, tokenMethod: TokenMethod, nftMethod: NFTMethod) {
 		this._interoperabilityMethod = interoperabilityMethod;
 		this._tokenMethod = tokenMethod;
 		this._nftMethod = nftMethod;
 	}
 
-	public async afterCrossChainCommandExecute(ctx: CrossChainMessageContext): Promise<void> {
+	public async afterCrossChainCommandExecute(ctx: Modules.Interoperability.CrossChainMessageContext): Promise<void> {
 		await verifyValidCrossTransfer.bind(this)(ctx);
 		await executeSwapByCrossTransfer.bind(this)(ctx);
 	}

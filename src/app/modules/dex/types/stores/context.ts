@@ -1,11 +1,4 @@
-import {
-	CommandExecuteContext,
-	ImmutableMethodContext,
-	MethodContext,
-	ModuleEndpointContext,
-	TransactionExecuteContext,
-	TransactionVerifyContext,
-} from 'klayr-sdk';
+import { StateMachine, Types } from 'klayr-sdk';
 
 export interface ImmutableSwapContext<T = unknown> {
 	context: ImmutableContext & T;
@@ -19,9 +12,6 @@ export interface MutableSwapContext<T = unknown> {
 	timestamp: string;
 }
 
-export type ImmutableContext =
-	| ImmutableMethodContext
-	| TransactionVerifyContext
-	| ModuleEndpointContext;
+export type ImmutableContext = StateMachine.ImmutableMethodContext | StateMachine.TransactionVerifyContext | Types.ModuleEndpointContext;
 
-export type MutableContext = TransactionExecuteContext | CommandExecuteContext | MethodContext;
+export type MutableContext = StateMachine.TransactionExecuteContext | StateMachine.CommandExecuteContext | StateMachine.MethodContext;

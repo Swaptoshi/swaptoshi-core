@@ -1,4 +1,4 @@
-import { BaseStore, ImmutableStoreGetter, StoreGetter, db, utils } from 'klayr-sdk';
+import { Modules, db, utils } from 'klayr-sdk';
 import { CastedVoteStoreData } from '../types';
 import { castedVoteStoreSchema } from '../schema';
 
@@ -6,8 +6,8 @@ export const defaultVote = Object.freeze<CastedVoteStoreData>({
 	activeVote: [],
 });
 
-export class CastedVoteStore extends BaseStore<CastedVoteStoreData> {
-	public async getOrDefault(context: ImmutableStoreGetter, address: Buffer): Promise<CastedVoteStoreData> {
+export class CastedVoteStore extends Modules.BaseStore<CastedVoteStoreData> {
+	public async getOrDefault(context: Modules.ImmutableStoreGetter, address: Buffer): Promise<CastedVoteStoreData> {
 		try {
 			const castedVote = await this.get(context, address);
 			return castedVote;
@@ -20,11 +20,11 @@ export class CastedVoteStore extends BaseStore<CastedVoteStoreData> {
 		}
 	}
 
-	public async removeAllCastedVote(context: StoreGetter, address: Buffer) {
+	public async removeAllCastedVote(context: Modules.StoreGetter, address: Buffer) {
 		await this.set(context, address, defaultVote);
 	}
 
-	public async removeCastedVoteByProposalId(context: StoreGetter, address: Buffer, proposalId: number) {
+	public async removeCastedVoteByProposalId(context: Modules.StoreGetter, address: Buffer, proposalId: number) {
 		const castedVote = await this.getOrDefault(context, address);
 
 		const indexToRemove = castedVote.activeVote.findIndex(vote => vote.proposalId === proposalId);

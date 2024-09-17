@@ -1,7 +1,7 @@
-import { JSONObject } from 'klayr-sdk';
+import { Types } from 'klayr-sdk';
 import { GetProposalParams, TypedSchema, ProposalStoreData } from '../../types';
 
-export const getProposalEndpointResponseSchema: TypedSchema<JSONObject<ProposalStoreData>> = {
+export const getProposalEndpointResponseSchema: TypedSchema<Types.JSONObject<ProposalStoreData>> = {
 	$id: '/governance/endpoint/response/getProposal',
 	type: 'object',
 	required: ['title', 'summary', 'deposited', 'author', 'turnout', 'parameters', 'voteSummary', 'status', 'actions', 'attributes'],

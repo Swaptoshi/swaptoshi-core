@@ -2,18 +2,18 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { BaseModule, GenesisBlockExecuteContext, ModuleInitArgs, ModuleMetadata, TokenMethod, TransactionExecuteContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { LiquidPosEndpoint } from './endpoint';
 import { LiquidPosMethod } from './method';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
 import { LiquidStakingTokenBurnEvent } from './events/lst_burn';
 import { getConfigEndpointRequestSchema, getConfigEndpointResponseSchema, getLSTTokenIDEndpointRequestSchema, getLSTTokenIDEndpointResponseSchema } from './schema';
 import { InternalLiquidPosMethod } from './internal_method';
-import { LiquidPosModuleDependencies } from './types';
+import { LiquidPosModuleDependencies, TokenMethod } from './types';
 import { GovernanceMethod } from '../governance';
 import { LiquidPosGovernableConfig } from './config';
 
-export class LiquidPosModule extends BaseModule {
+export class LiquidPosModule extends Modules.BaseModule {
 	public _config = new LiquidPosGovernableConfig(this.name, 0);
 	public _tokenMethod: TokenMethod | undefined;
 	public _governanceMethod: GovernanceMethod | undefined;
@@ -39,7 +39,7 @@ export class LiquidPosModule extends BaseModule {
 		this.method.addDependencies(this._internalMethod);
 	}
 
-	public metadata(): ModuleMetadata {
+	public metadata(): Modules.ModuleMetadata {
 		return {
 			...this.baseMetadata(),
 			endpoints: [
@@ -58,7 +58,7 @@ export class LiquidPosModule extends BaseModule {
 		};
 	}
 
-	public async init(_args: ModuleInitArgs): Promise<void> {
+	public async init(_args: Modules.ModuleInitArgs): Promise<void> {
 		if (this._governanceMethod) {
 			this._governanceMethod.registerGovernableConfig(_args, this.name, this._config);
 		} else {
@@ -69,11 +69,11 @@ export class LiquidPosModule extends BaseModule {
 		this._internalMethod.checkDependencies();
 	}
 
-	public async afterCommandExecute(_context: TransactionExecuteContext): Promise<void> {
+	public async afterCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		await this._internalMethod.handleAfterCommandExecute(_context);
 	}
 
-	public async initGenesisState(context: GenesisBlockExecuteContext): Promise<void> {
+	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
 		await this._internalMethod.handleInitGenesisState(context);
 	}
 }

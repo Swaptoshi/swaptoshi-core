@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { increaseObservationCardinalityNextEventSchema } from '../schema';
 
 export interface IncreaseObservationCardinalityNextEventData {
@@ -7,6 +7,6 @@ export interface IncreaseObservationCardinalityNextEventData {
 	observationCardinalityNextNew: string;
 }
 
-export class IncreaseObservationCardinalityNextEvent extends BaseEvent<IncreaseObservationCardinalityNextEventData> {
+export class IncreaseObservationCardinalityNextEvent extends Modules.BaseEvent<IncreaseObservationCardinalityNextEventData> {
 	public schema = increaseObservationCardinalityNextEventSchema;
 }

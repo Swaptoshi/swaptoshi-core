@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { BaseEndpoint, ModuleEndpointContext, Transaction, TransactionVerifyContext, codec, cryptography, transactionSchema } from 'klayr-sdk';
+import { Modules, Transaction, StateMachine, codec, cryptography, transactionSchema, Types } from 'klayr-sdk';
 import { FeeConversionMethodRegistry } from './registry';
 import { DryRunTransactionResponse, FeeConversionVerifyStatus, RegisteredMethod, RegisteredMethodResponse } from './types';
 import { serializer } from './utils';
@@ -8,7 +8,7 @@ import { TOKEN_ID_LENGTH } from './constants';
 import { FeeConversionGovernableConfig } from './config';
 import { dryRunTransactionEndpointResponseSchema, getConfigEndpointResponseSchema, getRegisteredHandlersEndpointResponseSchema } from './schema';
 
-export class FeeConversionEndpoint extends BaseEndpoint {
+export class FeeConversionEndpoint extends Modules.BaseEndpoint {
 	protected _handler: FeeConversionMethodRegistry | undefined;
 	protected _internalMethod: InternalFeeConversionMethod | undefined;
 
@@ -20,13 +20,13 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 		this._internalMethod = internalMethod;
 	}
 
-	public async getConfig(_context: ModuleEndpointContext) {
+	public async getConfig(_context: Types.ModuleEndpointContext) {
 		const configStore = this.stores.get(FeeConversionGovernableConfig);
 		const config = await configStore.getConfig(_context);
 		return serializer(config, getConfigEndpointResponseSchema);
 	}
 
-	public getRegisteredHandlers(_context: ModuleEndpointContext): RegisteredMethodResponse {
+	public getRegisteredHandlers(_context: Types.ModuleEndpointContext): RegisteredMethodResponse {
 		if (!this._handler) throw new Error('FeeConversionEndpoint is not initialized');
 		const handlers: RegisteredMethod[] = [];
 		const keys = this._handler.keys();
@@ -38,7 +38,7 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 		return serializer({ handlers }, getRegisteredHandlersEndpointResponseSchema);
 	}
 
-	public async dryRunTransaction(_context: ModuleEndpointContext): Promise<DryRunTransactionResponse> {
+	public async dryRunTransaction(_context: Types.ModuleEndpointContext): Promise<DryRunTransactionResponse> {
 		if (!this._internalMethod) throw new Error('FeeConversionEndpoint is not initialized');
 
 		const result: DryRunTransactionResponse = {
@@ -50,7 +50,7 @@ export class FeeConversionEndpoint extends BaseEndpoint {
 		try {
 			const tx = codec.decode<Transaction>(transactionSchema, Buffer.from(_context.params.transaction as string, 'hex'));
 			const transaction = { ...tx, senderAddress: cryptography.address.getAddressFromPublicKey(tx.senderPublicKey) };
-			const context = { ..._context, transaction } as unknown as TransactionVerifyContext;
+			const context = { ..._context, transaction } as unknown as StateMachine.TransactionVerifyContext;
 			const handlerResult = await this._internalMethod.executeHandlers(context);
 
 			if (handlerResult.status === FeeConversionVerifyStatus.WITH_CONVERSION && handlerResult.payload) {

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseEvent } from 'klayr-sdk';
+import { Modules } from 'klayr-sdk';
 import { feeConvertedEventSchema } from '../schema';
 
 export interface FeeConvertedEventData {
@@ -9,6 +9,6 @@ export interface FeeConvertedEventData {
 	amount: string;
 }
 
-export class FeeConvertedEvent extends BaseEvent<FeeConvertedEventData> {
+export class FeeConvertedEvent extends Modules.BaseEvent<FeeConvertedEventData> {
 	public schema = feeConvertedEventSchema;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { BaseMethod, ImmutableMethodContext, MethodContext } from 'klayr-sdk';
+import { Modules, StateMachine } from 'klayr-sdk';
 import { ICOPool } from './stores/instances/ico_pool';
 import { Airdrop } from './stores/instances/airdrop';
 import { Factory } from './stores/instances/factory';
@@ -14,9 +14,9 @@ import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { ICORouter } from './stores/instances/ico_router';
 import { ICOQuoter } from './stores/instances/ico_quoter';
 
-export class TokenFactoryMethod extends BaseMethod {
+export class TokenFactoryMethod extends Modules.BaseMethod {
 	public async createICOPool(
-		context: MethodContext,
+		context: StateMachine.MethodContext,
 		senderAddress: Buffer,
 		timestamp: number,
 		height: number,
@@ -39,7 +39,7 @@ export class TokenFactoryMethod extends BaseMethod {
 	}
 
 	public async createAirdrop(
-		context: MethodContext,
+		context: StateMachine.MethodContext,
 		senderAddress: Buffer,
 		timestamp: number,
 		height: number,
@@ -58,7 +58,7 @@ export class TokenFactoryMethod extends BaseMethod {
 	}
 
 	public async createTokenFactory(
-		context: MethodContext,
+		context: StateMachine.MethodContext,
 		senderAddress: Buffer,
 		timestamp: number,
 		height: number,
@@ -74,43 +74,50 @@ export class TokenFactoryMethod extends BaseMethod {
 		});
 	}
 
-	public async getICOPoolInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
+	public async getICOPoolInstance(context: StateMachine.MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getMutableICOPool(_context, tokenIn, tokenOut);
 	}
 
-	public async getICORouterInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICORouter>> {
+	public async getICORouterInstance(context: StateMachine.MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICORouter>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getMutableICORouter(_context);
 	}
 
-	public async getICOQuoterInstance(context: ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICOQuoter>> {
+	public async getICOQuoterInstance(context: StateMachine.ImmutableMethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<ICOQuoter>> {
 		const icoStore = this.stores.get(ICOStore);
 		const _context = immutableMethodFactoryContext(context, senderAddress, timestamp, height);
 		return icoStore.getImmutableICOQuoter(_context);
 	}
 
-	public async getAirdropInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer, providerAddress: Buffer): Promise<StoreInstance<Airdrop>> {
+	public async getAirdropInstance(
+		context: StateMachine.MethodContext,
+		senderAddress: Buffer,
+		timestamp: number,
+		height: number,
+		tokenId: Buffer,
+		providerAddress: Buffer,
+	): Promise<StoreInstance<Airdrop>> {
 		const airdropStore = this.stores.get(AirdropStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return airdropStore.getMutableAirdrop(_context, tokenId, providerAddress);
 	}
 
-	public async getFactoryInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer): Promise<StoreInstance<Factory>> {
+	public async getFactoryInstance(context: StateMachine.MethodContext, senderAddress: Buffer, timestamp: number, height: number, tokenId: Buffer): Promise<StoreInstance<Factory>> {
 		const factoryStore = this.stores.get(FactoryStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return factoryStore.getMutableFactory(_context, tokenId);
 	}
 
-	public async getVestingUnlockInstance(context: MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<VestingUnlock>> {
+	public async getVestingUnlockInstance(context: StateMachine.MethodContext, senderAddress: Buffer, timestamp: number, height: number): Promise<StoreInstance<VestingUnlock>> {
 		const vestingUnlockStore = this.stores.get(VestingUnlockStore);
 		const _context = methodFactoryContext(context, senderAddress, timestamp, height);
 		return vestingUnlockStore.getInstance(_context);
 	}
 
-	public async getNextAvailableTokenId(context: MethodContext): Promise<NextAvailableTokenIdStoreData> {
+	public async getNextAvailableTokenId(context: StateMachine.MethodContext): Promise<NextAvailableTokenIdStoreData> {
 		const nextAvailableTokenIdStore = this.stores.get(NextAvailableTokenIdStore);
 		return nextAvailableTokenIdStore.getOrDefault(context);
 	}
