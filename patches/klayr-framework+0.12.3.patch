@@ -11,7 +11,7 @@ index 2a3ee8a..207625f 100644
      getRegisteredModules(): BaseModule[];
      getMetadata(): ModuleMetadataJSON[];
 diff --git a/node_modules/klayr-framework/dist-node/application.js b/node_modules/klayr-framework/dist-node/application.js
-index 4aece0e..516380a 100644
+index 99408ce..8738648 100644
 --- a/node_modules/klayr-framework/dist-node/application.js
 +++ b/node_modules/klayr-framework/dist-node/application.js
 @@ -133,6 +133,9 @@ class Application {
