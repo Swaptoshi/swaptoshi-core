@@ -37,7 +37,7 @@
 		"test:ci": "jest --passWithNoTests --coverage=true --coverage-reporters=json",
 		"version": "oclif readme --multi --dir=docs/commands && git add README.md docs",
 		"prepublishOnly": "npm ci && npm run lint && npm run build",
-		"postpublish": "mv npm-shrinkwrap.json package-lock.json && npm run format",
+		"postpublish": "mv npm-shrinkwrap.json package-lock.json && npm install && npm run format",
 		"postinstall": "patch-package"
 	},
 	"bin": {

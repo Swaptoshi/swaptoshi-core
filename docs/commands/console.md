@@ -27,4 +27,4 @@ EXAMPLES
   console --api-ipc=/path/to/server
 ```
 
-_See code: [dist/commands/console.ts](https://github.com/Swaptoshi/swaptoshi-core/blob/v1.0.0-alpha.1/dist/commands/console.ts)_
+_See code: [dist/commands/console.ts](https://github.com/Swaptoshi/swaptoshi-core/blob/v1.0.0-alpha.2/dist/commands/console.ts)_
