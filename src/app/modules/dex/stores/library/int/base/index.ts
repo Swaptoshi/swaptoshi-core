@@ -7,23 +7,13 @@ export type BigIntAble = BigIntBase | string | number | bigint;
 export type BigNumberish = BigIntBase | bigint | string | number;
 export const _constructorGuard = {};
 
-export function BigIntFactory<T extends BigIntBase>(
-	this: typeof BigIntBase,
-	value: BigIntAble,
-	signed: boolean,
-	bitSize: number,
-): T {
+export function BigIntFactory<T extends BigIntBase>(this: typeof BigIntBase, value: BigIntAble, signed: boolean, bitSize: number): T {
 	if (value instanceof this) {
 		return value as T;
 	}
 
 	if ((value as unknown as BigIntBase)._value !== undefined) {
-		return new this(
-			_constructorGuard,
-			(value as unknown as BigIntBase)._value,
-			signed,
-			bitSize,
-		) as T;
+		return new this(_constructorGuard, (value as unknown as BigIntBase)._value, signed, bitSize) as T;
 	}
 
 	return new this(_constructorGuard, BigInt(value), signed, bitSize) as T;
@@ -181,9 +171,7 @@ export class BigIntBase {
 	}
 
 	public toHexString(): string {
-		return this.isNegative()
-			? this._value.toString(16).replace('-', '-0x')
-			: `0x${this._value.toString(16)}`;
+		return this.isNegative() ? this._value.toString(16).replace('-', '-0x') : `0x${this._value.toString(16)}`;
 	}
 
 	public toJSON(): Record<'type' | 'hex', string> {

@@ -1,8 +1,6 @@
 import * as HexStrings from '../../../../../../../src/app/modules/dex/stores/library/periphery/hex_strings';
 
-const TO_HEX_STRING_NO_PREFIX_TESTS: { value: number; length: number; expected: string }[] = [
-	{ value: 525, length: 2, expected: '020d' },
-];
+const TO_HEX_STRING_NO_PREFIX_TESTS: { value: number; length: number; expected: string }[] = [{ value: 525, length: 2, expected: '020d' }];
 
 describe('toHexString', () => {
 	TO_HEX_STRING_NO_PREFIX_TESTS.forEach(test => {

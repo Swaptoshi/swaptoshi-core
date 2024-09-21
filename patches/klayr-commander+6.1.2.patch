@@ -1,0 +1,26 @@
+diff --git a/node_modules/klayr-commander/dist/bootstrapping/commands/config/create.js b/node_modules/klayr-commander/dist/bootstrapping/commands/config/create.js
+index acc9697..e2468e3 100644
+--- a/node_modules/klayr-commander/dist/bootstrapping/commands/config/create.js
++++ b/node_modules/klayr-commander/dist/bootstrapping/commands/config/create.js
+@@ -55,7 +55,7 @@ CreateCommand.flags = {
+     output: core_1.Flags.string({
+         char: 'o',
+         description: 'Directory where the config file is saved',
+-        default: process.cwd(),
++        // default: process.cwd(),
+     }),
+     label: core_1.Flags.string({
+         char: 'l',
+diff --git a/node_modules/klayr-commander/dist/utils/flags.js b/node_modules/klayr-commander/dist/utils/flags.js
+index 97bf022..f0b37f4 100644
+--- a/node_modules/klayr-commander/dist/utils/flags.js
++++ b/node_modules/klayr-commander/dist/utils/flags.js
+@@ -93,7 +93,7 @@ exports.flagsWithParser = {
+     passphrase: core_1.Flags.string(exports.flags.passphrase),
+     output: core_1.Flags.string({
+         ...exports.flags.output,
+-        default: process.cwd(),
++        // default: process.cwd(),
+     }),
+     password: core_1.Flags.string(exports.flags.password),
+     offline: core_1.Flags.boolean({

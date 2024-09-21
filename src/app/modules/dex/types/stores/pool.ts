@@ -1,11 +1,4 @@
-import {
-	Uint160String,
-	Int24String,
-	Uint16String,
-	Uint128String,
-	Uint256String,
-	Uint24String,
-} from '../../stores/library/int';
+import { Uint160String, Int24String, Uint16String, Uint128String, Uint256String, Uint24String } from '../../stores/library/int';
 
 export interface Slot0 {
 	sqrtPriceX96: Uint160String;

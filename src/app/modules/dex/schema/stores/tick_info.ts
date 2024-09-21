@@ -1,16 +1,7 @@
 export const tickInfoStoreSchema = {
 	$id: '/dex/store/tick_info',
 	type: 'object',
-	required: [
-		'liquidityGross',
-		'liquidityNet',
-		'feeGrowthOutside0X128',
-		'feeGrowthOutside1X128',
-		'tickCumulativeOutside',
-		'secondsPerLiquidityOutsideX128',
-		'secondsOutside',
-		'initialized',
-	],
+	required: ['liquidityGross', 'liquidityNet', 'feeGrowthOutside0X128', 'feeGrowthOutside1X128', 'tickCumulativeOutside', 'secondsPerLiquidityOutsideX128', 'secondsOutside', 'initialized'],
 	properties: {
 		liquidityGross: {
 			dataType: 'string',

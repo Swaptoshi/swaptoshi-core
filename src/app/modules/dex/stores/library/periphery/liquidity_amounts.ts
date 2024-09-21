@@ -7,60 +7,30 @@ export function toUint128(x: Uint256String): Uint128String {
 	return Uint128.from(x).toString();
 }
 
-export function getLiquidityForAmount0(
-	sqrtRatioAX96: Uint160String,
-	sqrtRatioBX96: Uint160String,
-	amount0: Uint256String,
-): Uint128String {
+export function getLiquidityForAmount0(sqrtRatioAX96: Uint160String, sqrtRatioBX96: Uint160String, amount0: Uint256String): Uint128String {
 	let _sqrtRatioAX96 = sqrtRatioAX96;
 	let _sqrtRatioBX96 = sqrtRatioBX96;
 	if (Uint160.from(sqrtRatioAX96).gt(sqrtRatioBX96)) {
 		_sqrtRatioAX96 = sqrtRatioBX96;
 		_sqrtRatioBX96 = sqrtRatioAX96;
 	}
-	const intermediate: Uint256String = FullMath.mulDiv(
-		_sqrtRatioAX96,
-		_sqrtRatioBX96,
-		FixedPoint96.Q96,
-	);
-	const liquidity = toUint128(
-		FullMath.mulDiv(
-			amount0,
-			intermediate,
-			Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(),
-		),
-	);
+	const intermediate: Uint256String = FullMath.mulDiv(_sqrtRatioAX96, _sqrtRatioBX96, FixedPoint96.Q96);
+	const liquidity = toUint128(FullMath.mulDiv(amount0, intermediate, Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString()));
 	return liquidity;
 }
 
-export function getLiquidityForAmount1(
-	sqrtRatioAX96: Uint160String,
-	sqrtRatioBX96: Uint160String,
-	amount1: Uint256String,
-): Uint128String {
+export function getLiquidityForAmount1(sqrtRatioAX96: Uint160String, sqrtRatioBX96: Uint160String, amount1: Uint256String): Uint128String {
 	let _sqrtRatioAX96 = sqrtRatioAX96;
 	let _sqrtRatioBX96 = sqrtRatioBX96;
 	if (Uint160.from(sqrtRatioAX96).gt(sqrtRatioBX96)) {
 		_sqrtRatioAX96 = sqrtRatioBX96;
 		_sqrtRatioBX96 = sqrtRatioAX96;
 	}
-	const liquidity = toUint128(
-		FullMath.mulDiv(
-			amount1,
-			FixedPoint96.Q96,
-			Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(),
-		),
-	);
+	const liquidity = toUint128(FullMath.mulDiv(amount1, FixedPoint96.Q96, Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString()));
 	return liquidity;
 }
 
-export function getLiquidityForAmounts(
-	sqrtRatioX96: Uint160String,
-	sqrtRatioAX96: Uint160String,
-	sqrtRatioBX96: Uint160String,
-	amount0: Uint256String,
-	amount1: Uint256String,
-): Uint128String {
+export function getLiquidityForAmounts(sqrtRatioX96: Uint160String, sqrtRatioAX96: Uint160String, sqrtRatioBX96: Uint160String, amount0: Uint256String, amount1: Uint256String): Uint128String {
 	let liquidity: Uint128String;
 	let _sqrtRatioAX96 = sqrtRatioAX96;
 	let _sqrtRatioBX96 = sqrtRatioBX96;
@@ -81,11 +51,7 @@ export function getLiquidityForAmounts(
 	return liquidity;
 }
 
-export function getAmount0ForLiquidity(
-	sqrtRatioAX96: Uint160String,
-	sqrtRatioBX96: Uint160String,
-	liquidity: Uint128String,
-): Uint256String {
+export function getAmount0ForLiquidity(sqrtRatioAX96: Uint160String, sqrtRatioBX96: Uint160String, liquidity: Uint128String): Uint256String {
 	let _sqrtRatioAX96 = sqrtRatioAX96;
 	let _sqrtRatioBX96 = sqrtRatioBX96;
 	if (Uint160.from(sqrtRatioAX96).gt(sqrtRatioBX96)) {
@@ -93,22 +59,12 @@ export function getAmount0ForLiquidity(
 		_sqrtRatioBX96 = sqrtRatioAX96;
 	}
 
-	return Uint256.from(
-		FullMath.mulDiv(
-			Uint256.from(liquidity).shl(FixedPoint96.RESOLUTION).toString(),
-			Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(),
-			_sqrtRatioBX96,
-		),
-	)
+	return Uint256.from(FullMath.mulDiv(Uint256.from(liquidity).shl(FixedPoint96.RESOLUTION).toString(), Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(), _sqrtRatioBX96))
 		.div(_sqrtRatioAX96)
 		.toString();
 }
 
-export function getAmount1ForLiquidity(
-	sqrtRatioAX96: Uint160String,
-	sqrtRatioBX96: Uint160String,
-	liquidity: Uint128String,
-): Uint256String {
+export function getAmount1ForLiquidity(sqrtRatioAX96: Uint160String, sqrtRatioBX96: Uint160String, liquidity: Uint128String): Uint256String {
 	let _sqrtRatioAX96 = sqrtRatioAX96;
 	let _sqrtRatioBX96 = sqrtRatioBX96;
 	if (Uint160.from(sqrtRatioAX96).gt(sqrtRatioBX96)) {
@@ -116,11 +72,7 @@ export function getAmount1ForLiquidity(
 		_sqrtRatioBX96 = sqrtRatioAX96;
 	}
 
-	return FullMath.mulDiv(
-		liquidity,
-		Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(),
-		FixedPoint96.Q96,
-	);
+	return FullMath.mulDiv(liquidity, Uint160.from(_sqrtRatioBX96).sub(_sqrtRatioAX96).toString(), FixedPoint96.Q96);
 }
 
 export function getAmountsForLiquidity(

@@ -15,10 +15,7 @@ export class NFTRegistry {
 
 		NFTRegistry.nextAvailableId.set(collectionId.toString('hex'), id + BigInt(1));
 
-		NFTRegistry.balanceOf.set(
-			address.toString('hex'),
-			(parseInt(NFTRegistry.balanceOf.get(address.toString('hex')) ?? '0', 10) + 1).toString(),
-		);
+		NFTRegistry.balanceOf.set(address.toString('hex'), (parseInt(NFTRegistry.balanceOf.get(address.toString('hex')) ?? '0', 10) + 1).toString());
 	}
 
 	public static reset() {

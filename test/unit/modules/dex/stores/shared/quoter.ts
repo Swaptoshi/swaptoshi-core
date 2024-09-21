@@ -7,25 +7,10 @@ const token0Decimal = 8;
 const token1Symbol = 'TKNB';
 const token1Decimal = 8;
 
-export async function createPool(
-	nft: NonfungiblePositionManager,
-	sender: Buffer,
-	token0: Buffer,
-	token1: Buffer,
-) {
-	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase())
-		[token0, token1] = [token1, token0];
+export async function createPool(nft: NonfungiblePositionManager, sender: Buffer, token0: Buffer, token1: Buffer) {
+	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase()) [token0, token1] = [token1, token0];
 
-	await nft.createAndInitializePoolIfNecessary(
-		token0,
-		token0Symbol,
-		token0Decimal,
-		token1,
-		token1Symbol,
-		token1Decimal,
-		FeeAmount.MEDIUM,
-		encodePriceSqrt(1, 1).toString(),
-	);
+	await nft.createAndInitializePoolIfNecessary(token0, token0Symbol, token0Decimal, token1, token1Symbol, token1Decimal, FeeAmount.MEDIUM, encodePriceSqrt(1, 1).toString());
 
 	const liquidityParams = {
 		token0,
@@ -44,25 +29,10 @@ export async function createPool(
 	return nft.mint(liquidityParams);
 }
 
-export async function createPoolWithMultiplePositions(
-	nft: NonfungiblePositionManager,
-	sender: Buffer,
-	token0: Buffer,
-	token1: Buffer,
-) {
-	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase())
-		[token0, token1] = [token1, token0];
+export async function createPoolWithMultiplePositions(nft: NonfungiblePositionManager, sender: Buffer, token0: Buffer, token1: Buffer) {
+	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase()) [token0, token1] = [token1, token0];
 
-	await nft.createAndInitializePoolIfNecessary(
-		token0,
-		token0Symbol,
-		token0Decimal,
-		token1,
-		token1Symbol,
-		token1Decimal,
-		FeeAmount.MEDIUM,
-		encodePriceSqrt(1, 1).toString(),
-	);
+	await nft.createAndInitializePoolIfNecessary(token0, token0Symbol, token0Decimal, token1, token1Symbol, token1Decimal, FeeAmount.MEDIUM, encodePriceSqrt(1, 1).toString());
 
 	const liquidityParams = {
 		token0,
@@ -113,25 +83,10 @@ export async function createPoolWithMultiplePositions(
 	return nft.mint(liquidityParams3);
 }
 
-export async function createPoolWithZeroTickInitialized(
-	nft: NonfungiblePositionManager,
-	sender: Buffer,
-	token0: Buffer,
-	token1: Buffer,
-) {
-	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase())
-		[token0, token1] = [token1, token0];
+export async function createPoolWithZeroTickInitialized(nft: NonfungiblePositionManager, sender: Buffer, token0: Buffer, token1: Buffer) {
+	if (token0.toString('hex').toLowerCase() > token1.toString('hex').toLowerCase()) [token0, token1] = [token1, token0];
 
-	await nft.createAndInitializePoolIfNecessary(
-		token0,
-		token0Symbol,
-		token0Decimal,
-		token1,
-		token1Symbol,
-		token1Decimal,
-		FeeAmount.MEDIUM,
-		encodePriceSqrt(1, 1).toString(),
-	);
+	await nft.createAndInitializePoolIfNecessary(token0, token0Symbol, token0Decimal, token1, token1Symbol, token1Decimal, FeeAmount.MEDIUM, encodePriceSqrt(1, 1).toString());
 
 	const liquidityParams = {
 		token0,

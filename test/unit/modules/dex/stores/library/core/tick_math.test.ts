@@ -35,37 +35,22 @@ describe('TickMath', () => {
 		});
 
 		it('max tick - 1', () => {
-			expect(tickMath.getSqrtRatioAtTick((MAX_TICK - 1).toString())).toBe(
-				'1461373636630004318706518188784493106690254656249',
-			);
+			expect(tickMath.getSqrtRatioAtTick((MAX_TICK - 1).toString())).toBe('1461373636630004318706518188784493106690254656249');
 		});
 
 		it('min tick ratio is less than js implementation', () => {
-			expect(
-				Uint256.from(tickMath.getSqrtRatioAtTick(MIN_TICK.toString())).lt(
-					encodePriceSqrt(1, Uint.from(2).pow(127)).toString(),
-				),
-			).toBe(true);
+			expect(Uint256.from(tickMath.getSqrtRatioAtTick(MIN_TICK.toString())).lt(encodePriceSqrt(1, Uint.from(2).pow(127)).toString())).toBe(true);
 		});
 
 		it('max tick ratio is greater than js implementation', () => {
-			expect(
-				Uint256.from(tickMath.getSqrtRatioAtTick(MAX_TICK.toString())).gt(
-					encodePriceSqrt(Uint.from(2).pow(127), 1).toString(),
-				),
-			).toBe(true);
+			expect(Uint256.from(tickMath.getSqrtRatioAtTick(MAX_TICK.toString())).gt(encodePriceSqrt(Uint.from(2).pow(127), 1).toString())).toBe(true);
 		});
 
 		it('max tick', () => {
-			expect(tickMath.getSqrtRatioAtTick(MAX_TICK.toString())).toBe(
-				'1461446703485210103287273052203988822378723970342',
-			);
+			expect(tickMath.getSqrtRatioAtTick(MAX_TICK.toString())).toBe('1461446703485210103287273052203988822378723970342');
 		});
 
-		for (const absTick of [
-			50, 100, 250, 500, 1_000, 2_500, 3_000, 4_000, 5_000, 50_000, 150_000, 250_000, 500_000,
-			738_203,
-		]) {
+		for (const absTick of [50, 100, 250, 500, 1_000, 2_500, 3_000, 4_000, 5_000, 50_000, 150_000, 250_000, 500_000, 738_203]) {
 			for (const tick of [-absTick, absTick]) {
 				describe(`tick ${tick}`, () => {
 					it('is at most off by 1/100th of a bips', () => {
@@ -115,14 +100,10 @@ describe('TickMath', () => {
 			expect(tickMath.getTickAtSqrtRatio('4295343490')).toBe((MIN_TICK + 1).toString());
 		});
 		it('ratio of max tick - 1', () => {
-			expect(tickMath.getTickAtSqrtRatio('1461373636630004318706518188784493106690254656249')).toBe(
-				(MAX_TICK - 1).toString(),
-			);
+			expect(tickMath.getTickAtSqrtRatio('1461373636630004318706518188784493106690254656249')).toBe((MAX_TICK - 1).toString());
 		});
 		it('ratio closest to max tick', () => {
-			expect(
-				tickMath.getTickAtSqrtRatio(Uint256.from(tickMath.MAX_SQRT_RATIO).sub(1).toString()),
-			).toBe((MAX_TICK - 1).toString());
+			expect(tickMath.getTickAtSqrtRatio(Uint256.from(tickMath.MAX_SQRT_RATIO).sub(1).toString())).toBe((MAX_TICK - 1).toString());
 		});
 
 		for (const ratio of [
@@ -142,11 +123,7 @@ describe('TickMath', () => {
 		]) {
 			describe(`ratio ${ratio.toString()}`, () => {
 				it('is at most off by 1', () => {
-					const jsResult = new Decimal(ratio.toString())
-						.div(new Decimal(2).pow(96))
-						.pow(2)
-						.log(1.0001)
-						.floor();
+					const jsResult = new Decimal(ratio.toString()).div(new Decimal(2).pow(96)).pow(2).log(1.0001).floor();
 					const result = tickMath.getTickAtSqrtRatio(ratio.toString());
 					const absDiff = new Decimal(result.toString()).sub(jsResult).abs();
 					expect(absDiff.toNumber()).toBeLessThanOrEqual(1);
@@ -154,9 +131,7 @@ describe('TickMath', () => {
 				it('ratio is between the tick and tick+1', () => {
 					const tick = tickMath.getTickAtSqrtRatio(ratio.toString());
 					const ratioOfTick = tickMath.getSqrtRatioAtTick(tick);
-					const ratioOfTickPlusOne = tickMath.getSqrtRatioAtTick(
-						Int256.from(tick).add(1).toString(),
-					);
+					const ratioOfTickPlusOne = tickMath.getSqrtRatioAtTick(Int256.from(tick).add(1).toString());
 					expect(Uint256.from(ratio.toString()).gte(ratioOfTick)).toBe(true);
 					expect(Uint256.from(ratio.toString()).lt(ratioOfTickPlusOne)).toBe(true);
 				});

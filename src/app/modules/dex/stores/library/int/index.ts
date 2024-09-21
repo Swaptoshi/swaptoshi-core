@@ -21,27 +21,7 @@ import Uint256, { Uint256String } from './unsigned/uint256';
 
 export { BigIntAble } from './base';
 
-export {
-	Int8,
-	Int16,
-	Int24,
-	Int56,
-	Int128,
-	Int256,
-	Uint,
-	Uint8,
-	Uint16,
-	Uint24,
-	Uint32,
-	Uint64,
-	Uint80,
-	Uint96,
-	Uint128,
-	Uint160,
-	Uint176,
-	Uint192,
-	Uint256,
-};
+export { Int8, Int16, Int24, Int56, Int128, Int256, Uint, Uint8, Uint16, Uint24, Uint32, Uint64, Uint80, Uint96, Uint128, Uint160, Uint176, Uint192, Uint256 };
 
 export {
 	Int8String,

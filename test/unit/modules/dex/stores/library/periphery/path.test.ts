@@ -4,11 +4,7 @@ import { decodePath, encodePath } from '../../shared/path';
 import { FeeAmount } from '../../shared/utilities';
 
 describe('Path', () => {
-	const tokenAddresses = [
-		Buffer.from('5fc8d32690cc91d4', 'hex'),
-		Buffer.from('cf7ed3acca5a467e', 'hex'),
-		Buffer.from('dc64a140aa3e9811', 'hex'),
-	];
+	const tokenAddresses = [Buffer.from('5fc8d32690cc91d4', 'hex'), Buffer.from('cf7ed3acca5a467e', 'hex'), Buffer.from('dc64a140aa3e9811', 'hex')];
 	const fees = [FeeAmount.MEDIUM, FeeAmount.MEDIUM];
 
 	it('js encoding works as expected', async () => {
@@ -19,17 +15,10 @@ describe('Path', () => {
 				.join('000bb8'),
 			'hex',
 		);
-		expect(encodePath(tokenAddresses.slice(0, 2), fees.slice(0, 1)).toString('hex')).toStrictEqual(
-			expectedPath.toString('hex'),
-		);
+		expect(encodePath(tokenAddresses.slice(0, 2), fees.slice(0, 1)).toString('hex')).toStrictEqual(expectedPath.toString('hex'));
 
-		expectedPath = Buffer.from(
-			tokenAddresses.map(tokenAddress => tokenAddress.toString('hex').toLowerCase()).join('000bb8'),
-			'hex',
-		);
-		expect(encodePath(tokenAddresses, fees).toString('hex')).toStrictEqual(
-			expectedPath.toString('hex'),
-		);
+		expectedPath = Buffer.from(tokenAddresses.map(tokenAddress => tokenAddress.toString('hex').toLowerCase()).join('000bb8'), 'hex');
+		expect(encodePath(tokenAddresses, fees).toString('hex')).toStrictEqual(expectedPath.toString('hex'));
 	});
 
 	it('js decoding works as expected', async () => {
@@ -50,11 +39,7 @@ describe('Path', () => {
 			expect(tokenB).toStrictEqual(tokenAddresses[1]);
 			expect(fee).toBe(FeeAmount.MEDIUM);
 
-			expect(path.decodeFirstPool(path.getFirstPool(encodedPath))).toStrictEqual([
-				tokenA,
-				tokenB,
-				fee,
-			]);
+			expect(path.decodeFirstPool(path.getFirstPool(encodedPath))).toStrictEqual([tokenA, tokenB, fee]);
 		});
 
 		const offset = 8 + 3;

@@ -83,12 +83,12 @@ Export to <FILE>.
 
 ```
 USAGE
-  $ swaptoshi-core keys export -o <value> [-d <value>] [--pretty]
+  $ swaptoshi-core keys export [-d <value>] [--pretty] [-o <value>]
 
 FLAGS
   -d, --data-path=<value>  Directory path to specify where node data is stored. Environment variable "KLAYR_DATA_PATH"
                            can also be used.
-  -o, --output=<value>     (required) The output directory. Default will set to current working directory.
+  -o, --output=<value>     The output directory. Default will set to current working directory.
   --pretty                 Prints JSON in pretty format rather than condensed.
 
 DESCRIPTION

@@ -18,9 +18,7 @@ describe('#formatSqrtRatioX96', () => {
 		expect(formatSqrtRatioX96(encodePriceSqrt(1_000_000, 3).toString())).toBe('333330');
 	});
 	it('1e-18 still prints 5 sig figs', () => {
-		expect(formatSqrtRatioX96(encodePriceSqrt(1, 1e18).toString(), 18, 18)).toBe(
-			'0.0000000000000000010000',
-		);
+		expect(formatSqrtRatioX96(encodePriceSqrt(1, 1e18).toString(), 18, 18)).toBe('0.0000000000000000010000');
 	});
 	it('accounts for decimal differences', () => {
 		expect(formatSqrtRatioX96(encodePriceSqrt(1e6, 1e18).toString(), 18, 6)).toBe('1.0000');

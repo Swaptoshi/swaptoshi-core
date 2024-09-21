@@ -11,10 +11,8 @@ import { encodePriceSqrt as encodePriceSqrtFun } from '../../../../../../src/app
 
 export const MaxUint128 = Uint.from(2).pow(128).sub(1);
 
-export const getMinTick = (tickSpacing: string) =>
-	Math.ceil(-887272 / parseInt(tickSpacing, 10)) * parseInt(tickSpacing, 10);
-export const getMaxTick = (tickSpacing: string) =>
-	Math.floor(887272 / parseInt(tickSpacing, 10)) * parseInt(tickSpacing, 10);
+export const getMinTick = (tickSpacing: string) => Math.ceil(-887272 / parseInt(tickSpacing, 10)) * parseInt(tickSpacing, 10);
+export const getMaxTick = (tickSpacing: string) => Math.floor(887272 / parseInt(tickSpacing, 10)) * parseInt(tickSpacing, 10);
 export const getMaxLiquidityPerTick = (tickSpacing: string) =>
 	Uint.from(2)
 		.pow(128)
@@ -54,28 +52,13 @@ export const encodePriceSqrt = encodePriceSqrtFun;
 // 	);
 // }
 
-export type SwapFunction = (
-	amount: BigIntAble,
-	to: Buffer,
-	sqrtPriceLimitX96?: BigIntAble,
-) => Promise<void>;
+export type SwapFunction = (amount: BigIntAble, to: Buffer, sqrtPriceLimitX96?: BigIntAble) => Promise<void>;
 
 export type SwapToPriceFunction = (sqrtPriceX96: BigIntAble, to: Buffer) => Promise<void>;
 
-export type FlashFunction = (
-	amount0: BigIntAble,
-	amount1: BigIntAble,
-	to: Buffer,
-	pay0?: BigIntAble,
-	pay1?: BigIntAble,
-) => Promise<void>;
+export type FlashFunction = (amount0: BigIntAble, amount1: BigIntAble, to: Buffer, pay0?: BigIntAble, pay1?: BigIntAble) => Promise<void>;
 
-export type MintFunction = (
-	recipient: string,
-	tickLower: BigIntAble,
-	tickUpper: BigIntAble,
-	liquidity: BigIntAble,
-) => Promise<[string, string]>;
+export type MintFunction = (recipient: string, tickLower: BigIntAble, tickUpper: BigIntAble, liquidity: BigIntAble) => Promise<[string, string]>;
 
 export interface PoolFunctions {
 	swapToLowerPrice: SwapToPriceFunction;
@@ -87,35 +70,13 @@ export interface PoolFunctions {
 	flash: FlashFunction;
 	mint: MintFunction;
 }
-export function createPoolFunctions({
-	swapTarget,
-	token0,
-	token1,
-	pool,
-}: {
-	swapTarget: TestCallee;
-	token0: Buffer;
-	token1: Buffer;
-	pool: DEXPool;
-}): PoolFunctions {
-	async function swapToSqrtPrice(
-		inputToken: Buffer,
-		targetPrice: BigIntAble,
-		to: Buffer,
-	): Promise<void> {
-		const method =
-			inputToken.compare(token0) === 0
-				? swapTarget.swapToLowerSqrtPrice.bind(swapTarget)
-				: swapTarget.swapToHigherSqrtPrice.bind(swapTarget);
+export function createPoolFunctions({ swapTarget, token0, token1, pool }: { swapTarget: TestCallee; token0: Buffer; token1: Buffer; pool: DEXPool }): PoolFunctions {
+	async function swapToSqrtPrice(inputToken: Buffer, targetPrice: BigIntAble, to: Buffer): Promise<void> {
+		const method = inputToken.compare(token0) === 0 ? swapTarget.swapToLowerSqrtPrice.bind(swapTarget) : swapTarget.swapToHigherSqrtPrice.bind(swapTarget);
 		return method(pool, targetPrice.toString(), to);
 	}
 
-	async function swap(
-		inputToken: Buffer,
-		[amountIn, amountOut]: [string, string],
-		to: Buffer,
-		sqrtPriceLimitX96?: BigIntAble,
-	): Promise<void> {
+	async function swap(inputToken: Buffer, [amountIn, amountOut]: [string, string], to: Buffer, sqrtPriceLimitX96?: BigIntAble): Promise<void> {
 		const exactInput = amountOut === '0';
 
 		const method =
@@ -164,22 +125,10 @@ export function createPoolFunctions({
 	};
 
 	const mint: MintFunction = async (recipient, tickLower, tickUpper, liquidity) => {
-		return swapTarget.mint.bind(swapTarget)(
-			pool,
-			Buffer.from(recipient, 'hex'),
-			tickLower.toString(),
-			tickUpper.toString(),
-			liquidity.toString(),
-		);
+		return swapTarget.mint.bind(swapTarget)(pool, Buffer.from(recipient, 'hex'), tickLower.toString(), tickUpper.toString(), liquidity.toString());
 	};
 
-	const flash: FlashFunction = async (
-		amount0,
-		amount1,
-		to,
-		pay0?: BigIntAble,
-		pay1?: BigIntAble,
-	) => {
+	const flash: FlashFunction = async (amount0, amount1, to, pay0?: BigIntAble, pay1?: BigIntAble) => {
 		const { fee } = pool;
 		if (typeof pay0 === 'undefined') {
 			pay0 = Uint.from(amount0)
@@ -195,14 +144,7 @@ export function createPoolFunctions({
 				.div(1e6)
 				.add(amount1);
 		}
-		return swapTarget.flash.bind(swapTarget)(
-			pool,
-			to,
-			amount0.toString(),
-			amount1.toString(),
-			pay0.toString(),
-			pay1.toString(),
-		);
+		return swapTarget.flash.bind(swapTarget)(pool, to, amount0.toString(), amount1.toString(), pay0.toString(), pay1.toString());
 	};
 
 	return {
@@ -222,16 +164,7 @@ export interface MultiPoolFunctions {
 	swapForExact1Multi: SwapFunction;
 }
 
-export function createMultiPoolFunctions({
-	swapTarget,
-	poolInput,
-	poolOutput,
-}: {
-	inputToken: Buffer;
-	swapTarget: TestRouter;
-	poolInput: DEXPool;
-	poolOutput: DEXPool;
-}): MultiPoolFunctions {
+export function createMultiPoolFunctions({ swapTarget, poolInput, poolOutput }: { inputToken: Buffer; swapTarget: TestRouter; poolInput: DEXPool; poolOutput: DEXPool }): MultiPoolFunctions {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async function swapForExact0Multi(amountOut: BigIntAble, to: Buffer): Promise<void> {
 		const method = swapTarget.swapForExact0Multi.bind(swapTarget);

@@ -16,11 +16,7 @@ const SENDER_ADDRESS = Buffer.from('0000000000000000000000000000000000000001', '
 
 const oracleFixture = async () => {
 	const { module, createMethodContext } = await methodContextFixture();
-	const context = methodSwapContext(
-		createMethodContext(),
-		SENDER_ADDRESS,
-		parseInt(TEST_POOL_START_TIME, 10),
-	);
+	const context = methodSwapContext(createMethodContext(), SENDER_ADDRESS, parseInt(TEST_POOL_START_TIME, 10));
 	const oracleTest = new OracleTest(context, module, POOL_ADDRESS);
 	return oracleTest;
 };
@@ -82,10 +78,7 @@ describe('Oracle', () => {
 		});
 		it('sets first slot timestamp only', async () => {
 			await oracle.initialize({ liquidity: '1', tick: '1', time: '1' });
-			const oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				blockTimestamp: '1',
@@ -108,10 +101,7 @@ describe('Oracle', () => {
 
 		it('does not touch the first slot', async () => {
 			await oracle.grow('5');
-			const oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				secondsPerLiquidityCumulativeX128: '0',
 				tickCumulative: '0',
@@ -131,10 +121,7 @@ describe('Oracle', () => {
 		it('adds data to all the slots', async () => {
 			await oracle.grow('5');
 			for (let i = 1; i < 5; i += 1) {
-				const oracleData = await oracle.observationStore.getOrDefault(
-					oracle.context.context,
-					oracle.observationStore.getKey(oracle.poolAddress, i.toString()),
-				);
+				const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, i.toString()));
 				checkObservationEquals(oracleData, {
 					secondsPerLiquidityCumulativeX128: '0',
 					tickCumulative: '0',
@@ -163,10 +150,7 @@ describe('Oracle', () => {
 		it('single element array gets overwritten', async () => {
 			await oracle.update({ advanceTimeBy: '1', tick: '2', liquidity: '5' });
 			expect(oracle.index).toBe('0');
-			let oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			let oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				secondsPerLiquidityCumulativeX128: '340282366920938463463374607431768211456',
@@ -175,10 +159,7 @@ describe('Oracle', () => {
 			});
 			await oracle.update({ advanceTimeBy: '5', tick: '-1', liquidity: '8' });
 			expect(oracle.index).toBe('0');
-			oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				secondsPerLiquidityCumulativeX128: '680564733841876926926749214863536422912',
@@ -187,10 +168,7 @@ describe('Oracle', () => {
 			});
 			await oracle.update({ advanceTimeBy: '3', tick: '2', liquidity: '3' });
 			expect(oracle.index).toBe('0');
-			oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				secondsPerLiquidityCumulativeX128: '808170621437228850725514692650449502208',
@@ -214,10 +192,7 @@ describe('Oracle', () => {
 			await oracle.update({ advanceTimeBy: '4', tick: '-5', liquidity: '9' });
 
 			expect(oracle.index).toBe('2');
-			const oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '1'),
-			);
+			const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '1'));
 			checkObservationEquals(oracleData, {
 				tickCumulative: '0',
 				secondsPerLiquidityCumulativeX128: '2041694201525630780780247644590609268736',
@@ -235,10 +210,7 @@ describe('Oracle', () => {
 			await oracle.update({ advanceTimeBy: '4', tick: '6', liquidity: '4' });
 			expect(oracle.cardinality).toBe('4');
 			expect(oracle.index).toBe('2');
-			const oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '2'),
-			);
+			const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '2'));
 			checkObservationEquals(oracleData, {
 				secondsPerLiquidityCumulativeX128: '1247702012043441032699040227249816775338',
 				tickCumulative: '20',
@@ -255,10 +227,7 @@ describe('Oracle', () => {
 
 			expect(oracle.index).toBe('0');
 
-			const oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '0'),
-			);
+			const oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '0'));
 			checkObservationEquals(oracleData, {
 				secondsPerLiquidityCumulativeX128: '2268549112806256423089164049545121409706',
 				tickCumulative: '14',
@@ -276,40 +245,28 @@ describe('Oracle', () => {
 
 			expect(oracle.index).toBe('3');
 
-			let oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '1'),
-			);
+			let oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '1'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				tickCumulative: '0',
 				secondsPerLiquidityCumulativeX128: '1020847100762815390390123822295304634368',
 				blockTimestamp: '3',
 			});
-			oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '2'),
-			);
+			oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '2'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				tickCumulative: '12',
 				secondsPerLiquidityCumulativeX128: '1701411834604692317316873037158841057280',
 				blockTimestamp: '7',
 			});
-			oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '3'),
-			);
+			oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '3'));
 			checkObservationEquals(oracleData, {
 				initialized: true,
 				tickCumulative: '-23',
 				secondsPerLiquidityCumulativeX128: '1984980473705474370203018543351981233493',
 				blockTimestamp: '12',
 			});
-			oracleData = await oracle.observationStore.getOrDefault(
-				oracle.context.context,
-				oracle.observationStore.getKey(oracle.poolAddress, '4'),
-			);
+			oracleData = await oracle.observationStore.getOrDefault(oracle.context.context, oracle.observationStore.getKey(oracle.poolAddress, '4'));
 			checkObservationEquals(oracleData, {
 				initialized: false,
 				tickCumulative: '0',
@@ -325,9 +282,7 @@ describe('Oracle', () => {
 			beforeEach(async () => (oracle = await oracleFixture()));
 
 			const observeSingle = async (secondsAgo: number) => {
-				const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([
-					secondsAgo.toString(),
-				]);
+				const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([secondsAgo.toString()]);
 				return {
 					secondsPerLiquidityCumulativeX128: secondsPerLiquidityCumulativeX128s[0],
 					tickCumulative: tickCumulatives[0],
@@ -582,14 +537,7 @@ describe('Oracle', () => {
 				});
 				oracle.advanceTime('5');
 
-				const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([
-					'0',
-					'3',
-					'8',
-					'13',
-					'15',
-					'18',
-				]);
+				const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe(['0', '3', '8', '13', '15', '18']);
 				expect(tickCumulatives).toHaveLength(6);
 				expect(tickCumulatives[0]).toBe('56');
 				expect(tickCumulatives[1]).toBe('38');
@@ -655,9 +603,7 @@ describe('Oracle', () => {
 				beforeEach(async () => (oracle = await oracleFixture5Observations()));
 
 				const observeSingle = async (secondsAgo: number) => {
-					const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([
-						secondsAgo.toString(),
-					]);
+					const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([secondsAgo.toString()]);
 					return {
 						secondsPerLiquidityCumulativeX128: secondsPerLiquidityCumulativeX128s[0],
 						tickCumulative: tickCumulatives[0],
@@ -672,40 +618,30 @@ describe('Oracle', () => {
 				it('latest observation same time as latest', async () => {
 					const { tickCumulative, secondsPerLiquidityCumulativeX128 } = await observeSingle(0);
 					expect(tickCumulative).toBe('-21');
-					expect(secondsPerLiquidityCumulativeX128).toBe(
-						'2104079302127802832415199655953100107502',
-					);
+					expect(secondsPerLiquidityCumulativeX128).toBe('2104079302127802832415199655953100107502');
 				});
 				it('latest observation 5 seconds after latest', async () => {
 					oracle.advanceTime('5');
 					const { tickCumulative, secondsPerLiquidityCumulativeX128 } = await observeSingle(5);
 					expect(tickCumulative).toBe('-21');
-					expect(secondsPerLiquidityCumulativeX128).toBe(
-						'2104079302127802832415199655953100107502',
-					);
+					expect(secondsPerLiquidityCumulativeX128).toBe('2104079302127802832415199655953100107502');
 				});
 				it('current observation 5 seconds after latest', async () => {
 					oracle.advanceTime('5');
 					const { tickCumulative, secondsPerLiquidityCumulativeX128 } = await observeSingle(0);
 					expect(tickCumulative).toBe('9');
-					expect(secondsPerLiquidityCumulativeX128).toBe(
-						'2347138135642758877746181518404363115684',
-					);
+					expect(secondsPerLiquidityCumulativeX128).toBe('2347138135642758877746181518404363115684');
 				});
 				it('between latest observation and just before latest observation at same time as latest', async () => {
 					const { tickCumulative, secondsPerLiquidityCumulativeX128 } = await observeSingle(3);
 					expect(tickCumulative).toBe('-33');
-					expect(secondsPerLiquidityCumulativeX128).toBe(
-						'1593655751746395137220137744805447790318',
-					);
+					expect(secondsPerLiquidityCumulativeX128).toBe('1593655751746395137220137744805447790318');
 				});
 				it('between latest observation and just before latest observation after the latest observation', async () => {
 					oracle.advanceTime('5');
 					const { tickCumulative, secondsPerLiquidityCumulativeX128 } = await observeSingle(8);
 					expect(tickCumulative).toBe('-33');
-					expect(secondsPerLiquidityCumulativeX128).toBe(
-						'1593655751746395137220137744805447790318',
-					);
+					expect(secondsPerLiquidityCumulativeX128).toBe('1593655751746395137220137744805447790318');
 				});
 				it('older than oldest reverts', async () => {
 					const func = async () => {
@@ -761,9 +697,7 @@ describe('Oracle', () => {
 				secondsPerLiquidityCumulativeX128: string;
 			},
 		) {
-			const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([
-				secondsAgo.toString(),
-			]);
+			const { tickCumulatives, secondsPerLiquidityCumulativeX128s } = await oracle.observe([secondsAgo.toString()]);
 			const check = {
 				tickCumulative: tickCumulatives[0].toString(),
 				secondsPerLiquidityCumulativeX128: secondsPerLiquidityCumulativeX128s[0].toString(),

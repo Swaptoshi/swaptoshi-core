@@ -1,17 +1,7 @@
 export const poolStoreSchema = {
 	$id: '/dex/store/pool',
 	type: 'object',
-	required: [
-		'token0',
-		'token1',
-		'fee',
-		'tickSpacing',
-		'maxLiquidityPerTick',
-		'feeGrowthGlobal0X128',
-		'feeGrowthGlobal1X128',
-		'liquidity',
-		'slot0',
-	],
+	required: ['token0', 'token1', 'fee', 'tickSpacing', 'maxLiquidityPerTick', 'feeGrowthGlobal0X128', 'feeGrowthGlobal1X128', 'liquidity', 'slot0'],
 	properties: {
 		token0: {
 			dataType: 'bytes',
@@ -48,13 +38,7 @@ export const poolStoreSchema = {
 		slot0: {
 			type: 'object',
 			fieldNumber: 9,
-			required: [
-				'sqrtPriceX96',
-				'tick',
-				'observationIndex',
-				'observationCardinality',
-				'observationCardinalityNext',
-			],
+			required: ['sqrtPriceX96', 'tick', 'observationIndex', 'observationCardinality', 'observationCardinalityNext'],
 			properties: {
 				sqrtPriceX96: {
 					dataType: 'string',

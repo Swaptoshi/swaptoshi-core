@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await */
 import * as sqrtPriceMath from '../../../../../../../src/app/modules/dex/stores/library/core/sqrt_price_math';
-import {
-	Uint,
-	Uint128,
-	Uint256,
-} from '../../../../../../../src/app/modules/dex/stores/library/int';
+import { Uint, Uint128, Uint256 } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { encodePriceSqrt } from '../../shared/utilities';
 
 function expandTo18Decimals(n: number): Uint {
@@ -15,24 +11,14 @@ describe('SqrtPriceMath', () => {
 	describe('#getNextSqrtPriceFromInput', () => {
 		it('fails if price is zero', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					'0',
-					'0',
-					expandTo18Decimals(1).div(10).toString(),
-					false,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromInput('0', '0', expandTo18Decimals(1).div(10).toString(), false);
 			};
 			await expect(func()).rejects.toThrow();
 		});
 
 		it('fails if liquidity is zero', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					'1',
-					'0',
-					expandTo18Decimals(1).div(10).toString(),
-					true,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromInput('1', '0', expandTo18Decimals(1).div(10).toString(), true);
 			};
 			await expect(func()).rejects.toThrow();
 		});
@@ -56,108 +42,55 @@ describe('SqrtPriceMath', () => {
 
 		it('returns input price if amount in is zero and zeroForOne = true', () => {
 			const price = encodePriceSqrt(1, 1).toString();
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					price,
-					expandTo18Decimals(1).div(10).toString(),
-					'0',
-					true,
-				),
-			).toBe(price);
+			expect(sqrtPriceMath.getNextSqrtPriceFromInput(price, expandTo18Decimals(1).div(10).toString(), '0', true)).toBe(price);
 		});
 
 		it('returns input price if amount in is zero and zeroForOne = false', () => {
 			const price = encodePriceSqrt(1, 1).toString();
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					price,
-					expandTo18Decimals(1).div(10).toString(),
-					'0',
-					false,
-				),
-			).toBe(price);
+			expect(sqrtPriceMath.getNextSqrtPriceFromInput(price, expandTo18Decimals(1).div(10).toString(), '0', false)).toBe(price);
 		});
 
 		it('returns the minimum price for max inputs', () => {
 			const sqrtP = Uint.from(2).pow(160).sub(1).toString();
 			const liquidity = Uint256.from(Uint128.MAX);
 			const maxAmountNoOverflow = Uint256.from(Uint256.MAX).sub(liquidity.shl(96).div(sqrtP));
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					sqrtP.toString(),
-					liquidity.toString(),
-					maxAmountNoOverflow.toString(),
-					true,
-				),
-			).toBe('1');
+			expect(sqrtPriceMath.getNextSqrtPriceFromInput(sqrtP.toString(), liquidity.toString(), maxAmountNoOverflow.toString(), true)).toBe('1');
 		});
 
 		it('input amount of 0.1 token1', () => {
-			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromInput(
-				encodePriceSqrt(1, 1).toString(),
-				expandTo18Decimals(1).toString(),
-				expandTo18Decimals(1).div(10).toString(),
-				false,
-			);
+			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromInput(encodePriceSqrt(1, 1).toString(), expandTo18Decimals(1).toString(), expandTo18Decimals(1).div(10).toString(), false);
 			expect(sqrtQ).toBe('87150978765690771352898345369');
 		});
 
 		it('input amount of 0.1 token0', () => {
-			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromInput(
-				encodePriceSqrt(1, 1).toString(),
-				expandTo18Decimals(1).toString(),
-				expandTo18Decimals(1).div(10).toString(),
-				true,
-			);
+			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromInput(encodePriceSqrt(1, 1).toString(), expandTo18Decimals(1).toString(), expandTo18Decimals(1).div(10).toString(), true);
 			expect(sqrtQ).toBe('72025602285694852357767227579');
 		});
 
 		it('amountIn > type(uint96).max and zeroForOne = true', () => {
 			expect(
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					encodePriceSqrt(1, 1).toString(),
-					expandTo18Decimals(10).toString(),
-					Uint.from(2).pow(100).toString(),
-					true,
-				),
+				sqrtPriceMath.getNextSqrtPriceFromInput(encodePriceSqrt(1, 1).toString(), expandTo18Decimals(10).toString(), Uint.from(2).pow(100).toString(), true),
 				// perfect answer:
 				// https://www.wolframalpha.com/input/?i=624999999995069620+-+%28%281e19+*+1+%2F+%281e19+%2B+2%5E100+*+1%29%29+*+2%5E96%29
 			).toBe('624999999995069620');
 		});
 
 		it('can return 1 with enough amountIn and zeroForOne = true', () => {
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromInput(
-					encodePriceSqrt(1, 1).toString(),
-					'1',
-					Uint256.from(Uint256.MAX).div(2).toString(),
-					true,
-				),
-			).toBe('1');
+			expect(sqrtPriceMath.getNextSqrtPriceFromInput(encodePriceSqrt(1, 1).toString(), '1', Uint256.from(Uint256.MAX).div(2).toString(), true)).toBe('1');
 		});
 	});
 
 	describe('#getNextSqrtPriceFromOutput', () => {
 		it('fails if price is zero', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					'0',
-					'0',
-					expandTo18Decimals(1).div(10).toString(),
-					false,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromOutput('0', '0', expandTo18Decimals(1).div(10).toString(), false);
 			};
 			await expect(func()).rejects.toThrow();
 		});
 
 		it('fails if liquidity is zero', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					'1',
-					'0',
-					expandTo18Decimals(1).div(10).toString(),
-					true,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromOutput('1', '0', expandTo18Decimals(1).div(10).toString(), true);
 			};
 			await expect(func()).rejects.toThrow();
 		});
@@ -222,68 +155,34 @@ describe('SqrtPriceMath', () => {
 
 		it('returns input price if amount in is zero and zeroForOne = true', () => {
 			const price = encodePriceSqrt(1, 1).toString();
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					price,
-					expandTo18Decimals(1).div(10).toString(),
-					'0',
-					true,
-				),
-			).toBe(price);
+			expect(sqrtPriceMath.getNextSqrtPriceFromOutput(price, expandTo18Decimals(1).div(10).toString(), '0', true)).toBe(price);
 		});
 
 		it('returns input price if amount in is zero and zeroForOne = false', () => {
 			const price = encodePriceSqrt(1, 1).toString();
-			expect(
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					price,
-					expandTo18Decimals(1).div(10).toString(),
-					'0',
-					false,
-				),
-			).toBe(price);
+			expect(sqrtPriceMath.getNextSqrtPriceFromOutput(price, expandTo18Decimals(1).div(10).toString(), '0', false)).toBe(price);
 		});
 
 		it('output amount of 0.1 token1 zeroforone false', () => {
-			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromOutput(
-				encodePriceSqrt(1, 1).toString(),
-				expandTo18Decimals(1).toString(),
-				expandTo18Decimals(1).div(10).toString(),
-				false,
-			);
+			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromOutput(encodePriceSqrt(1, 1).toString(), expandTo18Decimals(1).toString(), expandTo18Decimals(1).div(10).toString(), false);
 			expect(sqrtQ).toBe('88031291682515930659493278152');
 		});
 
 		it('output amount of 0.1 token1 zeroforone true', () => {
-			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromOutput(
-				encodePriceSqrt(1, 1).toString(),
-				expandTo18Decimals(1).toString(),
-				expandTo18Decimals(1).div(10).toString(),
-				true,
-			);
+			const sqrtQ = sqrtPriceMath.getNextSqrtPriceFromOutput(encodePriceSqrt(1, 1).toString(), expandTo18Decimals(1).toString(), expandTo18Decimals(1).div(10).toString(), true);
 			expect(sqrtQ).toBe('71305346262837903834189555302');
 		});
 
 		it('reverts if amountOut is impossible in zero for one direction', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					encodePriceSqrt(1, 1).toString(),
-					'1',
-					Uint256.MAX,
-					true,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromOutput(encodePriceSqrt(1, 1).toString(), '1', Uint256.MAX, true);
 			};
 			await expect(func()).rejects.toThrow();
 		});
 
 		it('reverts if amountOut is impossible in one for zero direction', async () => {
 			const func = async () => {
-				sqrtPriceMath.getNextSqrtPriceFromOutput(
-					encodePriceSqrt(1, 1).toString(),
-					'1',
-					Uint256.MAX,
-					false,
-				);
+				sqrtPriceMath.getNextSqrtPriceFromOutput(encodePriceSqrt(1, 1).toString(), '1', Uint256.MAX, false);
 			};
 			await expect(func()).rejects.toThrow();
 		});
@@ -291,41 +190,21 @@ describe('SqrtPriceMath', () => {
 
 	describe('#getAmount0DeltaHelper', () => {
 		it('returns 0 if liquidity is 0', () => {
-			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(2, 1).toString(),
-				'0',
-				true,
-			);
+			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(2, 1).toString(), '0', true);
 
 			expect(amount0).toBe('0');
 		});
 		it('returns 0 if prices are equal', () => {
-			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(1, 1).toString(),
-				'0',
-				true,
-			);
+			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(1, 1).toString(), '0', true);
 
 			expect(amount0).toBe('0');
 		});
 
 		it('returns 0.1 amount1 for price of 1 to 1.21', () => {
-			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(121, 100).toString(),
-				expandTo18Decimals(1).toString(),
-				true,
-			);
+			const amount0 = sqrtPriceMath.getAmount0DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(121, 100).toString(), expandTo18Decimals(1).toString(), true);
 			expect(amount0).toBe('90909090909090910');
 
-			const amount0RoundedDown = sqrtPriceMath.getAmount0DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(121, 100).toString(),
-				expandTo18Decimals(1).toString(),
-				false,
-			);
+			const amount0RoundedDown = sqrtPriceMath.getAmount0DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(121, 100).toString(), expandTo18Decimals(1).toString(), false);
 
 			expect(amount0RoundedDown).toBe(Uint256.from(amount0).sub(1).toString());
 		});
@@ -349,41 +228,21 @@ describe('SqrtPriceMath', () => {
 
 	describe('#getAmount1DeltaHelper', () => {
 		it('returns 0 if liquidity is 0', () => {
-			const amount1 = sqrtPriceMath.getAmount1DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(2, 1).toString(),
-				'0',
-				true,
-			);
+			const amount1 = sqrtPriceMath.getAmount1DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(2, 1).toString(), '0', true);
 
 			expect(amount1).toBe('0');
 		});
 		it('returns 0 if prices are equal', () => {
-			const amount1 = sqrtPriceMath.getAmount0DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(1, 1).toString(),
-				'0',
-				true,
-			);
+			const amount1 = sqrtPriceMath.getAmount0DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(1, 1).toString(), '0', true);
 
 			expect(amount1).toBe('0');
 		});
 
 		it('returns 0.1 amount1 for price of 1 to 1.21', () => {
-			const amount1 = sqrtPriceMath.getAmount1DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(121, 100).toString(),
-				expandTo18Decimals(1).toString(),
-				true,
-			);
+			const amount1 = sqrtPriceMath.getAmount1DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(121, 100).toString(), expandTo18Decimals(1).toString(), true);
 
 			expect(amount1).toBe('100000000000000000');
-			const amount1RoundedDown = sqrtPriceMath.getAmount1DeltaHelper(
-				encodePriceSqrt(1, 1).toString(),
-				encodePriceSqrt(121, 100).toString(),
-				expandTo18Decimals(1).toString(),
-				false,
-			);
+			const amount1RoundedDown = sqrtPriceMath.getAmount1DeltaHelper(encodePriceSqrt(1, 1).toString(), encodePriceSqrt(121, 100).toString(), expandTo18Decimals(1).toString(), false);
 
 			expect(amount1RoundedDown).toBe(Uint256.from(amount1).sub(1).toString());
 		});

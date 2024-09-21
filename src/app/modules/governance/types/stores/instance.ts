@@ -9,7 +9,4 @@ interface Named {
 
 export type Constructor = new (...args: any) => Named;
 
-export type StoreInstance<T> = Omit<
-	T,
-	'addMutableDependencies' | 'addImmutableDependencies' | 'addDependencies'
->;
+export type StoreInstance<T> = Omit<T, 'addMutableDependencies' | 'addImmutableDependencies' | 'addDependencies'>;

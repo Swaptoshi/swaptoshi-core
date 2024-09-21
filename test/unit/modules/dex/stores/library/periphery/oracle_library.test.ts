@@ -26,26 +26,12 @@ describe('OracleLibrary', () => {
 
 	const oracleTestFixture = async () => {
 		const { module, createMethodContext } = await methodContextFixture();
-		const context = methodSwapContext(
-			createMethodContext(),
-			sender,
-			parseInt(TEST_POOL_START_TIME, 10),
-		);
+		const context = methodSwapContext(createMethodContext(), sender, parseInt(TEST_POOL_START_TIME, 10));
 
-		const {
-			token0,
-			token1,
-			token2,
-			token3,
-			token0Decimal,
-			token0Symbol,
-			token1Decimal,
-			token1Symbol,
-			token2Decimal,
-			token2Symbol,
-			token3Decimal,
-			token3Symbol,
-		} = await completeFixture(context, module);
+		const { token0, token1, token2, token3, token0Decimal, token0Symbol, token1Decimal, token1Symbol, token2Decimal, token2Symbol, token3Decimal, token3Symbol } = await completeFixture(
+			context,
+			module,
+		);
 
 		const _tokens: [Tokens, Tokens, Tokens, Tokens] = [
 			{ address: token0, symbol: () => token0Symbol, decimals: () => token0Decimal },
@@ -54,9 +40,7 @@ describe('OracleLibrary', () => {
 			{ address: token3, symbol: () => token3Symbol, decimals: () => token3Decimal },
 		];
 
-		_tokens.sort((a, b) =>
-			a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1,
-		);
+		_tokens.sort((a, b) => (a.address.toString('hex').toLowerCase() < b.address.toString('hex').toLowerCase() ? -1 : 1));
 
 		return {
 			tokens: _tokens,
@@ -81,15 +65,10 @@ describe('OracleLibrary', () => {
 				tickCumulatives: [12, 12],
 				secondsPerLiqCumulatives,
 			});
-			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(
-				mockObservable,
-				period.toString(),
-			);
+			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(mockObservable, period.toString());
 
 			expect(arithmeticMeanTick).toBe('0');
-			expect(harmonicMeanLiquidity).toBe(
-				calculateHarmonicAvgLiq(period, secondsPerLiqCumulatives).toString(),
-			);
+			expect(harmonicMeanLiquidity).toBe(calculateHarmonicAvgLiq(period, secondsPerLiqCumulatives).toString());
 		});
 
 		it('correct rounding for .5 negative tick', async () => {
@@ -102,17 +81,12 @@ describe('OracleLibrary', () => {
 				secondsPerLiqCumulatives,
 			});
 
-			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(
-				mockObservable,
-				period.toString(),
-			);
+			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(mockObservable, period.toString());
 
 			// Always round to negative infinity
 			// In this case, we need to subtract one because integer division rounds to 0
 			expect(arithmeticMeanTick).toBe('-1');
-			expect(harmonicMeanLiquidity).toBe(
-				calculateHarmonicAvgLiq(period, secondsPerLiqCumulatives).toString(),
-			);
+			expect(harmonicMeanLiquidity).toBe(calculateHarmonicAvgLiq(period, secondsPerLiqCumulatives).toString());
 		});
 
 		it('correct output for liquidity overflow', async () => {
@@ -125,20 +99,14 @@ describe('OracleLibrary', () => {
 				secondsPerLiqCumulatives,
 			});
 
-			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(
-				mockObservable,
-				period.toString(),
-			);
+			const [arithmeticMeanTick, harmonicMeanLiquidity] = oracle.consult(mockObservable, period.toString());
 
 			expect(arithmeticMeanTick).toBe('0');
 			// Make sure liquidity doesn't overflow uint128
 			expect(harmonicMeanLiquidity).toBe(Uint.from(2).pow(128).sub(1).toString());
 		});
 
-		function calculateHarmonicAvgLiq(
-			period: number,
-			secondsPerLiqCumulatives: [BigIntAble, BigIntAble],
-		) {
+		function calculateHarmonicAvgLiq(period: number, secondsPerLiqCumulatives: [BigIntAble, BigIntAble]) {
 			const [secondsPerLiq0, secondsPerLiq1] = secondsPerLiqCumulatives.map(t => Uint.from(t));
 			const delta = secondsPerLiq1.sub(secondsPerLiq0);
 
@@ -146,15 +114,7 @@ describe('OracleLibrary', () => {
 			return maxUint160.mul(period).div(delta.shl(32)).toString();
 		}
 
-		function observableWith({
-			period,
-			tickCumulatives,
-			secondsPerLiqCumulatives,
-		}: {
-			period: number;
-			tickCumulatives: [BigIntAble, BigIntAble];
-			secondsPerLiqCumulatives: [BigIntAble, BigIntAble];
-		}) {
+		function observableWith({ period, tickCumulatives, secondsPerLiqCumulatives }: { period: number; tickCumulatives: [BigIntAble, BigIntAble]; secondsPerLiqCumulatives: [BigIntAble, BigIntAble] }) {
 			return new MockObservable(
 				[period.toString(), '0'],
 				tickCumulatives.map(t => t.toString()),
@@ -166,73 +126,35 @@ describe('OracleLibrary', () => {
 	describe('#getQuoteAtTick', () => {
 		// sanity check
 		it('token0: returns correct value when tick = 0', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				BN0.toString(),
-				expandTo18Decimals(1).toString(),
-				tokens[0].address,
-				tokens[1].address,
-			);
+			const quoteAmount = oracle.getQuoteAtTick(BN0.toString(), expandTo18Decimals(1).toString(), tokens[0].address, tokens[1].address);
 
 			expect(quoteAmount).toBe(expandTo18Decimals(1).toString());
 		});
 
 		// sanity check
 		it('token1: returns correct value when tick = 0', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				BN0.toString(),
-				expandTo18Decimals(1).toString(),
-				tokens[1].address,
-				tokens[0].address,
-			);
+			const quoteAmount = oracle.getQuoteAtTick(BN0.toString(), expandTo18Decimals(1).toString(), tokens[1].address, tokens[0].address);
 
 			expect(quoteAmount).toBe(expandTo18Decimals(1).toString());
 		});
 
 		it('token0: returns correct value when at min tick | 0 < sqrtRatioX96 <= type(uint128).max', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				Uint.from(-887272).toString(),
-				Uint.from(2).pow(128).sub(1).toString(),
-				tokens[0].address,
-				tokens[1].address,
-			);
+			const quoteAmount = oracle.getQuoteAtTick(Uint.from(-887272).toString(), Uint.from(2).pow(128).sub(1).toString(), tokens[0].address, tokens[1].address);
 			expect(quoteAmount).toBe(Uint.from('1').toString());
 		});
 
 		it('token1: returns correct value when at min tick | 0 < sqrtRatioX96 <= type(uint128).max', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				Uint.from(-887272).toString(),
-				Uint.from(2).pow(128).sub(1).toString(),
-				tokens[1].address,
-				tokens[0].address,
-			);
-			expect(quoteAmount).toBe(
-				Uint.from(
-					'115783384738768196242144082653949453838306988932806144552194799290216044976282',
-				).toString(),
-			);
+			const quoteAmount = oracle.getQuoteAtTick(Uint.from(-887272).toString(), Uint.from(2).pow(128).sub(1).toString(), tokens[1].address, tokens[0].address);
+			expect(quoteAmount).toBe(Uint.from('115783384738768196242144082653949453838306988932806144552194799290216044976282').toString());
 		});
 
 		it('token0: returns correct value when at max tick | sqrtRatioX96 > type(uint128).max', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				Uint.from(887272).toString(),
-				Uint.from(2).pow(128).sub(1).toString(),
-				tokens[0].address,
-				tokens[1].address,
-			);
-			expect(quoteAmount).toBe(
-				Uint.from(
-					'115783384785599357996676985412062652720342362943929506828539444553934033845703',
-				).toString(),
-			);
+			const quoteAmount = oracle.getQuoteAtTick(Uint.from(887272).toString(), Uint.from(2).pow(128).sub(1).toString(), tokens[0].address, tokens[1].address);
+			expect(quoteAmount).toBe(Uint.from('115783384785599357996676985412062652720342362943929506828539444553934033845703').toString());
 		});
 
 		it('token1: returns correct value when at max tick | sqrtRatioX96 > type(uint128).max', async () => {
-			const quoteAmount = oracle.getQuoteAtTick(
-				Uint.from(887272).toString(),
-				Uint.from(2).pow(128).sub(1).toString(),
-				tokens[1].address,
-				tokens[0].address,
-			);
+			const quoteAmount = oracle.getQuoteAtTick(Uint.from(887272).toString(), Uint.from(2).pow(128).sub(1).toString(), tokens[1].address, tokens[0].address);
 			expect(quoteAmount).toBe(Uint.from('1').toString());
 		});
 	});
@@ -245,12 +167,7 @@ describe('OracleLibrary', () => {
 		const emptyLiquidity = 0;
 
 		// helper function to run each test case identically
-		const runOldestObservationsTest = async (
-			blockTimestamps: number[],
-			initializeds: boolean[],
-			observationCardinality: number,
-			observationIndex: number,
-		) => {
+		const runOldestObservationsTest = async (blockTimestamps: number[], initializeds: boolean[], observationCardinality: number, observationIndex: number) => {
 			const mockObservations = new MockObservations(
 				blockTimestamps.map(t => t.toString()),
 				emptyTickCumulatives.map(t => t.toString()),
@@ -263,16 +180,12 @@ describe('OracleLibrary', () => {
 				emptyLiquidity.toString(),
 			);
 
-			const result = oracle.getOldestObservationSecondsAgo(
-				mockObservations,
-				blockTimestamp.toString(),
-			);
+			const result = oracle.getOldestObservationSecondsAgo(mockObservations, blockTimestamp.toString());
 
 			// calculate seconds ago
 			let secondsAgo = 0;
 			if (initializeds[(observationIndex + 1) % observationCardinality]) {
-				secondsAgo =
-					blockTimestamp - blockTimestamps[(observationIndex + 1) % observationCardinality];
+				secondsAgo = blockTimestamp - blockTimestamps[(observationIndex + 1) % observationCardinality];
 			} else {
 				secondsAgo = blockTimestamp - blockTimestamps[0];
 			}
@@ -292,12 +205,7 @@ describe('OracleLibrary', () => {
 			const observationIndex = 1;
 
 			// run test
-			await runOldestObservationsTest(
-				blockTimestamps,
-				initializeds,
-				observationCardinality,
-				observationIndex,
-			);
+			await runOldestObservationsTest(blockTimestamps, initializeds, observationCardinality, observationIndex);
 		});
 
 		it('loops to fetches the oldest timestamp from index 0', async () => {
@@ -308,12 +216,7 @@ describe('OracleLibrary', () => {
 			const observationIndex = 2;
 
 			// run test
-			await runOldestObservationsTest(
-				blockTimestamps,
-				initializeds,
-				observationCardinality,
-				observationIndex,
-			);
+			await runOldestObservationsTest(blockTimestamps, initializeds, observationCardinality, observationIndex);
 		});
 
 		it('fetches from index 0 if the next index is uninitialized', async () => {
@@ -324,12 +227,7 @@ describe('OracleLibrary', () => {
 			const observationIndex = 1;
 
 			// run test
-			await runOldestObservationsTest(
-				blockTimestamps,
-				initializeds,
-				observationCardinality,
-				observationIndex,
-			);
+			await runOldestObservationsTest(blockTimestamps, initializeds, observationCardinality, observationIndex);
 		});
 
 		it('reverts if the pool is not initialized', async () => {
@@ -349,10 +247,7 @@ describe('OracleLibrary', () => {
 				emptyLiquidity.toString(),
 			);
 
-			await expect(
-				(async () =>
-					oracle.getOldestObservationSecondsAgo(mockObservations, blockTimestamp.toString()))(),
-			).rejects.toThrow('NI');
+			await expect((async () => oracle.getOldestObservationSecondsAgo(mockObservations, blockTimestamp.toString()))()).rejects.toThrow('NI');
 		});
 
 		it('fetches the correct timestamp when the timestamps overflow', async () => {
@@ -364,12 +259,7 @@ describe('OracleLibrary', () => {
 			const observationIndex = 1;
 
 			// run test
-			await runOldestObservationsTest(
-				blockTimestamps,
-				initializeds,
-				observationCardinality,
-				observationIndex,
-			);
+			await runOldestObservationsTest(blockTimestamps, initializeds, observationCardinality, observationIndex);
 		});
 	});
 
@@ -412,10 +302,7 @@ describe('OracleLibrary', () => {
 
 			await deployMockObservationsContract();
 
-			await expect(
-				(async () =>
-					oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))(),
-			).rejects.toThrow('NEO');
+			await expect((async () => oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))()).rejects.toThrow('NEO');
 		});
 
 		it('returns the tick and liquidity in storage if the latest observation was in a previous block', async () => {
@@ -427,12 +314,7 @@ describe('OracleLibrary', () => {
 			// 0
 			// (1): 0 + ((3-1)*2**128)/5000
 			// (1) + ((4-3)*2**128)/7000
-			liquidityValues = [
-				BN0,
-				Uint.from('136112946768375385385349842972707284'),
-				Uint.from('184724713471366594451546215462959885'),
-				BN0,
-			];
+			liquidityValues = [BN0, Uint.from('136112946768375385385349842972707284'), Uint.from('184724713471366594451546215462959885'), BN0];
 			initializeds = [true, true, true, false];
 			observationCardinality = 3;
 			observationIndex = 2;
@@ -442,10 +324,7 @@ describe('OracleLibrary', () => {
 
 			await deployMockObservationsContract();
 
-			const result = oracle.getBlockStartingTickAndLiquidity(
-				mockObservations,
-				blockTimestamp.toString(),
-			);
+			const result = oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString());
 			expect(result[0]).toBe(slot0Tick.toString());
 			expect(result[1]).toBe(liquidity.toString());
 		});
@@ -465,10 +344,7 @@ describe('OracleLibrary', () => {
 			await deployMockObservationsContract();
 
 			mockObservations.observationsTimestamp(blockTimestamp.toString());
-			await expect(
-				(async () =>
-					oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))(),
-			).rejects.toThrow('NEO');
+			await expect((async () => oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))()).rejects.toThrow('NEO');
 		});
 
 		// lastObservationCurrentTimestamp behavior
@@ -486,10 +362,7 @@ describe('OracleLibrary', () => {
 			await deployMockObservationsContract();
 
 			mockObservations.observationsTimestamp(blockTimestamp.toString());
-			await expect(
-				(async () =>
-					oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))(),
-			).rejects.toThrow('ONI');
+			await expect((async () => oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString()))()).rejects.toThrow('ONI');
 		});
 
 		// lastObservationCurrentTimestamp behavior
@@ -506,12 +379,7 @@ describe('OracleLibrary', () => {
 			// (3): (2) + (1*2**128)/13212
 			// (1): prev + (2*2**128)/12345
 			// (2): (1) + (3*2**128)/10238
-			liquidityValues = [
-				Uint.from('965320616647837491242414421221086683'),
-				Uint.from('839853488995212437053956034406948254'),
-				Uint.from('939565063595995342933046073701273770'),
-				BN0,
-			];
+			liquidityValues = [Uint.from('965320616647837491242414421221086683'), Uint.from('839853488995212437053956034406948254'), Uint.from('939565063595995342933046073701273770'), BN0];
 			slot0Tick = 3;
 			lastObservationCurrentTimestamp = true;
 			liquidity = 10000;
@@ -519,13 +387,9 @@ describe('OracleLibrary', () => {
 			await deployMockObservationsContract();
 
 			mockObservations.observationsTimestamp(blockTimestamp.toString());
-			const result = oracle.getBlockStartingTickAndLiquidity(
-				mockObservations,
-				blockTimestamp.toString(),
-			);
+			const result = oracle.getBlockStartingTickAndLiquidity(mockObservations, blockTimestamp.toString());
 
-			const actualStartingTick =
-				(tickCumulatives[0] - tickCumulatives[2]) / (blockTimestamps[0] - blockTimestamps[2]);
+			const actualStartingTick = (tickCumulatives[0] - tickCumulatives[2]) / (blockTimestamps[0] - blockTimestamps[2]);
 			expect(result[0]).toBe(actualStartingTick.toString());
 
 			const actualStartingLiquidity = 13212; // see comments above
@@ -576,9 +440,7 @@ describe('OracleLibrary', () => {
 			const tokenAddresses = [tokens[0].address, tokens[2].address];
 			ticks = ['5', '5'];
 
-			await expect((async () => oracle.getChainedPrice(tokenAddresses, ticks))()).rejects.toThrow(
-				'DL',
-			);
+			await expect((async () => oracle.getChainedPrice(tokenAddresses, ticks))()).rejects.toThrow('DL');
 		});
 		it('add two positive ticks, sorted order', async () => {
 			const tokenAddresses = [tokens[0].address, tokens[1].address, tokens[2].address];

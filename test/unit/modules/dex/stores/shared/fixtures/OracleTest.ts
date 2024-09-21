@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/prefer-for-of */
 import { DexModule } from '../../../../../../../src/app/modules/dex/module';
 import * as oracle from '../../../../../../../src/app/modules/dex/stores/library/core/oracle';
-import {
-	Uint32String,
-	Int24String,
-	Uint128String,
-	Uint16String,
-	Uint16,
-	Uint32,
-} from '../../../../../../../src/app/modules/dex/stores/library/int';
+import { Uint32String, Int24String, Uint128String, Uint16String, Uint16, Uint32 } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { ObservationStore } from '../../../../../../../src/app/modules/dex/stores/observation';
 import { MutableSwapContext } from '../../../../../../../src/app/modules/dex/types';
 
@@ -38,12 +31,7 @@ export class OracleTest {
 		this.tick = params.tick;
 		this.liquidity = params.liquidity;
 
-		const [cardinality, cardinalityNext] = await oracle.initialize(
-			this.observationStore,
-			this.context.context,
-			this.poolAddress,
-			params.time,
-		);
+		const [cardinality, cardinalityNext] = await oracle.initialize(this.observationStore, this.context.context, this.poolAddress, params.time);
 		this.cardinality = cardinality;
 		this.cardinalityNext = cardinalityNext;
 	}
@@ -85,17 +73,7 @@ export class OracleTest {
 
 		for (let i = 0; i < params.length; i += 1) {
 			_time = Uint32.from(_time).add(params[i].advanceTimeBy).toString();
-			const [index, cardinality] = await oracle.write(
-				this.observationStore,
-				this.context.context,
-				this.poolAddress,
-				_index,
-				_time,
-				_tick,
-				_liquidity,
-				_cardinality,
-				_cardinalityNext,
-			);
+			const [index, cardinality] = await oracle.write(this.observationStore, this.context.context, this.poolAddress, _index, _time, _tick, _liquidity, _cardinality, _cardinalityNext);
 			_index = index;
 			_cardinality = cardinality;
 			_tick = params[i].tick;
@@ -110,27 +88,11 @@ export class OracleTest {
 	}
 
 	public async grow(_cardinalityNext: Uint16String) {
-		this.cardinalityNext = await oracle.grow(
-			this.observationStore,
-			this.context.context,
-			this.poolAddress,
-			this.cardinalityNext,
-			_cardinalityNext,
-		);
+		this.cardinalityNext = await oracle.grow(this.observationStore, this.context.context, this.poolAddress, this.cardinalityNext, _cardinalityNext);
 	}
 
 	public async observe(secondsAgos: Uint32String[]) {
-		return oracle.observe(
-			this.observationStore,
-			this.context.context,
-			this.poolAddress,
-			this.time,
-			secondsAgos,
-			this.tick,
-			this.index,
-			this.liquidity,
-			this.cardinality,
-		);
+		return oracle.observe(this.observationStore, this.context.context, this.poolAddress, this.time, secondsAgos, this.tick, this.index, this.liquidity, this.cardinality);
 	}
 
 	module: DexModule;

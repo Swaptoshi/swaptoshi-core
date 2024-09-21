@@ -40,41 +40,17 @@ describe('FullMath', () => {
 
 		it('accurate without phantom overflow', () => {
 			const result = Uint.from(Q128).div(3).toString();
-			expect(
-				fullMath
-					.mulDiv(
-						Q128.toString(),
-						Uint.from(50).mul(Q128).div(100).toString(),
-						Uint.from(150).mul(Q128).div(100).toString(),
-					)
-					.toString(),
-			).toBe(result);
+			expect(fullMath.mulDiv(Q128.toString(), Uint.from(50).mul(Q128).div(100).toString(), Uint.from(150).mul(Q128).div(100).toString()).toString()).toBe(result);
 		});
 
 		it('accurate with phantom overflow', () => {
 			const result = Uint.from(4375).mul(Q128).div(1000).toString();
-			expect(
-				fullMath
-					.mulDiv(
-						Q128.toString(),
-						Uint.from(35).mul(Q128).toString(),
-						Uint.from(8).mul(Q128).toString(),
-					)
-					.toString(),
-			).toBe(result);
+			expect(fullMath.mulDiv(Q128.toString(), Uint.from(35).mul(Q128).toString(), Uint.from(8).mul(Q128).toString()).toString()).toBe(result);
 		});
 
 		it('accurate with phantom overflow and repeating decimal', () => {
 			const result = Uint.from(1).mul(Q128).div(3).toString();
-			expect(
-				fullMath
-					.mulDiv(
-						Q128.toString(),
-						Uint.from(1000).mul(Q128).toString(),
-						Uint.from(3000).mul(Q128).toString(),
-					)
-					.toString(),
-			).toBe(result);
+			expect(fullMath.mulDiv(Q128.toString(), Uint.from(1000).mul(Q128).toString(), Uint.from(3000).mul(Q128).toString()).toString()).toBe(result);
 		});
 	});
 
@@ -99,22 +75,14 @@ describe('FullMath', () => {
 		});
 		it('reverts on overflow with all max inputs', async () => {
 			const func = async () => {
-				fullMath.mulDivRoundingUp(
-					Uint256.MAX,
-					Uint256.MAX,
-					Uint256.from(Uint256.MAX).sub(1).toString(),
-				);
+				fullMath.mulDivRoundingUp(Uint256.MAX, Uint256.MAX, Uint256.from(Uint256.MAX).sub(1).toString());
 			};
 			await expect(func()).rejects.toThrow();
 		});
 
 		it('reverts if mulDiv overflows 256 bits after rounding up', async () => {
 			const func = async () => {
-				fullMath.mulDivRoundingUp(
-					'535006138814359',
-					'432862656469423142931042426214547535783388063929571229938474969',
-					'2',
-				);
+				fullMath.mulDivRoundingUp('535006138814359', '432862656469423142931042426214547535783388063929571229938474969', '2');
 			};
 			await expect(func()).rejects.toThrow();
 		});
@@ -136,35 +104,17 @@ describe('FullMath', () => {
 
 		it('accurate without phantom overflow', () => {
 			const result = Uint.from(Q128).div(3).add(1).toString();
-			expect(
-				fullMath.mulDivRoundingUp(
-					Q128.toString(),
-					Uint.from(50).mul(Q128).div(100).toString(),
-					Uint.from(150).mul(Q128).div(100).toString(),
-				),
-			).toBe(result);
+			expect(fullMath.mulDivRoundingUp(Q128.toString(), Uint.from(50).mul(Q128).div(100).toString(), Uint.from(150).mul(Q128).div(100).toString())).toBe(result);
 		});
 
 		it('accurate with phantom overflow', () => {
 			const result = Uint.from(4375).mul(Q128).div(1000).toString();
-			expect(
-				fullMath.mulDivRoundingUp(
-					Q128.toString(),
-					Uint.from(35).mul(Q128).toString(),
-					Uint.from(8).mul(Q128).toString(),
-				),
-			).toBe(result);
+			expect(fullMath.mulDivRoundingUp(Q128.toString(), Uint.from(35).mul(Q128).toString(), Uint.from(8).mul(Q128).toString())).toBe(result);
 		});
 
 		it('accurate with phantom overflow and repeating decimal', () => {
 			const result = Uint.from(1).mul(Q128).div(3).add(1).toString();
-			expect(
-				fullMath.mulDivRoundingUp(
-					Q128.toString(),
-					Uint.from(1000).mul(Q128).toString(),
-					Uint.from(3000).mul(Q128).toString(),
-				),
-			).toBe(result);
+			expect(fullMath.mulDivRoundingUp(Q128.toString(), Uint.from(1000).mul(Q128).toString(), Uint.from(3000).mul(Q128).toString())).toBe(result);
 		});
 	});
 

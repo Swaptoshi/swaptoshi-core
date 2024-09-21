@@ -16,8 +16,7 @@ USAGE
 FLAGS
   -i, --chain-id=<value>  (required) ChainID in hex format. For example, Klayr mainnet mainchain is 00000000
   -l, --label=<value>     [default: beta-sdk-app] App Label
-  -o, --output=<value>    [default: /Users/aldhosutra/Documents/Swaptoshi/swaptoshi-core] Directory where the config
-                          file is saved
+  -o, --output=<value>    Directory where the config file is saved
 
 DESCRIPTION
   Creates network configuration file.

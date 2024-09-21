@@ -1,5 +1,5 @@
 {
-	"version": "1.0.0-alpha.0",
+	"version": "1.0.0-alpha.1",
 	"commands": {
 		"console": {
 			"id": "console",
@@ -100,8 +100,8 @@
 					"description": "Seed peers to initially connect to in format of comma separated \"ip:port\". IP can be DNS name or IPV4 format. Environment variable \"KLAYR_SEED_PEERS\" can also be used.",
 					"multiple": false
 				},
-				"enable-generator-plugin": {
-					"name": "enable-generator-plugin",
+				"enable-forger-plugin": {
+					"name": "enable-forger-plugin",
 					"type": "boolean",
 					"description": "Enable Forger Plugin. Environment variable \"KLAYR_ENABLE_FORGER_PLUGIN\" can also be used.",
 					"allowNo": false
@@ -285,14 +285,7 @@
 			"aliases": [],
 			"examples": ["config:create --output mydir", "config:create --output mydir --label beta-sdk-app", "config:create --output mydir --label beta-sdk-app --community-identifier sdk"],
 			"flags": {
-				"output": {
-					"name": "output",
-					"type": "option",
-					"char": "o",
-					"description": "Directory where the config file is saved",
-					"multiple": false,
-					"default": "/Users/aldhosutra/Documents/Swaptoshi/swaptoshi-core"
-				},
+				"output": { "name": "output", "type": "option", "char": "o", "description": "Directory where the config file is saved", "multiple": false },
 				"label": { "name": "label", "type": "option", "char": "l", "description": "App Label", "multiple": false, "default": "beta-sdk-app" },
 				"chain-id": { "name": "chain-id", "type": "option", "char": "i", "description": "ChainID in hex format. For example, Klayr mainnet mainchain is 00000000", "required": true, "multiple": false }
 			},
@@ -360,9 +353,9 @@
 			"pluginType": "core",
 			"aliases": [],
 			"examples": [
-				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz",
-				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data",
-				"generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data --password your_password"
+				"generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz",
+				"generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data",
+				"generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data --password your_password"
 			],
 			"flags": {
 				"data-path": {
@@ -392,10 +385,10 @@
 			"pluginType": "core",
 			"aliases": [],
 			"examples": [
-				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --use-status-value",
-				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10",
-				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data",
-				"generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data --password your_password"
+				"generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --use-status-value",
+				"generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10",
+				"generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data",
+				"generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data --password your_password"
 			],
 			"flags": {
 				"data-path": {
@@ -616,7 +609,7 @@
 					"multiple": false
 				},
 				"pretty": { "name": "pretty", "type": "boolean", "description": "Prints JSON in pretty format rather than condensed.", "allowNo": false },
-				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "required": true, "multiple": false }
+				"output": { "name": "output", "type": "option", "char": "o", "description": "The output directory. Default will set to current working directory.", "multiple": false }
 			},
 			"args": []
 		},

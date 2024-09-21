@@ -31,11 +31,7 @@ export function decodePoolAddress(poolAddress: Buffer): PoolKey {
 }
 
 export function computeAddress(key: PoolKey): Buffer {
-	if (
-		key.token0.compare(Buffer.alloc(8)) === 0 &&
-		key.token1.compare(Buffer.alloc(8)) === 0 &&
-		key.fee === '0'
-	) {
+	if (key.token0.compare(Buffer.alloc(8)) === 0 && key.token1.compare(Buffer.alloc(8)) === 0 && key.fee === '0') {
 		throw new Error('zero');
 	}
 

@@ -32,11 +32,11 @@ DESCRIPTION
   Disable block generation for given validator address.
 
 EXAMPLES
-  generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz
+  generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz
 
-  generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data
+  generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data
 
-  generator:disable kly ycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data --password your_password
+  generator:disable lskycz7hvr8yfu74bcwxy2n4mopfmjancgdvxq8xz --data-path ./data --password your_password
 ```
 
 ## `swaptoshi-core generator enable ADDRESS`
@@ -68,13 +68,13 @@ DESCRIPTION
   Enable block generation for given validator address.
 
 EXAMPLES
-  generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --use-status-value
+  generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --use-status-value
 
-  generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10
+  generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10
 
-  generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data
+  generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data
 
-  generator:enable kly 24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data --password your_password
+  generator:enable lsk24cd35u4jdq8szo3pnsqe5dsxwrnazyqqqg5eu --height=100 --max-height-generated=30 --max-height-prevoted=10 --data-path ./data --password your_password
 ```
 
 ## `swaptoshi-core generator export`

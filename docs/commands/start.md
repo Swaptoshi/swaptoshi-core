@@ -12,7 +12,7 @@ Start Blockchain Node.
 USAGE
   $ swaptoshi-core start [-d <value>] [-n <value>] [-c <value>] [--overwrite-config] [-p <value>]
     [--api-ipc] [--api-ws] [--api-http] [--api-port <value>] [--api-host <value>] [-l trace|debug|info|warn|error|fatal]
-    [--seed-peers <value>] [--enable-generator-plugin] [--monitor-plugin-port <value> --enable-monitor-plugin]
+    [--seed-peers <value>] [--enable-forger-plugin] [--monitor-plugin-port <value> --enable-monitor-plugin]
     [--monitor-plugin-whitelist <value> ] [--enable-report-misbehavior-plugin] [--faucet-plugin-port <value>
     --enable-faucet-plugin] [--dashboard-plugin-port <value> --enable-dashboard-plugin]
     [--enable-chain-connector-plugin]
@@ -46,7 +46,7 @@ FLAGS
                                       also be used.
   --enable-faucet-plugin              Enable Faucet Plugin. Environment variable "KLAYR_ENABLE_FAUCET_PLUGIN" can also
                                       be used.
-  --enable-generator-plugin           Enable Forger Plugin. Environment variable "KLAYR_ENABLE_FORGER_PLUGIN" can also
+  --enable-forger-plugin              Enable Forger Plugin. Environment variable "KLAYR_ENABLE_FORGER_PLUGIN" can also
                                       be used.
   --enable-monitor-plugin             Enable Monitor Plugin. Environment variable "KLAYR_ENABLE_MONITOR_PLUGIN" can also
                                       be used.
@@ -84,4 +84,4 @@ EXAMPLES
   start --network testnet --config ~/my_custom_config.json
 ```
 
-_See code: [dist/commands/start.ts](https://github.com/Swaptoshi/swaptoshi-core/blob/v1.0.0-alpha.0/dist/commands/start.ts)_
+_See code: [dist/commands/start.ts](https://github.com/Swaptoshi/swaptoshi-core/blob/v1.0.0-alpha.1/dist/commands/start.ts)_

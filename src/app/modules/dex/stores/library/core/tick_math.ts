@@ -13,9 +13,7 @@ export function getSqrtRatioAtTick(tick: Int24String): Uint160String {
 
 	if (absTick.gt(Uint256.from(MAX_TICK))) throw new Error('T');
 
-	let ratio: Uint256 = !absTick.and(0x1).eq(0)
-		? Uint256.from('0xfffcb933bd6fad37aa2d162d1a594001')
-		: Uint256.from('0x100000000000000000000000000000000');
+	let ratio: Uint256 = !absTick.and(0x1).eq(0) ? Uint256.from('0xfffcb933bd6fad37aa2d162d1a594001') : Uint256.from('0x100000000000000000000000000000000');
 	if (!absTick.and(0x2).eq(0)) ratio = ratio.mul('0xfff97272373d413259a46990580e213a').shr(128);
 	if (!absTick.and(0x4).eq(0)) ratio = ratio.mul('0xfff2e50f5f656932ef12357cf3c7fdcc').shr(128);
 	if (!absTick.and(0x8).eq(0)) ratio = ratio.mul('0xffe5caca7e10e4e61c3624eaa0941cd0').shr(128);
@@ -44,12 +42,7 @@ export function getSqrtRatioAtTick(tick: Int24String): Uint160String {
 }
 
 export function getTickAtSqrtRatio(sqrtPriceX96: Uint160String): Int24String {
-	if (
-		!(
-			Uint160.from(sqrtPriceX96).gte(MIN_SQRT_RATIO) &&
-			Uint160.from(sqrtPriceX96).lt(MAX_SQRT_RATIO)
-		)
-	) {
+	if (!(Uint160.from(sqrtPriceX96).gte(MIN_SQRT_RATIO) && Uint160.from(sqrtPriceX96).lt(MAX_SQRT_RATIO))) {
 		throw new Error('R');
 	}
 
@@ -167,11 +160,7 @@ export function getTickAtSqrtRatio(sqrtPriceX96: Uint160String): Int24String {
 	const tickLow = Int24.from(log_sqrt10001.sub('3402992956809132418596140100660247210').shr(128));
 	const tickHi = Int24.from(log_sqrt10001.add('291339464771989622907027621153398088495').shr(128));
 
-	const tick: Int24 = tickLow.eq(tickHi)
-		? tickLow
-		: Int256.from(getSqrtRatioAtTick(tickHi.toString())).lte(sqrtPriceX96)
-		? tickHi
-		: tickLow;
+	const tick: Int24 = tickLow.eq(tickHi) ? tickLow : Int256.from(getSqrtRatioAtTick(tickHi.toString())).lte(sqrtPriceX96) ? tickHi : tickLow;
 
 	return tick.toString();
 }

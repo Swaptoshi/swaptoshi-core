@@ -1,18 +1,7 @@
 export const dexNFTAttributeSchema = {
 	$id: '/dex/attribute/nft',
 	type: 'object',
-	required: [
-		'token0',
-		'token1',
-		'fee',
-		'tickLower',
-		'tickUpper',
-		'liquidity',
-		'feeGrowthInside0LastX128',
-		'feeGrowthInside1LastX128',
-		'tokensOwed0',
-		'tokensOwed1',
-	],
+	required: ['token0', 'token1', 'fee', 'tickLower', 'tickUpper', 'liquidity', 'feeGrowthInside0LastX128', 'feeGrowthInside1LastX128', 'tokensOwed0', 'tokensOwed1'],
 	properties: {
 		token0: {
 			dataType: 'bytes',

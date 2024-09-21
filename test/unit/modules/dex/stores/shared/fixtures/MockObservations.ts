@@ -1,14 +1,4 @@
-import {
-	Uint160String,
-	Int24String,
-	Uint16String,
-	Uint8String,
-	Uint128String,
-	Uint32String,
-	Int56String,
-	Uint256,
-	Uint32,
-} from '../../../../../../../src/app/modules/dex/stores/library/int';
+import { Uint160String, Int24String, Uint16String, Uint8String, Uint128String, Uint32String, Int56String, Uint256, Uint32 } from '../../../../../../../src/app/modules/dex/stores/library/int';
 import { Observation } from '../../../../../../../src/app/modules/dex/types';
 
 interface Slot0 {
@@ -66,28 +56,14 @@ export class MockObservations {
 
 	public observationsTimestamp(blockTimestamp: Uint32String) {
 		if (this.lastObservationCurrentTimestamp) {
-			const prevIndex = Uint256.from(
-				Uint256.from(this.slot0.observationIndex).add(this.slot0.observationCardinality).sub(1),
-			)
-				.mod(this.slot0.observationCardinality)
-				.toNumber();
+			const prevIndex = Uint256.from(Uint256.from(this.slot0.observationIndex).add(this.slot0.observationCardinality).sub(1)).mod(this.slot0.observationCardinality).toNumber();
 
 			this.observations[prevIndex].blockTimestamp = Uint32.from(blockTimestamp)
-				.sub(
-					Uint32.from(
-						this.observations[parseInt(this.slot0ObservationIndex, 10)].blockTimestamp,
-					).sub(this.observations[prevIndex].blockTimestamp),
-				)
+				.sub(Uint32.from(this.observations[parseInt(this.slot0ObservationIndex, 10)].blockTimestamp).sub(this.observations[prevIndex].blockTimestamp))
 				.toString();
 
-			this.observations[parseInt(this.slot0.observationIndex, 10)].blockTimestamp = Uint32.from(
-				blockTimestamp,
-			)
-				.sub(
-					Uint32.from(
-						this.observations[parseInt(this.slot0ObservationIndex, 10)].blockTimestamp,
-					).sub(this.observations[parseInt(this.slot0.observationIndex, 10)].blockTimestamp),
-				)
+			this.observations[parseInt(this.slot0.observationIndex, 10)].blockTimestamp = Uint32.from(blockTimestamp)
+				.sub(Uint32.from(this.observations[parseInt(this.slot0ObservationIndex, 10)].blockTimestamp).sub(this.observations[parseInt(this.slot0.observationIndex, 10)].blockTimestamp))
 				.toString();
 		}
 	}

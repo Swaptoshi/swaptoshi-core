@@ -1,13 +1,7 @@
 export const positionInfoStoreSchema = {
 	$id: '/dex/store/position_info',
 	type: 'object',
-	required: [
-		'liquidity',
-		'feeGrowthInside0LastX128',
-		'feeGrowthInside1LastX128',
-		'tokensOwed0',
-		'tokensOwed1',
-	],
+	required: ['liquidity', 'feeGrowthInside0LastX128', 'feeGrowthInside1LastX128', 'tokensOwed0', 'tokensOwed1'],
 	properties: {
 		liquidity: {
 			dataType: 'string',

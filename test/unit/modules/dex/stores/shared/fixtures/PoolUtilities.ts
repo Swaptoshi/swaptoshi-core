@@ -2,10 +2,7 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DEXPool } from '../../../../../../../src/app/modules/dex/stores/factory';
-import {
-	Uint256String,
-	Uint256,
-} from '../../../../../../../src/app/modules/dex/stores/library/int';
+import { Uint256String, Uint256 } from '../../../../../../../src/app/modules/dex/stores/library/int';
 
 export function setFeeGrowthGlobal0X128(this: DEXPool, _feeGrowthGlobal0X128: Uint256String) {
 	this.feeGrowthGlobal0X128 = _feeGrowthGlobal0X128;
@@ -17,8 +14,6 @@ export function setFeeGrowthGlobal1X128(this: DEXPool, _feeGrowthGlobal1X128: Ui
 
 export function advanceTime(this: DEXPool, by: Uint256String) {
 	if (this['mutableDependencyReady']) {
-		this['mutableContext']!.timestamp = Uint256.from(this['mutableContext']!.timestamp)
-			.add(by)
-			.toString();
+		this['mutableContext']!.timestamp = Uint256.from(this['mutableContext']!.timestamp).add(by).toString();
 	}
 }

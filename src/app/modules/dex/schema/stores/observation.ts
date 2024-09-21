@@ -1,12 +1,7 @@
 export const observationStoreSchema = {
 	$id: '/dex/store/observation',
 	type: 'object',
-	required: [
-		'blockTimestamp',
-		'tickCumulative',
-		'secondsPerLiquidityCumulativeX128',
-		'initialized',
-	],
+	required: ['blockTimestamp', 'tickCumulative', 'secondsPerLiquidityCumulativeX128', 'initialized'],
 	properties: {
 		blockTimestamp: {
 			dataType: 'string',

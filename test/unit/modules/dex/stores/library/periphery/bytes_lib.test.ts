@@ -1,9 +1,6 @@
 import * as BytesLib from '../../../../../../../src/app/modules/dex/stores/library/periphery/bytes_lib';
 
-const sliceBytes = Buffer.from(
-	'f00d0000000000000000000000000000000000000000000000000000000000feedf00d00000000000000000000000000000000000000000000000000000000feed',
-	'hex',
-);
+const sliceBytes = Buffer.from('f00d0000000000000000000000000000000000000000000000000000000000feedf00d00000000000000000000000000000000000000000000000000000000feed', 'hex');
 
 const SLICE_TESTS: { input?: Buffer; start: number; length: number; expected: string }[] = [
 	{ start: 0, length: 2, expected: 'f00d' },
@@ -23,25 +20,19 @@ const SLICE_TESTS: { input?: Buffer; start: number; length: number; expected: st
 	{
 		start: 0,
 		length: 64,
-		expected:
-			'f00d0000000000000000000000000000000000000000000000000000000000feedf00d00000000000000000000000000000000000000000000000000000000fe',
+		expected: 'f00d0000000000000000000000000000000000000000000000000000000000feedf00d00000000000000000000000000000000000000000000000000000000fe',
 	},
 ];
 
 describe('slice', () => {
 	SLICE_TESTS.forEach(test => {
 		it(`should return ${test.expected} for slice(${test.start}, ${test.length})`, () => {
-			expect(
-				BytesLib.slice(test.input ?? sliceBytes, test.start, test.length).toString('hex'),
-			).toStrictEqual(test.expected);
+			expect(BytesLib.slice(test.input ?? sliceBytes, test.start, test.length).toString('hex')).toStrictEqual(test.expected);
 		});
 	});
 });
 
-const toAddressBytes = Buffer.from(
-	'f00dfeed383Fa3B60f9B4AB7fBf6835d3c26C3765cD2B2e2f00dfeed',
-	'hex',
-);
+const toAddressBytes = Buffer.from('f00dfeed383Fa3B60f9B4AB7fBf6835d3c26C3765cD2B2e2f00dfeed', 'hex');
 
 const TO_ADDRESS_TESTS: { input?: Buffer; start: number; expected: string }[] = [
 	{ start: 4, expected: '383fa3b60f9b4ab7' },
@@ -54,9 +45,7 @@ const TO_ADDRESS_TESTS: { input?: Buffer; start: number; expected: string }[] = 
 describe('toAddress', () => {
 	TO_ADDRESS_TESTS.forEach(test => {
 		it(`should return ${test.expected} for toAddress(${test.start})`, () => {
-			expect(BytesLib.toAddress(test.input ?? toAddressBytes, test.start)).toStrictEqual(
-				Buffer.from(test.expected, 'hex'),
-			);
+			expect(BytesLib.toAddress(test.input ?? toAddressBytes, test.start)).toStrictEqual(Buffer.from(test.expected, 'hex'));
 		});
 	});
 });
@@ -72,9 +61,7 @@ const TO_UINT24_TESTS: { input?: Buffer; start: number; expected: number }[] = [
 describe('toUint24', () => {
 	TO_UINT24_TESTS.forEach(test => {
 		it(`should return ${test.expected} for toUint24(${test.start})`, () => {
-			expect(BytesLib.toUint24(test.input ?? toUint24Bytes, test.start)).toStrictEqual(
-				test.expected,
-			);
+			expect(BytesLib.toUint24(test.input ?? toUint24Bytes, test.start)).toStrictEqual(test.expected);
 		});
 	});
 });
