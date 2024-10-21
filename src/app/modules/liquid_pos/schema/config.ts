@@ -8,6 +8,7 @@ export const configSchema: GovernableConfigSchema<LiquidPosModuleConfig> = {
 	properties: {
 		tokenID: {
 			dataType: 'string',
+			governable: false,
 			fieldNumber: 1,
 		},
 		ratio: {
