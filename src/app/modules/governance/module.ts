@@ -198,6 +198,7 @@ export class GovernanceModule extends Modules.BaseModule {
 		this._feeMethod = dependencies.feeMethod;
 
 		this._internalMethod.addDependencies(dependencies.tokenMethod, this._governableConfig);
+		this._config.addDependencies(this._internalMethod);
 	}
 
 	public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
@@ -237,6 +238,7 @@ export class GovernanceModule extends Modules.BaseModule {
 	}
 
 	public async beforeTransactionsExecute(context: StateMachine.BlockExecuteContext): Promise<void> {
+		this._internalMethod.setModulePriorityStatus(context);
 		await this._internalMethod.initializeGovernableConfig(context);
 	}
 

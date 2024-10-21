@@ -26,6 +26,7 @@ interface BlockReward {
 export class GovernanceInternalMethod extends Modules.BaseMethod {
 	private _governableConfig: GovernableConfigRegistry | undefined;
 	private _tokenMethod: TokenMethod | undefined;
+	private _modulePriorityStatus: boolean | undefined;
 
 	public addDependencies(token: TokenMethod, governableConfig: GovernableConfigRegistry) {
 		this._tokenMethod = token;
@@ -152,6 +153,10 @@ export class GovernanceInternalMethod extends Modules.BaseMethod {
 
 		const taxedBlockRewardForTreasury = await this._getBlockRewardTaxBracket(context, dynamicReward, context.header.height);
 		if (taxedBlockRewardForTreasury > BigInt(0)) {
+			if (!this.isThisModulePriority()) {
+				throw new Error('Taxing block reward requires governance module to be registered before dynamicReward module');
+			}
+
 			await this._tokenMethod.mint(context, treasuryAddress, Buffer.from(config.treasuryReward.tokenID, 'hex'), taxedBlockRewardForTreasury);
 
 			this._setRewardContext(context, dynamicReward.blockReward - taxedBlockRewardForTreasury);
@@ -166,6 +171,30 @@ export class GovernanceInternalMethod extends Modules.BaseMethod {
 				[treasuryAddress, context.header.generatorAddress],
 			);
 		}
+	}
+
+	public setModulePriorityStatus(context: StateMachine.BlockExecuteContext) {
+		if (this._modulePriorityStatus === undefined) {
+			const blockReward = this._getDynamicBlockRewardContext(context);
+			const reduction = this._getDynamicBlockReductionContext(context);
+
+			// if context value is undefined, then dynamicReward module haven't set this yet,
+			// meaning governance module is executed before dynamicReward (priority is true)
+
+			if (blockReward !== undefined && reduction !== undefined) {
+				this._modulePriorityStatus = false;
+			} else {
+				this._modulePriorityStatus = true;
+			}
+		}
+	}
+
+	public isThisModulePriority(): boolean {
+		return !!this._modulePriorityStatus;
+	}
+
+	public isAppRunning(): boolean {
+		return this._modulePriorityStatus !== undefined;
 	}
 
 	private async _getMintBracket(context: StateMachine.BlockAfterExecuteContext, reward: BlockReward, height: number) {
@@ -186,9 +215,17 @@ export class GovernanceInternalMethod extends Modules.BaseMethod {
 		return parseBigintOrPercentage(bracket, reward.blockReward);
 	}
 
+	private _getDynamicBlockRewardContext(context: StateMachine.BlockExecuteContext): bigint {
+		return context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD) as bigint;
+	}
+
+	private _getDynamicBlockReductionContext(context: StateMachine.BlockExecuteContext): number {
+		return context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION) as number;
+	}
+
 	private _getRewardDeduction(context: StateMachine.BlockAfterExecuteContext): BlockReward {
-		const blockReward = context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REWARD) as bigint;
-		const reduction = context.contextStore.get(CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION) as number;
+		const blockReward = this._getDynamicBlockRewardContext(context);
+		const reduction = this._getDynamicBlockReductionContext(context);
 
 		return {
 			blockReward: blockReward === undefined ? BigInt(0) : blockReward,

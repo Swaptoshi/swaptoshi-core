@@ -6,10 +6,17 @@ import { DEFAULT_MAX_BOOST_DURATION_DAY, DEFAULT_VOTE_DURATION_DAY, defaultConfi
 import { configSchema } from './schema';
 import { GovernableConfigVerifyContext, GovernanceModuleConfig, QuorumMode } from './types';
 import { verifyNumberString, verifyPositiveNumber } from './utils';
+import { GovernanceInternalMethod } from './internal_method';
 
 export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceModuleConfig> {
 	public schema = configSchema;
 	public default = defaultConfig;
+
+	private _internalMethod: GovernanceInternalMethod | undefined;
+
+	public addDependencies(internalMethod: GovernanceInternalMethod) {
+		this._internalMethod = internalMethod;
+	}
 
 	public beforeConfigInit(genesisConfig: Types.GenesisConfig): void {
 		this.default = utils.objects.mergeDeep({}, this.default, {
@@ -78,6 +85,17 @@ export class GovernanceGovernableConfig extends BaseGovernableConfig<GovernanceM
 
 		for (const blockRewardTaxBracket of config.treasuryReward.blockRewardTaxBracket) {
 			if (!this._isValidNonNegativeIntegerOrPercentage(blockRewardTaxBracket)) throw new Error(`Invalid blockRewardTaxBracket: ${blockRewardTaxBracket}`);
+		}
+
+		if (config.treasuryReward.blockRewardTaxBracket.length > 0) {
+			if (!this._internalMethod) throw new Error('GovernanceGovernableConfig dependencies not configured');
+
+			// if blockchain App isn't running yet (e.g on initGenesisState hook),
+			// then module priority check can't be done correctly
+			// hence, it will be skipped
+
+			if (this._internalMethod.isAppRunning() && !this._internalMethod.isThisModulePriority())
+				throw new Error(`Modifying blockRewardTaxBracket requires governance module to be registered before dynamicReward module`);
 		}
 	}
 
