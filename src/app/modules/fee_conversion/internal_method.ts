@@ -51,7 +51,10 @@ export class InternalFeeConversionMethod extends Modules.BaseMethod {
 			}
 		} else {
 			const balance = await this._tokenMethod!.getAvailableBalance(context, context.transaction.senderAddress, this._feeMethod!.getFeeTokenID());
-			if (context.transaction.fee > balance) {
+			const config = this._feeMethod!.getConfig();
+
+			// eslint-disable-next-line dot-notation
+			if (config['dangerouslySkipBalanceVerification'] && context.transaction.fee > balance) {
 				throw new Error(`Insufficient balance.`);
 			}
 		}

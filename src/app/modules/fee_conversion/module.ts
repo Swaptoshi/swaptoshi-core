@@ -78,6 +78,8 @@ export class FeeConversionModule extends Modules.BaseModule {
 	}
 
 	public addDependencies(dependencies: FeeConversionModuleDependencies) {
+		if (dependencies.feeMethod.getConfig === undefined) throw new Error("feeMethod doesn't have getConfig method, patch needed");
+
 		this._feeMethod = dependencies.feeMethod;
 		this._governanceMethod = dependencies.governanceMethod;
 		this._internalMethod.addDependencies(dependencies.feeMethod, dependencies.tokenMethod, dependencies.dexMethod);
@@ -99,10 +101,14 @@ export class FeeConversionModule extends Modules.BaseModule {
 	public async beforeCommandExecute(_context: StateMachine.TransactionExecuteContext): Promise<void> {
 		const { transaction, header } = _context;
 
-		const minFee = this._getMinFee(header.height, transaction.getBytes().length);
-		const availableFee = transaction.fee - minFee;
+		const config = this._feeMethod!.getConfig();
 
-		_context.contextStore.set(CONTEXT_STORE_KEY_AVAILABLE_FEE, availableFee);
+		if (config['dangerouslySkipAvailableFeeInitialization']) {
+			const minFee = this._getMinFee(header.height, transaction.getBytes().length);
+			const availableFee = transaction.fee - minFee;
+
+			_context.contextStore.set(CONTEXT_STORE_KEY_AVAILABLE_FEE, availableFee);
+		}
 
 		await this._internalMethod.execute(_context);
 	}
