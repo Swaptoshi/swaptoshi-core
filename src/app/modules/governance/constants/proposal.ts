@@ -1,3 +1,5 @@
 export const MAX_LENGTH_PROPOSAL_SUMMARY = 1000;
 
 export const MAX_LENGTH_PROPOSAL_TITLE = 100;
+
+export const MAX_PROPOSAL_QUEUE_PER_BLOCK = 10;

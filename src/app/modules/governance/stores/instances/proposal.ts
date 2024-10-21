@@ -10,7 +10,7 @@ import { GovernanceGovernableConfig } from '../../config';
 import { bytesToNumber, getBoostMultiplier, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalCreatedEvent } from '../../events/proposal_created';
 import { NextAvailableProposalIdStore } from '../next_available_proposal_id';
-import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, POS_MODULE_NAME } from '../../constants';
+import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, MAX_PROPOSAL_QUEUE_PER_BLOCK, POS_MODULE_NAME } from '../../constants';
 import { configActionPayloadSchema } from '../../schema';
 import { GovernableConfigRegistry } from '../../registry';
 import { ProposalVotedEvent } from '../../events/proposal_voted';
@@ -380,6 +380,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 
 	private async _saveQueue(proposalId: number, height: number, type: keyof ProposalQueueStoreData) {
 		const proposalQueue = await this.proposalQueueStore.getOrDefault(this.mutableContext!.context, numberToBytes(height));
+		if (proposalQueue[type].length >= MAX_PROPOSAL_QUEUE_PER_BLOCK) throw new Error(`Exceeded MAX_PROPOSAL_QUEUE_PER_BLOCK of ${MAX_PROPOSAL_QUEUE_PER_BLOCK}`);
 		if (proposalQueue[type].findIndex(id => id === proposalId) === -1) proposalQueue[type].push(proposalId);
 		await this.proposalQueueStore.set(this.mutableContext!.context, numberToBytes(height), proposalQueue);
 	}
