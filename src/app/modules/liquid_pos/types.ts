@@ -23,6 +23,20 @@ export interface LiquidPosModuleDependencies {
 	governanceMethod?: GovernanceMethod;
 }
 
+export interface PosModuleGenesisStakerSubstore {
+	address: Buffer;
+	stakes: {
+		validatorAddress: Buffer;
+		amount: bigint;
+		sharingCoefficients: { tokenID: Buffer; coefficient: Buffer }[];
+	}[];
+	pendingUnlocks: {
+		validatorAddress: Buffer;
+		amount: bigint;
+		unstakeHeight: number;
+	}[];
+}
+
 export type ConfigPathKeys<T> = T extends object
 	? {
 			[K in keyof T]: K extends string

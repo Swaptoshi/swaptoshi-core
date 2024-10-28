@@ -1,8 +1,11 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { Modules, StateMachine, Types, codec } from 'klayr-sdk';
+import { Modules, StateMachine, Types, codec, validator } from 'klayr-sdk';
+import { genesisStoreSchema } from 'klayr-framework/dist-node/modules/pos/schemas';
+import { MethodContext } from 'klayr-framework/dist-node/state_machine';
 import BigNumber from 'bignumber.js';
-import { LiquidPosModuleConfig, StakeTransactionParams, TokenMethod } from './types';
+import { LiquidPosModuleConfig, PosModuleGenesisStakerSubstore, StakeTransactionParams, TokenMethod } from './types';
 import { POS_MODULE_NAME, POS_STAKE_COMMAND_NAME } from './constants';
 import { stakeCommandParamsSchema } from './schema';
 import { LiquidStakingTokenMintEvent } from './events/lst_mint';
@@ -15,6 +18,7 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 	private _chainID: Buffer | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 	private _lstTokenID: Buffer | undefined;
+	private _config: LiquidPosGovernableConfig | undefined;
 
 	public async init(moduleConfig: LiquidPosModuleConfig, genesisConfig: Types.GenesisConfig) {
 		this._chainID = Buffer.from(genesisConfig.chainID, 'hex');
@@ -23,6 +27,7 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 
 	public addDependencies(tokenMethod: TokenMethod) {
 		this._tokenMethod = tokenMethod;
+		this._config = this.stores.get(LiquidPosGovernableConfig);
 	}
 
 	public getLstTokenID() {
@@ -33,7 +38,26 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 		this.checkDependencies();
 
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
-		if (!isTokenIDAvailable) throw new Error('specified tokenID on liquid_pos config is not available');
+
+		if (!isTokenIDAvailable) {
+			const assetBytes = context.assets.getAsset(POS_MODULE_NAME);
+			if (!assetBytes) return;
+
+			const genesisStore = codec.decode<{ stakers: PosModuleGenesisStakerSubstore[] }>(genesisStoreSchema, assetBytes);
+			validator.validator.validate(genesisStoreSchema, genesisStore);
+
+			const totalPosStaked = genesisStore.stakers.reduce(
+				(accumulator: bigint, stakerSubstore: PosModuleGenesisStakerSubstore) =>
+					accumulator + stakerSubstore.stakes.reduce((stakerAccumulator: bigint, stakes: PosModuleGenesisStakerSubstore['stakes'][0]) => stakerAccumulator + stakes.amount, BigInt(0)),
+				BigInt(0),
+			);
+
+			const totalSupply = await this._tokenMethod!.getTotalSupply(context as unknown as MethodContext);
+			const lstTotalSupply = totalSupply.totalSupply.find(t => t.tokenID.equals(this._lstTokenID!))!.totalSupply;
+			const computedLstTotalSupply = await this._multiplyByRatio(context as unknown as MethodContext, totalPosStaked);
+
+			if (computedLstTotalSupply !== lstTotalSupply) throw new Error('lstTokenID supply doesnt match computed totalPosStaked');
+		}
 	}
 
 	public async handleAfterCommandExecute(context: StateMachine.TransactionExecuteContext) {
@@ -56,13 +80,10 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 		this.checkDependencies();
 		if (baseAmount < BigInt(0)) throw new Error("baseAmount minted can't be negative");
 
-		const configStore = this.stores.get(LiquidPosGovernableConfig);
-		const config = await configStore.getConfig(context);
-
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		const mintedAmount = BigInt(new BigNumber(baseAmount.toString()).multipliedBy(config.ratio).toFixed(0));
+		const mintedAmount = await this._multiplyByRatio(context, baseAmount);
 
 		await this._tokenMethod!.mint(context, address, this._lstTokenID!, mintedAmount);
 		const events = this.events.get(LiquidStakingTokenMintEvent);
@@ -73,13 +94,10 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 		this.checkDependencies();
 		if (baseBurned < BigInt(0)) throw new Error("baseBurned burned can't be negative");
 
-		const configStore = this.stores.get(LiquidPosGovernableConfig);
-		const config = await configStore.getConfig(context);
-
 		const isTokenIDAvailable = await this._tokenMethod!.isTokenIDAvailable(context, this._lstTokenID!);
 		if (isTokenIDAvailable) await this._tokenMethod!.initializeToken(context, this._lstTokenID!);
 
-		const burnedAmount = BigInt(new BigNumber(baseBurned.toString()).multipliedBy(config.ratio).toFixed(0));
+		const burnedAmount = await this._multiplyByRatio(context, baseBurned);
 
 		await this._tokenMethod!.burn(context, address, this._lstTokenID!, burnedAmount);
 		const events = this.events.get(LiquidStakingTokenBurnEvent);
@@ -87,7 +105,7 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 	}
 
 	public checkDependencies() {
-		if (!this._chainID || !this._tokenMethod || !this._lstTokenID) {
+		if (!this._chainID || !this._tokenMethod || !this._lstTokenID || !this._config) {
 			throw new Error('liquid_pos module dependencies is not configured, make sure LiquidPos.addDependencies() is called before module registration');
 		}
 	}
@@ -103,5 +121,12 @@ export class InternalLiquidPosMethod extends Modules.BaseMethod {
 			const buff = Buffer.from(tokenID, 'hex');
 			this._lstTokenID = Buffer.concat([chainID, buff]);
 		}
+	}
+
+	private async _multiplyByRatio(context: StateMachine.MethodContext, amount: bigint): Promise<bigint> {
+		this.checkDependencies();
+
+		const config = await this._config!.getConfig(context);
+		return BigInt(new BigNumber(amount.toString()).multipliedBy(config.ratio).toFixed(0));
 	}
 }

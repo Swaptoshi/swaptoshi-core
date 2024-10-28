@@ -237,12 +237,12 @@ export class GovernanceModule extends Modules.BaseModule {
 		await this._internalMethod.executeQueuedProposal(context);
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	public async beforeTransactionsExecute(context: StateMachine.BlockExecuteContext): Promise<void> {
 		this._internalMethod.setModulePriorityStatus(context);
-		await this._internalMethod.initializeGovernableConfig(context);
 	}
 
 	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
-		await this._internalMethod.verifyGovernableConfig(context);
+		await this._internalMethod.initializeGovernableConfig(context);
 	}
 }

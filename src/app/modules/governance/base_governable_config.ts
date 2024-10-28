@@ -147,7 +147,7 @@ export abstract class BaseGovernableConfig<T extends object> extends Modules.Bas
 	 *
 	 * @param context - The genesis block execution context.
 	 */
-	public async initRegisteredConfig(context: StateMachine.BlockExecuteContext): Promise<void> {
+	public async initRegisteredConfig(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
 		if (await this.has(context, this.storeKey)) return;
 
 		if (Object.keys(this.schema.properties).length === 0) throw new Error(`schema for ${this.name} is not configured`);
