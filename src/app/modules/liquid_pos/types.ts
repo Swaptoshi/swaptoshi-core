@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Modules } from 'klayr-sdk';
-import { GovernanceMethod } from '../governance';
+import { GovernableConfigStoreData, GovernanceMethod } from '../governance';
 
 export type TokenMethod = Modules.Token.TokenMethod;
 
@@ -35,6 +35,10 @@ export interface PosModuleGenesisStakerSubstore {
 		amount: bigint;
 		unstakeHeight: number;
 	}[];
+}
+
+export interface LiquidPosGenesisStore {
+	configSubstore: GovernableConfigStoreData;
 }
 
 export type ConfigPathKeys<T> = T extends object
