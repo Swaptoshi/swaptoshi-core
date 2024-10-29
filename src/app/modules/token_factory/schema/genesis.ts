@@ -35,7 +35,7 @@ const genesisSchemaBuilder = (
 export const tokenFactoryGenesisStoreSchema = {
 	$id: '/tokenFactory/module/genesis',
 	type: 'object',
-	required: ['airdropSubstore', 'factorySubstore', 'icoSubstore', 'nextAvailableTokenIdSubstore', 'vestingUnlockSubstore'],
+	required: ['airdropSubstore', 'factorySubstore', 'icoSubstore', 'nextAvailableTokenIdSubstore', 'vestingUnlockSubstore', 'configSubstore'],
 	properties: {
 		airdropSubstore: {
 			fieldNumber: 1,
