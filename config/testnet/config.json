@@ -62,6 +62,9 @@
 			"dangerouslySkipBalanceVerification": true,
 			"dangerouslySkipAvailableFeeInitialization": true
 		},
+		"feeConversion": {
+			"conversionPath": ["01555555000000000000640155555500000001"]
+		},
 		"pos": {
 			"minWeightStandby": "1000000000",
 			"failSafeInactiveWindow": 403200,
