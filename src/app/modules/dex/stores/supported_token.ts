@@ -25,6 +25,8 @@ export class SupportedTokenStore extends Modules.BaseStore<SupportedTokenManager
 			const supportManager = await this.get(context, Buffer.alloc(0));
 			if (supportManager.supportAll !== config.supportAllTokens) {
 				await this._applyConfig(context);
+				supportManager.supportAll = config.supportAllTokens;
+				await this.set(context, Buffer.alloc(0), supportManager);
 			}
 		} else {
 			await this._applyConfig(context);
