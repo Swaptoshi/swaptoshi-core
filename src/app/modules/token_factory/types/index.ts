@@ -5,3 +5,4 @@ export * from './stores';
 export * from './endpoint';
 export * from './module';
 export * from './utils';
+export * from './genesis';

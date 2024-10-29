@@ -15,7 +15,7 @@ const genesisSchemaBuilder = (
 	keys: {
 		key: string;
 		dataType: 'string' | 'bytes' | 'uint32' | 'uint64' | 'sint32' | 'sint64' | 'boolean';
-		format?: string;
+		format?: 'hex' | 'klayr32';
 	}[],
 ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
