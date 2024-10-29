@@ -1,5 +1,5 @@
 export const liquidStakingTokenMintEventSchema = {
-	$id: '/liquid_pos/events/lst_mint',
+	$id: '/liquidPos/events/lst_mint',
 	type: 'object',
 	required: ['address', 'tokenID', 'amount'],
 	properties: {

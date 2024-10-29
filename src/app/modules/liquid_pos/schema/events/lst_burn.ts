@@ -1,5 +1,5 @@
 export const liquidStakingTokenBurnEventSchema = {
-	$id: '/liquid_pos/events/lst_burn',
+	$id: '/liquidPos/events/lst_burn',
 	type: 'object',
 	required: ['address', 'tokenID', 'amount'],
 	properties: {

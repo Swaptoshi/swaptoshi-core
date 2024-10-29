@@ -1,5 +1,5 @@
 export const feeConvertedEventSchema = {
-	$id: '/fee_conversion/events/fee_converted',
+	$id: '/feeConversion/events/fee_converted',
 	type: 'object',
 	required: ['moduleCommand', 'path', 'token', 'amount'],
 	properties: {

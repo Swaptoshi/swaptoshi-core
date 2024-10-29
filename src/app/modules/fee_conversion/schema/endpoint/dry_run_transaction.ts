@@ -1,5 +1,5 @@
 export const dryRunTransactionEndpointResponseSchema = {
-	$id: '/fee_conversion/endpoint/response/dry_run_transaction',
+	$id: '/feeConversion/endpoint/response/dry_run_transaction',
 	type: 'object',
 	required: ['status', 'data', 'errorMessage'],
 	properties: {
@@ -38,7 +38,7 @@ export const dryRunTransactionEndpointResponseSchema = {
 };
 
 export const dryRunTransactionEndpointRequestSchema = {
-	$id: '/fee_conversion/endpoint/request/dry_run_transaction',
+	$id: '/feeConversion/endpoint/request/dry_run_transaction',
 	type: 'object',
 	required: ['transaction'],
 	properties: {

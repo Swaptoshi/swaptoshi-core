@@ -3,7 +3,7 @@ import { GovernableConfigSchema } from '../../governance';
 import { FeeConversionModuleConfig } from '../types';
 
 export const configSchema: GovernableConfigSchema<FeeConversionModuleConfig> = {
-	$id: '/fee_conversion/config',
+	$id: '/feeConversion/config',
 	type: 'object',
 	required: ['conversionPath'],
 	properties: {

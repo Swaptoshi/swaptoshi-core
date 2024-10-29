@@ -1,5 +1,5 @@
 export const getLSTTokenIDEndpointResponseSchema = {
-	$id: '/liquid_pos/endpoint/response/get_lst_token_id',
+	$id: '/liquidPos/endpoint/response/get_lst_token_id',
 	type: 'object',
 	required: ['tokenID'],
 	properties: {
@@ -11,7 +11,7 @@ export const getLSTTokenIDEndpointResponseSchema = {
 };
 
 export const getLSTTokenIDEndpointRequestSchema = {
-	$id: '/liquid_pos/endpoint/request/get_lst_token_id',
+	$id: '/liquidPos/endpoint/request/get_lst_token_id',
 	type: 'object',
 	required: [],
 	properties: {},

@@ -1,5 +1,5 @@
 export const getRegisteredHandlersEndpointResponseSchema = {
-	$id: '/fee_conversion/endpoint/response/get_registered_handlers',
+	$id: '/feeConversion/endpoint/response/get_registered_handlers',
 	type: 'object',
 	required: ['handlers'],
 	properties: {
@@ -28,7 +28,7 @@ export const getRegisteredHandlersEndpointResponseSchema = {
 };
 
 export const getRegisteredHandlersEndpointRequestSchema = {
-	$id: '/fee_conversion/endpoint/request/get_registered_handlers',
+	$id: '/feeConversion/endpoint/request/get_registered_handlers',
 	type: 'object',
 	required: [],
 	properties: {},
