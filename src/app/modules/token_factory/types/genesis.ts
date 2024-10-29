@@ -1,3 +1,4 @@
+import { GovernableConfigStoreData } from '../../governance';
 import { AirdropStoreData, FactoryStoreData, ICOStoreData, NextAvailableTokenIdStoreData, VestingUnlockStoreData } from './stores';
 
 export interface TokenFactoryGenesisStore {
@@ -6,6 +7,7 @@ export interface TokenFactoryGenesisStore {
 	icoSubstore: ICOGenesisSubstore[];
 	nextAvailableTokenIdSubstore: NextAvailableTokenIdStoreData;
 	vestingUnlockSubstore: VestingUnlockGenesisSubstore[];
+	configSubstore: GovernableConfigStoreData;
 }
 
 interface AirdropGenesisSubstore extends AirdropStoreData {

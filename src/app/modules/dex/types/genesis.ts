@@ -1,3 +1,4 @@
+import { GovernableConfigStoreData } from '../../governance';
 import { DEXPoolData, Observation, PositionInfo, PositionManager, SupportedTokenManager, TickBitmap, TickInfo, TokenSymbol } from './stores';
 
 export interface DexGenesisStore {
@@ -9,6 +10,7 @@ export interface DexGenesisStore {
 	tickBitmapSubstore: TickBitmapSubstore[];
 	tickInfoSubstore: TickInfoSubstore[];
 	tokenSymbolSubstore: TokenSymbolSubstore[];
+	configSubstore: GovernableConfigStoreData;
 }
 
 interface ObservationGenesisSubstore extends Observation {

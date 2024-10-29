@@ -1,5 +1,6 @@
 import { utils } from 'klayr-sdk';
 import { airdropStoreSchema, factoryStoreSchema, icoStoreSchema, nextAvailableTokenIdStoreSchema, vestingUnlockStoreSchema } from './stores';
+import { governableConfigSchema } from '../../governance/schema';
 
 const genesisSchemaBuilder = (
 	schema: { $id: string; type: string; required: string[]; properties: Record<string, object> },
@@ -62,6 +63,10 @@ export const tokenFactoryGenesisStoreSchema = {
 			fieldNumber: 5,
 			type: 'array',
 			items: genesisSchemaBuilder(vestingUnlockStoreSchema, [{ key: 'height', dataType: 'uint32' }]),
+		},
+		configSubstore: {
+			fieldNumber: 6,
+			...genesisSchemaBuilder(governableConfigSchema, []),
 		},
 	},
 };
