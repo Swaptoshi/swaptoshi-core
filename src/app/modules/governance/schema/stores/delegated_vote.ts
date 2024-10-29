@@ -7,6 +7,7 @@ export const delegatedVoteStoreSchema: TypedSchema<DelegatedVoteStoreData> = {
 	properties: {
 		outgoingDelegation: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 1,
 		},
 		incomingDelegation: {
@@ -14,6 +15,7 @@ export const delegatedVoteStoreSchema: TypedSchema<DelegatedVoteStoreData> = {
 			fieldNumber: 2,
 			items: {
 				dataType: 'bytes',
+				format: 'klayr32',
 			},
 		},
 	},

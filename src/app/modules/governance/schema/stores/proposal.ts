@@ -19,6 +19,7 @@ export const proposalStoreSchema: TypedSchema<ProposalStoreData> = {
 		},
 		author: {
 			dataType: 'bytes',
+			format: 'klayr32',
 			fieldNumber: 4,
 		},
 		turnout: {

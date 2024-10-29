@@ -6,3 +6,4 @@ export * from './config';
 export * from './governable_config';
 export * from './dependencies';
 export * from './endpoint';
+export * from './genesis';

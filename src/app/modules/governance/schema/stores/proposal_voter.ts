@@ -10,6 +10,7 @@ export const proposalVoterStoreSchema: TypedSchema<ProposalVoterStoreData> = {
 			fieldNumber: 1,
 			items: {
 				dataType: 'bytes',
+				format: 'klayr32',
 			},
 		},
 	},
