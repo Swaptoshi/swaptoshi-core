@@ -62,6 +62,9 @@
 			"dangerouslySkipBalanceVerification": true,
 			"dangerouslySkipAvailableFeeInitialization": true
 		},
+		"dex": {
+			"feeProtocol": 170
+		},
 		"feeConversion": {
 			"conversionPath": ["01555555000000000000640155555500000001"]
 		},
