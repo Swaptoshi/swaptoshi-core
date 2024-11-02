@@ -85,7 +85,8 @@ export const dexGenesisStoreSchema = {
 		},
 		supportedTokenSubstore: {
 			fieldNumber: 5,
-			...genesisSchemaBuilder(supportedTokenStoreSchema, []),
+			type: 'array',
+			items: genesisSchemaBuilder(supportedTokenStoreSchema, []),
 		},
 		tickBitmapSubstore: {
 			fieldNumber: 6,

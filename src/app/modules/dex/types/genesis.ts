@@ -6,7 +6,7 @@ export interface DexGenesisStore {
 	poolSubstore: DEXPoolData[];
 	positionInfoSubstore: PositionInfoSubstore[];
 	positionManagerSubstore: PositionManager[];
-	supportedTokenSubstore: SupportedTokenManager;
+	supportedTokenSubstore: SupportedTokenManager[];
 	tickBitmapSubstore: TickBitmapSubstore[];
 	tickInfoSubstore: TickInfoSubstore[];
 	tokenSymbolSubstore: TokenSymbolSubstore[];
