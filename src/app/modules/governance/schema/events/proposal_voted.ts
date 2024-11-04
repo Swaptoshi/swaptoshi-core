@@ -3,7 +3,7 @@ import { ProposalVotedEventData, TypedSchema } from '../../types';
 export const proposalVotedEventSchema: TypedSchema<ProposalVotedEventData> = {
 	$id: '/governance/events/proposal_voted',
 	type: 'object',
-	required: ['proposalId', 'voterAddress', 'decision'],
+	required: ['proposalId', 'voterAddress', 'decision', 'data'],
 	properties: {
 		proposalId: {
 			dataType: 'uint32',
@@ -17,6 +17,10 @@ export const proposalVotedEventSchema: TypedSchema<ProposalVotedEventData> = {
 		decision: {
 			dataType: 'uint32',
 			fieldNumber: 3,
+		},
+		data: {
+			dataType: 'string',
+			fieldNumber: 4,
 		},
 	},
 };

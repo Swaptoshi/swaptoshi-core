@@ -10,7 +10,7 @@ export const castedVoteStoreSchema: TypedSchema<CastedVoteStoreData> = {
 			fieldNumber: 1,
 			items: {
 				type: 'object',
-				required: ['proposalId', 'decision'],
+				required: ['proposalId', 'decision', 'data'],
 				properties: {
 					proposalId: {
 						dataType: 'uint32',
@@ -18,6 +18,10 @@ export const castedVoteStoreSchema: TypedSchema<CastedVoteStoreData> = {
 					},
 					decision: {
 						dataType: 'uint32',
+						fieldNumber: 2,
+					},
+					data: {
+						dataType: 'string',
 						fieldNumber: 3,
 					},
 				},

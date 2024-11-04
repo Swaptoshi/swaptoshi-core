@@ -11,7 +11,7 @@ export const getCastedVoteEndpointResponseSchema: TypedSchema<Types.JSONObject<C
 			fieldNumber: 1,
 			items: {
 				type: 'object',
-				required: ['proposalId', 'decision'],
+				required: ['proposalId', 'decision', 'data'],
 				properties: {
 					proposalId: {
 						dataType: 'uint32',
@@ -20,6 +20,10 @@ export const getCastedVoteEndpointResponseSchema: TypedSchema<Types.JSONObject<C
 					decision: {
 						dataType: 'uint32',
 						fieldNumber: 2,
+					},
+					data: {
+						dataType: 'string',
+						fieldNumber: 3,
 					},
 				},
 			},

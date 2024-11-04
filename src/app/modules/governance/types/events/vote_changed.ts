@@ -5,4 +5,5 @@ export interface VoteChangedEventData {
 	voterAddress: Buffer;
 	oldDecision: Votes;
 	newDecision: Votes;
+	data: string;
 }

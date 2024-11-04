@@ -3,7 +3,7 @@ import { TypedSchema, VoteChangedEventData } from '../../types';
 export const voteChangedEventSchema: TypedSchema<VoteChangedEventData> = {
 	$id: '/governance/events/vote_changed',
 	type: 'object',
-	required: ['proposalId', 'voterAddress', 'oldDecision', 'newDecision'],
+	required: ['proposalId', 'voterAddress', 'oldDecision', 'newDecision', 'data'],
 	properties: {
 		proposalId: {
 			dataType: 'uint32',
@@ -21,6 +21,10 @@ export const voteChangedEventSchema: TypedSchema<VoteChangedEventData> = {
 		newDecision: {
 			dataType: 'uint32',
 			fieldNumber: 4,
+		},
+		data: {
+			dataType: 'string',
+			fieldNumber: 5,
 		},
 	},
 };

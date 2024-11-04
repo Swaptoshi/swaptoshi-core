@@ -4,5 +4,6 @@ export interface CastedVoteStoreData {
 	activeVote: {
 		proposalId: number;
 		decision: Votes;
+		data: string;
 	}[];
 }

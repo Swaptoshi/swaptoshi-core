@@ -10,7 +10,7 @@ import { GovernanceGovernableConfig } from '../../config';
 import { bytesToNumber, getBoostMultiplier, numberToBytes, parseBigintOrPercentage, serializer } from '../../utils';
 import { ProposalCreatedEvent } from '../../events/proposal_created';
 import { NextAvailableProposalIdStore } from '../next_available_proposal_id';
-import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, MAX_PROPOSAL_QUEUE_PER_BLOCK, POS_MODULE_NAME } from '../../constants';
+import { MAX_LENGTH_PROPOSAL_SUMMARY, MAX_LENGTH_PROPOSAL_TITLE, MAX_PROPOSAL_QUEUE_PER_BLOCK, POS_MODULE_NAME, VOTE_DATA_MAX_LENGTH } from '../../constants';
 import { configActionPayloadSchema } from '../../schema';
 import { GovernableConfigRegistry } from '../../registry';
 import { ProposalVotedEvent } from '../../events/proposal_voted';
@@ -196,6 +196,10 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			throw new Error('invalid vote decision');
 		}
 
+		if (params.data.length >= VOTE_DATA_MAX_LENGTH) {
+			throw new Error(`vote data exceed max length of ${VOTE_DATA_MAX_LENGTH} characters`);
+		}
+
 		const senderDelegatedVoteState = await this.delegatedVoteStore.getOrDefault(this.immutableContext!.context, this.immutableContext!.senderAddress);
 		if (!senderDelegatedVoteState.outgoingDelegation.equals(Buffer.alloc(0))) {
 			throw new Error(`the sender is currently delegating their votes`);
@@ -224,6 +228,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 					voterAddress: this.mutableContext!.senderAddress,
 					oldDecision: castedVote.activeVote[proposalIndex].decision,
 					newDecision: params.decision,
+					data: params.data,
 				},
 				[this.mutableContext!.senderAddress],
 			);
@@ -231,9 +236,10 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 			await this._removeSenderDelegatedVoteFromProposal();
 
 			castedVote.activeVote[proposalIndex].decision = params.decision;
+			castedVote.activeVote[proposalIndex].data = params.data;
 		} else {
 			const boostedState = await this.boostedAccountStore.getOrDefault(this.mutableContext!.context, this.mutableContext!.senderAddress);
-			castedVote.activeVote.push({ proposalId: params.proposalId, decision: params.decision });
+			castedVote.activeVote.push({ proposalId: params.proposalId, decision: params.decision, data: params.data });
 
 			await this.addVote(baseScore, params.decision, boostedState.targetHeight);
 
@@ -244,6 +250,7 @@ export class Proposal extends BaseInstance<ProposalStoreData, ProposalStore> imp
 					proposalId: params.proposalId,
 					voterAddress: this.mutableContext!.senderAddress,
 					decision: params.decision,
+					data: params.data,
 				},
 				[this.mutableContext!.senderAddress],
 			);
