@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { Modules, StateMachine } from 'klayr-sdk';
+import { codec, Modules, StateMachine, validator } from 'klayr-sdk';
 import { FeeConversionMethod } from '../fee_conversion';
 import { GovernanceMethod } from '../governance';
 import { TokenFactoryMethod } from '../token_factory/method';
@@ -40,6 +40,7 @@ import { TreasurifyEvent } from './events/treasurify';
 import { executeBaseFee, executeSwapByTransfer, verifyBaseFee, verifyMinimumFee, verifySwapByTransfer, verifyValidTransfer } from './hooks';
 import { DexMethod } from './method';
 import {
+	dexGenesisStoreSchema,
 	getConfigEndpointRequestSchema,
 	getConfigEndpointResponseSchema,
 	getMetadataEndpointRequestSchema,
@@ -73,7 +74,7 @@ import { SupportedTokenStore } from './stores/supported_token';
 import { TickBitmapStore } from './stores/tick_bitmap';
 import { TickInfoStore } from './stores/tick_info';
 import { TokenSymbolStore } from './stores/token_symbol';
-import { DexModuleDependencies, FeeMethod, TokenMethod } from './types';
+import { DexGenesisStore, DexModuleDependencies, FeeMethod, TokenMethod } from './types';
 
 export class DexModule extends Modules.Interoperability.BaseInteroperableModule {
 	public _config: DexGovernableConfig = new DexGovernableConfig(this.name, 8);
@@ -279,5 +280,202 @@ export class DexModule extends Modules.Interoperability.BaseInteroperableModule 
 
 	public async beforeTransactionsExecute(context: StateMachine.BlockExecuteContext): Promise<void> {
 		await this.stores.get(SupportedTokenStore).apply(context);
+	}
+
+	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
+		const assetBytes = context.assets.getAsset(this.name);
+		// if there is no asset, do not initialize
+		if (!assetBytes) return;
+
+		const genesisStore = codec.decode<DexGenesisStore>(dexGenesisStoreSchema, assetBytes);
+		validator.validator.validate(dexGenesisStoreSchema, genesisStore);
+
+		const observationStore = this.stores.get(ObservationStore);
+
+		// create copied object to verify sorting
+		const copiedObservationStore = [...genesisStore.observationSubstore];
+		copiedObservationStore.sort((a, b) => {
+			// First, sort by poolAddress
+			if (!a.poolAddress.equals(b.poolAddress)) return a.poolAddress.compare(b.poolAddress);
+
+			// If poolAddress is the same, sort by index (convert to number to ensure correct numerical sorting)
+			return parseInt(a.index, 10) - parseInt(b.index, 10);
+		});
+
+		for (let i = 0; i < genesisStore.observationSubstore.length; i += 1) {
+			const observationData = genesisStore.observationSubstore[i];
+
+			// Validate sorting of observationSubstore
+			if (!observationData.poolAddress.equals(copiedObservationStore[i].poolAddress) || observationData.index !== copiedObservationStore[i].index) {
+				throw new Error('observationSubstore must be sorted by poolAddress and index.');
+			}
+
+			// set state
+			await observationStore.set(context, observationStore.getKey(observationData.poolAddress, observationData.index), observationData);
+		}
+
+		const poolStore = this.stores.get(PoolStore);
+
+		// create copies object to verify sorting
+		const copiedPoolStore = [...genesisStore.poolSubstore];
+		copiedPoolStore.sort((a, b) => {
+			// First, sort by token0
+			if (!a.token0.equals(b.token0)) return a.token0.compare(b.token0);
+
+			// If token0 is the same, sort by token1
+			if (!a.token1.equals(b.token1)) return a.token1.compare(b.token1);
+
+			// If both token0 and token1 are the same, sort by fee (convert to number if necessary)
+			return parseInt(a.fee, 10) - parseInt(b.fee, 10);
+		});
+
+		for (let i = 0; i < genesisStore.poolSubstore.length; i += 1) {
+			const poolData = genesisStore.poolSubstore[i];
+
+			// Validate sorting of poolSubstore
+			if (!poolData.token0.equals(copiedPoolStore[i].token0) || !poolData.token1.equals(copiedPoolStore[i].token1) || poolData.fee !== copiedPoolStore[i].fee) {
+				throw new Error('poolSubstore must be sorted by token0, token1, and fee');
+			}
+
+			// set state
+			const poolAddress = poolStore.getKey(poolData.token0, poolData.token1, poolData.fee);
+			await poolStore.set(context, poolAddress, poolData);
+		}
+
+		const positionInfoStore = this.stores.get(PositionInfoStore);
+
+		// create copied object to verify sorting
+		const copiedPositionInfoSubstore = [...genesisStore.positionInfoSubstore];
+		copiedPositionInfoSubstore.sort((a, b) => {
+			// First, sort by poolAddress
+			if (!a.poolAddress.equals(b.poolAddress)) return a.poolAddress.compare(b.poolAddress);
+
+			// If both poolAddress are the same, sort by key
+			if (!a.key.equals(b.key)) return a.key.compare(b.key);
+
+			// default
+			return 0;
+		});
+
+		for (let i = 0; i < genesisStore.positionInfoSubstore.length; i += 1) {
+			const positionInfoData = genesisStore.positionInfoSubstore[i];
+
+			// Validate sorting of positionInfoSubstore
+			if (!positionInfoData.poolAddress.equals(copiedPositionInfoSubstore[i].poolAddress) || !positionInfoData.key.equals(copiedPositionInfoSubstore[i].key)) {
+				throw new Error('positionInfoSubstore must be sorted by poolAddress and key.');
+			}
+
+			// set state
+			await positionInfoStore.set(context, positionInfoStore.getKey(positionInfoData.poolAddress, positionInfoData.key), positionInfoData);
+		}
+
+		const positionManagerStore = this.stores.get(PositionManagerStore);
+
+		// create copied object to verify sorting
+		const copiedPositionManagerSubstore = [...genesisStore.positionManagerSubstore];
+		copiedPositionManagerSubstore.sort((a, b) => a.poolAddress.compare(b.poolAddress));
+
+		for (let i = 0; i < genesisStore.positionManagerSubstore.length; i += 1) {
+			const positionManagerData = genesisStore.positionManagerSubstore[i];
+
+			// validate sorting of positionManagerSubstore
+			if (!positionManagerData.poolAddress.equals(copiedPositionManagerSubstore[i].poolAddress)) {
+				throw new Error('positionManagerSubstore must be sorted by poolAddress.');
+			}
+
+			// set state
+			await positionManagerStore.set(context, positionManagerStore.getKey(positionManagerData.poolAddress), positionManagerData);
+		}
+
+		const supportedTokenStore = this.stores.get(SupportedTokenStore);
+
+		// verify supportedTokenSubstore
+		const { supportedTokenSubstore } = genesisStore;
+		if (supportedTokenSubstore.length > 0 && supportedTokenSubstore.length !== 1) {
+			throw new Error('supportedTokenSubstore must have one element, if specified');
+		}
+
+		if (supportedTokenSubstore.length === 1) {
+			const supportedTokenData = supportedTokenSubstore[0];
+			const copiedSupportedTokenList = [...supportedTokenData.supported];
+			copiedSupportedTokenList.sort((a, b) => a.compare(b));
+
+			for (let i = 0; i < supportedTokenData.supported.length; i += 1) {
+				if (!supportedTokenData.supported[i].equals(copiedSupportedTokenList[i])) {
+					throw new Error('supportedTokenSubstore.supported must be sorted');
+				}
+			}
+			await supportedTokenStore.set(context, Buffer.alloc(0), supportedTokenData);
+		}
+
+		const tickBitmapStore = this.stores.get(TickBitmapStore);
+
+		// create copied object to verify sorting
+		const copiedTickBitmapSubstore = [...genesisStore.tickBitmapSubstore];
+		copiedTickBitmapSubstore.sort((a, b) => {
+			// First, sort by poolAddress
+			if (!a.poolAddress.equals(b.poolAddress)) {
+				return a.poolAddress.compare(b.poolAddress);
+			}
+
+			// If poolAddress is the same, sort by index (convert to number to ensure correct numerical sorting)
+			return parseInt(a.index, 10) - parseInt(b.index, 10);
+		});
+
+		for (let i = 0; i < genesisStore.tickBitmapSubstore.length; i += 1) {
+			const tickBitmapData = genesisStore.tickBitmapSubstore[i];
+
+			// validate sorting of tickBitmapSubstore
+			if (!tickBitmapData.poolAddress.equals(copiedTickBitmapSubstore[i].poolAddress) || tickBitmapData.index !== copiedTickBitmapSubstore[i].index) {
+				throw new Error('tickBitmapSubstore must be sorted by poolAddress and index.');
+			}
+
+			// set state
+			await tickBitmapStore.set(context, tickBitmapStore.getKey(tickBitmapData.poolAddress, tickBitmapData.index), tickBitmapData);
+		}
+
+		const tickInfoStore = this.stores.get(TickInfoStore);
+
+		// create copied object to verify sorting
+		const copiedTickInfoSubstore = [...genesisStore.tickInfoSubstore];
+		copiedTickInfoSubstore.sort((a, b) => {
+			// First, sort by poolAddress
+			if (!a.poolAddress.equals(b.poolAddress)) {
+				return a.poolAddress.compare(b.poolAddress);
+			}
+
+			// If poolAddress is the same, sort by tick (convert to number to ensure correct numerical sorting)
+			return parseInt(a.tick, 10) - parseInt(b.tick, 10);
+		});
+
+		for (let i = 0; i < genesisStore.tickInfoSubstore.length; i += 1) {
+			const tickInfoData = genesisStore.tickInfoSubstore[i];
+
+			// validate sorting of tickInfoSubstore
+			if (!tickInfoData.poolAddress.equals(copiedTickInfoSubstore[i].poolAddress) || tickInfoData.tick !== copiedTickInfoSubstore[i].tick) {
+				throw new Error('tickInfoSubstore must be sorted by poolAddress and tick.');
+			}
+
+			// set state
+			await tickInfoStore.set(context, tickInfoStore.getKey(tickInfoData.poolAddress, tickInfoData.tick), tickInfoData);
+		}
+
+		const tokenSymbolStore = this.stores.get(TokenSymbolStore);
+
+		// create copied object to verify sorting
+		const copiedTokenSymbolSubstore = [...genesisStore.tokenSymbolSubstore];
+		copiedTokenSymbolSubstore.sort((a, b) => a.tokenId.compare(b.tokenId));
+
+		for (let i = 0; i < genesisStore.tokenSymbolSubstore.length; i += 1) {
+			const tokenSymbolData = genesisStore.tokenSymbolSubstore[i];
+
+			// validate sorting of tokenSymbolSubstore
+			if (!tokenSymbolData.tokenId.equals(copiedTokenSymbolSubstore[i].tokenId)) {
+				throw new Error('tokenSymbolSubstore must be sorted by tokenId.');
+			}
+
+			// set state
+			await tokenSymbolStore.set(context, tokenSymbolStore.getKey(tokenSymbolData.tokenId), tokenSymbolData);
+		}
 	}
 }

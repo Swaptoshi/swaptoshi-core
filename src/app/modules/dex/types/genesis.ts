@@ -34,5 +34,5 @@ interface TickInfoSubstore extends TickInfo {
 }
 
 interface TokenSymbolSubstore extends TokenSymbol {
-	tokenID: Buffer;
+	tokenId: Buffer;
 }

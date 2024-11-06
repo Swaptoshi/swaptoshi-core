@@ -7,3 +7,4 @@ export * from './nft_attribute';
 export * from './stores';
 export * from './config';
 export * from './genesis';
+export * from './nft';

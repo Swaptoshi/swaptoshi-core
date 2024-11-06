@@ -107,7 +107,7 @@ export const dexGenesisStoreSchema = {
 		tokenSymbolSubstore: {
 			fieldNumber: 8,
 			type: 'array',
-			items: genesisSchemaBuilder(tokenSymbolStoreSchema, [{ key: 'tokenID', dataType: 'bytes' }]),
+			items: genesisSchemaBuilder(tokenSymbolStoreSchema, [{ key: 'tokenId', dataType: 'bytes' }]),
 		},
 		configSubstore: {
 			fieldNumber: 9,

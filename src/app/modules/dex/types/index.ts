@@ -6,3 +6,4 @@ export * from './params';
 export * from './module';
 export * from './utils';
 export * from './genesis';
+export * from './nft';
