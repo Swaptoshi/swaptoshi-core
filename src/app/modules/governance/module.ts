@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { Modules, StateMachine, utils } from 'klayr-sdk';
+import { codec, Modules, StateMachine, utils, validator } from 'klayr-sdk';
 import { BoostVoteCommand } from './commands/boost_vote_command';
 import { CreateProposalCommand } from './commands/create_proposal_command';
 import { DelegateVoteCommand } from './commands/delegate_vote_command';
@@ -31,7 +31,7 @@ import { DelegatedVoteStore } from './stores/delegated_vote';
 import { NextAvailableProposalIdStore } from './stores/next_available_proposal_id';
 import { ProposalStore } from './stores/proposal';
 import { ProposalQueueStore } from './stores/queue';
-import { FeeMethod, GovernanceModuleConfig, GovernanceModuleDependencies } from './types';
+import { FeeMethod, GovernanceGenesisStore, GovernanceModuleConfig, GovernanceModuleDependencies } from './types';
 import { immutableTransactionHookGovernanceContext } from './stores/context';
 import { ProposalExecutedEvent } from './events/proposal_executed';
 import { VoteChangedEvent } from './events/vote_changed';
@@ -57,8 +57,10 @@ import {
 	getDelegatedVoteEndpointResponseSchema,
 	getNextAvailableProposalIdEndpointResponseSchema,
 	getNextAvailableProposalIdEndpointRequestSchema,
+	governanceGenesisStoreSchema,
 } from './schema';
 import { ProposalVoterStore } from './stores/proposal_voter';
+import { numberToBytes } from './utils';
 
 export class GovernanceModule extends Modules.BaseModule {
 	public _config = new GovernanceGovernableConfig(this.name, 0);
@@ -243,6 +245,146 @@ export class GovernanceModule extends Modules.BaseModule {
 	}
 
 	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
+		// TODO: adjust this (maybe extract)
 		await this._internalMethod.initializeGovernableConfig(context);
+
+		const assetBytes = context.assets.getAsset(this.name);
+		// if there is no asset, do not initialize
+		if (!assetBytes) return;
+
+		const genesisStore = codec.decode<GovernanceGenesisStore>(governanceGenesisStoreSchema, assetBytes);
+		validator.validator.validate(governanceGenesisStoreSchema, genesisStore);
+
+		const boostedAccountStore = this.stores.get(BoostedAccountStore);
+
+		// create copied object to verify sorting
+		const copiedBoostedAccountSubstore = [...genesisStore.boostedAccountSubstore];
+		copiedBoostedAccountSubstore.sort((a, b) => a.address.compare(b.address));
+
+		for (let i = 0; i < genesisStore.boostedAccountSubstore.length; i += 1) {
+			const boostedAccountData = genesisStore.boostedAccountSubstore[i];
+
+			// Validate sorting of boostedAccountSubstore
+			if (!boostedAccountData.address.equals(copiedBoostedAccountSubstore[i].address)) {
+				throw new Error('boostedAccountSubstore must be sorted by address.');
+			}
+
+			// set state
+			await boostedAccountStore.set(context, boostedAccountData.address, boostedAccountData);
+		}
+
+		const castedVoteStore = this.stores.get(CastedVoteStore);
+
+		// create copied object to verify sorting
+		const copiedCastedVoteSubstore = [...genesisStore.castedVoteSubstore];
+		copiedCastedVoteSubstore.sort((a, b) => a.address.compare(b.address));
+
+		for (let i = 0; i < genesisStore.castedVoteSubstore.length; i += 1) {
+			const castedVoteData = genesisStore.castedVoteSubstore[i];
+
+			// Validate sorting of castedVoteSubstore
+			if (!castedVoteData.address.equals(copiedCastedVoteSubstore[i].address)) {
+				throw new Error('castedVoteSubstore must be sorted by address.');
+			}
+
+			// set state
+			await castedVoteStore.set(context, castedVoteData.address, castedVoteData);
+		}
+
+		const delegatedVoteStore = this.stores.get(DelegatedVoteStore);
+
+		// create copied object to verify sorting
+		const copiedDelegatedVoteSubstore = [...genesisStore.delegatedVoteSubstore];
+		copiedDelegatedVoteSubstore.sort((a, b) => a.address.compare(b.address));
+
+		for (let i = 0; i < genesisStore.delegatedVoteSubstore.length; i += 1) {
+			const delegatedVoteData = genesisStore.delegatedVoteSubstore[i];
+
+			// Validate sorting of delegatedVoteSubstore
+			if (!delegatedVoteData.address.equals(copiedDelegatedVoteSubstore[i].address)) {
+				throw new Error('delegatedVoteSubstore must be sorted by address.');
+			}
+
+			// set state
+			await delegatedVoteStore.set(context, delegatedVoteData.address, delegatedVoteData);
+		}
+
+		const nextAvailableProposalIdStore = this.stores.get(NextAvailableProposalIdStore);
+
+		if (!genesisStore.nextAvailableProposalIdSubstore) throw new Error('nextAvailableProposalIdSubstore not present in governance genesis assets');
+
+		await nextAvailableProposalIdStore.set(context, Buffer.alloc(0), genesisStore.nextAvailableProposalIdSubstore);
+
+		const proposalVoterStore = this.stores.get(ProposalVoterStore);
+
+		// create copied object to verify sorting
+		const copiedProposalVoterSubstore = [...genesisStore.proposalVoterSubstore];
+		copiedProposalVoterSubstore.sort((a, b) => a.proposalId - b.proposalId);
+
+		for (let i = 0; i < genesisStore.proposalVoterSubstore.length; i += 1) {
+			const proposalVoterData = genesisStore.proposalVoterSubstore[i];
+
+			// Validate sorting of proposalVoterSubstore
+			if (proposalVoterData.proposalId !== copiedProposalVoterSubstore[i].proposalId) {
+				throw new Error('proposalVoterSubstore must be sorted by proposalId.');
+			}
+
+			// set state
+			await proposalVoterStore.set(context, numberToBytes(proposalVoterData.proposalId), proposalVoterData);
+		}
+
+		const proposalStore = this.stores.get(ProposalStore);
+
+		// create copied object to verify sorting
+		const copiedProposalSubstore = [...genesisStore.proposalSubstore];
+		copiedProposalSubstore.sort((a, b) => a.proposalId - b.proposalId);
+
+		for (let i = 0; i < genesisStore.proposalSubstore.length; i += 1) {
+			const proposalData = genesisStore.proposalSubstore[i];
+
+			// Validate sorting of proposalSubstore
+			if (proposalData.proposalId !== copiedProposalSubstore[i].proposalId) {
+				throw new Error('proposalSubstore must be sorted by proposalId.');
+			}
+
+			// set state
+			await proposalStore.set(context, numberToBytes(proposalData.proposalId), proposalData);
+		}
+
+		const queueStore = this.stores.get(ProposalQueueStore);
+
+		// create copied object to verify sorting
+		const copiedQueueSubstore = [...genesisStore.queueSubstore];
+		copiedQueueSubstore.sort((a, b) => a.height - b.height);
+
+		for (let i = 0; i < genesisStore.queueSubstore.length; i += 1) {
+			const queueData = genesisStore.queueSubstore[i];
+
+			// Validate sorting of queueSubstore
+			if (queueData.height !== copiedQueueSubstore[i].height) {
+				throw new Error('queueSubstore must be sorted by height.');
+			}
+
+			// set state
+			await queueStore.set(context, numberToBytes(queueData.height), queueData);
+		}
+
+		const voteScoreStore = this.stores.get(VoteScoreStore);
+
+		// create copied object to verify sorting
+		const copiedVoteScoreStore = [...genesisStore.voteScoreSubstore];
+		copiedVoteScoreStore.sort((a, b) => a.address.compare(b.address));
+
+		for (let i = 0; i < genesisStore.voteScoreSubstore.length; i += 1) {
+			const voteScoreData = genesisStore.voteScoreSubstore[i];
+
+			// Validate sorting of voteScoreSubstore
+			if (!voteScoreData.address.equals(copiedVoteScoreStore[i].address)) {
+				throw new Error('voteScoreSubstore must be sorted by address.');
+			}
+
+			// set state
+			await voteScoreStore.set(context, voteScoreData.address, voteScoreData);
+		}
 	}
 }
