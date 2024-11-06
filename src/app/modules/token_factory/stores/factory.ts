@@ -34,7 +34,7 @@ export class FactoryStore extends BaseStoreWithInstance<FactoryStoreData> {
 	public async getMutableFactory(ctx: MutableFactoryContext, tokenId: Buffer): Promise<StoreInstance<Factory>> {
 		this._checkDependencies();
 
-		const factoryData = await this.get(ctx.context, this._getKey(tokenId));
+		const factoryData = await this.get(ctx.context, this.getKey(tokenId));
 
 		const factory = new Factory(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, factoryData, tokenId);
 
@@ -50,7 +50,7 @@ export class FactoryStore extends BaseStoreWithInstance<FactoryStoreData> {
 	public async getImmutableFactory(ctx: ImmutableFactoryContext, tokenId: Buffer): Promise<StoreInstance<Factory>> {
 		this._checkDependencies();
 
-		const factoryData = await this.get(ctx.context, this._getKey(tokenId));
+		const factoryData = await this.get(ctx.context, this.getKey(tokenId));
 
 		const factory = new Factory(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, factoryData, tokenId);
 
@@ -63,7 +63,7 @@ export class FactoryStore extends BaseStoreWithInstance<FactoryStoreData> {
 		return factory;
 	}
 
-	private _getKey(key: Buffer) {
+	public getKey(key: Buffer) {
 		if (key.length !== TOKEN_ID_LENGTH) {
 			throw new Error('invalid token id');
 		}

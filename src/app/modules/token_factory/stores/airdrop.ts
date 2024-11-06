@@ -40,7 +40,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 	public async getMutableAirdrop(ctx: MutableFactoryContext, tokenId: Buffer, providerAddress: Buffer): Promise<StoreInstance<Airdrop>> {
 		this._checkDependencies();
 
-		const airdropData = await this.get(ctx.context, this._getKey(tokenId, providerAddress));
+		const airdropData = await this.get(ctx.context, this.getKey(tokenId, providerAddress));
 
 		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
 
@@ -56,7 +56,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 	public async getImmutableAirdrop(ctx: ImmutableFactoryContext, tokenId: Buffer, providerAddress: Buffer): Promise<StoreInstance<Airdrop>> {
 		this._checkDependencies();
 
-		const airdropData = await this.get(ctx.context, this._getKey(tokenId, providerAddress));
+		const airdropData = await this.get(ctx.context, this.getKey(tokenId, providerAddress));
 
 		const airdrop = new Airdrop(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, airdropData, tokenId, providerAddress);
 
@@ -69,7 +69,7 @@ export class AirdropStore extends BaseStoreWithInstance<AirdropStoreData> {
 		return airdrop;
 	}
 
-	private _getKey(tokenId: Buffer, providerAddress: Buffer) {
+	public getKey(tokenId: Buffer, providerAddress: Buffer) {
 		if (tokenId.length !== TOKEN_ID_LENGTH) {
 			throw new Error('invalid token id');
 		}

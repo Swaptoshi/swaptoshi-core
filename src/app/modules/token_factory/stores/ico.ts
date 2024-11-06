@@ -36,9 +36,9 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	public async getMutableICOPool(ctx: MutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
 		this._checkDependencies();
 
-		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
+		const icoData = await this.get(ctx.context, this.getKey(tokenIn, tokenOut));
 
-		const ico = new ICOPool(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+		const ico = new ICOPool(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, icoData, this.getKey(tokenIn, tokenOut));
 
 		ico.addMutableDependencies({
 			context: ctx,
@@ -52,9 +52,9 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 	public async getImmutableICOPool(ctx: ImmutableFactoryContext, tokenIn: Buffer, tokenOut: Buffer): Promise<StoreInstance<ICOPool>> {
 		this._checkDependencies();
 
-		const icoData = await this.get(ctx.context, this._getKey(tokenIn, tokenOut));
+		const icoData = await this.get(ctx.context, this.getKey(tokenIn, tokenOut));
 
-		const ico = new ICOPool(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, icoData, this._getKey(tokenIn, tokenOut));
+		const ico = new ICOPool(this.stores, this.events, this.config!, this.genesisConfig!, this.moduleName, icoData, this.getKey(tokenIn, tokenOut));
 
 		ico.addImmutableDependencies({
 			context: ctx,
@@ -113,7 +113,7 @@ export class ICOStore extends BaseStoreWithInstance<ICOStoreData> {
 		return quoter;
 	}
 
-	private _getKey(tokenIn: Buffer, tokenOut: Buffer) {
+	public getKey(tokenIn: Buffer, tokenOut: Buffer) {
 		return computeICOPoolAddress({ tokenIn, tokenOut });
 	}
 

@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 
-import { Modules, StateMachine } from 'klayr-sdk';
+import { codec, Modules, StateMachine, validator } from 'klayr-sdk';
 import { DexMethod } from '../dex/method';
 import { FeeConversionMethod } from '../fee_conversion';
 import { TokenFactoryInteroperableMethod } from './cc_method';
@@ -60,15 +60,17 @@ import {
 	quoteICOExactOutputEndpointResponseSchema,
 	quoteICOExactOutputSingleEndpointRequestSchema,
 	quoteICOExactOutputSingleEndpointResponseSchema,
+	tokenFactoryGenesisStoreSchema,
 } from './schema';
 import { AirdropStore } from './stores/airdrop';
 import { FactoryStore } from './stores/factory';
 import { ICOStore } from './stores/ico';
 import { NextAvailableTokenIdStore } from './stores/next_available_token_id';
 import { VestingUnlockStore } from './stores/vesting_unlock';
-import { FeeMethod, NFTMethod, TokenFactoryModuleDependencies, TokenMethod } from './types';
+import { FeeMethod, NFTMethod, TokenFactoryGenesisStore, TokenFactoryModuleDependencies, TokenMethod } from './types';
 import { TokenFactoryGovernableConfig } from './config';
 import { GovernanceMethod } from '../governance';
+import { numberToBytes } from './utils';
 
 export class TokenFactoryModule extends Modules.Interoperability.BaseInteroperableModule {
 	public _config: TokenFactoryGovernableConfig = new TokenFactoryGovernableConfig(this.name, 5);
@@ -272,5 +274,105 @@ export class TokenFactoryModule extends Modules.Interoperability.BaseInteroperab
 
 	public async beforeTransactionsExecute(_context: StateMachine.BlockExecuteContext): Promise<void> {
 		await executeVestingUnlock.bind(this)(_context);
+	}
+
+	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
+		const assetBytes = context.assets.getAsset(this.name);
+		// if there is no asset, do not initialize
+		if (!assetBytes) return;
+
+		const genesisStore = codec.decode<TokenFactoryGenesisStore>(tokenFactoryGenesisStoreSchema, assetBytes);
+		validator.validator.validate(tokenFactoryGenesisStoreSchema, genesisStore);
+
+		const airdropStore = this.stores.get(AirdropStore);
+
+		// create copied object to verify sorting
+		const copiedAirdropStore = [...genesisStore.airdropSubstore];
+		copiedAirdropStore.sort((a, b) => {
+			// First, sort by tokenId
+			if (!a.tokenId.equals(b.tokenId)) {
+				return a.tokenId.compare(b.tokenId);
+			}
+
+			// Then, sort by providerAddress
+			if (!a.providerAddress.equals(b.providerAddress)) {
+				return a.providerAddress.compare(b.providerAddress);
+			}
+
+			// default
+			return 0;
+		});
+
+		for (let i = 0; i < genesisStore.airdropSubstore.length; i += 1) {
+			const airdropData = genesisStore.airdropSubstore[i];
+
+			// Validate sorting of airdropSubstore
+			if (!airdropData.tokenId.equals(copiedAirdropStore[i].tokenId) || !airdropData.providerAddress.equals(copiedAirdropStore[i].providerAddress)) {
+				throw new Error('airdropSubstore must be sorted by tokenId and providerAddress.');
+			}
+
+			// set state
+			await airdropStore.set(context, airdropStore.getKey(airdropData.tokenId, airdropData.providerAddress), airdropData);
+		}
+
+		const factoryStore = this.stores.get(FactoryStore);
+
+		// create copied object to verify sorting
+		const copiedFactorySubstore = [...genesisStore.factorySubstore];
+		copiedFactorySubstore.sort((a, b) => a.tokenId.compare(b.tokenId));
+
+		for (let i = 0; i < genesisStore.factorySubstore.length; i += 1) {
+			const factoryData = genesisStore.factorySubstore[i];
+
+			// Validate sorting of factorySubstore
+			if (!factoryData.tokenId.equals(copiedFactorySubstore[i].tokenId)) {
+				throw new Error('airdropSubstore must be sorted by tokenId.');
+			}
+
+			// set state
+			await factoryStore.set(context, factoryStore.getKey(factoryData.tokenId), factoryData);
+		}
+
+		const icoStore = this.stores.get(ICOStore);
+
+		// create copied object to verify sorting
+		const copiedICOStore = [...genesisStore.icoSubstore];
+		copiedICOStore.sort((a, b) => a.poolAddress.compare(b.poolAddress));
+
+		for (let i = 0; i < genesisStore.icoSubstore.length; i += 1) {
+			const icoData = genesisStore.icoSubstore[i];
+
+			// Validate sorting of icoSubstore
+			if (!icoData.poolAddress.equals(copiedICOStore[i].poolAddress)) {
+				throw new Error('icoSubstore must be sorted by poolAddress.');
+			}
+
+			// set state
+			await icoStore.set(context, icoData.poolAddress, icoData);
+		}
+
+		const nextAvailableTokenIdStore = this.stores.get(NextAvailableTokenIdStore);
+
+		if (!genesisStore.nextAvailableTokenIdSubstore) throw new Error('nextAvailableTokenIdSubstore not present in tokenFactory genesis assets');
+
+		await nextAvailableTokenIdStore.set(context, Buffer.alloc(0), genesisStore.nextAvailableTokenIdSubstore);
+
+		const vestingUnlockStore = this.stores.get(VestingUnlockStore);
+
+		// create copied object to verify sorting
+		const copiedVestingUnlockSubstore = [...genesisStore.vestingUnlockSubstore];
+		copiedVestingUnlockSubstore.sort((a, b) => a.height - b.height);
+
+		for (let i = 0; i < genesisStore.vestingUnlockSubstore.length; i += 1) {
+			const vestingUnlockData = genesisStore.vestingUnlockSubstore[i];
+
+			// Validate sorting of vestinUnlockSubstore
+			if (vestingUnlockData.height !== copiedVestingUnlockSubstore[i].height) {
+				throw new Error('vestinUnlockSubstore must be sorted by height.');
+			}
+
+			// set state
+			await vestingUnlockStore.set(context, numberToBytes(vestingUnlockData.height), vestingUnlockData);
+		}
 	}
 }
