@@ -10,7 +10,6 @@ import {
 	tickInfoStoreSchema,
 	tokenSymbolStoreSchema,
 } from './stores';
-import { governableConfigSchema } from '../../governance/schema';
 
 const genesisSchemaBuilder = (
 	schema: { $id: string; type: string; required: string[]; properties: Record<string, object> },
@@ -45,17 +44,7 @@ const genesisSchemaBuilder = (
 export const dexGenesisStoreSchema = {
 	$id: '/dex/module/genesis',
 	type: 'object',
-	required: [
-		'observationSubstore',
-		'poolSubstore',
-		'positionInfoSubstore',
-		'positionManagerSubstore',
-		'supportedTokenSubstore',
-		'tickBitmapSubstore',
-		'tickInfoSubstore',
-		'tokenSymbolSubstore',
-		'configSubstore',
-	],
+	required: ['observationSubstore', 'poolSubstore', 'positionInfoSubstore', 'positionManagerSubstore', 'supportedTokenSubstore', 'tickBitmapSubstore', 'tickInfoSubstore', 'tokenSymbolSubstore'],
 	properties: {
 		observationSubstore: {
 			fieldNumber: 1,
@@ -108,10 +97,6 @@ export const dexGenesisStoreSchema = {
 			fieldNumber: 8,
 			type: 'array',
 			items: genesisSchemaBuilder(tokenSymbolStoreSchema, [{ key: 'tokenId', dataType: 'bytes' }]),
-		},
-		configSubstore: {
-			fieldNumber: 9,
-			...genesisSchemaBuilder(governableConfigSchema, []),
 		},
 	},
 };

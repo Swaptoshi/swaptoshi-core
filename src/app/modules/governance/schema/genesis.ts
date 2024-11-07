@@ -1,6 +1,5 @@
 /* eslint-disable import/no-cycle */
 import { utils } from 'klayr-sdk';
-import { governableConfigSchema } from './governable_config';
 import {
 	boostedAccountStoreSchema,
 	castedVoteStoreSchema,
@@ -98,7 +97,21 @@ export const governanceGenesisStoreSchema = {
 		},
 		configSubstore: {
 			fieldNumber: 9,
-			...genesisSchemaBuilder(governableConfigSchema, []),
+			type: 'array',
+			items: {
+				type: 'object',
+				required: ['module', 'data'],
+				properties: {
+					module: {
+						fieldNumber: 1,
+						dataType: 'string',
+					},
+					data: {
+						fieldNumber: 2,
+						dataType: 'bytes',
+					},
+				},
+			},
 		},
 	},
 };

@@ -19,7 +19,11 @@ export interface GovernanceGenesisStore {
 	proposalSubstore: ProposalGenesisSubstore[];
 	queueSubstore: ProposalQueueGenesisSubstore[];
 	voteScoreSubstore: VoteScoreGenesisSubstore[];
-	configSubstore: GovernableConfigStoreData;
+	configSubstore: ConfigGenesisSubstore[];
+}
+
+interface ConfigGenesisSubstore extends GovernableConfigStoreData {
+	module: string;
 }
 
 interface BoostedAccountGenesisSubstore extends BoostedAccountStoreData {

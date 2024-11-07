@@ -5,7 +5,7 @@ import { Types, Modules } from 'klayr-sdk';
 
 import { FeeConvertedEventData } from './events/fee_converted';
 import { DexMethod } from '../dex/method';
-import { GovernableConfigStoreData, GovernanceMethod } from '../governance';
+import { GovernanceMethod } from '../governance';
 
 export type TokenMethod = Modules.Token.TokenMethod;
 export type FeeMethod = Modules.Fee.FeeMethod;
@@ -62,10 +62,6 @@ export interface FeeConversionModuleDependencies {
 	feeMethod: FeeMethod;
 	dexMethod: DexMethod;
 	governanceMethod?: GovernanceMethod;
-}
-
-export interface FeeConversionGenesisStore {
-	configSubstore: GovernableConfigStoreData;
 }
 
 export type ConfigPathKeys<T> = T extends object
