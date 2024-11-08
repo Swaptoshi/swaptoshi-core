@@ -12,3 +12,4 @@ export * from './vote_boosted';
 export * from './vote_delegated';
 export * from './vote_changed';
 export * from './proposal_active';
+export * from './config_registered';

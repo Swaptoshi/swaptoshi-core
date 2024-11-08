@@ -61,6 +61,8 @@ import {
 } from './schema';
 import { ProposalVoterStore } from './stores/proposal_voter';
 import { numberToBytes } from './utils';
+import { ConfigRegisteredEvent } from './events/config_registered';
+import { ConfigRegistryStore } from './stores/config_registry';
 
 export class GovernanceModule extends Modules.BaseModule {
 	public _config = new GovernanceGovernableConfig(this.name, 0);
@@ -91,6 +93,7 @@ export class GovernanceModule extends Modules.BaseModule {
 		this.stores.register(CastedVoteStore, new CastedVoteStore(this.name, 6));
 		this.stores.register(VoteScoreStore, new VoteScoreStore(this.name, 7));
 		this.stores.register(ProposalVoterStore, new ProposalVoterStore(this.name, 8));
+		this.stores.register(ConfigRegistryStore, new ConfigRegistryStore(this.name, 9));
 
 		this.events.register(ConfigUpdatedEvent, new ConfigUpdatedEvent(this.name));
 		this.events.register(DelegatedVoteRevokedEvent, new DelegatedVoteRevokedEvent(this.name));
@@ -106,6 +109,7 @@ export class GovernanceModule extends Modules.BaseModule {
 		this.events.register(TreasuryMintEvent, new TreasuryMintEvent(this.name));
 		this.events.register(VoteBoostedEvent, new VoteBoostedEvent(this.name));
 		this.events.register(VoteDelegatedEvent, new VoteDelegatedEvent(this.name));
+		this.events.register(ConfigRegisteredEvent, new ConfigRegisteredEvent(this.name));
 
 		this.method.init(this._governableConfig);
 		this.endpoint.init(this._governableConfig);
@@ -246,6 +250,7 @@ export class GovernanceModule extends Modules.BaseModule {
 
 	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
 		// TODO: adjust this (maybe extract)
+		// TODO: initialize config_registry
 		await this._internalMethod.initializeGovernableConfig(context);
 
 		const assetBytes = context.assets.getAsset(this.name);

@@ -2,6 +2,7 @@ import { GovernableConfigStoreData } from './governable_config';
 import {
 	BoostedAccountStoreData,
 	CastedVoteStoreData,
+	ConfigRegistryStoreData,
 	DelegatedVoteStoreData,
 	NextAvailableProposalIdStoreData,
 	ProposalQueueStoreData,
@@ -19,6 +20,7 @@ export interface GovernanceGenesisStore {
 	proposalSubstore: ProposalGenesisSubstore[];
 	queueSubstore: ProposalQueueGenesisSubstore[];
 	voteScoreSubstore: VoteScoreGenesisSubstore[];
+	configRegistrySubstore: ConfigRegistryStoreData;
 	configSubstore: ConfigGenesisSubstore[];
 }
 

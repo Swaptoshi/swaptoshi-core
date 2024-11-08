@@ -3,6 +3,7 @@ import { utils } from 'klayr-sdk';
 import {
 	boostedAccountStoreSchema,
 	castedVoteStoreSchema,
+	configRegistryStoreSchema,
 	delegatedVoteStoreSchema,
 	nextAvailableProposalIdStoreSchema,
 	proposalQueueStoreSchema,
@@ -53,6 +54,7 @@ export const governanceGenesisStoreSchema = {
 		'proposalSubstore',
 		'queueSubstore',
 		'voteScoreSubstore',
+		'configRegistrySubstore',
 		'configSubstore',
 	],
 	properties: {
@@ -95,8 +97,12 @@ export const governanceGenesisStoreSchema = {
 			type: 'array',
 			items: genesisSchemaBuilder(voteScoreStoreSchema, [{ key: 'address', dataType: 'bytes', format: 'klayr32' }]),
 		},
-		configSubstore: {
+		configRegistrySubstore: {
 			fieldNumber: 9,
+			...genesisSchemaBuilder(configRegistryStoreSchema, []),
+		},
+		configSubstore: {
+			fieldNumber: 10,
 			type: 'array',
 			items: {
 				type: 'object',
