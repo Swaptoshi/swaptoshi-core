@@ -18,13 +18,23 @@ import { GovernanceMethod } from './method';
 export abstract class BaseGovernableConfig<T extends object> extends Modules.BaseStore<GovernableConfigStoreData> {
 	protected storeKey = Buffer.alloc(0);
 	protected governanceEvent: Modules.NamedRegistry = new Modules.NamedRegistry();
-	protected module: string = '';
 	protected method: GovernanceMethod | undefined;
 
 	public constructor(moduleName: string, index: number) {
 		super(moduleName, index);
 		this.module = moduleName;
+		this.index = index;
 	}
+
+	/**
+	 * module name as initialized at constructor
+	 */
+	public module: string = '';
+
+	/**
+	 * store index as initialized at constructor
+	 */
+	public index: number = 0;
 
 	/**
 	 * Indicates whether this instance is registered as a governable config in the governance module.

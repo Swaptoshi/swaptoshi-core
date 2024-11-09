@@ -6,7 +6,6 @@ import { CONTEXT_STORE_KEY_DYNAMIC_BLOCK_REDUCTION, CONTEXT_STORE_KEY_DYNAMIC_BL
 import { TreasuryMintEvent } from './events/treasury_mint';
 import { TreasuryBlockRewardTaxEvent } from './events/treasury_block_reward_tax';
 import { GovernanceGovernableConfig } from './config';
-import { GovernableConfigRegistry } from './registry';
 import { methodGovernanceContext, mutableBlockHookGovernanceContext } from './stores/context';
 import { ProposalQueueStore } from './stores/queue';
 import { MutableContext, StakeTransactionParams, TokenMethod, VoteScoreOrArray } from './types';
@@ -24,13 +23,11 @@ interface BlockReward {
 }
 
 export class GovernanceInternalMethod extends Modules.BaseMethod {
-	private _governableConfig: GovernableConfigRegistry | undefined;
 	private _tokenMethod: TokenMethod | undefined;
 	private _modulePriorityStatus: boolean | undefined;
 
-	public addDependencies(token: TokenMethod, governableConfig: GovernableConfigRegistry) {
+	public addDependencies(token: TokenMethod) {
 		this._tokenMethod = token;
-		this._governableConfig = governableConfig;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -107,17 +104,6 @@ export class GovernanceInternalMethod extends Modules.BaseMethod {
 		const ctx = mutableBlockHookGovernanceContext(context);
 		const queue = await proposalQueueStore.getInstance(ctx);
 		await queue.executeQueue();
-	}
-
-	public async initializeGovernableConfig(context: StateMachine.GenesisBlockExecuteContext) {
-		if (!this._governableConfig) throw new Error('GovernanceInternalMethod dependencies is not configured');
-
-		// TODO: handle initialize for fresh blockchain, and re-genesis
-		const governableConfigList = this._governableConfig.values();
-
-		for (const governableConfig of governableConfigList) {
-			await governableConfig.initRegisteredConfig(context);
-		}
 	}
 
 	public async addTreasuryReward(context: StateMachine.BlockAfterExecuteContext) {

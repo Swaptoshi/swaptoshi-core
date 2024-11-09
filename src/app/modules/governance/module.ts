@@ -203,7 +203,7 @@ export class GovernanceModule extends Modules.BaseModule {
 
 		this._feeMethod = dependencies.feeMethod;
 
-		this._internalMethod.addDependencies(dependencies.tokenMethod, this._governableConfig);
+		this._internalMethod.addDependencies(dependencies.tokenMethod);
 		this._config.addDependencies(this._internalMethod);
 	}
 
@@ -249,13 +249,12 @@ export class GovernanceModule extends Modules.BaseModule {
 	}
 
 	public async initGenesisState(context: StateMachine.GenesisBlockExecuteContext): Promise<void> {
-		// TODO: adjust this (maybe extract)
-		// TODO: initialize config_registry
-		await this._internalMethod.initializeGovernableConfig(context);
-
 		const assetBytes = context.assets.getAsset(this.name);
-		// if there is no asset, do not initialize
-		if (!assetBytes) return;
+		// if there is no asset, only initialize configSubstore data from config file
+		if (!assetBytes) {
+			await this._initGovernableConfig(context);
+			return;
+		}
 
 		const genesisStore = codec.decode<GovernanceGenesisStore>(governanceGenesisStoreSchema, assetBytes);
 		validator.validator.validate(governanceGenesisStoreSchema, genesisStore);
@@ -390,6 +389,71 @@ export class GovernanceModule extends Modules.BaseModule {
 
 			// set state
 			await voteScoreStore.set(context, voteScoreData.address, voteScoreData);
+		}
+
+		const configRegistryStore = this.stores.get(ConfigRegistryStore);
+
+		if (genesisStore.configRegistrySubstore.registry.length > 0) {
+			// create copied object to verify sorting
+			const copiedConfigRegistrySubstore = [...genesisStore.configRegistrySubstore.registry];
+			copiedConfigRegistrySubstore.sort((a, b) => {
+				if (a.module > b.module) return -1;
+				if (b.module > a.module) return 1;
+				return 0;
+			});
+
+			for (let i = 0; i < genesisStore.configRegistrySubstore.registry.length; i += 1) {
+				const registry = genesisStore.configRegistrySubstore.registry[i];
+
+				// validate sorting of configRegistrySubstore.registry
+				if (registry.module !== copiedConfigRegistrySubstore[i].module) {
+					throw new Error('configRegistrySubstore.registry must be sorted by module name');
+				}
+			}
+
+			// set state
+			await configRegistryStore.set(context, Buffer.alloc(0), genesisStore.configRegistrySubstore);
+		}
+
+		if (genesisStore.configSubstore.length > 0) {
+			const governableConfigList = this._governableConfig.values();
+
+			// create copied object to verify sorting
+			const copiedConfigSubstore = [...genesisStore.configSubstore];
+			copiedConfigSubstore.sort((a, b) => {
+				if (a.module > b.module) return -1;
+				if (b.module > a.module) return 1;
+				return 0;
+			});
+
+			for (let i = 0; i < genesisStore.configSubstore.length; i += 1) {
+				// validate sorting of configRegistrySubstore.registry
+				if (genesisStore.configSubstore[i].module !== copiedConfigSubstore[i].module) {
+					throw new Error('configSubstore must be sorted by module name');
+				}
+
+				const governableConfigIndex = governableConfigList.findIndex(t => t.module === genesisStore.configSubstore[i].module);
+				if (governableConfigIndex === -1) {
+					throw new Error(`configSubstore item with module ${genesisStore.configSubstore[i].module} doesnt exists on governableConfigRegistry`);
+				}
+
+				// set state
+				await governableConfigList[governableConfigIndex].set(context, Buffer.alloc(0), { data: genesisStore.configSubstore[i].data });
+			}
+		} else {
+			await this._initGovernableConfig(context);
+		}
+	}
+
+	private async _initGovernableConfig(context: StateMachine.GenesisBlockExecuteContext) {
+		const configRegistryStore = this.stores.get(ConfigRegistryStore);
+		const configRegisteredEvent = this.events.get(ConfigRegisteredEvent);
+		const governableConfigList = this._governableConfig.values();
+
+		for (const governableConfig of governableConfigList) {
+			await governableConfig.initRegisteredConfig(context);
+			await configRegistryStore.register(context, governableConfig.module, governableConfig.index);
+			configRegisteredEvent.add(context, { module: governableConfig.module, index: governableConfig.index }, [governableConfig.storePrefix]);
 		}
 	}
 }
