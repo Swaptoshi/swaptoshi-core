@@ -4,6 +4,10 @@ exports[`VoteCommand constructor should have valid schema 1`] = `
 {
   "$id": "/governance/command/vote",
   "properties": {
+    "data": {
+      "dataType": "string",
+      "fieldNumber": 3,
+    },
     "decision": {
       "dataType": "uint32",
       "fieldNumber": 2,
@@ -16,6 +20,7 @@ exports[`VoteCommand constructor should have valid schema 1`] = `
   "required": [
     "proposalId",
     "decision",
+    "data",
   ],
   "type": "object",
 }
