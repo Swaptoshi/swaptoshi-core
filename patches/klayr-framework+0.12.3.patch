@@ -132,6 +132,24 @@ index da24f74..9452071 100644
      }
      async afterCommandExecute(context) {
          const { header, transaction } = context;
+diff --git a/node_modules/klayr-framework/dist-node/modules/nft/module.js b/node_modules/klayr-framework/dist-node/modules/nft/module.js
+index 4229e42..55b9721 100644
+--- a/node_modules/klayr-framework/dist-node/modules/nft/module.js
++++ b/node_modules/klayr-framework/dist-node/modules/nft/module.js
+@@ -117,7 +117,12 @@ class NFTModule extends interoperability_1.BaseInteroperableModule {
+                     response: schemas_1.isNFTSupportedResponseSchema,
+                 },
+             ],
+-            assets: [],
++            assets: [
++				{
++					version: 0,
++					data: schemas_1.genesisNFTStoreSchema,
++				},
++			],
+         };
+     }
+     async init(args) {
 diff --git a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts b/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts
 index 1ee0809..51c1c41 100644
 --- a/node_modules/klayr-framework/dist-node/state_machine/state_machine.d.ts

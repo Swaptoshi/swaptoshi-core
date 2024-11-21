@@ -144,7 +144,7 @@ describe('DexModule', () => {
 			expect(moduleMetadata.commands).toHaveLength(12);
 			expect(moduleMetadata.endpoints).toHaveLength(12);
 			expect(moduleMetadata.events).toHaveLength(16);
-			expect(moduleMetadata.assets).toHaveLength(0);
+			expect(moduleMetadata.assets).toHaveLength(1);
 			expect(moduleMetadata.stores).toHaveLength(9);
 		});
 	});

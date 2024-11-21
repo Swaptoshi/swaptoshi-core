@@ -223,7 +223,12 @@ export class DexModule extends Modules.Interoperability.BaseInteroperableModule 
 					response: quotePriceEndpointResponseSchema,
 				},
 			],
-			assets: [],
+			assets: [
+				{
+					version: 0,
+					data: dexGenesisStoreSchema,
+				},
+			],
 		};
 	}
 

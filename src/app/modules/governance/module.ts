@@ -165,7 +165,12 @@ export class GovernanceModule extends Modules.BaseModule {
 					response: getNextAvailableProposalIdEndpointResponseSchema,
 				},
 			],
-			assets: [],
+			assets: [
+				{
+					version: 0,
+					data: governanceGenesisStoreSchema,
+				},
+			],
 		};
 	}
 

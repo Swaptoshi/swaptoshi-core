@@ -217,7 +217,12 @@ export class TokenFactoryModule extends Modules.Interoperability.BaseInteroperab
 					response: getVestingUnlockEndpointResponseSchema,
 				},
 			],
-			assets: [],
+			assets: [
+				{
+					version: 0,
+					data: tokenFactoryGenesisStoreSchema,
+				},
+			],
 		};
 	}
 

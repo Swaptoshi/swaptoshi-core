@@ -19,6 +19,6 @@ export function decodeNFTId(nftId: Buffer) {
 	return {
 		chainId: nftId.subarray(0, 4),
 		collectionId: nftId.subarray(4, 8),
-		index: nftId.subarray(8).readBigInt64BE(),
+		index: nftId.subarray(8).readBigUInt64BE(),
 	};
 }
