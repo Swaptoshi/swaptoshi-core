@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Application, Modules } from 'klayr-sdk';
-import { DexModule } from './modules/dex/module';
-import { FeeConversionModule } from './modules/fee_conversion';
-import { GovernanceModule } from './modules/governance/module';
-import { LiquidPosModule } from './modules/liquid_pos/module';
-import { TokenFactoryModule } from './modules/token_factory/module';
+import { Modules as SwaptoshiModules } from 'swaptoshi-sdk';
 
 interface KlayrMethod {
 	validator: Modules.Validators.ValidatorsMethod;
@@ -19,11 +15,11 @@ interface KlayrMethod {
 
 export const registerModules = (app: Application, method: KlayrMethod): void => {
 	const nftModule = new Modules.NFT.NFTModule();
-	const tokenFactoryModule = new TokenFactoryModule();
-	const dexModule = new DexModule();
-	const feeConversionModule = new FeeConversionModule();
-	const liquidPosModule = new LiquidPosModule();
-	const governanceModule = new GovernanceModule();
+	const tokenFactoryModule = new SwaptoshiModules.TokenFactory.TokenFactoryModule();
+	const dexModule = new SwaptoshiModules.DEX.DexModule();
+	const feeConversionModule = new SwaptoshiModules.FeeConversion.FeeConversionModule();
+	const liquidPosModule = new SwaptoshiModules.LiquidPoS.LiquidPosModule();
+	const governanceModule = new SwaptoshiModules.Governance.GovernanceModule();
 
 	nftModule.addDependencies(method.interoperability, method.fee, method.token);
 	governanceModule.addDependencies({ tokenMethod: method.token, feeMethod: method.fee });
