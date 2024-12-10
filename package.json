@@ -1,6 +1,6 @@
 {
 	"name": "swaptoshi-core",
-	"version": "1.0.0-alpha.2",
+	"version": "1.0.0-beta.0",
 	"description": "Decentralized Exchange (DEX) Protocol built using Klayr SDK",
 	"author": "swaptoshi",
 	"license": "Apache-2.0",
